@@ -52,7 +52,6 @@ list:
 	@docker network ls --filter label=com.docker.compose.project=$(NAME)
 
 clean: down
-	@sudo rm -rf $(HOME)/data
 
 all: setup build up
 
