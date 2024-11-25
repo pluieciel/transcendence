@@ -3,6 +3,38 @@ services:
         build: ./django
         image: django
         container_name: django
-        restart: unless-stopped
+        environment:
+            POSTGRESQL_PASSWORD_FILE: /run/secrets/db_password
+            POSTGRESQL_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
+        env_file: .env
+        secrets:
+            - db_password
+            - db_root_password
         ports:
             - 8080:8080
+        networks:
+            - transcendence
+        restart: unless-stopped
+    postgresql:
+        image: bitnami/postgresql:15.10.0
+        container_name: postgresql
+        environment:
+            POSTGRESQL_PASSWORD_FILE: /run/secrets/db_password
+            POSTGRESQL_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
+        env_file: .env
+        secrets:
+            - db_password
+            - db_root_password
+        networks:
+            - transcendence
+        restart: unless-stopped
+
+networks:
+    transcendence:
+        name: transcendence
+
+secrets:
+    db_password:
+        file: ./secrets/db_password.txt
+    db_root_password:
+        file: ./secrets/db_root_password.txt
