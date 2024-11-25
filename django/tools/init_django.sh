@@ -2,9 +2,12 @@
 
 POSTGRES_PASSWORD=$(cat $POSTGRES_PASSWORD_FILE)
 
-sed -i "s/^ALLOWED_HOSTS = .*/ALLOWED_HOSTS = ['*']/" /transcendence/transcendence/settings.py
+if [ ! -f manage.py ]; then
+    django-admin startproject transcendence .
 
-sed -i "/DATABASES = {/,+5c\\
+    sed -i "s/^ALLOWED_HOSTS = .*/ALLOWED_HOSTS = ['*']/" ./transcendence/settings.py
+
+    sed -i "/DATABASES = {/,+5c\\
 DATABASES = {\\
     \"default\": {\\
         \"ENGINE\": \"django.db.backends.postgresql\",\\
@@ -14,6 +17,7 @@ DATABASES = {\\
         \"HOST\": \"$POSTGRES_HOST\",\\
         \"PORT\": \"$POSTGRES_PORT\",\\
     }\\
-}" /transcendence/transcendence/settings.py
+}" ./transcendence/settings.py
+fi
 
-python /transcendence/manage.py runserver 0.0.0.0:$DJANGO_PORT
+exec python ./manage.py runserver 0.0.0.0:$DJANGO_PORT

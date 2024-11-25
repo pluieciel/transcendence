@@ -31,6 +31,8 @@ services:
         env_file: .env
         secrets:
             - postgres-passwd
+        volumes:
+            - dj_data:/usr/src/app
         ports:
             - 8080:8080
         networks:
@@ -48,6 +50,12 @@ volumes:
             type: none
             o: bind
             device: $HOME/data/postgres
+    dj_data:
+        name: dj_data
+        driver_opts:
+            type: none
+            o: bind
+            device: $HOME/data/django
 
 secrets:
     postgres-passwd:

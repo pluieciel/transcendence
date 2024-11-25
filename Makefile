@@ -25,6 +25,7 @@ help:
 
 setup:
 	@mkdir -p $(HOME)/data/postgres
+	@mkdir -p $(HOME)/data/django
 
 build:
 	@$(DOCKER_COMPOSE_CMD) -f $(DOCKER_COMPOSE_YML) -p $(NAME) build
