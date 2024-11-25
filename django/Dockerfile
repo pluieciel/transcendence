@@ -4,12 +4,12 @@ RUN python -m pip install Django
 
 RUN django-admin startproject transcendence
 
-COPY ./init_django.sh /init_django.sh
+COPY ./tools/init_django.sh /usr/local/bin/init_django.sh
 
-RUN chmod +x /init_django.sh
+RUN chmod +x /usr/local/bin/init_django.sh
 
 WORKDIR /transcendence
 
 EXPOSE 8080
 
-ENTRYPOINT ["/init_django.sh"]
+ENTRYPOINT ["/usr/local/bin/init_django.sh"]
