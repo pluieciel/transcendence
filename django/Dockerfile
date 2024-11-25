@@ -1,14 +1,20 @@
-FROM python:3.14.0a2-alpine3.19
+FROM python:3.13.0-alpine3.19
 
-RUN python -m pip install Django
-
-RUN django-admin startproject transcendence
-
-COPY ./tools/init_django.sh /usr/local/bin/init_django.sh
-
-RUN chmod +x /usr/local/bin/init_django.sh
+RUN apk add --no-cache \
+    musl-dev \
+    postgresql-dev \
+    libpq
 
 WORKDIR /transcendence
+
+COPY ./tools/requirements.txt .
+
+RUN python -m pip install -r requirements.txt
+
+RUN django-admin startproject transcendence .
+
+COPY ./tools/init_django.sh /usr/local/bin/init_django.sh
+RUN chmod +x /usr/local/bin/init_django.sh
 
 EXPOSE 8080
 

@@ -1,32 +1,38 @@
 services:
+    postgres:
+        image: postgres:16.6-alpine3.19
+        container_name: postgres
+        environment:
+            POSTGRES_PASSWORD_FILE: /run/secrets/postgres-passwd
+        env_file: .env
+        secrets:
+            - postgres-passwd
+        volumes:
+            - pg_data:/var/lib/postgresql/data
+        expose:
+            - 5432
+        networks:
+            - transcendence
+        restart: unless-stopped
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -h localhost -p $POSTGRES_PORT -U postgres || exit 1"]
+            interval: 5s
+            timeout: 2s
+            retries: 3
     django:
         build: ./django
         image: django
         container_name: django
+        depends_on:
+            postgres:
+                condition: service_healthy
         environment:
-            POSTGRESQL_PASSWORD_FILE: /run/secrets/db_password
-            POSTGRESQL_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
+            POSTGRES_PASSWORD_FILE: /run/secrets/postgres-passwd
         env_file: .env
         secrets:
-            - db_password
-            - db_root_password
+            - postgres-passwd
         ports:
             - 8080:8080
-        networks:
-            - transcendence
-        restart: unless-stopped
-    postgresql:
-        image: bitnami/postgresql:15.10.0
-        container_name: postgresql
-        environment:
-            POSTGRESQL_PASSWORD_FILE: /run/secrets/db_password
-            POSTGRESQL_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
-        env_file: .env
-        secrets:
-            - db_password
-            - db_root_password
-        expose:
-            - 5432
         networks:
             - transcendence
         restart: unless-stopped
@@ -35,8 +41,14 @@ networks:
     transcendence:
         name: transcendence
 
+volumes:
+    pg_data:
+        name: pg_data
+        driver_opts:
+            type: none
+            o: bind
+            device: $HOME/data/postgres
+
 secrets:
-    db_password:
-        file: ./secrets/db_password.txt
-    db_root_password:
-        file: ./secrets/db_root_password.txt
+    postgres-passwd:
+        file: ./secrets/postgres-passwd.txt

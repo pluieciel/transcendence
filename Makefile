@@ -1,6 +1,6 @@
-.PHONY: help setup build up down stop restart logs list exec clean all re
+.PHONY: help setup build up down stop restart logs list clean all re
 
-NAME = inception
+NAME = transcendence
 DOCKER_COMPOSE_YML = ./docker-compose.yml
 DOCKER_COMPOSE_CMD = docker-compose
 
@@ -23,6 +23,9 @@ help:
 	@echo "  all               Run setup, build, and up"
 	@echo "  re                Clean, rebuild, and restart the services"
 
+setup:
+	@mkdir -p $(HOME)/data/postgres
+
 build:
 	@$(DOCKER_COMPOSE_CMD) -f $(DOCKER_COMPOSE_YML) -p $(NAME) build
 
@@ -43,15 +46,16 @@ logs:
 
 list:
 	@echo "$(BOLD_GREEN)Listing containers:$(RESET)"
-	@$(DOCKER_COMPOSE_CMD) -f $(DOCKER_COMPOSE_YML) -p $(NAME) ps -a
+	@docker ps
 	@echo "$(BOLD_GREEN)Listing images:$(RESET)"
-	@docker image ls --filter label=com.docker.compose.project=$(NAME)
+	@docker image ls
 	@echo "$(BOLD_GREEN)Listing volumes:$(RESET)"
-	@docker volume ls --filter label=com.docker.compose.project=$(NAME)
+	@docker volume ls
 	@echo "$(BOLD_GREEN)Listing networks:$(RESET)"
-	@docker network ls --filter label=com.docker.compose.project=$(NAME)
+	@docker network ls
 
 clean: down
+	@sudo rm -rf $(HOME)/data
 
 all: setup build up
 
