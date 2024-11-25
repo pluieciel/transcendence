@@ -25,6 +25,8 @@ services:
         secrets:
             - db_password
             - db_root_password
+        expose:
+            - 5432
         networks:
             - transcendence
         restart: unless-stopped
