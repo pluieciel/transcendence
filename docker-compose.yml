@@ -1,0 +1,8 @@
+services:
+    django:
+        build: ./django
+        image: django
+        container_name: django
+        restart: unless-stopped
+        ports:
+            - 8000:8000
