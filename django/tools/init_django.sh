@@ -25,6 +25,7 @@ DATABASES = {\\
     # Add STATIC_ROOT setting
     echo "import os" >> ./transcendence/settings.py
     echo "STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')" >> ./transcendence/settings.py
+    echo "CSRF_TRUSTED_ORIGINS = ['http://localhost:8081']" >> ./transcendence/settings.py
 
     python manage.py makemigrations
     python manage.py migrate
