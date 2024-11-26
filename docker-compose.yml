@@ -15,7 +15,11 @@ services:
             - transcendence
         restart: unless-stopped
         healthcheck:
-            test: ["CMD-SHELL", "pg_isready -h localhost -p $POSTGRES_PORT -U postgres || exit 1"]
+            test:
+                [
+                    "CMD-SHELL",
+                    "pg_isready -h localhost -p $POSTGRES_PORT -U postgres || exit 1",
+                ]
             interval: 5s
             timeout: 2s
             retries: 3
@@ -28,13 +32,30 @@ services:
                 condition: service_healthy
         environment:
             POSTGRES_PASSWORD_FILE: /run/secrets/postgres-passwd
+            DJANGO_SUPERUSER_PASSWORD_FILE: /run/secrets/django-passwd
         env_file: .env
         secrets:
             - postgres-passwd
+            - django-passwd
         volumes:
             - dj_data:/usr/src/app
+            - static_data:/usr/src/app/staticfiles
+        networks:
+            - transcendence
+        restart: unless-stopped
+    nginx:
+        build: ./nginx
+        image: nginx
+        container_name: nginx
+        depends_on:
+            django:
+                condition: service_started
+        expose:
+            - 8081
         ports:
-            - 8080:8080
+            - 8081:8081
+        volumes:
+            - static_data:/usr/src/app/staticfiles
         networks:
             - transcendence
         restart: unless-stopped
@@ -56,7 +77,11 @@ volumes:
             type: none
             o: bind
             device: $HOME/data/django
+    static_data:
+        name: static_data
 
 secrets:
     postgres-passwd:
         file: ./secrets/postgres-passwd.txt
+    django-passwd:
+        file: ./secrets/django-passwd.txt
