@@ -7,6 +7,7 @@ if [ ! -f manage.py ]; then
 
     sed -i "s/^ALLOWED_HOSTS = .*/ALLOWED_HOSTS = ['*']/" ./transcendence/settings.py
 
+
     sed -i "/DATABASES = {/,+5c\\
 DATABASES = {\\
     \"default\": {\\
@@ -18,6 +19,11 @@ DATABASES = {\\
         \"PORT\": \"$POSTGRES_PORT\",\\
     }\\
 }" ./transcendence/settings.py
+
+    sed -i "\$a\\
+STATIC_URL = '/static/'\\
+STATICFILES_DIRS = ['/usr/src/app/frontend']
+" ./transcendence/settings.py
 fi
 
 exec python ./manage.py runserver 0.0.0.0:$DJANGO_PORT

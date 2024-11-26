@@ -56,7 +56,7 @@ list:
 	@docker network ls
 
 clean: down
-	@sudo rm -rf $(HOME)/data
+	#@sudo rm -rf $(HOME)/data
 
 all: setup build up
 
