@@ -42,20 +42,20 @@ services:
         networks:
             - transcendence
         restart: unless-stopped
-#    nginx:
-#        build: ./nginx
-#        image: nginx
-#        container_name: nginx
-#        depends_on:
-#            django:
-#                condition: service_started
-#        expose:
-#            - 8081
-#        ports:
-#            - 8081:8081
-#        networks:
-#            - transcendence
-#        restart: unless-stopped
+    nginx:
+        build: ./nginx
+        image: nginx
+        container_name: nginx
+        depends_on:
+            django:
+                condition: service_started
+        expose:
+            - 8081
+        ports:
+            - 8081:8081
+        networks:
+            - transcendence
+        restart: unless-stopped
 
 networks:
     transcendence:
