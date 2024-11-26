@@ -38,4 +38,4 @@ DATABASES = {\\
     fi
 fi
 
-exec gunicorn transcendence.wsgi:application --bind 0.0.0.0:$DJANGO_PORT
+exec daphne -b 0.0.0.0 -p $DJANGO_PORT transcendence.asgi:application
