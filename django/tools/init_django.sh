@@ -31,4 +31,4 @@ STATICFILES_DIRS = ['/usr/src/app/frontend']
 	python ./manage.py migrate
 fi
 
-exec python ./manage.py runserver 0.0.0.0:$DJANGO_PORT
+exec gunicorn transcendence.wsgi:application --bind 0.0.0.0:$DJANGO_PORT
