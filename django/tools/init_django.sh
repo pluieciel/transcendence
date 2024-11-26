@@ -8,7 +8,6 @@ if [ ! -f manage.py ]; then
 
     sed -i "s/^ALLOWED_HOSTS = .*/ALLOWED_HOSTS = ['*']/" ./transcendence/settings.py
 
-
     sed -i "/DATABASES = {/,+5c\\
 DATABASES = {\\
     \"default\": {\\
@@ -21,14 +20,22 @@ DATABASES = {\\
     }\\
 }" ./transcendence/settings.py
 
-    sed -i "\$a\\
-STATIC_URL = '/static/'\\
-STATICFILES_DIRS = ['/usr/src/app/frontend']
-" ./transcendence/settings.py
+    sed -i 's|STATIC_URL = .*$|STATIC_URL = "/static/"|' ./transcendence/settings.py
 
-    python ./manage.py createsuperuser --noinput --username $DJANGO_SUPERUSER_USERNAME --email $DJANGO_SUPERUSER_EMAIL
-	python ./manage.py makemigrations
-	python ./manage.py migrate
+    # Add STATIC_ROOT setting
+    echo "import os" >> ./transcendence/settings.py
+    echo "STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')" >> ./transcendence/settings.py
+
+    python manage.py makemigrations
+    python manage.py migrate
+    python manage.py collectstatic --noinput
+
+    # Check if superuser already exists
+    if ! python manage.py shell -c "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.filter(username='$DJANGO_SUPERUSER_USERNAME').exists()" | grep -q 'True'; then
+        python manage.py createsuperuser --noinput --username $DJANGO_SUPERUSER_USERNAME --email $DJANGO_SUPERUSER_EMAIL
+    else
+        echo "Superuser $DJANGO_SUPERUSER_USERNAME already exists."
+    fi
 fi
 
 exec gunicorn transcendence.wsgi:application --bind 0.0.0.0:$DJANGO_PORT

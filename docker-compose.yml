@@ -39,6 +39,7 @@ services:
             - django-passwd
         volumes:
             - dj_data:/usr/src/app
+            - static_data:/usr/src/app/staticfiles
         networks:
             - transcendence
         restart: unless-stopped
@@ -53,6 +54,8 @@ services:
             - 8081
         ports:
             - 8081:8081
+        volumes:
+            - static_data:/usr/src/app/staticfiles
         networks:
             - transcendence
         restart: unless-stopped
@@ -74,6 +77,8 @@ volumes:
             type: none
             o: bind
             device: $HOME/data/django
+    static_data:
+        name: static_data
 
 secrets:
     postgres-passwd:
