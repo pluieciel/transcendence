@@ -25,6 +25,7 @@ DATABASES = {\\
     # Add STATIC_ROOT setting
     echo "import os" >> ./transcendence/settings.py
     echo "STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')" >> ./transcendence/settings.py
+    echo "CSRF_TRUSTED_ORIGINS = ['http://localhost:8081']" >> ./transcendence/settings.py
 
     python manage.py makemigrations
     python manage.py migrate
@@ -38,4 +39,4 @@ DATABASES = {\\
     fi
 fi
 
-exec gunicorn transcendence.wsgi:application --bind 0.0.0.0:$DJANGO_PORT
+exec daphne -b 0.0.0.0 -p $DJANGO_PORT transcendence.asgi:application
