@@ -1,6 +1,7 @@
 #!/bin/sh
 
-POSTGRES_PASSWORD=$(cat $POSTGRES_PASSWORD_FILE)
+export POSTGRES_PASSWORD=$(cat $POSTGRES_PASSWORD_FILE)
+export DJANGO_SUPERUSER_PASSWORD=$(cat $DJANGO_SUPERUSER_PASSWORD_FILE)
 
 if [ ! -f manage.py ]; then
     django-admin startproject transcendence .
@@ -24,6 +25,10 @@ DATABASES = {\\
 STATIC_URL = '/static/'\\
 STATICFILES_DIRS = ['/usr/src/app/frontend']
 " ./transcendence/settings.py
+
+    python ./manage.py createsuperuser --noinput --username $DJANGO_SUPERUSER_USERNAME --email $DJANGO_SUPERUSER_EMAIL
+	python ./manage.py makemigrations
+	python ./manage.py migrate
 fi
 
 exec python ./manage.py runserver 0.0.0.0:$DJANGO_PORT

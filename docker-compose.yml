@@ -15,7 +15,11 @@ services:
             - transcendence
         restart: unless-stopped
         healthcheck:
-            test: ["CMD-SHELL", "pg_isready -h localhost -p $POSTGRES_PORT -U postgres || exit 1"]
+            test:
+                [
+                    "CMD-SHELL",
+                    "pg_isready -h localhost -p $POSTGRES_PORT -U postgres || exit 1",
+                ]
             interval: 5s
             timeout: 2s
             retries: 3
@@ -28,9 +32,11 @@ services:
                 condition: service_healthy
         environment:
             POSTGRES_PASSWORD_FILE: /run/secrets/postgres-passwd
+            DJANGO_SUPERUSER_PASSWORD_FILE: /run/secrets/django-passwd
         env_file: .env
         secrets:
             - postgres-passwd
+            - django-passwd
         volumes:
             - dj_data:/usr/src/app
         ports:
@@ -60,3 +66,5 @@ volumes:
 secrets:
     postgres-passwd:
         file: ./secrets/postgres-passwd.txt
+    django-passwd:
+        file: ./secrets/django-passwd.txt
