@@ -1,6 +1,7 @@
 services:
     postgres:
-        image: postgres:16.6-alpine3.19
+        build: ./postgres
+        image: postgres
         container_name: postgres
         environment:
             POSTGRES_PASSWORD_FILE: /run/secrets/postgres-passwd
@@ -9,13 +10,14 @@ services:
             - postgres-passwd
         volumes:
             - postgres_data:/var/lib/postgresql/data
+            - postgres_logs:/var/log/postgres
         expose:
             - 5432
         networks:
             - transcendence
         restart: unless-stopped
         healthcheck:
-            test: ["CMD-SHELL", "pg_isready -h localhost -p $POSTGRES_PORT -U postgres || exit 1"]
+            test: ["CMD-SHELL", "pg_isready -h localhost -p $POSTGRES_PORT -U postgres"]
             interval: 5s
             timeout: 2s
             retries: 3
@@ -36,6 +38,8 @@ services:
         volumes:
             - django_data:/usr/src/app
             - static_data:/usr/src/app/staticfiles
+        expose:
+            - 8080
         networks:
             - transcendence
         restart: unless-stopped
@@ -52,6 +56,23 @@ services:
             - 8081:8081
         volumes:
             - static_data:/var/www/html
+            - nginx_logs:/var/log/nginx
+        networks:
+            - transcendence
+        restart: unless-stopped 
+    logstash:
+        image: logstash:8.15.5
+        container_name: logstash
+        depends_on:
+            postgres:
+                condition: service_healthy
+            django:
+                condition: service_started
+            nginx:
+                condition: service_started
+        volumes:
+            - postgres_logs:/var/log/postgres
+            - nginx_logs:/var/log/nginx
         networks:
             - transcendence
         restart: unless-stopped
@@ -75,6 +96,10 @@ volumes:
             device: $HOME/data/django
     static_data:
         name: static_data
+    postgres_logs:
+        name: postgres_logs
+    nginx_logs:
+        name: nginx_logs
 
 secrets:
     postgres-passwd:
