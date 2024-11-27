@@ -8,93 +8,123 @@ import * as THREE from "three";
 export class Game {
 	constructor(canvasId) {
 		this.renderer = new Renderer(canvasId);
-
 		this.sceneManager = new SceneManager();
-		// Initial camera setup
 		this.inputManager = new InputManager();
 		this.players = [];
-		this.paddleSpeed = 0.1;
-		this.paddlePositions = [0, 0];
 		this.controls = null;
 		this.ball = null;
+		this.initialized = false;
+		this.setupWebSocket();
+	}
+
+	setupWebSocket() {
+		this.ws = new WebSocket("ws://localhost:8765");
+		this.inputManager.ws = this.ws;
+
+		this.ws.onopen = () => {
+			console.log("Connected to server");
+			if (this.sceneManager.paddles.length > 0) {
+				this.sendInitMessage();
+			}
+		};
+
+		this.ws.onclose = () => {
+			console.log("Disconnected from server");
+			// Attempt to reconnect after a delay
+			setTimeout(() => this.setupWebSocket(), 1000);
+		};
+
+		this.ws.onerror = (error) => {
+			console.error("WebSocket error:", error);
+		};
+
+		this.ws.onmessage = (event) => {
+			const message = JSON.parse(event.data);
+			console.log(message);
+			if (!this.initialized) {
+				this.onInitMessageReceived(message);
+			} else {
+				this.onMessageReceived(message);
+			}
+		};
+	}
+
+	sendInitMessage() {
+		if (this.ws.readyState === WebSocket.OPEN) {
+			this.ws.send(
+				JSON.stringify({
+					type: "init",
+					data: {
+						positions: {
+							player_left: this.sceneManager.paddles[0].position,
+							player_right: this.sceneManager.paddles[1].position,
+							ball: this.ball.position,
+							corners: this.sceneManager.corners,
+						},
+					},
+				}),
+			);
+		}
 	}
 
 	initialize() {
 		this.sceneManager.setupLights();
 		this.sceneManager.createObjects();
 		const paddles = this.sceneManager.getPaddles();
-		this.players.push(new Player(0, "Player Left", 1000, paddles[0]));
-		this.players.push(new Player(1, "Player Right", 1000, paddles[1]));
-		//Orbit
-		this.controls = new OrbitControls(
-			this.sceneManager.camera,
-			this.renderer.canvas,
-		);
+
+		this.controls = new OrbitControls(this.sceneManager.camera, this.renderer.canvas);
 		this.ball = this.sceneManager.ball;
 		this.controls.target.set(0, 0, 0);
 
-		this.sceneManager.updateNameLeft(
-			this.players[0].name + " [" + this.players[0].elo + "]",
-		);
-		this.sceneManager.updateNameRight(
-			this.players[1].name + " [" + this.players[1].elo + "]",
-		);
+		// If WebSocket is already open, send init message
+		if (this.ws.readyState === WebSocket.OPEN) {
+			this.sendInitMessage();
+		}
+
 		this.animate();
 	}
 
-	handleInput() {
-		const { inputManager, paddlePositions, paddleSpeed } = this;
-		// Player 1 controls
-		if (inputManager.isKeyPressed("ArrowUp") && paddlePositions[0] < 5) {
-			paddlePositions[0] += paddleSpeed;
+	onInitMessageReceived(message) {
+		if (message.type == "init_response") {
+			console.log("ReceivedInitialization");
+			this.sceneManager.updateNameLeft(message.data.player.left.name + " [" + message.data.player.left.rank + "]");
+			this.sceneManager.updateNameRight(message.data.player.right.name + " [" + message.data.player.right.rank + "]");
 		}
-		if (inputManager.isKeyPressed("ArrowDown") && paddlePositions[0] > -5) {
-			paddlePositions[0] -= paddleSpeed;
-		}
-		// Player 2 controls
-		if (inputManager.isKeyPressed("w") && paddlePositions[1] < 5) {
-			paddlePositions[1] += paddleSpeed;
-		}
-		if (inputManager.isKeyPressed("s") && paddlePositions[1] > -5) {
-			paddlePositions[1] -= paddleSpeed;
-		}
+		this.sceneManager.updateScoreLeft(0);
+		this.sceneManager.updateScoreRight(0);
+		this.initialized = true;
+	}
 
-		const playerLeftPos = new THREE.Vector3(
-			18,
-			paddlePositions[0],
-			this.sceneManager.offsetZ,
-		);
-		const playerRightPos = new THREE.Vector3(
-			-18,
-			paddlePositions[1],
-			this.sceneManager.offsetZ,
-		);
-		const ballPos = new THREE.Vector3(0, 0, this.sceneManager.offsetZ);
-
-		this.updateGame(playerLeftPos, playerRightPos, ballPos, 1, 0);
+	onMessageReceived(message) {
+		if (message.type === "update") {
+			this.updateGame(
+				message.data.player.left.position,
+				message.data.player.right.position,
+				message.data.ball.position,
+				message.data.player.left.score,
+				message.data.player.right.score,
+			);
+		}
 	}
 
 	updateGame(playerLeftPos, playerRightPos, ballPos, scoreLeft, scoreRight) {
-		const p1 = this.players[0];
-		const p2 = this.players[1];
-		p1.paddle.position.copy(playerLeftPos);
-		p2.paddle.position.copy(playerRightPos);
-		p1.score = scoreLeft;
-		p2.score = scoreRight;
+		const paddles = this.sceneManager.getPaddles();
+		if (paddles[0]) {
+			paddles[0].position.set(playerLeftPos.x, playerLeftPos.y, playerLeftPos.z);
+		}
+		if (paddles[1]) {
+			paddles[1].position.set(playerRightPos.x, playerRightPos.y, playerRightPos.z);
+		}
+		if (this.ball && ballPos) {
+			this.ball.position.set(ballPos.x, ballPos.y, ballPos.z);
+		}
 		this.sceneManager.updateScoreLeft(scoreLeft);
 		this.sceneManager.updateScoreRight(scoreRight);
-		if (ballPos) {
-			this.ball.position.copy(ballPos);
-		}
 	}
 
 	animate() {
 		requestAnimationFrame(this.animate.bind(this)); // This ensures the `this` context is correct
-		this.handleInput();
 		this.controls.update();
-		this.renderer.render(
-			this.sceneManager.getScene(),
-			this.sceneManager.getCamera(),
-		);
+		this.renderer.render(this.sceneManager.getScene(), this.sceneManager.getCamera());
 	}
 }

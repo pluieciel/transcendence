@@ -8,6 +8,7 @@ export class SceneManager {
 		this.offsetX = 0;
 		this.offsetY = -3;
 		this.offsetZ = -15;
+		this.corners = [];
 
 		this.camera = new THREE.PerspectiveCamera(
 			90, // FOV: Adjust as needed
@@ -101,9 +102,32 @@ export class SceneManager {
 		this.scene.add(this.bottomBorder);
 		this.scene.add(this.leftBorder);
 		this.scene.add(this.rightBorder);
+		this.corners = {
+			topLeft: {
+				x: -20 + this.offsetX, // Left border x
+				y: 10 + this.offsetY, // Top border y
+				z: this.offsetZ,
+			},
+			topRight: {
+				x: 20 + this.offsetX, // Right border x
+				y: 10 + this.offsetY, // Top border y
+				z: this.offsetZ,
+			},
+			bottomLeft: {
+				x: -20 + this.offsetX, // Left border x
+				y: -10 + this.offsetY, // Bottom border y
+				z: this.offsetZ,
+			},
+			bottomRight: {
+				x: 20 + this.offsetX, // Right border x
+				y: -10 + this.offsetY, // Bottom border y
+				z: this.offsetZ,
+			},
+		};
 	}
 
-	createTexts() {
+	createTexts()
+	{
 		var scoreLeft = document.createElement("div");
 		scoreLeft.style.position = "absolute";
 		scoreLeft.style.color = "white";
