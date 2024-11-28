@@ -85,14 +85,42 @@ export class Game {
 	}
 
 	onInitMessageReceived(message) {
-		if (message.type == "init_response") {
-			console.log("ReceivedInitialization");
+		if (message.type === "init_response") {
+			// Update all positions from server
+			const positions = message.data.positions;
+
+			// Update paddles
+			if (this.sceneManager.paddles[0]) {
+				this.sceneManager.paddles[0].position.copy(positions.player_left);
+			}
+			if (this.sceneManager.paddles[1]) {
+				this.sceneManager.paddles[1].position.copy(positions.player_right);
+			}
+
+			// Update ball
+			if (this.sceneManager.ball) {
+				this.sceneManager.ball.position.copy(positions.ball);
+			}
+
+			// Update borders
+			if (positions.borders) {
+				this.sceneManager.topBorder.position.copy(positions.borders.top);
+				this.sceneManager.bottomBorder.position.copy(positions.borders.bottom);
+				this.sceneManager.leftBorder.position.copy(positions.borders.left);
+				this.sceneManager.rightBorder.position.copy(positions.borders.right);
+			}
+
+			// Update corners
+			this.sceneManager.corners = positions.corners;
+
+			// Update player information
 			this.sceneManager.updateNameLeft(message.data.player.left.name + " [" + message.data.player.left.rank + "]");
 			this.sceneManager.updateNameRight(message.data.player.right.name + " [" + message.data.player.right.rank + "]");
+			this.sceneManager.updateScoreLeft(0);
+			this.sceneManager.updateScoreRight(0);
+
+			this.initialized = true;
 		}
-		this.sceneManager.updateScoreLeft(0);
-		this.sceneManager.updateScoreRight(0);
-		this.initialized = true;
 	}
 
 	onMessageReceived(message) {

@@ -4,26 +4,15 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 export class SceneManager {
 	constructor() {
 		this.scene = new THREE.Scene();
-		// Define your desired game view size
-		this.offsetX = 0;
-		this.offsetY = -3;
-		this.offsetZ = -15;
-		this.corners = [];
-
-		this.camera = new THREE.PerspectiveCamera(
-			90, // FOV: Adjust as needed
-			window.innerWidth / window.innerHeight,
-			0.1, // Near plane
-			1000, // Far plane
-		);
-
-		this.camera.position.set(0, 0, 0); // Position the camera above the scene
+		this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+		this.camera.position.set(0, 0, 20);
 		this.paddles = [];
 		this.ball = null;
 		this.playerLeftName = null;
 		this.playerRightName = null;
 		this.playerLeftScore = null;
 		this.playerRightScore = null;
+		this.corners = null; // Will be set from server
 	}
 
 	setupLights() {
@@ -40,25 +29,23 @@ export class SceneManager {
 		const material = new THREE.MeshStandardMaterial({ color: 0xf2f0f2 });
 		const paddle1 = new THREE.Mesh(paddleGeometry, material);
 		const paddle2 = new THREE.Mesh(paddleGeometry, material);
+
 		paddle1.castShadow = false;
 		paddle1.receiveShadow = false;
-		this.scene.add(paddle1);
-		paddle1.position.set(-18 + this.offsetX, this.offsetY, this.offsetZ);
 		paddle2.castShadow = true;
 		paddle2.receiveShadow = true;
+
+		this.scene.add(paddle1);
 		this.scene.add(paddle2);
-		paddle2.position.set(18 + this.offsetX, this.offsetY, this.offsetZ);
 		this.paddles.push(paddle1, paddle2);
 	}
 	createBall() {
 		const material = new THREE.MeshStandardMaterial({ color: 0xf2f0f2 });
 		const sphereGeometry = new THREE.SphereGeometry(0.5, 25, 25);
-
 		const sphere = new THREE.Mesh(sphereGeometry, material);
 
 		sphere.castShadow = true;
 		sphere.receiveShadow = true;
-		sphere.position.set(this.offsetX, this.offsetY, this.offsetZ);
 		this.ball = sphere;
 		this.scene.add(sphere);
 	}
@@ -66,68 +53,22 @@ export class SceneManager {
 	createPlayableArea() {
 		const material = new THREE.MeshStandardMaterial({ color: 0xf2f0f2 });
 		const sideMat = new THREE.MeshStandardMaterial({ color: 0x2500f5 });
-		const lineGeometry = new THREE.BoxGeometry(0.1, 20, 0.1); // Vertical lines
-		const horizontalLineGeometry = new THREE.BoxGeometry(40, 0.1, 0.1); // Horizontal lines
+		const lineGeometry = new THREE.BoxGeometry(0.1, 20, 0.1);
+		const horizontalLineGeometry = new THREE.BoxGeometry(40, 0.1, 0.1);
 
-		// Create four distinct lines
 		this.topBorder = new THREE.Mesh(horizontalLineGeometry, material);
 		this.bottomBorder = new THREE.Mesh(horizontalLineGeometry, material);
 		this.leftBorder = new THREE.Mesh(lineGeometry, sideMat.clone());
 		this.rightBorder = new THREE.Mesh(lineGeometry, sideMat.clone());
 
-		// Position the lines
-		this.topBorder.position.set(
-			this.offsetX,
-			10 + this.offsetY,
-			this.offsetZ,
-		);
-		this.bottomBorder.position.set(
-			this.offsetX,
-			-10 + this.offsetY,
-			this.offsetZ,
-		);
-		this.leftBorder.position.set(
-			-20 + this.offsetX,
-			this.offsetY,
-			this.offsetZ,
-		);
-		this.rightBorder.position.set(
-			20 + this.offsetX,
-			this.offsetY,
-			this.offsetZ,
-		);
-
-		// Add to scene
+		// Positions will be updated when receiving init message
 		this.scene.add(this.topBorder);
 		this.scene.add(this.bottomBorder);
 		this.scene.add(this.leftBorder);
 		this.scene.add(this.rightBorder);
-		this.corners = {
-			topLeft: {
-				x: -20 + this.offsetX, // Left border x
-				y: 10 + this.offsetY, // Top border y
-				z: this.offsetZ,
-			},
-			topRight: {
-				x: 20 + this.offsetX, // Right border x
-				y: 10 + this.offsetY, // Top border y
-				z: this.offsetZ,
-			},
-			bottomLeft: {
-				x: -20 + this.offsetX, // Left border x
-				y: -10 + this.offsetY, // Bottom border y
-				z: this.offsetZ,
-			},
-			bottomRight: {
-				x: 20 + this.offsetX, // Right border x
-				y: -10 + this.offsetY, // Bottom border y
-				z: this.offsetZ,
-			},
-		};
 	}
 
-	createTexts()
-	{
+	createTexts() {
 		var scoreLeft = document.createElement("div");
 		scoreLeft.style.position = "absolute";
 		scoreLeft.style.color = "white";
