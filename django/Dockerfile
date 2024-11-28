@@ -20,6 +20,8 @@ RUN npm install three
 COPY ./tools/init_django.sh /usr/local/bin/init_django.sh
 RUN chmod +x /usr/local/bin/init_django.sh
 
+RUN mkdir -p /var/log/django
+
 EXPOSE 8080
 
 ENTRYPOINT ["/usr/local/bin/init_django.sh"]

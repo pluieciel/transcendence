@@ -22,16 +22,51 @@ DATABASES = {\\
 
     sed -i 's|STATIC_URL = .*$|STATIC_URL = "/static/"|' ./transcendence/settings.py
 
-    # Add STATIC_ROOT setting
-    echo "import os" >> ./transcendence/settings.py
-    echo "STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')" >> ./transcendence/settings.py
-    echo "CSRF_TRUSTED_ORIGINS = ['http://localhost:8081']" >> ./transcendence/settings.py
+    cat <<EOF >> ./transcendence/settings.py
+
+import os
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+CSRF_TRUSTED_ORIGINS = ['http://localhost:8081']
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "%(asctime)s %(levelname)s %(name)s [%(process)d]: %(message)s"
+        },
+        "simple": {
+            "format": "%(asctime)s %(levelname)s %(message)s"
+        },
+    },
+    "handlers": {
+        "file": {
+            "level": "DEBUG",
+            "class": "logging.FileHandler",
+            "filename": "/var/log/django/django.log",
+            "formatter": "verbose",
+        },
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["file"],
+            "level": "DEBUG",
+            "propagate": True,
+        },
+        "django.db.backends": {
+            "handlers": ["file"],
+            "level": "DEBUG",
+            "propagate": False,
+        },
+    },
+}
+EOF
 
     python manage.py makemigrations
     python manage.py migrate
     python manage.py collectstatic --noinput
 
-    # Check if superuser already exists
     if ! python manage.py shell -c "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.filter(username='$DJANGO_SUPERUSER_USERNAME').exists()" | grep -q 'True'; then
         python manage.py createsuperuser --noinput --username $DJANGO_SUPERUSER_USERNAME --email $DJANGO_SUPERUSER_EMAIL
     else

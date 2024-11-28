@@ -38,6 +38,7 @@ services:
         volumes:
             - django_data:/usr/src/app
             - static_data:/usr/src/app/staticfiles
+            - django_logs:/var/log/django
         expose:
             - 8080
         networks:
@@ -61,7 +62,8 @@ services:
             - transcendence
         restart: unless-stopped 
     logstash:
-        image: logstash:8.15.5
+        build: ./logstash
+        image: logstash
         container_name: logstash
         depends_on:
             postgres:
@@ -71,8 +73,12 @@ services:
             nginx:
                 condition: service_started
         volumes:
+            - logstash_data:/usr/share/logstash/pipeline
             - postgres_logs:/var/log/postgres
+            - django_logs:/var/log/django
             - nginx_logs:/var/log/nginx
+        expose:
+            - 5044
         networks:
             - transcendence
         restart: unless-stopped
@@ -94,10 +100,18 @@ volumes:
             type: none
             o: bind
             device: $HOME/data/django
+    logstash_data:
+        name: logstash_data
+        driver_opts:
+            type: none
+            o: bind
+            device: $HOME/data/logstash
     static_data:
         name: static_data
     postgres_logs:
         name: postgres_logs
+    django_logs:
+        name: django_logs
     nginx_logs:
         name: nginx_logs
 

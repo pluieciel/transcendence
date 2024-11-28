@@ -26,6 +26,7 @@ help:
 setup:
 	@mkdir -p $(HOME)/data/postgres
 	@mkdir -p $(HOME)/data/django
+	@mkdir -p $(HOME)/data/logstash
 
 build:
 	@$(DOCKER_COMPOSE_CMD) -f $(DOCKER_COMPOSE_YML) -p $(NAME) build
