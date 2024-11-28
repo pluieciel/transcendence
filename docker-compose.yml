@@ -65,13 +65,6 @@ services:
         build: ./logstash
         image: logstash
         container_name: logstash
-        depends_on:
-            postgres:
-                condition: service_healthy
-            django:
-                condition: service_started
-            nginx:
-                condition: service_started
         volumes:
             - logstash_data:/usr/share/logstash/pipeline
             - postgres_logs:/var/log/postgres
