@@ -1,6 +1,6 @@
 api.http.host: "0.0.0.0"
-xpack.monitoring.elasticsearch.hosts: ["http://elasticsearch:9200"]
-xpack.monitoring.elasticsearch.username: "elastic"
-xpack.monitoring.elasticsearch.password: "123456"
-log.format: plain
-path.logs: /var/log/logstash
+log.format: "plain"
+path.logs: "/var/log/logstash"
+xpack.monitoring.elasticsearch.hosts: ["${ELASTIC_HOST}"]
+xpack.monitoring.elasticsearch.username: "${ELASTIC_USERNAME}"
+xpack.monitoring.elasticsearch.password: "${ELASTIC_PASSWORD}"
