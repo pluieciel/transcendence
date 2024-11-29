@@ -1,7 +1,5 @@
 FROM logstash:8.15.5
 
-WORKDIR /usr/share/logstash/
-
 COPY ./conf .
 
 USER root

@@ -71,22 +71,25 @@ services:
         container_name: elasticsearch
         environment:
             - ELASTIC_PASSWORD_FILE=/run/secrets/elastic-passwd
+            - KIBANA_PASSWORD_FILE=/run/secrets/kibana-passwd
             - discovery.type=single-node
-            - xpack.security.enabled=false
+            - xpack.security.enabled=true
         env_file: .env
         secrets:
             - elastic-passwd
+            - kibana-passwd
         volumes:
             - elasticsearch_data:/usr/share/elasticsearch/data
         expose:
             - 9200
             - 9300
+        ports:
+            - 9200:9200 #TODO: remove
         networks:
             - transcendence
         restart: unless-stopped
         healthcheck:
-            test:     
-                ["CMD-SHELL","curl -s -f http://localhost:9200/_cluster/health?pretty | grep status | grep -q '\\(green\\|yellow\\)'"]
+            test: ["CMD-SHELL", "/usr/local/bin/healthcheck.sh"]
             interval: 10s
             timeout: 10s
             retries: 5
@@ -176,3 +179,5 @@ secrets:
         file: ./secrets/django-passwd.txt
     elastic-passwd:
         file: ./secrets/elastic-passwd.txt
+    kibana-passwd:
+        file: ./secrets/kibana-passwd.txt
