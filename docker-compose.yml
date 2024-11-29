@@ -89,7 +89,7 @@ services:
                 ["CMD-SHELL","curl -s -f http://localhost:9200/_cluster/health?pretty | grep status | grep -q '\\(green\\|yellow\\)'"]
             interval: 10s
             timeout: 10s
-            retries: 3
+            retries: 5
     logstash:
         build: ./logstash
         image: logstash
@@ -109,6 +109,24 @@ services:
         expose:
             - 5044
             - 9600
+        networks:
+            - transcendence
+        restart: unless-stopped
+    kibana:
+        build: ./kibana
+        image: kibana
+        container_name: kibana
+        depends_on:
+            elasticsearch:
+                condition: service_healthy
+        environment:
+            ELASTIC_PASSWORD_FILE: /run/secrets/elastic-passwd
+        secrets:
+            - elastic-passwd
+        expose:
+            - 5601
+        ports:
+            - 5601:5601
         networks:
             - transcendence
         restart: unless-stopped
