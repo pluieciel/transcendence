@@ -65,7 +65,6 @@ services:
         networks:
             - transcendence
         restart: unless-stopped
-
     elasticsearch:
         build: ./elasticsearch
         image: elasticsearch
@@ -85,23 +84,13 @@ services:
         networks:
             - transcendence
         restart: unless-stopped
-        healthcheck:
-            test:
-                [
-                    "CMD-SHELL",
-                    "curl -s -f http://localhost:9200/_cluster/health || exit 1",
-                ]
-            interval: 5s
-            timeout: 2s
-            retries: 3
-
     logstash:
         build: ./logstash
         image: logstash
         container_name: logstash
         depends_on:
             elasticsearch:
-                condition: service_healthy
+                condition: service_started
         environment:
             ELASTIC_PASSWORD_FILE: /run/secrets/elastic-passwd
         secrets:
