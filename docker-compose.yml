@@ -17,7 +17,11 @@ services:
             - transcendence
         restart: unless-stopped
         healthcheck:
-            test: ["CMD-SHELL", "pg_isready -h localhost -p $POSTGRES_PORT -U postgres"]
+            test:
+                [
+                    "CMD-SHELL",
+                    "pg_isready -h localhost -p $POSTGRES_PORT -U postgres",
+                ]
             interval: 5s
             timeout: 2s
             retries: 3
@@ -60,18 +64,56 @@ services:
             - nginx_logs:/var/log/nginx
         networks:
             - transcendence
-        restart: unless-stopped 
+        restart: unless-stopped
+
+    elasticsearch:
+        build: ./elasticsearch
+        image: elasticsearch
+        container_name: elasticsearch
+        environment:
+            - ELASTIC_PASSWORD_FILE=/run/secrets/elastic-passwd
+            - discovery.type=single-node
+            - xpack.security.enabled=false
+        env_file: .env
+        secrets:
+            - elastic-passwd
+        volumes:
+            - elasticsearch_data:/usr/share/elasticsearch/data
+        expose:
+            - 9200
+            - 9300
+        networks:
+            - transcendence
+        restart: unless-stopped
+        healthcheck:
+            test:
+                [
+                    "CMD-SHELL",
+                    "curl -s -f http://localhost:9200/_cluster/health || exit 1",
+                ]
+            interval: 5s
+            timeout: 2s
+            retries: 3
+
     logstash:
         build: ./logstash
         image: logstash
         container_name: logstash
+        depends_on:
+            elasticsearch:
+                condition: service_healthy
+        environment:
+            ELASTIC_PASSWORD_FILE: /run/secrets/elastic-passwd
+        secrets:
+            - elastic-passwd
         volumes:
             - logstash_data:/usr/share/logstash/pipeline
-            - postgres_logs:/var/log/postgres
-            - django_logs:/var/log/django
-            - nginx_logs:/var/log/nginx
+            - postgres_logs:/var/log/postgres:ro
+            - django_logs:/var/log/django:ro
+            - nginx_logs:/var/log/nginx:ro
         expose:
             - 5044
+            - 9600
         networks:
             - transcendence
         restart: unless-stopped
@@ -93,6 +135,12 @@ volumes:
             type: none
             o: bind
             device: $HOME/data/django
+    elasticsearch_data:
+        name: elasticsearch_data
+        driver_opts:
+            type: none
+            o: bind
+            device: $HOME/data/elasticsearch
     logstash_data:
         name: logstash_data
         driver_opts:
@@ -113,3 +161,5 @@ secrets:
         file: ./secrets/postgres-passwd.txt
     django-passwd:
         file: ./secrets/django-passwd.txt
+    elastic-passwd:
+        file: ./secrets/elastic-passwd.txt
