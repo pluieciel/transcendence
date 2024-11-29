@@ -84,13 +84,19 @@ services:
         networks:
             - transcendence
         restart: unless-stopped
+        healthcheck:
+            test:     
+                ["CMD-SHELL","curl -s -f http://localhost:9200/_cluster/health?pretty | grep status | grep -q '\\(green\\|yellow\\)'"]
+            interval: 10s
+            timeout: 10s
+            retries: 3
     logstash:
         build: ./logstash
         image: logstash
         container_name: logstash
         depends_on:
             elasticsearch:
-                condition: service_started
+                condition: service_healthy
         environment:
             ELASTIC_PASSWORD_FILE: /run/secrets/elastic-passwd
         secrets:
