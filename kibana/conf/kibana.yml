@@ -1,3 +1,8 @@
-elasticsearch.username: "elastic"
-elasticsearch.password: "123456"
+server.host: "0.0.0.0"
+elasticsearch.hosts: ["${ELASTIC_HOST}"]
+elasticsearch.username: "${ELASTICSEARCH_USERNAME}"
+elasticsearch.password: "${ELASTICSEARCH_PASSWORD}"
 xpack.reporting.roles.enabled: false
+xpack.security.encryptionKey: "a_very_secure_and_unique_encryption_key"
+xpack.encryptedSavedObjects.encryptionKey: "another_unique_encryption_key_lol"
+xpack.reporting.encryptionKey: "yet_another_secure_encryption_key"
