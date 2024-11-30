@@ -108,6 +108,7 @@ services:
             - postgres_logs:/var/log/postgres:ro
             - django_logs:/var/log/django:ro
             - nginx_logs:/var/log/nginx:ro
+            - kibana_logs:/var/log/kibana:ro
         expose:
             - 5044
             - 9600
@@ -128,6 +129,8 @@ services:
         secrets:
             - elastic-passwd
             - kibana-passwd
+        volumes:
+            - kibana_logs:/var/log/kibana
         expose:
             - 5601
         ports:
@@ -173,6 +176,8 @@ volumes:
         name: django_logs
     nginx_logs:
         name: nginx_logs
+    kibana_logs:
+        name: kibana_logs
 
 secrets:
     postgres-passwd:
