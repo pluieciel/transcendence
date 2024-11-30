@@ -7,6 +7,8 @@ USER root
 COPY ./tools /usr/local/bin
 RUN chmod +x /usr/local/bin/init_kibana.sh
 
+RUN chown kibana:root ./config/kibana.yml
+
 USER kibana
 
 ENTRYPOINT ["/usr/local/bin/init_kibana.sh"]
