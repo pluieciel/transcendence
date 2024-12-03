@@ -14,6 +14,13 @@ if [ ! -f "$INIT_FLAG" ]; then
   echo "xpack.encryptedSavedObjects.encryptionKey: \"$(openssl rand -base64 32)\"" >> /usr/share/kibana/config/kibana.yml
   echo "xpack.reporting.encryptionKey: \"$(openssl rand -base64 32)\"" >> /usr/share/kibana/config/kibana.yml
 
+  curl -u "$ELASTIC_USERNAME:$ELASTIC_PASSWORD" -X PUT "$ELASTIC_HOST/_snapshot/transcendence" -H "Content-Type: application/json" -d "{
+    \"type\": \"fs\",
+    \"settings\": {
+      \"location\": \"transcendence\"
+    }
+  }"
+
   touch "$INIT_FLAG"
 fi
 

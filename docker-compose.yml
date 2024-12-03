@@ -80,6 +80,7 @@ services:
             - kibana-passwd
         volumes:
             - elasticsearch_data:/usr/share/elasticsearch/data
+            - elasticsearch_snapshots:/usr/share/elasticsearch/data/snapshots
         expose:
             - 9200
             - 9300
@@ -168,6 +169,12 @@ volumes:
             type: none
             o: bind
             device: $HOME/data/logstash
+    elasticsearch_snapshots:
+        name: elasticsearch_snapshots
+        driver_opts:
+            type: none
+            o: bind
+            device: $HOME/data/elasticsearch/snapshots
     static_data:
         name: static_data
     postgres_logs:
