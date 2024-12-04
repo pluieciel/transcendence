@@ -6,7 +6,7 @@ INIT_FLAG="/usr/share/kibana/.initialized"
 if [ ! -f "$INIT_FLAG" ]; then
   ELASTIC_PASSWORD=$(cat $ELASTIC_PASSWORD_FILE)
 
-  curl -u "$ELASTIC_USERNAME:$ELASTIC_PASSWORD" -X POST "$ELASTIC_HOST/_security/user/kibana_system/_password" -H "Content-Type: application/json" -d "{
+  curl -s -u "$ELASTIC_USERNAME:$ELASTIC_PASSWORD" -X POST "$ELASTIC_HOST/_security/user/kibana_system/_password" -H "Content-Type: application/json" -d "{
     \"password\": \"$ELASTICSEARCH_PASSWORD\"
   }"
 
@@ -14,14 +14,9 @@ if [ ! -f "$INIT_FLAG" ]; then
   echo "xpack.encryptedSavedObjects.encryptionKey: \"$(openssl rand -base64 32)\"" >> /usr/share/kibana/config/kibana.yml
   echo "xpack.reporting.encryptionKey: \"$(openssl rand -base64 32)\"" >> /usr/share/kibana/config/kibana.yml
 
-  curl -u "$ELASTIC_USERNAME:$ELASTIC_PASSWORD" -X PUT "$ELASTIC_HOST/_snapshot/transcendence" -H "Content-Type: application/json" -d "{
-    \"type\": \"fs\",
-    \"settings\": {
-      \"location\": \"transcendence\"
-    }
-  }"
-
   touch "$INIT_FLAG"
 fi
+
+nohup /usr/local/bin/setup_kibana.sh &
 
 exec /usr/share/kibana/bin/kibana "$@"

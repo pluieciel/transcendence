@@ -84,6 +84,8 @@ services:
         expose:
             - 9200
             - 9300
+        ports:
+            - 9200:9200
         networks:
             - transcendence
         restart: unless-stopped

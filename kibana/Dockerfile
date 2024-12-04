@@ -7,8 +7,8 @@ USER root
 RUN mkdir -p /var/log/kibana && \
 	chown -R kibana:root /var/log/kibana
 
-COPY ./tools /usr/local/bin
-RUN chmod +x /usr/local/bin/init_kibana.sh
+COPY ./tools/ /usr/local/bin
+RUN chmod +x /usr/local/bin/init_kibana.sh /usr/local/bin/setup_kibana.sh
 
 RUN chown kibana:root ./config/kibana.yml
 
