@@ -26,6 +26,7 @@ help:
 setup:
 	@mkdir -p $(HOME)/data/postgres
 	@mkdir -p $(HOME)/data/django
+	@mkdir -p $(HOME)/data/nginx
 
 build:
 	@$(DOCKER_COMPOSE_CMD) -f $(DOCKER_COMPOSE_YML) -p $(NAME) build
@@ -60,4 +61,4 @@ clean: down
 
 all: setup build up
 
-re: clean all
+#re: clean all
