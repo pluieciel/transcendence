@@ -1,8 +1,8 @@
 import { Renderer } from "./Renderer.js";
 import { SceneManager } from "./SceneManager.js";
 import { InputManager } from "./InputManager.js";
-import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import * as THREE from "three";
+//import { OrbitControls } from '/static/three/examples/jsm/controls/OrbitControls.js';
+import * as THREE from "/static/three/build/three.module.js";
 
 export class Game {
 	constructor(canvasId) {
@@ -11,7 +11,7 @@ export class Game {
 		this.inputManager = new InputManager();
 		this.uiManager = this.sceneManager.UIManager;
 
-		this.controls = null;
+		//this.controls = null;
 		this.ball = null;
 		this.initialized = false;
 		this.gameStarted = false;
@@ -24,13 +24,15 @@ export class Game {
 	}
 
 	setupWebSocket() {
-		this.ws = new WebSocket("ws://localhost:8765");
+		const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+		const host = window.location.host;
+		const wsUrl = `${protocol}//${host}/game/`;
+
+		this.ws = new WebSocket(wsUrl);
 		this.inputManager.ws = this.ws;
 
 		this.ws.onopen = () => {
-			if (this.sceneInitialized) {
-				this.sendInitMessage();
-			}
+			console.log("Connected to server");
 		};
 
 		this.ws.onclose = () => {
@@ -42,17 +44,14 @@ export class Game {
 
 		this.ws.onerror = (error) => {
 			console.error("WebSocket error:", error);
-			this.uiManager.setOverlayVisibility(true);
-			this.uiManager.setOverText("Error while connecting to server");
 		};
 
 		this.ws.onmessage = (event) => {
 			const message = JSON.parse(event.data);
-			console.log(message);
-			if (!this.initialized) {
-				this.onInitMessageReceived(message);
-			} else {
-				this.onMessageReceived(message);
+			if (message.type === "init_response") {
+				this.handleInitResponse(message.data);
+			} else if (message.type === "game_update") {
+				this.handleGameUpdate(message.data);
 			}
 		};
 	}
@@ -80,8 +79,8 @@ export class Game {
 		this.sceneManager.createObjects();
 		this.sceneManager.hideObjects();
 		this.ball = this.sceneManager.ball;
-		this.controls = new OrbitControls(this.sceneManager.camera, this.renderer.canvas);
-		this.controls.target.set(0, 0, 0);
+		//this.controls = new OrbitControls(this.sceneManager.camera, this.renderer.canvas);
+		//this.controls.target.set(0, 0, 0);
 		this.sceneInitialized = this.validateSceneInitialization();
 		if (this.sceneInitialized && this.ws.readyState === WebSocket.OPEN) {
 			this.sendInitMessage();
@@ -104,39 +103,72 @@ export class Game {
 		);
 	}
 
-	onInitMessageReceived(message) {
-		if (message.type === "init_response") {
-			const positions = message.data.positions;
+	handleInitResponse(data) {
+		// Set initial positions
+		const positions = data.positions;
+
+		this.sceneManager.paddles[0].position.set(positions.player_left.x, positions.player_left.y, positions.player_left.z);
+
+		this.sceneManager.paddles[1].position.set(positions.player_right.x, positions.player_right.y, positions.player_right.z);
+
+		this.sceneManager.ball.position.set(positions.ball.x, positions.ball.y, positions.ball.z);
+
+		// Set player side
+		this.playerSide = data.side;
+
+		// Update player names and ranks
+		this.uiManager.updateNameLeft(data.player.left.name + " [" + data.player.left.rank + "]");
+		this.uiManager.updateNameRight(data.player.right.name + " [" + data.player.right.rank + "]");
+
+		// Update scores
+		this.uiManager.updateScoreLeft(data.player.left.score);
+		this.uiManager.updateScoreRight(data.player.right.score);
+
+		// Show game objects
+		this.sceneManager.showObjects();
+
+		// Show appropriate overlay message
+		if (data.game_started) {
+			this.uiManager.setOverlayVisibility(false);
+			this.gameStarted = true;
+		} else {
+			this.uiManager.setOverlayVisibility(true);
+			this.uiManager.setOverText("Waiting for opponent...");
+		}
+	}
+
+	handleGameUpdate(data) {
+		// Update paddle positions
+		if (data.player) {
+			const leftPos = data.player.left.position;
+			const rightPos = data.player.right.position;
 
 			if (this.sceneManager.paddles[0]) {
-				this.sceneManager.paddles[0].position.copy(positions.player_left);
+				this.sceneManager.paddles[0].position.set(leftPos.x, leftPos.y, leftPos.z);
 			}
 			if (this.sceneManager.paddles[1]) {
-				this.sceneManager.paddles[1].position.copy(positions.player_right);
+				this.sceneManager.paddles[1].position.set(rightPos.x, rightPos.y, rightPos.z);
 			}
 
-			if (this.sceneManager.ball) {
-				this.sceneManager.ball.position.copy(positions.ball);
-			}
+			// Update scores
+			this.uiManager.updateScoreLeft(data.player.left.score);
+			this.uiManager.updateScoreRight(data.player.right.score);
+		}
 
-			if (positions.borders) {
-				this.sceneManager.topBorder.position.copy(positions.borders.top);
-				this.sceneManager.bottomBorder.position.copy(positions.borders.bottom);
-				this.sceneManager.leftBorder.position.copy(positions.borders.left);
-				this.sceneManager.rightBorder.position.copy(positions.borders.right);
-			}
+		// Update ball position
+		if (data.ball && this.sceneManager.ball) {
+			this.sceneManager.ball.position.set(data.ball.position.x, data.ball.position.y, data.ball.position.z);
+		}
 
-			this.uiManager.updateNameLeft(message.data.player.left.name + " [" + message.data.player.left.rank + "]");
-			this.uiManager.updateNameRight(message.data.player.right.name + " [" + message.data.player.right.rank + "]");
-			this.uiManager.updateScoreLeft(0);
-			this.uiManager.updateScoreRight(0);
-			this.uiManager.setOverlayVisibility(true);
-			this.uiManager.setOverText("Waiting for other player...");
-			this.initialized = true;
+		// Hide the overlay once we start getting game updates
+		if (!this.gameStarted) {
+			this.gameStarted = true;
+			this.uiManager.setOverlayVisibility(false);
 		}
 	}
 
 	onMessageReceived(message) {
+		console.log(message);
 		if (message.type === "update") {
 			if (!this.gameStarted) {
 				this.gameStarted = true;
@@ -156,7 +188,7 @@ export class Game {
 
 	animate() {
 		requestAnimationFrame(this.animate.bind(this)); // This ensures the `this` context is correct
-		this.controls.update();
+		//this.controls.update();
 		this.renderer.render(this.sceneManager.getScene(), this.sceneManager.getCamera());
 	}
 }

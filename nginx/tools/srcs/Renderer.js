@@ -1,4 +1,4 @@
-import * as THREE from "three";
+import * as THREE from '/static/three/build/three.module.js';
 
 export class Renderer {
 	constructor(canvasId) {

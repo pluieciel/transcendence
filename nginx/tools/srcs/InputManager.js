@@ -11,6 +11,7 @@ export class InputManager {
 			if (!this.keys[event.key]) {
 				this.keys[event.key] = true;
 				if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+					event.preventDefault(); // Prevent page scrolling
 					this.sendKeyEvent("keydown", event.key);
 				}
 			}
@@ -20,6 +21,7 @@ export class InputManager {
 			if (this.keys[event.key]) {
 				this.keys[event.key] = false;
 				if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+					event.preventDefault(); // Prevent page scrolling
 					this.sendKeyEvent("keyup", event.key);
 				}
 			}
@@ -28,11 +30,13 @@ export class InputManager {
 
 	sendKeyEvent(type, key) {
 		if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-			const message = {
-				type: type,
-				key: key,
-			};
-			this.ws.send(JSON.stringify(message));
+			console.log(`Sending key event: ${type} ${key}`); // Debug log
+			this.ws.send(
+				JSON.stringify({
+					type: type,
+					key: key,
+				}),
+			);
 		}
 	}
 }

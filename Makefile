@@ -61,4 +61,4 @@ clean: down
 
 all: setup build up
 
-#re: clean all
+re: clean all

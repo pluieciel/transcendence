@@ -1,6 +1,6 @@
-import * as THREE from "three";
-import { UIManager } from "./UIManager";
-import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import * as THREE from "/static/three/build/three.module.js";
+import { UIManager } from "./UIManager.js";
+//import { OrbitControls } from '/static/three/examples/jsm/controls/OrbitControls.js';
 
 export class SceneManager {
 	constructor() {
@@ -110,21 +110,27 @@ export class SceneManager {
 		return this.paddles;
 	}
 
-	updateGame(playerLeftPos, playerRightPos, ballPos, scoreLeft, scoreRight) {
-		this.updatePaddle(this.paddles[0], playerLeftPos);
-		this.updatePaddle(this.paddles[1], playerRightPos);
-		this.updateBall(ballPos);
-		this.UIManager.updateScoreLeft(scoreLeft);
-		this.UIManager.updateScoreRight(scoreRight);
+	updateGameState(data) {
+		if (data.player) {
+			// Update paddle positions
+			this.updatePaddle(this.paddles[0], data.player.left.position);
+			this.updatePaddle(this.paddles[1], data.player.right.position);
+		}
+
+		if (data.ball) {
+			this.updateBall(data.ball.position);
+		}
 	}
 
 	updatePaddle(paddle, position) {
-		if (paddle) {
+		if (paddle && position) {
 			paddle.position.set(position.x, position.y, position.z);
 		}
 	}
 
 	updateBall(position) {
-		if (this.ball && position) this.ball.position.set(position.x, position.y, position.z);
+		if (this.ball && position) {
+			this.ball.position.set(position.x, position.y, position.z);
+		}
 	}
 }
