@@ -10,7 +10,6 @@ RUN apk add --no-cache \
 WORKDIR /usr/src/app
 
 COPY ./tools/requirements.txt .
-COPY ./tools/frontend ./frontend
 
 RUN python -m pip install -r requirements.txt
 

@@ -14,9 +14,9 @@ if [ ! -f "$INIT_FLAG" ]; then
   echo "xpack.encryptedSavedObjects.encryptionKey: \"$(openssl rand -base64 32)\"" >> /usr/share/kibana/config/kibana.yml
   echo "xpack.reporting.encryptionKey: \"$(openssl rand -base64 32)\"" >> /usr/share/kibana/config/kibana.yml
 
+  nohup /usr/local/bin/setup_kibana.sh &
+
   touch "$INIT_FLAG"
 fi
-
-nohup /usr/local/bin/setup_kibana.sh &
 
 exec /usr/share/kibana/bin/kibana "$@"

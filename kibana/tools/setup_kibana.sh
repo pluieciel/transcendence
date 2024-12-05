@@ -98,18 +98,20 @@ while [ $retries -gt 0 ]; do
   if [ "$response" = "available" ]; then
     for service in "${services[@]}"; do
       curl -s -u "$ELASTIC_USERNAME:$ELASTIC_PASSWORD" -X POST "http://localhost:5601/api/data_views/data_view" \
-        -H "Content-Type: application/json" -H "kbn-xsrf: kibana" -d "{
+        -H "Content-Type: application/json" -H "kbn-xsrf: true" -d "{
           \"data_view\": {
             \"name\": \"$service\",
             \"title\": \"$service-logs-*\" 
           }
         }"
     done
-    exit 0;
+    curl -s -u "$ELASTIC_USERNAME:$ELASTIC_PASSWORD" -X POST "http://localhost:5601/api/saved_objects/_import?createNewCopies=true" \
+      -H "kbn-xsrf: true" --form file=@./config/export.ndjson
+    exit 0
   else
     sleep 5
     retries=$((retries - 1))
   fi
 done
 
-exit 1;
+exit 1
