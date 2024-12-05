@@ -80,7 +80,6 @@ services:
             - kibana-passwd
         volumes:
             - elasticsearch_data:/usr/share/elasticsearch/data
-            - elasticsearch_snapshots:/usr/share/elasticsearch/data/snapshots
             - elasticsearch_logs:/var/log/elasticsearch
         expose:
             - 9200
@@ -149,44 +148,30 @@ networks:
         name: transcendence
 
 volumes:
-    postgres_data:
-        name: postgres_data
-        driver_opts:
-            type: none
-            o: bind
-            device: $HOME/data/postgres
-    django_data:
-        name: django_data
-        driver_opts:
-            type: none
-            o: bind
-            device: $HOME/data/django
-    elasticsearch_data:
-        name: elasticsearch_data
-        driver_opts:
-            type: none
-            o: bind
-            device: $HOME/data/elasticsearch
     logstash_data:
         name: logstash_data
         driver_opts:
             type: none
             o: bind
             device: $HOME/data/logstash
-    elasticsearch_snapshots:
-        name: elasticsearch_snapshots
+    django_data:
+        name: django_data
         driver_opts:
             type: none
             o: bind
-            device: $HOME/data/elasticsearch/snapshots
-    static_data:
-        name: static_data
-    postgres_logs:
-        name: postgres_logs
+            device: $HOME/data/django
     django_logs:
         name: django_logs
+    postgres_data:
+        name: postgres_data
+    postgres_logs:
+        name: postgres_logs
     nginx_logs:
         name: nginx_logs
+    static_data:
+        name: static_data
+    elasticsearch_data:
+        name: elasticsearch_data
     elasticsearch_logs:
         name: elasticsearch_logs
     kibana_logs:
