@@ -81,6 +81,7 @@ services:
         volumes:
             - elasticsearch_data:/usr/share/elasticsearch/data
             - elasticsearch_snapshots:/usr/share/elasticsearch/data/snapshots
+            - elasticsearch_logs:/var/log/elasticsearch
         expose:
             - 9200
             - 9300
@@ -111,6 +112,7 @@ services:
             - postgres_logs:/var/log/postgres:ro
             - django_logs:/var/log/django:ro
             - nginx_logs:/var/log/nginx:ro
+            - elasticsearch_logs:/var/log/elasticsearch:ro
             - kibana_logs:/var/log/kibana:ro
         expose:
             - 5044
@@ -185,6 +187,8 @@ volumes:
         name: django_logs
     nginx_logs:
         name: nginx_logs
+    elasticsearch_logs:
+        name: elasticsearch_logs
     kibana_logs:
         name: kibana_logs
 
