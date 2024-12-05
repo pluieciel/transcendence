@@ -24,8 +24,8 @@ help:
 	@echo "  re                Clean, rebuild, and restart the services"
 
 setup:
-	@mkdir -p $(HOME)/data/django
-	@mkdir -p $(HOME)/data/logstash
+	@mkdir -p $(HOME)/goinfre/data/django
+	@mkdir -p $(HOME)/goinfre/data/logstash/pipeline
 
 build:
 	@$(DOCKER_COMPOSE_CMD) -f $(DOCKER_COMPOSE_YML) -p $(NAME) build
@@ -56,7 +56,7 @@ list:
 	@docker network ls
 
 clean: down
-	@sudo rm -rf $(HOME)/data
+	@sudo rm -rf $(HOME)/goinfre/data
 
 all: setup build up
 

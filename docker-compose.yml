@@ -153,13 +153,13 @@ volumes:
         driver_opts:
             type: none
             o: bind
-            device: $HOME/data/logstash
+            device: $HOME/goinfre/data/logstash/pipeline
     django_data:
         name: django_data
         driver_opts:
             type: none
             o: bind
-            device: $HOME/data/django
+            device: $HOME/goinfre/data/django
     django_logs:
         name: django_logs
     postgres_data:
