@@ -77,6 +77,25 @@ while [ $retries -gt 0 ]; do
                 }
               }
             }
+          }"
+        curl -s -u "$ELASTIC_USERNAME:$ELASTIC_PASSWORD" -X PUT "$ELASTIC_HOST/_index_template/$service-template" \
+          -H "Content-Type: application/json" -d "{
+            \"version\": 1,
+            \"priority\": 100,
+            \"template\": {
+              \"settings\": {
+                \"number_of_shards\": 2,
+                \"number_of_replicas\": 2,
+                \"index.lifecycle.name\": \"$service-lifecycle-policy\",
+                \"index.lifecycle.rollover_alias\": \"$service-logs\"
+              },
+              \"aliases\": {
+                \"$service-logs\": {
+                  \"is_write_index\": true
+                }
+              }
+            },
+            \"index_patterns\": [\"$service-logs-*\"]
           }"    
       fi
     done <<< "$indexes"
