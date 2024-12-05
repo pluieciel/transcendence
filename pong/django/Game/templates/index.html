@@ -1,0 +1,15 @@
+{% load static %}
+<!doctype html>
+<html lang="en-US">
+	<head>
+		<!-- ... -->
+	</head>
+	<body>
+		<<canvas id="myCanvas" width="0" height="0"></canvas>>
+		<!-- Add this script tag to define STATIC_URL -->
+		<script>
+			window.STATIC_URL = "{% static '' %}";
+		</script>
+		<script type="module" src="{% static '/Main.js' %}"></script>
+	</body>
+</html>
