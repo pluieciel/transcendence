@@ -5,8 +5,10 @@ COPY ./conf ./config
 USER root
 
 COPY ./tools /usr/local/bin
-RUN chmod +x /usr/local/bin/healthcheck.sh
+RUN chmod +x /usr/local/bin/healthcheck.sh /usr/local/bin/init_elasticsearch.sh
 
 RUN chown elasticsearch:root ./config/elasticsearch.yml
 
 USER elasticsearch
+
+ENTRYPOINT ["/usr/local/bin/init_elasticsearch.sh"]

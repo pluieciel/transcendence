@@ -71,15 +71,13 @@ services:
         image: elasticsearch
         container_name: elasticsearch
         environment:
-            #- ELASTIC_PASSWORD_FILE=/run/secrets/elastic-passwd
-            # TODO: avoid this shit
-            - ELASTIC_PASSWORD=123456
+            - ELASTICSEARCH_PASSWORD_FILE=/run/secrets/elasticsearch-passwd
             - KIBANA_PASSWORD_FILE=/run/secrets/kibana-passwd
             - discovery.type=single-node
             - xpack.security.enabled=true
         env_file: .env
         secrets:
-            - elastic-passwd
+            - elasticsearch-passwd
             - kibana-passwd
         volumes:
             - elasticsearch_data:/usr/share/elasticsearch/data
@@ -111,7 +109,6 @@ services:
         #secrets:
         #- elastic-passwd
         volumes:
-            - logstash_data:/usr/share/logstash/pipeline
             - postgres_logs:/var/log/postgres:ro
             - django_logs:/var/log/django:ro
             - nginx_logs:/var/log/nginx:ro
@@ -153,12 +150,6 @@ networks:
         name: transcendence
 
 volumes:
-    logstash_data:
-        name: logstash_data
-        driver_opts:
-            type: none
-            o: bind
-            device: $HOME/goinfre/data/logstash/pipeline
     django_data:
         name: django_data
         driver_opts:
@@ -195,5 +186,7 @@ secrets:
         file: ./secrets/django-passwd.txt
     elastic-passwd:
         file: ./secrets/elastic-passwd.txt
+    elasticsearch-passwd:
+        file: ./secrets/elasticsearch-passwd.txt
     kibana-passwd:
         file: ./secrets/kibana-passwd.txt

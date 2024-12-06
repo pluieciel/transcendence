@@ -25,7 +25,6 @@ help:
 
 setup:
 	@mkdir -p $(HOME)/goinfre/data/django
-	@mkdir -p $(HOME)/goinfre/data/logstash/pipeline
 	@mkdir -p $(HOME)/goinfre/data/nginx
 
 build:
