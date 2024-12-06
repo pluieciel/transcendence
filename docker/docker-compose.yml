@@ -1,0 +1,106 @@
+services:
+    postgres:
+        image: postgres:16.6-alpine3.19
+        container_name: postgres
+        environment:
+            POSTGRES_PASSWORD_FILE: /run/secrets/postgres-passwd
+
+        secrets:
+            - postgres-passwd
+        volumes:
+            - postgres_data:/var/lib/postgresql/data
+        expose:
+            - 5432
+        networks:
+            - transcendence
+        restart: unless-stopped
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -h localhost -p 5432 -U postgres || exit 1"]
+            interval: 5s
+            timeout: 2s
+            retries: 3
+    django:
+        build: ./django
+        image: django
+        container_name: django
+        depends_on:
+            postgres:
+                condition: service_healthy
+        environment:
+            POSTGRES_PASSWORD_FILE: /run/secrets/postgres-passwd
+        secrets:
+            - postgres-passwd
+        volumes:
+            - django_data:/usr/src/app
+        networks:
+            - transcendence
+        restart: unless-stopped
+    vue:
+        build: ./vue
+        image: vue
+        container_name: vue
+        volumes:
+            - vue_data:/usr/src/app
+        environment:
+            - CHOKIDAR_USEPOLLING=true
+        networks:
+            - transcendence
+        restart: unless-stopped
+    nginx:
+        build: ./nginx
+        image: nginx
+        container_name: nginx
+        depends_on:
+            django:
+                condition: service_started
+        expose:
+            - 9000
+            - 9001
+        ports:
+            - 9000:9000
+            - 9001:9001
+        volumes:
+            - nginx_data:/var/www/html
+            - static_django_data:/var/www/html/static
+        networks:
+            - transcendence
+        restart: unless-stopped
+
+networks:
+    transcendence:
+        name: transcendence
+
+volumes:
+    postgres_data:
+        name: postgres_data
+        driver_opts:
+            type: none
+            o: bind
+            device: ${PWD}/db_data
+    django_data:
+        name: django_data
+        driver_opts:
+            type: none
+            o: bind
+            device: ${PWD}/../backend
+    vue_data:
+        name: vue_data
+        driver_opts:
+            type: none
+            o: bind
+            device: ${PWD}/../frontend
+    nginx_data:
+        name: nginx_data
+        driver_opts:
+            type: none
+            o: bind
+            device: ${PWD}/../static
+    static_django_data:
+        name: static_django_data
+        driver_opts:
+            type: none
+            o: bind
+            device: ${PWD}/../backend/staticfiles
+secrets:
+    postgres-passwd:
+        file: ${PWD}/secrets/postgres-passwd.txt

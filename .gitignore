@@ -1,1 +1,2 @@
-secrets
+./docker/secrets/*
+./docker/db_data/*
