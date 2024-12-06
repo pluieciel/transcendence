@@ -56,7 +56,7 @@ list:
 	@docker network ls
 
 clean: down
-	@sudo rm -rf $(HOME)/goinfre/data
+	rm -rf $(HOME)/goinfre/data
 
 all: setup build up
 

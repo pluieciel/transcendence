@@ -70,7 +70,9 @@ services:
         image: elasticsearch
         container_name: elasticsearch
         environment:
-            - ELASTIC_PASSWORD_FILE=/run/secrets/elastic-passwd
+            #- ELASTIC_PASSWORD_FILE=/run/secrets/elastic-passwd
+            # TODO: avoid this shit
+            - ELASTIC_PASSWORD=123456
             - KIBANA_PASSWORD_FILE=/run/secrets/kibana-passwd
             - discovery.type=single-node
             - xpack.security.enabled=true
