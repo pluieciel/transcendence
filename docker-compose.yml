@@ -1,6 +1,7 @@
 services:
     postgres:
-        image: postgres:16.6-alpine3.19
+        build: ./postgres
+        image: postgres
         container_name: postgres
         environment:
             POSTGRES_PASSWORD_FILE: /run/secrets/postgres-passwd
@@ -9,13 +10,18 @@ services:
             - postgres-passwd
         volumes:
             - postgres_data:/var/lib/postgresql/data
+            - postgres_logs:/var/log/postgres
         expose:
             - 5432
         networks:
             - transcendence
         restart: unless-stopped
         healthcheck:
-            test: ["CMD-SHELL", "pg_isready -h localhost -p $POSTGRES_PORT -U postgres || exit 1"]
+            test:
+                [
+                    "CMD-SHELL",
+                    "pg_isready -h localhost -p $POSTGRES_PORT -U postgres",
+                ]
             interval: 5s
             timeout: 2s
             retries: 3
@@ -36,6 +42,9 @@ services:
         volumes:
             - django_data:/usr/src/app
             - static_data:/usr/src/app/staticfiles
+            - django_logs:/var/log/django
+        expose:
+            - 8080
         networks:
             - transcendence
         restart: unless-stopped
@@ -53,6 +62,86 @@ services:
         volumes:
             - static_data:/var/www/html
             - nginx_data:/var/www/static
+            - nginx_logs:/var/log/nginx
+        networks:
+            - transcendence
+        restart: unless-stopped
+    elasticsearch:
+        build: ./elasticsearch
+        image: elasticsearch
+        container_name: elasticsearch
+        environment:
+            #- ELASTIC_PASSWORD_FILE=/run/secrets/elastic-passwd
+            # TODO: avoid this shit
+            - ELASTIC_PASSWORD=123456
+            - KIBANA_PASSWORD_FILE=/run/secrets/kibana-passwd
+            - discovery.type=single-node
+            - xpack.security.enabled=true
+        env_file: .env
+        secrets:
+            - elastic-passwd
+            - kibana-passwd
+        volumes:
+            - elasticsearch_data:/usr/share/elasticsearch/data
+            - elasticsearch_logs:/var/log/elasticsearch
+        expose:
+            - 9200
+            - 9300
+        ports:
+            - 9200:9200
+        networks:
+            - transcendence
+        restart: unless-stopped
+        healthcheck:
+            test: ["CMD-SHELL", "/usr/local/bin/healthcheck.sh"]
+            interval: 10s
+            timeout: 10s
+            retries: 5
+    logstash:
+        build: ./logstash
+        image: logstash
+        container_name: logstash
+        depends_on:
+            elasticsearch:
+                condition: service_healthy
+        environment:
+            - ELASTIC_PASSWORD_FILE=/run/secrets/elastic-passwd
+        env_file: .env
+        secrets:
+            - elastic-passwd
+        volumes:
+            - logstash_data:/usr/share/logstash/pipeline
+            - postgres_logs:/var/log/postgres:ro
+            - django_logs:/var/log/django:ro
+            - nginx_logs:/var/log/nginx:ro
+            - elasticsearch_logs:/var/log/elasticsearch:ro
+            - kibana_logs:/var/log/kibana:ro
+        expose:
+            - 5044
+            - 9600
+        networks:
+            - transcendence
+        restart: unless-stopped
+    kibana:
+        build: ./kibana
+        image: kibana
+        container_name: kibana
+        depends_on:
+            elasticsearch:
+                condition: service_healthy
+        environment:
+            - ELASTIC_PASSWORD_FILE=/run/secrets/elastic-passwd
+            - KIBANA_PASSWORD_FILE=/run/secrets/kibana-passwd
+        env_file: .env
+        secrets:
+            - elastic-passwd
+            - kibana-passwd
+        volumes:
+            - kibana_logs:/var/log/kibana
+        expose:
+            - 5601
+        ports:
+            - 5601:5601
         networks:
             - transcendence
         restart: unless-stopped
@@ -62,29 +151,47 @@ networks:
         name: transcendence
 
 volumes:
-    postgres_data:
-        name: postgres_data
+    logstash_data:
+        name: logstash_data
         driver_opts:
             type: none
             o: bind
-            device: $HOME/data/postgres
+            device: $HOME/goinfre/data/logstash/pipeline
     django_data:
         name: django_data
         driver_opts:
             type: none
             o: bind
-            device: $HOME/data/django
+            device: $HOME/goinfre/data/django
     nginx_data:
         name: nginx_data
         driver_opts:
             type: none
             o: bind
-            device: $HOME/data/nginx
+            device: $HOME/goinfre/data/nginx
+    django_logs:
+        name: django_logs
+    postgres_data:
+        name: postgres_data
+    postgres_logs:
+        name: postgres_logs
+    nginx_logs:
+        name: nginx_logs
     static_data:
         name: static_data
+    elasticsearch_data:
+        name: elasticsearch_data
+    elasticsearch_logs:
+        name: elasticsearch_logs
+    kibana_logs:
+        name: kibana_logs
 
 secrets:
     postgres-passwd:
         file: ./secrets/postgres-passwd.txt
     django-passwd:
         file: ./secrets/django-passwd.txt
+    elastic-passwd:
+        file: ./secrets/elastic-passwd.txt
+    kibana-passwd:
+        file: ./secrets/kibana-passwd.txt

@@ -1,0 +1,10 @@
+logging.appenders.default:
+  type: file
+  fileName: /var/log/kibana/kibana.log
+  layout:
+    type: pattern
+server.host: "0.0.0.0"
+elasticsearch.hosts: ["${ELASTIC_HOST}"]
+elasticsearch.username: "${ELASTICSEARCH_USERNAME}"
+elasticsearch.password: "${ELASTICSEARCH_PASSWORD}"
+xpack.reporting.roles.enabled: false
