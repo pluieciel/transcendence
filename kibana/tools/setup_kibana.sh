@@ -2,7 +2,7 @@
 
 services=("elasticsearch" "logstash" "kibana" "nginx" "django" "postgres")
 
-ELASTIC_PASSWORD=$(cat $ELASTIC_PASSWORD_FILE)
+ELASTIC_PASSWORD=$(cat $ELASTICSEARCH_PASSWORD_FILE)
 
 for service in "${services[@]}"; do
   curl -s -u "$ELASTIC_USERNAME:$ELASTIC_PASSWORD" -X PUT "$ELASTIC_HOST/_snapshot/$service-repo" \
@@ -94,14 +94,14 @@ done
 retries=10
 while [ $retries -gt 0 ]; do
   response=$(curl -s -X GET "http://localhost:5601/api/status" | grep -o '"level":"[^"]*"' | awk -F ':"' '{print $2}' | tr -d '"')
-  
+
   if [ "$response" = "available" ]; then
     for service in "${services[@]}"; do
       curl -s -u "$ELASTIC_USERNAME:$ELASTIC_PASSWORD" -X POST "http://localhost:5601/api/data_views/data_view" \
         -H "Content-Type: application/json" -H "kbn-xsrf: true" -d "{
           \"data_view\": {
             \"name\": \"$service\",
-            \"title\": \"$service-logs-*\" 
+            \"title\": \"$service-logs-*\"
           }
         }"
     done

@@ -2,4 +2,4 @@
 
 export ELASTIC_PASSWORD=$(cat $ELASTICSEARCH_PASSWORD_FILE)
 
-exec /usr/share/logstash/bin/logstash "$@"
+exec /bin/tini -- /usr/local/bin/docker-entrypoint.sh
