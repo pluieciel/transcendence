@@ -1,0 +1,7 @@
+#create before make for the first time:
+#file: docker/secrets/postgres-passwd.txt
+#folder: docker/db_data
+
+#change db_data permission:
+docker exec -it postgres sh
+chmod -R 755 /var/lib/postgresql/data

@@ -1,2 +1,0 @@
-docker exec -it postgres sh
-chmod -R 755 /var/lib/postgresql/data

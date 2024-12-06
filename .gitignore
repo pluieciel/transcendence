@@ -2,3 +2,4 @@ docker/secrets/*
 docker/db_data/*
 docker/db_data/
 backend/staticfiles/*
+*.pyc
