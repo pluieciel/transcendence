@@ -2,7 +2,7 @@
 
 services=("elasticsearch" "logstash" "kibana" "nginx" "django" "postgres")
 
-#ELASTIC_PASSWORD=$(cat $ELASTIC_PASSWORD_FILE)
+ELASTIC_PASSWORD=$(cat $ELASTICSEARCH_PASSWORD_FILE)
 
 for service in "${services[@]}"; do
   curl -s -u "$ELASTIC_USERNAME:$ELASTIC_PASSWORD" -X PUT "$ELASTIC_HOST/_snapshot/$service-repo" \

@@ -103,11 +103,10 @@ services:
             elasticsearch:
                 condition: service_healthy
         environment:
-            #- ELASTIC_PASSWORD_FILE=/run/secrets/elastic-passwd
-            - ELASTIC_PASSWORD=123456
+            - ELASTICSEARCH_PASSWORD_FILE=/run/secrets/elasticsearch-passwd
         env_file: .env
-        #secrets:
-        #- elastic-passwd
+        secrets:
+            - elasticsearch-passwd
         volumes:
             - postgres_logs:/var/log/postgres:ro
             - django_logs:/var/log/django:ro
@@ -128,12 +127,11 @@ services:
             elasticsearch:
                 condition: service_healthy
         environment:
-            #- ELASTIC_PASSWORD_FILE=/run/secrets/elastic-passwd
-            - ELASTIC_PASSWORD=123456
+            - ELASTICSEARCH_PASSWORD_FILE=/run/secrets/elasticsearch-passwd
             - KIBANA_PASSWORD_FILE=/run/secrets/kibana-passwd
         env_file: .env
         secrets:
-            #- elastic-passwd
+            - elasticsearch-passwd
             - kibana-passwd
         volumes:
             - kibana_logs:/var/log/kibana
@@ -184,8 +182,6 @@ secrets:
         file: ./secrets/postgres-passwd.txt
     django-passwd:
         file: ./secrets/django-passwd.txt
-    elastic-passwd:
-        file: ./secrets/elastic-passwd.txt
     elasticsearch-passwd:
         file: ./secrets/elasticsearch-passwd.txt
     kibana-passwd:
