@@ -24,9 +24,7 @@ help:
 	@echo "  re                Clean, rebuild, and restart the services"
 
 setup:
-	@mkdir -p $(HOME)/goinfre/data/django
-	@mkdir -p $(HOME)/goinfre/data/logstash/pipeline
-	@mkdir -p $(HOME)/goinfre/data/nginx
+
 
 build:
 	@$(DOCKER_COMPOSE_CMD) -f $(DOCKER_COMPOSE_YML) -p $(NAME) build

@@ -61,7 +61,7 @@ services:
             - 9001:9001
         volumes:
             - nginx_data:/var/www/html
-            - static_django_data:/var/www/html/static
+            - static_django_data:/var/www/django/static
         networks:
             - transcendence
         restart: unless-stopped
