@@ -61,6 +61,7 @@ services:
             - 8081:8081
         volumes:
             - static_data:/var/www/html
+            - nginx_data:/var/www/static
             - nginx_logs:/var/log/nginx
         networks:
             - transcendence
@@ -162,6 +163,12 @@ volumes:
             type: none
             o: bind
             device: $HOME/goinfre/data/django
+    nginx_data:
+        name: nginx_data
+        driver_opts:
+            type: none
+            o: bind
+            device: $HOME/goinfre/data/nginx
     django_logs:
         name: django_logs
     postgres_data:
