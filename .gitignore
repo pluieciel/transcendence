@@ -1,4 +1,4 @@
-./docker/secrets/*
-./docker/db_data/*
-./docker/db_data/
-./backend/staticfiles/*
+docker/secrets/*
+docker/db_data/*
+docker/db_data/
+backend/staticfiles/*
