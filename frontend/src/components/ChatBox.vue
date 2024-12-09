@@ -5,16 +5,15 @@
 
     <!-- Chat button -->
     <button class="btn btn-primary position-fixed end-0 bottom-0 m-3"
-            style="z-index: 9999;"
             type="button" 
             data-bs-toggle="offcanvas" 
-            data-bs-target="#offcanvas">
+            data-bs-target="#offcanvas"
+            style="z-index: 2000;">
         <span class="fw-bold px-3">Chat</span>
     </button>
     
     <!-- Chat box -->
-    <div class="offcanvas offcanvas-end custom-offcanvas" 
-    style="z-index: 9999;"
+    <div class="offcanvas offcanvas-end custom-offcanvas"
             data-bs-scroll="true" 
             tabindex="-1" 
             id="offcanvas">
