@@ -35,6 +35,7 @@ export default class ChatBox {
                     data-bs-theme="dark">
                     <button type="button" 
                             class="btn-close position-absolute start-0 ms-2" 
+							id="btn-closing-chat"
                             data-bs-dismiss="offcanvas" 
                             aria-label="Close">
                     </button>

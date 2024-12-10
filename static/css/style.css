@@ -256,7 +256,7 @@
     color: #888;
 }
 
-button {
+.sendButton {
     background-color: #42b983;
     color: white;
     border: none;
@@ -264,6 +264,6 @@ button {
     cursor: pointer;
 }
 
-button:hover {
+.sendButton:hover {
     background-color: #3aa876;
 }
