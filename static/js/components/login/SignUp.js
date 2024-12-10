@@ -49,7 +49,7 @@ export default class SignUp {
 
     addEventListeners() {
         const form = this.container.querySelector('#signupForm');
-        form.addEventListener('submit', (e) => {
+        form.addEventListener('submit', async (e) => {
             e.preventDefault();
             const username = this.container.querySelector('#username').value;
             const password = this.container.querySelector('#password').value;
@@ -63,10 +63,26 @@ export default class SignUp {
             }
 
             const hashedPassword = CryptoJS.SHA256(password).toString();
-            console.log('signup info:', { username, password: hashedPassword });
-            
-            // After successful signup, redirect to login
-            window.app.router.navigateTo('/login');
+
+            try {
+                // This is an async operation - waits for server response
+                const response = await axios.post('/api/signup/', {
+                    username: username,
+                    password: hashedPassword
+                });
+    
+                // This code runs only after getting response from server
+                if (response.data.success) {
+                    window.app.router.navigateTo('/login');
+                } else {
+                    errorDiv.textContent = response.data.message || 'Signup failed';
+                    errorDiv.classList.remove('d-none');
+                }
+            } catch (error) {
+                // Handles any errors during the async operation
+                errorDiv.textContent = error.response?.data?.message || 'An error occurred';
+                errorDiv.classList.remove('d-none');
+            }
         });
     }
 }
