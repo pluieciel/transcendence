@@ -1,9 +1,10 @@
 import ChatBox from './chat/ChatBox.js';
+import Router from '../router.js';
 import { gameinit } from './game/Main.js';
 
 export default class MainView {
     constructor(container, appState) {
-        this.container = container;
+		this.container = container;
         this.username = appState.username;
         this.render();
         this.initComponents();
@@ -46,7 +47,7 @@ export default class MainView {
 			<h2>PLAY!</h2>
 			<button id="playAI">AI</button>
 			<button id="rankedMatch">Ranked</button>
-			<button id="quickMatch">Quick Match</button>
+			<button  class="nav-link" data-view="game" id="quickMatch">Quick Match</button>
 			<button id="joinTournament">Join Tournament</button>
 			<button id="createTournament">Create Tournament</button>
 		</div>
@@ -65,8 +66,7 @@ export default class MainView {
     }
 
     showGame() {
-        const mainContent = this.container.querySelector('#mainContent');
-        new gameinit(mainContent);
+		window.app.router.navigateTo('/game');
     }
 
     showLeaderboard() {

@@ -4,22 +4,6 @@
     text-align: center;
 }
 
-.nav-links {
-    display: inline-block;  /* Make the div only as wide as its content */
-}
-
-.nav-links span {
-    color: #2c3e50;
-    margin: 0 5px;
-}
-
-.nav-link {
-    font-weight: bold;
-    color: #2c3e50;
-    text-decoration: none;
-    padding: 0 10px;
-}
-
 .nav-link:hover {
     color: #42b983;
 }
