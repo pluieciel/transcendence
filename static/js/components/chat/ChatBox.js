@@ -45,7 +45,7 @@ export default class ChatBox {
                 </div>
 
                 <!-- Flex container -->
-                <div class="d-flex flex-column h-100">
+                <div class="chatnavbox d-flex flex-column h-100">
                     <div class="d-flex h-100">
                         <!-- Tabs -->
                         <ul class="nav flex-column nav-tabs custom-tabs" id="chatTabs">
@@ -63,15 +63,15 @@ export default class ChatBox {
                         </ul>
                         
                         <!-- Chat content -->
-                        <div class="card-body chat-messages flex-grow-1 overflow-auto" id="messageContainer">
-                            <div id="onlineUsers" class="online-users-list"></div>
-                            <div id="publicChat" class="d-none"></div>
+                        <div class="card-body chat-messages overflow-auto" id="messageContainer">
+                            <div id="onlineUsers" class="chat-messagebox online-users-list"></div>
+                            <div id="publicChat" class="chat-messagebox d-none"></div>
                             <div id="privateChats"></div>
                         </div>
                     </div>
 
                     <!-- Input -->
-                    <div class="card-footer mt-auto">
+                    <div class="card-footer">
                         <div class="input-group">
                             <input type="text" 
                                     class="form-control"
@@ -106,7 +106,7 @@ export default class ChatBox {
         
         this.chatSocket.onmessage = (e) => {
             const data = JSON.parse(e.data);
-            console.log(data);
+            //console.log(data);
             if (data.recipient === 'update_online_users') {
                 this.onlineusers = JSON.parse(data.message).sort((a, b) => a.localeCompare(b));
                 this.updateOnlineUsersList();
@@ -118,7 +118,7 @@ export default class ChatBox {
             } else {
                 this.handlePrivateMessage(data);
             }
-            console.log(this.privateMessages);
+            //console.log(this.privateMessages);
             this.scrollToBottom();
         };
     }
@@ -213,7 +213,7 @@ export default class ChatBox {
         if (!chatContainer) {
             chatContainer = document.createElement('div');
             chatContainer.id = `chat-${user}`;
-            chatContainer.classList.add('d-none');
+            chatContainer.classList.add('chat-messagebox', 'd-none');
             container.appendChild(chatContainer);
         }
     

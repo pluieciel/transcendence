@@ -155,16 +155,43 @@
 .custom-offcanvas {
     background-color: rgba(0, 0, 0, 0) !important;
     width: 500px !important;
+    height: 100vh !important;
+    position: fixed !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    right: 0 !important;
+}
+
+.chatnavbox {
+    flex: 1;
+    height: calc(100vh - 40px) !important; /* Subtract header height */
+    max-height: calc(100vh - 40px) !important;
 }
 
 .chat-messages {
-    flex-grow: 1; 
+    flex: 1;
     overflow-y: auto;
     padding: 1rem;
     background: rgba(54, 54, 54, 0.8);
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    max-height: calc(100vh - 80px) !important;
 
     scrollbar-width: thin;
     scrollbar-color: #42b983 #f1f1f1;
+}
+
+.chat-messagebox {
+    flex: 1;
+    min-height: 0;
+    position: relative;
+}
+
+/* Footer */
+.card-footer {
+    flex-shrink: 0; /* Prevent footer from shrinking */
+    height: 40px; /* Set explicit height for footer */
 }
 
 .chat-message {
@@ -239,18 +266,4 @@ button {
 
 button:hover {
     background-color: #3aa876;
-}
-
-.custom-offcanvas .d-flex.flex-column.h-100 {
-    height: calc(100vh - 80px) !important; /* Subtract header height */
-    max-height: calc(100vh - 80px) !important;
-}
-
-.card-body {
-    height: calc(100vh - 80px) !important;
-}
-
-.card-footer {
-    flex-shrink: 0;  /* Prevent shrinking */
-    position: relative;  /* Ensure it stays at the bottom */
 }

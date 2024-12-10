@@ -35,17 +35,6 @@ services:
         networks:
             - transcendence
         restart: unless-stopped
-    vue:
-        build: ./vue
-        image: vue
-        container_name: vue
-        volumes:
-            - vue_data:/usr/src/app
-        environment:
-            - CHOKIDAR_USEPOLLING=true
-        networks:
-            - transcendence
-        restart: unless-stopped
     nginx:
         build: ./nginx
         image: nginx
@@ -83,12 +72,6 @@ volumes:
             type: none
             o: bind
             device: ${PWD}/../backend
-    vue_data:
-        name: vue_data
-        driver_opts:
-            type: none
-            o: bind
-            device: ${PWD}/../frontend
     nginx_data:
         name: nginx_data
         driver_opts:

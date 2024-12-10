@@ -2,9 +2,9 @@ import ChatBox from './chat/ChatBox.js';
 import { gameinit } from './game/Main.js';
 
 export default class MainView {
-    constructor(container) {
+    constructor(container, appState) {
         this.container = container;
-        this.username = window.app.state.username;
+        this.username = appState.username;
         this.render();
         this.initComponents();
         this.addEventListeners();

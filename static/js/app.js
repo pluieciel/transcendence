@@ -5,8 +5,8 @@ import Router from './router.js';
 class App {
     constructor() {
         this.state = {
-            isLoggedIn: false,
-            username: '',
+            isLoggedIn: sessionStorage.getItem('isLoggedIn') === 'true',
+            username: sessionStorage.getItem('username') || '',
         };
 
         this.routes = [
@@ -15,18 +15,22 @@ class App {
             { path: '*', component: LoginView }  // Default route
         ];
 
-        this.router = new Router(this.routes);
+        this.router = new Router(this.routes, this.state);
     }
 
     login(username) {
         this.state.isLoggedIn = true;
         this.state.username = username;
+        sessionStorage.setItem('isLoggedIn', 'true');
+        sessionStorage.setItem('username', username);
         this.router.navigateTo('/game');
     }
 
     logout() {
         this.state.isLoggedIn = false;
         this.state.username = '';
+        sessionStorage.removeItem('isLoggedIn');
+        sessionStorage.removeItem('username');
         this.router.navigateTo('/');
     }
 }
