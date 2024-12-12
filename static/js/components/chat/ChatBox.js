@@ -113,6 +113,7 @@ export default class ChatBox {
                 this.updateOnlineUsersList();
             } else if (data.recipient === 'public') {
                 if (!this.blocked.includes(data.sender)) {
+					data.message = this.escapeHtml(data.message);
                     this.publicMessages.push(data);
                     this.updatePublicChat();
                 }
@@ -155,10 +156,10 @@ export default class ChatBox {
 
     handlePrivateMessage(data) {
         if (!this.privateMessages[data.sender]) {
-            this.privateMessages[data.sender] = [];
+			this.privateMessages[data.sender] = [];
         }
         if (!this.privateMessages[data.recipient]) {
-            this.privateMessages[data.recipient] = [];
+			this.privateMessages[data.recipient] = [];
         }
         if (!this.blocked.includes(data.sender)) {
             this.privateMessages[data.sender].push(data);
@@ -166,12 +167,12 @@ export default class ChatBox {
             this.updatePrivateChat(data.sender);
         }
         if (!this.blocked.includes(data.recipient) || data.sender === this.username) {
-            this.privateMessages[data.recipient].push(data);
+			this.privateMessages[data.recipient].push(data);
             this.addUserTab(data.recipient);
             this.updatePrivateChat(data.recipient);
         }
     }
-
+	
     createMessageHTML(msg) {
         return `
             <div class="chat-message ${msg.sender === this.username ? 'right' : msg.sender !== 'admin' ? 'left' : 'admin'}">
@@ -180,7 +181,7 @@ export default class ChatBox {
                         <span class="message-username">${this.capitalizeFirstLetter(msg.sender)}</span>
                         <span class="message-timestamp">${msg.time}</span>
                     </div>
-                    <span class="message-text">${msg.message}</span>
+					<span class="message-text">${msg.message}</span>
                 </div>
             </div>
         `;
@@ -334,7 +335,19 @@ export default class ChatBox {
     }
 
     scrollToBottom() {
-        const container = this.container.querySelector('#messageContainer');
+		const container = this.container.querySelector('#messageContainer');
         container.scrollTop = container.scrollHeight;
     }
+	
+	escapeHtml(str) {
+		return str.replace(/[&<>"']/g, function (match) {
+			switch (match) {
+				case '&': return '&amp;';
+				case '<': return '&lt;';
+				case '>': return '&gt;';
+				case '"': return '&quot;';
+				case "'": return '&apos;';
+			}
+		});
+	}
 }
