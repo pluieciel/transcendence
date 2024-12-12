@@ -71,10 +71,8 @@ services:
         image: elasticsearch
         container_name: elasticsearch
         environment:
-            - ELASTICSEARCH_PASSWORD_FILE=/run/secrets/elasticsearch-passwd
-            - KIBANA_PASSWORD_FILE=/run/secrets/kibana-passwd
-            - discovery.type=single-node
-            - xpack.security.enabled=true
+            ELASTICSEARCH_PASSWORD_FILE: /run/secrets/elasticsearch-passwd
+            KIBANA_PASSWORD_FILE: /run/secrets/kibana-passwd
         env_file: .env
         secrets:
             - elasticsearch-passwd
@@ -90,20 +88,15 @@ services:
         networks:
             - transcendence
         restart: unless-stopped
-        healthcheck:
-            test: ["CMD-SHELL", "/usr/local/bin/healthcheck.sh"]
-            interval: 10s
-            timeout: 10s
-            retries: 5
     logstash:
         build: ./logstash
         image: logstash
         container_name: logstash
         depends_on:
             elasticsearch:
-                condition: service_healthy
+                condition: service_started
         environment:
-            - ELASTICSEARCH_PASSWORD_FILE=/run/secrets/elasticsearch-passwd
+            ELASTICSEARCH_PASSWORD_FILE: /run/secrets/elasticsearch-passwd
         env_file: .env
         secrets:
             - elasticsearch-passwd
@@ -125,10 +118,10 @@ services:
         container_name: kibana
         depends_on:
             elasticsearch:
-                condition: service_healthy
+                condition: service_started
         environment:
-            - ELASTICSEARCH_PASSWORD_FILE=/run/secrets/elasticsearch-passwd
-            - KIBANA_PASSWORD_FILE=/run/secrets/kibana-passwd
+            ELASTICSEARCH_PASSWORD_FILE: /run/secrets/elasticsearch-passwd
+            KIBANA_PASSWORD_FILE: /run/secrets/kibana-passwd
         env_file: .env
         secrets:
             - elasticsearch-passwd
