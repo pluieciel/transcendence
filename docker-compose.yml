@@ -88,13 +88,19 @@ services:
         networks:
             - transcendence
         restart: unless-stopped
+        healthcheck:
+            test: ["CMD-SHELL", "/usr/local/bin/healthcheck.sh"]
+            interval: 5s
+            timeout: 2s
+            retries: 3
+            start_period: 15s
     logstash:
         build: ./logstash
         image: logstash
         container_name: logstash
         depends_on:
             elasticsearch:
-                condition: service_started
+                condition: service_healthy
         environment:
             ELASTICSEARCH_PASSWORD_FILE: /run/secrets/elasticsearch-passwd
         env_file: .env
@@ -118,7 +124,7 @@ services:
         container_name: kibana
         depends_on:
             elasticsearch:
-                condition: service_started
+                condition: service_healthy
         environment:
             ELASTICSEARCH_PASSWORD_FILE: /run/secrets/elasticsearch-passwd
             KIBANA_PASSWORD_FILE: /run/secrets/kibana-passwd
