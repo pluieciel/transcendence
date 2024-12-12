@@ -79,6 +79,7 @@ services:
             - kibana-passwd
         volumes:
             - elasticsearch_data:/usr/share/elasticsearch/data
+            - elasticsearch_cert:/usr/share/elasticsearch/config
             - elasticsearch_logs:/var/log/elasticsearch
         expose:
             - 9200
@@ -134,6 +135,7 @@ services:
             - kibana-passwd
         volumes:
             - kibana_logs:/var/log/kibana
+            - elasticsearch_cert:/usr/share/kibana/config
         expose:
             - 5601
         ports:
@@ -171,6 +173,8 @@ volumes:
         name: static_data
     elasticsearch_data:
         name: elasticsearch_data
+    elasticsearch_cert:
+        name: elasticsearch_cert
     elasticsearch_logs:
         name: elasticsearch_logs
     kibana_logs:
