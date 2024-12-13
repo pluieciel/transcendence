@@ -140,12 +140,31 @@ services:
         build: ./prometheus
         image: prometheus
         container_name: prometheus
+        depends_on:
+            cadvisor:
+                condition: service_started
         volumes:
             - prometheus_data:/prometheus
         expose:
             - 9090
         ports:
             - 9090:9090
+        networks:
+            - transcendence
+        restart: unless-stopped
+    cadvisor:
+        build: ./cadvisor
+        image: cadvisor
+        container_name: cadvisor
+        volumes:
+            - /:/rootfs:ro
+            - /var/run:/var/run:ro
+            - /sys:/sys:ro
+            - /var/lib/docker/:/var/lib/docker:ro
+        expose:
+            - 8080
+        ports:
+            - 8080:8080
         networks:
             - transcendence
         restart: unless-stopped
