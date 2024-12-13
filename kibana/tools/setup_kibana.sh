@@ -108,13 +108,13 @@ done
 
 retries=10
 while [ $retries -gt 0 ]; do
-  response=$(curl -s -X GET "http://localhost:5601/api/status" | grep -o '"level":"[^"]*"' | awk -F ':"' '{print $2}' | tr -d '"')
+  response=$(curl -s -X GET "$KIBANA_HOST/api/status" | grep -o '"level":"[^"]*"' | awk -F ':"' '{print $2}' | tr -d '"')
 
   if [ "$response" = "available" ]; then
     for service in "${services[@]}"; do
       curl -s -u "$ELASTIC_USERNAME:$ELASTIC_PASSWORD" \
-      	--cacert ./config/certs/elastic-certificates.pem \
-       	-X POST "http://localhost:5601/api/data_views/data_view" \
+      	--cacert ./config/certs/kibana-certificates.pem \
+       	-X POST "$KIBANA_HOST/api/data_views/data_view" \
         -H "Content-Type: application/json" \
         -H "kbn-xsrf: true" \
         -d "{
@@ -126,8 +126,8 @@ while [ $retries -gt 0 ]; do
     done
 
     curl -s -u "$ELASTIC_USERNAME:$ELASTIC_PASSWORD" \
-    	--cacert ./config/certs/elastic-certificates.pem \
-     	-X POST "http://localhost:5601/api/saved_objects/_import?createNewCopies=true" \
+    	--cacert ./config/certs/kibana-certificates.pem \
+     	-X POST "$KIBANA_HOST/api/saved_objects/_import?createNewCopies=true" \
       	-H "kbn-xsrf: true" --form file=@./config/export.ndjson
     exit 0
   else
