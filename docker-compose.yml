@@ -71,30 +71,28 @@ services:
         image: elasticsearch
         container_name: elasticsearch
         environment:
-            - ELASTICSEARCH_PASSWORD_FILE=/run/secrets/elasticsearch-passwd
-            - KIBANA_PASSWORD_FILE=/run/secrets/kibana-passwd
-            - discovery.type=single-node
-            - xpack.security.enabled=true
+            ELASTICSEARCH_PASSWORD_FILE: /run/secrets/elasticsearch-passwd
+            KIBANA_PASSWORD_FILE: /run/secrets/kibana-passwd
         env_file: .env
         secrets:
             - elasticsearch-passwd
             - kibana-passwd
         volumes:
-            - elasticsearch_data:/usr/share/elasticsearch/data
+            - elasticsearch_data:/usr/share/elasticsearch
+            - elasticsearch_certs:/usr/share/elasticsearch/config/certs
             - elasticsearch_logs:/var/log/elasticsearch
         expose:
             - 9200
             - 9300
-        ports:
-            - 9200:9200
         networks:
             - transcendence
         restart: unless-stopped
         healthcheck:
             test: ["CMD-SHELL", "/usr/local/bin/healthcheck.sh"]
-            interval: 10s
-            timeout: 10s
-            retries: 5
+            interval: 5s
+            timeout: 2s
+            retries: 3
+            start_period: 20s
     logstash:
         build: ./logstash
         image: logstash
@@ -103,7 +101,7 @@ services:
             elasticsearch:
                 condition: service_healthy
         environment:
-            - ELASTICSEARCH_PASSWORD_FILE=/run/secrets/elasticsearch-passwd
+            ELASTICSEARCH_PASSWORD_FILE: /run/secrets/elasticsearch-passwd
         env_file: .env
         secrets:
             - elasticsearch-passwd
@@ -111,8 +109,9 @@ services:
             - postgres_logs:/var/log/postgres:ro
             - django_logs:/var/log/django:ro
             - nginx_logs:/var/log/nginx:ro
-            - elasticsearch_logs:/var/log/elasticsearch:ro
             - kibana_logs:/var/log/kibana:ro
+            - elasticsearch_logs:/var/log/elasticsearch:ro
+            - elasticsearch_certs:/usr/share/logstash/config/certs:ro
         expose:
             - 5044
             - 9600
@@ -127,14 +126,15 @@ services:
             elasticsearch:
                 condition: service_healthy
         environment:
-            - ELASTICSEARCH_PASSWORD_FILE=/run/secrets/elasticsearch-passwd
-            - KIBANA_PASSWORD_FILE=/run/secrets/kibana-passwd
+            ELASTICSEARCH_PASSWORD_FILE: /run/secrets/elasticsearch-passwd
+            KIBANA_PASSWORD_FILE: /run/secrets/kibana-passwd
         env_file: .env
         secrets:
             - elasticsearch-passwd
             - kibana-passwd
         volumes:
             - kibana_logs:/var/log/kibana
+            - elasticsearch_certs:/usr/share/kibana/config/certs:ro
         expose:
             - 5601
         ports:
@@ -172,6 +172,8 @@ volumes:
         name: static_data
     elasticsearch_data:
         name: elasticsearch_data
+    elasticsearch_certs:
+        name: elasticsearch_certs
     elasticsearch_logs:
         name: elasticsearch_logs
     kibana_logs:

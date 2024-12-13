@@ -1,10 +1,20 @@
 logging.appenders.default:
-  type: file
-  fileName: /var/log/kibana/kibana.log
-  layout:
-    type: pattern
+    type: file
+    fileName: /var/log/kibana/kibana.log
+    layout:
+        type: pattern
 server.host: "0.0.0.0"
 elasticsearch.hosts: ["${ELASTIC_HOST}"]
 elasticsearch.username: "${ELASTICSEARCH_USERNAME}"
 elasticsearch.password: "${ELASTICSEARCH_PASSWORD}"
 xpack.reporting.roles.enabled: false
+elasticsearch.ssl.certificateAuthorities:
+    ["/usr/share/kibana/config/certs/elastic-certificates.pem"]
+elasticsearch.ssl.verificationMode: "certificate"
+server.ssl.enabled: true
+server.ssl.certificate: /usr/share/kibana/config/certs/kibana-certificates.pem
+server.ssl.key: /usr/share/kibana/config/certs/kibana-key.pem
+server.ssl.certificateAuthorities:
+    - "/usr/share/kibana/config/certs/elastic-certificates.pem"
+    - "/usr/share/kibana/config/certs/kibana-certificates.pem"
+server.ssl.supportedProtocols: ["TLSv1.2", "TLSv1.3"]
