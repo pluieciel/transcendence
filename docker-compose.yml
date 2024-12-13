@@ -41,10 +41,6 @@ services:
             - django-passwd
         volumes:
             - django_data:/usr/src/app
-            - static_data:/usr/src/app/staticfiles
-            - django_logs:/var/log/django
-        expose:
-            - 8080
         networks:
             - transcendence
         restart: unless-stopped
@@ -56,13 +52,12 @@ services:
             django:
                 condition: service_started
         expose:
-            - 8081
+            - 9000
         ports:
-            - 8081:8081
+            - 9000:9000
         volumes:
-            - static_data:/var/www/html
-            - nginx_data:/var/www/static
-            - nginx_logs:/var/log/nginx
+            - nginx_data:/var/www/html
+            - static_django_data:/var/www/django/static
         networks:
             - transcendence
         restart: unless-stopped
@@ -153,13 +148,19 @@ volumes:
         driver_opts:
             type: none
             o: bind
-            device: $HOME/goinfre/data/django
+            device: ${PWD}/backend
     nginx_data:
         name: nginx_data
         driver_opts:
             type: none
             o: bind
-            device: $HOME/goinfre/data/nginx
+            device: ${PWD}/static
+    static_django_data:
+        name: static_django_data
+        driver_opts:
+            type: none
+            o: bind
+            device: ${PWD}/backend/staticfiles
     django_logs:
         name: django_logs
     postgres_data:

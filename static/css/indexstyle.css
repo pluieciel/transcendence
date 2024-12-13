@@ -1,0 +1,154 @@
+/* General body styles */
+:root {
+    --primary-color: #013f05;
+    --secondary-color: #c7f0c7;
+    --accent-color: #057e0d;
+    --text-color: #000000;
+    --button-hover-bg: #06550c;
+    --button-hover-text: #FFFFFF;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    color: #000000;
+    background-color: #c7f0c7;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header styles */
+header {
+    background-color: #013f05;
+    padding: 20px;
+    color: #FFFFFF;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    width: 100%;
+    top: 0;
+    left: 0;
+	position: absolute;
+	overflow: hidden;
+    box-sizing: border-box;
+}
+
+h1, h2 {
+    font-size: 2.5rem;
+    margin: 0;
+}
+
+h3 {
+	font-size: 1.5rem;
+	margin: 0;
+}
+
+a {
+	font-size: 0.9rem;
+	color: grey;
+	text-decoration: none;
+}
+
+/* Center the Welcome message under the header */
+.welcome {
+    margin-top: 100px; /* Adjust spacing from header */
+    text-align: center;
+    width: 100%;
+    font-size: 1.5rem;
+}
+
+.content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start; /* Align items to the top */
+    gap: 20px; /* Space between sections */
+}
+
+.content > div {
+    flex: 1; /* Make each section take equal width by default */
+    min-width: 250px; /* Ensure a minimum width to fit smaller contents */
+    max-width: 400px; /* Prevent excessive expansion */
+    padding: 15px;
+}
+
+.credits, .game-buttons, .profile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #057e0d;
+    background-color: #dcf7dc;
+    padding: 20px;
+    border-radius: 10px;
+    width: fit-content;
+    height: fit-content;
+	text-align: center;
+	margin-left: 20px;
+	margin-right: 20px;
+}
+
+
+/* Button styles */
+#settings, #logoutBtn, .game-buttons button {
+    display: block;
+    padding: 10px 20px;
+    font-size: 1rem;
+    background-color: #FFFFFF;
+    border-radius: 10px;
+    color: #0CF31C;
+	border: #fff solid 2px;
+    cursor: pointer; 
+    transition: background-color 0.3s, color 0.3s, border 0.2s, transform 0.2s;
+    margin: 10px 0; /* Adjust vertical spacing */
+    box-shadow: 0 6px 20px rgba(0, 207, 28, 0.5);
+    text-align: center;
+    width: 100%; /* Ensure consistent button width */
+    max-width: 200px; /* Limit maximum width */
+	position: static;
+}
+
+.game-buttons button:hover {
+    background-color: #057e0d;
+    color: #000;
+    border: #000 solid 2px;
+    box-shadow: 0 4px 15px rgba(0, 207, 28, 0.5);
+}
+
+.sendButton, .btn-closing-chat {
+    background-color: #f0f0f0; /* Example custom background */
+    color: #333; /* Example custom text color */
+    border: #ddd solid 1px;
+}
+
+/* Ensure login button is fully visible */
+#settings, #logoutBtn {
+    margin-right: 10px; /* Add spacing from the edge */
+    padding: 10px;
+	width: 100px;
+    font-size: 1rem;
+	position: absolute;
+	order: -1; /* Move it to the start of the flex container */
+	color: #013f05;
+}
+
+#settings {
+	right: 150px;
+}
+
+#logoutBtn {
+	right: 5px;
+}
+
+#settings:hover, #logoutBtn:hover {
+	background-color: #06550c;
+    color: #FFFFFF;
+    border: #FFFFFF solid 2px;
+    transform: scale(1.1);
+    box-shadow: 0 4px 15px rgba(255, 255, 255, 0.8);
+}
+
+#fab fa-js {
+	background-color: yellow;
+} 
