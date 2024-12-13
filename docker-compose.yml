@@ -78,13 +78,12 @@ services:
             - elasticsearch-passwd
             - kibana-passwd
         volumes:
-            - elasticsearch_data:/usr/share/elasticsearch/data
+            - elasticsearch_data:/usr/share/elasticsearch
+            - elasticsearch_certs:/usr/share/elasticsearch/config/certs
             - elasticsearch_logs:/var/log/elasticsearch
         expose:
             - 9200
             - 9300
-        ports:
-            - 9200:9200
         networks:
             - transcendence
         restart: unless-stopped
@@ -134,6 +133,7 @@ services:
             - kibana-passwd
         volumes:
             - kibana_logs:/var/log/kibana
+            - elasticsearch_certs:/usr/share/kibana/config/certs:ro
         expose:
             - 5601
         ports:
@@ -171,6 +171,8 @@ volumes:
         name: static_data
     elasticsearch_data:
         name: elasticsearch_data
+    elasticsearch_certs:
+        name: elasticsearch_certs
     elasticsearch_logs:
         name: elasticsearch_logs
     kibana_logs:

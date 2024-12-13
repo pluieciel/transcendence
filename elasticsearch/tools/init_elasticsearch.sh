@@ -20,7 +20,6 @@ if [ ! -f ./config/elastic-certificates.p12 ]; then
     ./bin/elasticsearch-keystore add -f xpack.security.http.ssl.keystore.secure_password <<< "$ELASTIC_PASSWORD"
     ./bin/elasticsearch-keystore add -f xpack.security.http.ssl.truststore.secure_password <<< "$ELASTIC_PASSWORD"
 
-    mkdir -p ./config/certs
     openssl pkcs12 -in ./config/elastic-certificates.p12 \
         -out ./config/certs/elastic-certificates.pem \
         -nokeys \
