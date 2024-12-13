@@ -108,7 +108,8 @@ done
 
 retries=10
 while [ $retries -gt 0 ]; do
-  response=$(curl -s -X GET "$KIBANA_HOST/api/status" | grep -o '"level":"[^"]*"' | awk -F ':"' '{print $2}' | tr -d '"')
+  response=$(curl -s --cacert ./config/certs/kibana-certificates.pem \
+     			-X GET "$KIBANA_HOST/api/status" | grep -o '"level":"[^"]*"' | awk -F ':"' '{print $2}' | tr -d '"')
 
   if [ "$response" = "available" ]; then
     for service in "${services[@]}"; do
