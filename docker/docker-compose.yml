@@ -1,6 +1,6 @@
 services:
     postgres:
-        build: ./postgres
+        build: ${PWD}/docker/postgres
         image: postgres
         container_name: postgres
         environment:
@@ -26,7 +26,7 @@ services:
             timeout: 2s
             retries: 3
     django:
-        build: ./django
+        build: ${PWD}/docker/django
         image: django
         container_name: django
         depends_on:
@@ -45,7 +45,7 @@ services:
             - transcendence
         restart: unless-stopped
     nginx:
-        build: ./nginx
+        build: ${PWD}/docker/nginx
         image: nginx
         container_name: nginx
         depends_on:
@@ -62,7 +62,7 @@ services:
             - transcendence
         restart: unless-stopped
     elasticsearch:
-        build: ./elasticsearch
+        build: ${PWD}/docker/elasticsearch
         image: elasticsearch
         container_name: elasticsearch
         environment:
@@ -88,7 +88,7 @@ services:
             timeout: 10s
             retries: 10
     logstash:
-        build: ./logstash
+        build: ${PWD}/docker/logstash
         image: logstash
         container_name: logstash
         depends_on:
@@ -113,7 +113,7 @@ services:
             - transcendence
         restart: unless-stopped
     kibana:
-        build: ./kibana
+        build: ${PWD}/docker/kibana
         image: kibana
         container_name: kibana
         depends_on:
@@ -137,7 +137,7 @@ services:
             - transcendence
         restart: unless-stopped
     cadvisor:
-        build: ./cadvisor
+        build: ${PWD}/docker/cadvisor
         image: cadvisor
         container_name: cadvisor
         volumes:
@@ -153,7 +153,7 @@ services:
             - transcendence
         restart: unless-stopped
     prometheus:
-        build: ./prometheus
+        build: ${PWD}/docker/prometheus
         image: prometheus
         container_name: prometheus
         depends_on:
@@ -169,12 +169,17 @@ services:
             - transcendence
         restart: unless-stopped
     grafana:
-        build: ./grafana
+        build: ${PWD}/docker/grafana
         image: grafana
         container_name: grafana
         depends_on:
             prometheus:
                 condition: service_started
+        environment:
+            GF_SECURITY_ADMIN_PASSWORD__FILE: /run/secrets/grafana-passwd
+        env_file: .env
+        secrets:
+            - grafana-passwd
         volumes:
             - grafana_data:/var/lib/grafana
         expose:
@@ -233,10 +238,12 @@ volumes:
 
 secrets:
     postgres-passwd:
-        file: ./secrets/postgres-passwd.txt
+        file: ${PWD}/docker/secrets/postgres-passwd.txt
     django-passwd:
-        file: ./secrets/django-passwd.txt
+        file: ${PWD}/docker/secrets/django-passwd.txt
     elasticsearch-passwd:
-        file: ./secrets/elasticsearch-passwd.txt
+        file: ${PWD}/docker/secrets/elasticsearch-passwd.txt
     kibana-passwd:
-        file: ./secrets/kibana-passwd.txt
+        file: ${PWD}/docker/secrets/kibana-passwd.txt
+    grafana-passwd:
+        file: ${PWD}/docker/secrets/grafana-passwd.txt
