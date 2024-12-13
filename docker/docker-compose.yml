@@ -136,6 +136,22 @@ services:
         networks:
             - transcendence
         restart: unless-stopped
+    cadvisor:
+        build: ./cadvisor
+        image: cadvisor
+        container_name: cadvisor
+        volumes:
+            - /:/rootfs:ro
+            - /var/run:/var/run:ro
+            - /sys:/sys:ro
+            - /var/lib/docker/:/var/lib/docker:ro
+        expose:
+            - 8080
+        ports:
+            - 8080:8080
+        networks:
+            - transcendence
+        restart: unless-stopped
     prometheus:
         build: ./prometheus
         image: prometheus
@@ -152,19 +168,19 @@ services:
         networks:
             - transcendence
         restart: unless-stopped
-    cadvisor:
-        build: ./cadvisor
-        image: cadvisor
-        container_name: cadvisor
+    grafana:
+        build: ./grafana
+        image: grafana
+        container_name: grafana
+        depends_on:
+            prometheus:
+                condition: service_started
         volumes:
-            - /:/rootfs:ro
-            - /var/run:/var/run:ro
-            - /sys:/sys:ro
-            - /var/lib/docker/:/var/lib/docker:ro
+            - grafana_data:/var/lib/grafana
         expose:
-            - 8080
+            - 3000
         ports:
-            - 8080:8080
+            - 3000:3000
         networks:
             - transcendence
         restart: unless-stopped
@@ -212,6 +228,8 @@ volumes:
         name: kibana_logs
     prometheus_data:
         name: prometheus_data
+    grafana_data:
+        name: grafana_data
 
 secrets:
     postgres-passwd:
