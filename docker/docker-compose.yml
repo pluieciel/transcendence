@@ -84,10 +84,9 @@ services:
         restart: unless-stopped
         healthcheck:
             test: ["CMD-SHELL", "/usr/local/bin/healthcheck.sh"]
-            interval: 5s
-            timeout: 2s
-            retries: 3
-            start_period: 20s
+            interval: 10s
+            timeout: 10s
+            retries: 10
     logstash:
         build: ./logstash
         image: logstash
@@ -137,6 +136,19 @@ services:
         networks:
             - transcendence
         restart: unless-stopped
+    prometheus:
+        build: ./prometheus
+        image: prometheus
+        container_name: prometheus
+        volumes:
+            - prometheus_data:/prometheus
+        expose:
+            - 9090
+        ports:
+            - 9090:9090
+        networks:
+            - transcendence
+        restart: unless-stopped
 
 networks:
     transcendence:
@@ -179,6 +191,8 @@ volumes:
         name: elasticsearch_logs
     kibana_logs:
         name: kibana_logs
+    prometheus_data:
+        name: prometheus_data
 
 secrets:
     postgres-passwd:
