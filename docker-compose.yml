@@ -109,8 +109,9 @@ services:
             - postgres_logs:/var/log/postgres:ro
             - django_logs:/var/log/django:ro
             - nginx_logs:/var/log/nginx:ro
-            - elasticsearch_logs:/var/log/elasticsearch:ro
             - kibana_logs:/var/log/kibana:ro
+            - elasticsearch_logs:/var/log/elasticsearch:ro
+            - elasticsearch_certs:/usr/share/logstash/config/certs:ro
         expose:
             - 5044
             - 9600

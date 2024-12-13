@@ -4,3 +4,5 @@ api.http.host: "0.0.0.0"
 xpack.monitoring.elasticsearch.hosts: ["${ELASTIC_HOST}"]
 xpack.monitoring.elasticsearch.username: "${ELASTIC_USERNAME}"
 xpack.monitoring.elasticsearch.password: "${ELASTIC_PASSWORD}"
+xpack.monitoring.elasticsearch.ssl.certificate_authority: "/usr/share/logstash/config/certs/elastic-certificates.pem"
+xpack.monitoring.elasticsearch.ssl.verification_mode: "certificate"
