@@ -105,23 +105,14 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-'''
-DATABASES = {
-    'default': {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "transcendence_db",
-        "USER": "admin_db",
-        "PASSWORD": os.environ.get('POSTGRES_PASSWORD'),
+        "NAME": "transcendence",
+        "USER": "postgres",
+        "PASSWORD": "123",
         "HOST": "postgres",
         "PORT": "5432",
     }
 }
-'''
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
