@@ -10,4 +10,4 @@ elasticsearch.password: "${ELASTICSEARCH_PASSWORD}"
 xpack.reporting.roles.enabled: false
 elasticsearch.ssl.certificateAuthorities:
     ["/usr/share/kibana/config/certs/elastic-certificates.pem"]
-elasticsearch.ssl.verificationMode: "none"
+elasticsearch.ssl.verificationMode: "certificate"

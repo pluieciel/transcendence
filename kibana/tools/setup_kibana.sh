@@ -5,15 +5,22 @@ services=("elasticsearch" "logstash" "kibana" "nginx" "django" "postgres")
 ELASTIC_PASSWORD=$(cat $ELASTICSEARCH_PASSWORD_FILE)
 
 for service in "${services[@]}"; do
-  curl -s -u "$ELASTIC_USERNAME:$ELASTIC_PASSWORD" -X PUT "$ELASTIC_HOST/_snapshot/$service-repo" \
-    -H "Content-Type: application/json" -d "{
+  curl -s -u "$ELASTIC_USERNAME:$ELASTIC_PASSWORD" \
+  	--cacert ./config/certs/elastic-certificates.pem \
+   	-X PUT "$ELASTIC_HOST/_snapshot/$service-repo" \
+    -H "Content-Type: application/json" \
+    -d "{
       \"type\": \"fs\",
       \"settings\": {
         \"location\": \"$service-repo\"
       }
     }"
-  curl -s -u "$ELASTIC_USERNAME:$ELASTIC_PASSWORD" -X PUT "$ELASTIC_HOST/_slm/policy/$service-snapshot-policy" \
-    -H "Content-Type: application/json" -d "{
+
+  curl -s -u "$ELASTIC_USERNAME:$ELASTIC_PASSWORD" \
+  	--cacert ./config/certs/elastic-certificates.pem \
+   	-X PUT "$ELASTIC_HOST/_slm/policy/$service-snapshot-policy" \
+    -H "Content-Type: application/json" \
+    -d "{
       \"name\": \"<$service-snapshot-{now/d}>\",
       \"schedule\": \"0 30 1 * * ?\",
       \"repository\": \"$service-repo\",
@@ -26,8 +33,12 @@ for service in "${services[@]}"; do
         \"expire_after\": \"365d\"
       }
     }"
-  curl -s -u "$ELASTIC_USERNAME:$ELASTIC_PASSWORD" -X PUT "$ELASTIC_HOST/_ilm/policy/$service-lifecycle-policy" \
-    -H "Content-Type: application/json" -d "{
+
+  curl -s -u "$ELASTIC_USERNAME:$ELASTIC_PASSWORD" \
+  	--cacert ./config/certs/elastic-certificates.pem \
+   	-X PUT "$ELASTIC_HOST/_ilm/policy/$service-lifecycle-policy" \
+    -H "Content-Type: application/json" \
+    -d "{
       \"policy\": {
         \"phases\": {
           \"hot\": {
@@ -70,8 +81,12 @@ for service in "${services[@]}"; do
         }
       }
     }"
-  curl -s -u "$ELASTIC_USERNAME:$ELASTIC_PASSWORD" -X PUT "$ELASTIC_HOST/_index_template/$service-template" \
-    -H "Content-Type: application/json" -d "{
+
+  curl -s -u "$ELASTIC_USERNAME:$ELASTIC_PASSWORD" \
+  	--cacert ./config/certs/elastic-certificates.pem \
+   	-X PUT "$ELASTIC_HOST/_index_template/$service-template" \
+    -H "Content-Type: application/json" \
+    -d "{
       \"version\": 1,
       \"priority\": 100,
       \"template\": {
@@ -97,16 +112,23 @@ while [ $retries -gt 0 ]; do
 
   if [ "$response" = "available" ]; then
     for service in "${services[@]}"; do
-      curl -s -u "$ELASTIC_USERNAME:$ELASTIC_PASSWORD" -X POST "http://localhost:5601/api/data_views/data_view" \
-        -H "Content-Type: application/json" -H "kbn-xsrf: true" -d "{
+      curl -s -u "$ELASTIC_USERNAME:$ELASTIC_PASSWORD" \
+      	--cacert ./config/certs/elastic-certificates.pem \
+       	-X POST "http://localhost:5601/api/data_views/data_view" \
+        -H "Content-Type: application/json" \
+        -H "kbn-xsrf: true" \
+        -d "{
           \"data_view\": {
             \"name\": \"$service\",
             \"title\": \"$service-logs-*\"
           }
         }"
     done
-    curl -s -u "$ELASTIC_USERNAME:$ELASTIC_PASSWORD" -X POST "http://localhost:5601/api/saved_objects/_import?createNewCopies=true" \
-      -H "kbn-xsrf: true" --form file=@./config/export.ndjson
+
+    curl -s -u "$ELASTIC_USERNAME:$ELASTIC_PASSWORD" \
+    	--cacert ./config/certs/elastic-certificates.pem \
+     	-X POST "http://localhost:5601/api/saved_objects/_import?createNewCopies=true" \
+      	-H "kbn-xsrf: true" --form file=@./config/export.ndjson
     exit 0
   else
     sleep 5
