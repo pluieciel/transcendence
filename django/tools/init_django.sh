@@ -1,5 +1,6 @@
 #!/bin/sh
 
+export POSTGRES_PASSWORD=$(cat $POSTGRES_PASSWORD_FILE)
 export DJANGO_SUPERUSER_PASSWORD=$(cat $DJANGO_SUPERUSER_PASSWORD_FILE)
 
 python manage.py makemigrations
