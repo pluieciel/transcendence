@@ -159,6 +159,11 @@ services:
         depends_on:
             cadvisor:
                 condition: service_started
+        environment:
+            PROMETHEUS_PASSWORD_FILE: /run/secrets/prometheus-passwd
+        env_file: .env
+        secrets:
+            - prometheus-passwd
         volumes:
             - prometheus_data:/prometheus
         expose:
@@ -245,5 +250,7 @@ secrets:
         file: ${PWD}/docker/secrets/elasticsearch-passwd.txt
     kibana-passwd:
         file: ${PWD}/docker/secrets/kibana-passwd.txt
+    prometheus-passwd:
+        file: ${PWD}/docker/secrets/prometheus-passwd.txt
     grafana-passwd:
         file: ${PWD}/docker/secrets/grafana-passwd.txt
