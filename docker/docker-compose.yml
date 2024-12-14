@@ -57,7 +57,7 @@ services:
             - 9000:9000
         volumes:
             - nginx_data:/var/www/html
-            - static_django_data:/var/www/django/static
+            - django_static_data:/var/www/django/static
         networks:
             - transcendence
         restart: unless-stopped
@@ -212,8 +212,8 @@ volumes:
             type: none
             o: bind
             device: ${PWD}/static
-    static_django_data:
-        name: static_django_data
+    django_static_data:
+        name: django_static_data
         driver_opts:
             type: none
             o: bind
@@ -226,8 +226,6 @@ volumes:
         name: postgres_logs
     nginx_logs:
         name: nginx_logs
-    static_data:
-        name: static_data
     elasticsearch_data:
         name: elasticsearch_data
     elasticsearch_certs:
