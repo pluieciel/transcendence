@@ -2,8 +2,8 @@ scrape_configs:
   - job_name: 'prometheus'
     scheme: https
     basic_auth:
-      username: prometheus
-      password: 123
+      username: ${PROMETHEUS_USERNAME}
+      password: ${PROMETHEUS_PASSWORD}
     tls_config:
       ca_file: /etc/prometheus/config/certs/ca.crt
       cert_file: /etc/prometheus/config/certs/prometheus_metrics.crt
