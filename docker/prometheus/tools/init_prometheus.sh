@@ -1,11 +1,20 @@
 #!/bin/sh
 
+
 if [ ! -f /etc/prometheus/web-config.yml ]; then
     PROMETHEUS_PASSWORD=$(cat $PROMETHEUS_PASSWORD_FILE)
 
-    export PROMETHEUS_PASSWORD_HASH=$(htpasswd -nbBC 10 "" "$PROMETHEUS_PASSWORD" | tr -d ':\n')
+    export PROMETHEUS_PASSWORD_HASH=$(htpasswd -nbBC 10 "" "$PROMETHEUS_PASSWORD" | tr -d ':')
 
     envsubst < /etc/prometheus/config/web-config.yml.template > /etc/prometheus/config/web-config.yml
+fi
+
+if [ ! -f /etc/prometheus/config/certs/ca.key ] || [ ! -f /etc/prometheus/config/certs/ca.crt ]; then
+    openssl genrsa -out /etc/prometheus/config/certs/ca.key 2048
+
+    openssl req -x509 -new -nodes -key /etc/prometheus/config/certs/ca.key \
+        -sha256 -days 365 -out /etc/prometheus/config/certs/ca.crt \
+        -subj "/C=LU/L=Belval/O=42/CN=ca"
 fi
 
 if [ ! -f /etc/prometheus/config/certs/prometheus.key ] || [ ! -f /etc/prometheus/config/certs/prometheus.crt ]; then
@@ -14,9 +23,24 @@ if [ ! -f /etc/prometheus/config/certs/prometheus.key ] || [ ! -f /etc/prometheu
     openssl req -new \
         -key /etc/prometheus/config/certs/prometheus.key \
         -out /etc/prometheus/config/certs/prometheus.csr \
-        -subj "/C=LU/L=Belval/CN=localhost"
+        -subj "/C=LU/L=Belval/CN=prometheus"
 
-    openssl x509 -req -days 365 -in /etc/prometheus/config/certs/prometheus.csr -signkey /etc/prometheus/config/certs/prometheus.key -out /etc/prometheus/config/certs/prometheus.crt
+    openssl x509 -req -in /etc/prometheus/config/certs/prometheus.csr \
+        -CA /etc/prometheus/config/certs/ca.crt -CAkey /etc/prometheus/config/certs/ca.key -CAcreateserial \
+        -out /etc/prometheus/config/certs/prometheus.crt -days 365 -sha256
+fi
+
+if [ ! -f /etc/prometheus/config/certs/prometheus_metrics.key ] || [ ! -f /etc/prometheus/config/certs/prometheus_metrics.crt ]; then
+    openssl genrsa -out /etc/prometheus/config/certs/prometheus_metrics.key 2048
+
+    openssl req -new \
+        -key /etc/prometheus/config/certs/prometheus_metrics.key \
+        -out /etc/prometheus/config/certs/prometheus_metrics.csr \
+        -subj "/C=LU/L=Belval/CN=prometheus_metrics"
+
+    openssl x509 -req -in /etc/prometheus/config/certs/prometheus_metrics.csr \
+        -CA /etc/prometheus/config/certs/ca.crt -CAkey /etc/prometheus/config/certs/ca.key -CAcreateserial \
+        -out /etc/prometheus/config/certs/prometheus_metrics.crt -days 365 -sha256
 fi
 
 exec /bin/prometheus \

@@ -9,7 +9,8 @@ WORKDIR /etc/prometheus
 USER root
 
 RUN mkdir -p ./config/certs ./data && \
-    chown -R nobody:nobody ./
+    chown -R nobody:nobody ./ && \
+    rm ./prometheus.yml
 
 COPY ./conf ./config
 
