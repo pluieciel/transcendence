@@ -4,12 +4,14 @@ RUN apk add --no-cache apache2-utils envsubst openssl
 
 FROM prom/prometheus:v3.0.0
 
+WORKDIR /etc/prometheus
+
 USER root
 
-COPY ./conf /etc/prometheus
+RUN mkdir -p ./config/certs ./data && \
+    chown -R nobody:nobody ./
 
-RUN mkdir -p /etc/prometheus/config/certs && \
-    chown -R nobody:nobody /etc/prometheus/config
+COPY ./conf ./config
 
 COPY ./tools/ /usr/local/bin
 RUN chmod +x /usr/local/bin/init_prometheus.sh

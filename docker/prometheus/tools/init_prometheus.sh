@@ -5,7 +5,7 @@ if [ ! -f /etc/prometheus/web-config.yml ]; then
 
     export PROMETHEUS_PASSWORD_HASH=$(htpasswd -nbBC 10 "" "$PROMETHEUS_PASSWORD" | tr -d ':\n')
 
-    envsubst < /etc/prometheus/web-config.yml.template > /etc/prometheus/web-config.yml
+    envsubst < /etc/prometheus/config/web-config.yml.template > /etc/prometheus/config/web-config.yml
 fi
 
 if [ ! -f /etc/prometheus/config/certs/prometheus.key ] || [ ! -f /etc/prometheus/config/certs/prometheus.crt ]; then
@@ -20,6 +20,6 @@ if [ ! -f /etc/prometheus/config/certs/prometheus.key ] || [ ! -f /etc/prometheu
 fi
 
 exec /bin/prometheus \
-    --web.config.file=/etc/prometheus/web-config.yml \
-    --config.file=/etc/prometheus/prometheus.yml \
-    --storage.tsdb.path=/prometheus
+    --web.config.file=/etc/prometheus/config/web-config.yml \
+    --config.file=/etc/prometheus/config/prometheus.yml \
+    --storage.tsdb.path=/etc/prometheus/data

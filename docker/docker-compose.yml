@@ -165,7 +165,7 @@ services:
         secrets:
             - prometheus-passwd
         volumes:
-            - prometheus_data:/prometheus
+            - prometheus_data:/etc/prometheus/data
         expose:
             - 9090
         ports:
