@@ -1,6 +1,5 @@
 #!/bin/sh
 
-
 if [ ! -f /etc/prometheus/web-config.yml ]; then
     PROMETHEUS_PASSWORD=$(cat $PROMETHEUS_PASSWORD_FILE)
 
@@ -27,7 +26,7 @@ if [ ! -f /etc/prometheus/config/certs/prometheus.key ] || [ ! -f /etc/prometheu
 
     openssl x509 -req -in /etc/prometheus/config/certs/prometheus.csr \
         -CA /etc/prometheus/config/certs/ca.crt -CAkey /etc/prometheus/config/certs/ca.key -CAcreateserial \
-        -out /etc/prometheus/config/certs/prometheus.crt -days 365 -sha256
+        -out /etc/prometheus/config/certs/prometheus.crt -days 365 -sha256 -extensions v3_req -extfile /etc/prometheus/config/openssl.cnf
 fi
 
 if [ ! -f /etc/prometheus/config/certs/prometheus_metrics.key ] || [ ! -f /etc/prometheus/config/certs/prometheus_metrics.crt ]; then
@@ -40,7 +39,7 @@ if [ ! -f /etc/prometheus/config/certs/prometheus_metrics.key ] || [ ! -f /etc/p
 
     openssl x509 -req -in /etc/prometheus/config/certs/prometheus_metrics.csr \
         -CA /etc/prometheus/config/certs/ca.crt -CAkey /etc/prometheus/config/certs/ca.key -CAcreateserial \
-        -out /etc/prometheus/config/certs/prometheus_metrics.crt -days 365 -sha256
+        -out /etc/prometheus/config/certs/prometheus_metrics.crt -days 365 -sha256 -extensions v3_req -extfile /etc/prometheus/config/openssl.cnf
 fi
 
 exec /bin/prometheus \
