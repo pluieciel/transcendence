@@ -15,4 +15,6 @@ RUN chown elasticsearch:root ./config/elasticsearch.yml
 
 USER elasticsearch
 
+EXPOSE 9200 9300
+
 ENTRYPOINT ["/usr/local/bin/init_elasticsearch.sh"]

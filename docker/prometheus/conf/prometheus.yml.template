@@ -1,0 +1,16 @@
+scrape_configs:
+  - job_name: 'prometheus'
+    scheme: https
+    basic_auth:
+      username: ${PROMETHEUS_USERNAME}
+      password: ${PROMETHEUS_PASSWORD}
+    tls_config:
+      ca_file: /etc/prometheus/config/certs/ca.crt
+      cert_file: /etc/prometheus/config/certs/prometheus_metrics.crt
+      key_file: /etc/prometheus/config/certs/prometheus_metrics.key
+      insecure_skip_verify: false
+    static_configs:
+      - targets: ['prometheus:9090']
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']

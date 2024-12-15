@@ -10,4 +10,6 @@ RUN rm /var/log/nginx/access.log /var/log/nginx/error.log && \
 	touch /var/log/nginx/access.log /var/log/nginx/error.log && \
 	chown nginx:nginx /var/log/nginx/access.log /var/log/nginx/error.log
 
+EXPOSE 9000
+
 ENTRYPOINT ["/usr/sbin/nginx", "-g", "daemon off;"]
