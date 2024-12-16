@@ -21,10 +21,8 @@ class App {
             username: sessionStorage.getItem('username') || '',
         };
         
-        this.router = new Router(this.routes, this.state);
-
 		window.app = this;
-		// Object.assign(this.state, { router: this.router});
+        this.router = new Router(this.routes, this.state);
 
     }
     

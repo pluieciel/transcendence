@@ -22,7 +22,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         #print("Parsed params:", query_params)
 
         self.username = query_params.get("username", [None])[0]
-        #print("Username:", self.username)
+        #print("Username:", self.username, "$")
 
         self.room_group_name = f"user_{self.username}"
         #print(self.username)
@@ -37,7 +37,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
             self.channel_name
         )
         await self.accept()
-        ChatConsumer.online_users.add(self.username)
+
+        if self.username:
+            ChatConsumer.online_users.add(self.username)
 
 
         channel_layer = get_channel_layer()
