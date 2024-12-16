@@ -15,4 +15,6 @@ RUN chown kibana:root ./config/kibana.yml
 
 USER kibana
 
+EXPOSE 5601
+
 ENTRYPOINT ["/usr/local/bin/init_kibana.sh"]

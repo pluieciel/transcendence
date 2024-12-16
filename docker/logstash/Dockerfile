@@ -18,4 +18,6 @@ RUN chmod +x /usr/local/bin/init_logstash.sh
 
 USER logstash
 
+EXPOSE 5044 9600
+
 ENTRYPOINT ["/usr/local/bin/init_logstash.sh"]
