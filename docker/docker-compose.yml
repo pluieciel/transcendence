@@ -74,7 +74,6 @@ services:
             - kibana-passwd
         volumes:
             - elasticsearch_data:/usr/share/elasticsearch
-            - elasticsearch_certs:/usr/share/elasticsearch/config/certs
             - elasticsearch_logs:/var/log/elasticsearch
         expose:
             - 9200
