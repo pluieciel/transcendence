@@ -168,8 +168,6 @@ services:
             - prometheus_data:/etc/prometheus/data
         expose:
             - 9090
-        ports:
-            - 9090:9090
         networks:
             - transcendence
         restart: unless-stopped
