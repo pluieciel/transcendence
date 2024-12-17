@@ -7,7 +7,6 @@ if [ ! -f "$INIT_FLAG" ]; then
   ELASTIC_PASSWORD=$(cat $ELASTICSEARCH_PASSWORD_FILE)
 
   curl -s -u "$ELASTIC_USERNAME:$ELASTIC_PASSWORD" \
-    --cacert ./config/certs/elastic-certificates.pem \
     -X POST "$ELASTIC_HOST/_security/user/kibana_system/_password" \
     -H "Content-Type: application/json" \
     -d "{
