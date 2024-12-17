@@ -89,31 +89,31 @@ a {
 	margin-right: 20px;
 }
 
-
-/* Button styles */
-#settings, #logoutBtn, .game-buttons button {
-    display: block;
-    padding: 10px 20px;
-    font-size: 1rem;
-    background-color: #FFFFFF;
-    border-radius: 10px;
-    color: #0CF31C;
-	border: #fff solid 2px;
+#settingsBtn, #indexBtn, #logoutBtn, .game-buttons button {
+	display: block;
+	padding: 10px 20px;
+	font-size: 1rem;
+	background-color: #FFFFFF;
+	border-radius: 10px;
+	color: #0CF31C;
     cursor: pointer; 
+	border: 0px solid #fff;
     transition: background-color 0.3s, color 0.3s, border 0.2s, transform 0.2s;
     margin: 10px 0; /* Adjust vertical spacing */
-    box-shadow: 0 6px 20px rgba(0, 207, 28, 0.5);
     text-align: center;
     width: 100%; /* Ensure consistent button width */
     max-width: 200px; /* Limit maximum width */
 	position: static;
 }
 
+.game-buttons button {
+	border: 2px solid #057e0d;
+}
+
 .game-buttons button:hover {
     background-color: #057e0d;
     color: #000;
     border: #000 solid 2px;
-    box-shadow: 0 4px 15px rgba(0, 207, 28, 0.5);
 }
 
 .sendButton, .btn-closing-chat {
@@ -123,7 +123,7 @@ a {
 }
 
 /* Ensure login button is fully visible */
-#settings, #logoutBtn {
+#settingsBtn, #indexBtn, #logoutBtn {
     margin-right: 10px; /* Add spacing from the edge */
     padding: 10px;
 	width: 100px;
@@ -133,7 +133,11 @@ a {
 	color: #013f05;
 }
 
-#settings {
+#settingsBtn {
+	right: 150px;
+}
+
+#indexBtn {
 	right: 150px;
 }
 
@@ -141,7 +145,7 @@ a {
 	right: 5px;
 }
 
-#settings:hover, #logoutBtn:hover {
+#settingsBtn:hover, #indexBtn:hover, #logoutBtn:hover {
 	background-color: #06550c;
     color: #FFFFFF;
     border: #FFFFFF solid 2px;
@@ -151,4 +155,4 @@ a {
 
 #fab fa-js {
 	background-color: yellow;
-} 
+}

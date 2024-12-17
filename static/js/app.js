@@ -1,5 +1,7 @@
 import LoginView from './components/LoginView.js';
-import MainView from './components/MainView.js';
+import MainView from './components/pages/MainView.js';
+import SettingsView from './components/pages/SettingsView.js';
+import SignUpAuthView from './components/login/OAuth.js';
 import GameView from './components/GameView.js';
 import Router from './router.js';
 
@@ -14,6 +16,8 @@ class App {
 			{ path: '/', component: LoginView },
             { path: '/index', component: MainView },
             { path: '/game', component: GameView },
+            { path: '/settings', component: SettingsView },
+            { path: '/signup/oauth', component: SignUpAuthView },
 			{ path: '*', component: LoginView },  // Default route
 		]
         this.state = {

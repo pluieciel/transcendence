@@ -3,6 +3,11 @@ from channels.generic.http import AsyncHttpConsumer
 from django.contrib.auth import get_user_model, authenticate
 from channels.db import database_sync_to_async
 import json
+import logging
+import requests
+
+logger = logging.getLogger(__name__)
+
 
 class SignupConsumer(AsyncHttpConsumer):
     async def handle(self, body):
@@ -39,6 +44,62 @@ class SignupConsumer(AsyncHttpConsumer):
                 'message': 'Signup successful'
             }
             
+            return await self.send_response(201, 
+                json.dumps(response_data).encode(),
+                headers=[(b"Content-Type", b"application/json")])
+
+        except Exception as e:
+            response_data = {
+                'success': False,
+                'message': str(e)
+            }
+            return await self.send_response(500, json.dumps(response_data).encode(),
+                headers=[(b"Content-Type", b"application/json")])
+
+    @database_sync_to_async
+    def get_user_exists(self, username):
+        User = get_user_model()
+        return User.objects.filter(username=username).exists()
+
+    @database_sync_to_async
+    def create_user(self, username, password):
+        User = get_user_model()
+        user = User.objects.create_user(
+            username=username,
+            password=password
+        )
+        return user
+
+class SignupOAuthConsumer(AsyncHttpConsumer):
+    async def handle(self, body):
+        try:
+            data = json.loads(body.decode())
+            token = data.get('token')
+
+            url = 'https://api.intra.42.fr/v2/me'
+            headers = {
+                'Authorization': f'Bearer {token}'
+            }
+
+            response = requests.get(url, headers=headers)
+
+            if response.status_code == 200:
+                user_data = response.json()
+                print(user_data)
+            else:
+                response_data = {
+                    'success': False,
+                    'message': str(e)
+                }
+                return await self.send_response(500, json.dumps(response_data).encode(),
+                    headers=[(b"Content-Type", b"application/json")])
+
+            await self.create_user_oauth(user_data['login'], token)
+            response_data = {
+                'success': True,
+                'message': 'Signup successful'
+            }
+
             return await self.send_response(201, 
                 json.dumps(response_data).encode(),
                 headers=[(b"Content-Type", b"application/json")])
@@ -133,7 +194,7 @@ class LoginConsumer(AsyncHttpConsumer):
         User = get_user_model()
         return User.objects.filter(username=username).exists()
 
-class EloConsumer(AsyncHttpConsumer):
+class ProfileConsumer(AsyncHttpConsumer):
     async def handle(self, body):
         try:
             data = json.loads(body.decode())
@@ -158,9 +219,17 @@ class EloConsumer(AsyncHttpConsumer):
                 return await self.send_response(404, json.dumps(response_data).encode(),
                     headers=[(b"Content-Type", b"application/json")])
             
+            tot_games = (user.win + user.loss)
+            if tot_games == 0:
+                winrate = 0
+            else:
+                winrate = (user.win / tot_games) * 100
+
             response_data = {
                 'success': True,
-                'elo': user.elo
+                'elo': user.elo,
+                'winrate': winrate,
+                'tourn': user.tourn_win,
             }
             return await self.send_response(200, json.dumps(response_data).encode(),
                 headers=[(b"Content-Type", b"application/json")])
@@ -176,4 +245,5 @@ class EloConsumer(AsyncHttpConsumer):
     @database_sync_to_async
     def get_user(self, username):
         User = get_user_model()
-        return User.objects.filter(username=username).first()
+        return User.objects.filter(username=username).first()      
+
