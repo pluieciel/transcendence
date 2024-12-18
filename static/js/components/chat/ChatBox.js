@@ -111,7 +111,8 @@ export default class ChatBox {
             const data = JSON.parse(e.data);
             //console.log(data);
             if (data.recipient === 'update_online_users') {
-                this.onlineusers = JSON.parse(data.message).sort((a, b) => a.localeCompare(b));
+                this.onlineusers = JSON.parse(data.message).filter(user => user !== this.username).sort((a, b) => a.localeCompare(b));
+                this.onlineusers.unshift(this.username);
                 this.updateOnlineUsersList();
             } else if (data.recipient === 'update_waiting_users') {
                 this.waiting_users = JSON.parse(data.message);
