@@ -56,7 +56,7 @@ export class UIManager {
 		nameLeft.style.height = 100;
 		nameLeft.style.fontSize = "50px";
 		nameLeft.style.userSelect = "none";
-		nameLeft.innerHTML = "Julien [2057]";
+		nameLeft.innerHTML = "0";
 		nameLeft.style.top = 170 + "px";
 		nameLeft.style.left = 1100 + "px";
 		document.body.appendChild(nameLeft);

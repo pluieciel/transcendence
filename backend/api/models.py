@@ -6,7 +6,7 @@ class CustomUserManager(BaseUserManager):
     def create_user(self, username, password=None):
         if not username:
             raise ValueError('Users must have a username')
-        
+
         user = self.model(username=username)
         user.set_password(password)
         user.save(using=self._db)
@@ -32,6 +32,9 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     elo = models.IntegerField(default=1000)
     wins = models.IntegerField(default=0)
     looses = models.IntegerField(default=0)
+    language = models.CharField(max_length=4, unique=False, default="en")
+    is_playing = models.BooleanField(default=False)
+    current_game_id = models.IntegerField(default=0)
 
     objects = CustomUserManager()
 
