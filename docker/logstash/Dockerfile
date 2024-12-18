@@ -9,9 +9,8 @@ RUN rm -f pipeline/logstash.conf
 RUN groupadd -g 70 postgres && \
 	usermod -aG postgres logstash
 
-RUN mkdir -p ./pipeline ./logs /var/log/logstash ./config/certs && \
-	chown -R logstash:root ./pipeline ./logs /var/log/logstash ./config/certs && \
-	chmod 775 ./config/certs
+RUN mkdir -p ./pipeline ./logs /var/log/logstash && \
+	chown -R logstash:root ./pipeline ./logs /var/log/logstash
 
 COPY ./tools /usr/local/bin
 RUN chmod +x /usr/local/bin/init_logstash.sh
