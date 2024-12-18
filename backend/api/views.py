@@ -80,7 +80,7 @@ class HandleOAuthConsumer(AsyncHttpConsumer):
                 'client_id': 'u-s4t2ud-ba5b0c72367af9ad1efbf4d20585f3c315b613ece176ca16919733a7dba999d5',
                 'client_secret': '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',
                 'code': code,
-                'redirect_uri': 'http://localhost:9000/signup/oauth'
+                'redirect_uri': 'http://10.11.3.2:9000/signup/oauth'
             }
 
             response = requests.post(url, data=params)
@@ -105,18 +105,18 @@ class HandleOAuthConsumer(AsyncHttpConsumer):
                 if await self.get_user_exists(user_data['login']):
                     response_data = {
                         'success': True,
-                        'signup': False,
-                        'message': 'Login successful'
+						'status': 200,
+                        'message': 'Login successful',
+						'username': user_data['login']
                     }
                     return await self.send_response(200, json.dumps(response_data).encode(),
                         headers=[(b"Content-Type", b"application/json")])
                     
                 else:
                     await self.create_user_oauth(user_data['login'], access_token)
-    
                     response_data = {
                         'success': True,
-                        'signup': True,
+						'status': 201,
                         'message': 'Signup successful'
                     }
                     return await self.send_response(201, json.dumps(response_data).encode(),

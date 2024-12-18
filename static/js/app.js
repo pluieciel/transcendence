@@ -2,7 +2,6 @@ import LoginView from './components/LoginView.js';
 import MainView from './components/pages/MainView.js';
 import SettingsView from './components/pages/SettingsView.js';
 import SignUpAuthView from './components/login/SignUpOAuth.js';
-import LoginAuthView from './components/login/LoginOAuth.js';
 import GameView from './components/GameView.js';
 import Router from './router.js';
 
@@ -21,16 +20,8 @@ class App {
             { path: '/signup/oauth', component: SignUpAuthView },
 			{ path: '*', component: LoginView },
 		]
-        this.state = {
-            isLoggedIn: sessionStorage.getItem('isLoggedIn') === 'true',
-            username: sessionStorage.getItem('username') || '',
-        };
-        
         this.router = new Router(this.routes, this.state);
-
 		window.app = this;
-		// Object.assign(this.state, { router: this.router});
-
     }
     
     login(username) {
