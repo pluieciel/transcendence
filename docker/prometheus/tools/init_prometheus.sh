@@ -1,10 +1,9 @@
 #!/bin/sh
 
 export PROMETHEUS_PASSWORD=$(cat $PROMETHEUS_PASSWORD_FILE)
+export PROMETHEUS_PASSWORD_HASH=$(htpasswd -nbBC 10 "" "$PROMETHEUS_PASSWORD" | tr -d ':')
 
 if [ ! -f /etc/prometheus/web-config.yml ]; then
-    export PROMETHEUS_PASSWORD_HASH=$(htpasswd -nbBC 10 "" "$PROMETHEUS_PASSWORD" | tr -d ':')
-
     envsubst < /etc/prometheus/config/web-config.yml.template > /etc/prometheus/config/web-config.yml
 fi
 

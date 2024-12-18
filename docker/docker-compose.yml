@@ -104,7 +104,6 @@ services:
             - nginx_logs:/var/log/nginx:ro
             - kibana_logs:/var/log/kibana:ro
             - elasticsearch_logs:/var/log/elasticsearch:ro
-            - elasticsearch_certs:/usr/share/logstash/config/certs:ro
         expose:
             - 5044
             - 9600
@@ -127,7 +126,6 @@ services:
             - kibana-passwd
         volumes:
             - kibana_logs:/var/log/kibana
-            - elasticsearch_certs:/usr/share/kibana/config/certs:ro
         expose:
             - 5601
         ports:
@@ -221,8 +219,6 @@ volumes:
         name: nginx_logs
     elasticsearch_data:
         name: elasticsearch_data
-    elasticsearch_certs:
-        name: elasticsearch_certs
     elasticsearch_logs:
         name: elasticsearch_logs
     kibana_logs:
