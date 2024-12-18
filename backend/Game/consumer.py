@@ -48,7 +48,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 			#TODO update websocket
 			self.game_id = user.current_game_id
 			self.game = game_manager.get_game(user.current_game_id)
-		else
+		else:
 			self.game_id = game_manager.get_available_game()
 			self.game = game_manager.get_game(self.game_id)
 

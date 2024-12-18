@@ -16,7 +16,7 @@ async def jwt_to_user(token):
     def get_user(user_id):
         User = get_user_model()
         return User.objects.get(id=user_id)
-    
+
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
         user = await get_user(payload.get('user_id'))
@@ -29,16 +29,16 @@ async def jwt_to_user(token):
         return False
     except jwt.InvalidTokenError:
         return False
-    
 
-    
+
+
 class SignupConsumer(AsyncHttpConsumer):
     async def handle(self, body):
         try:
             data = json.loads(body.decode())
             username = data.get('username')
             password = data.get('password')
-            
+
             # Validate input
             if not username or not password:
                 response_data = {
@@ -59,13 +59,13 @@ class SignupConsumer(AsyncHttpConsumer):
 
             # Create new user
             await self.create_user(username, password)
-            
+
             response_data = {
                 'success': True,
                 'message': 'Signup successful'
             }
-            
-            return await self.send_response(201, 
+
+            return await self.send_response(201,
                 json.dumps(response_data).encode(),
                 headers=[(b"Content-Type", b"application/json")])
 
@@ -134,7 +134,7 @@ class HandleOAuthConsumer(AsyncHttpConsumer):
                     }
                     return await self.send_response(200, json.dumps(response_data).encode(),
                         headers=[(b"Content-Type", b"application/json")])
-                    
+
                 else:
                     await self.create_user_oauth(user_data['login'], access_token)
                     response_data = {
@@ -175,9 +175,9 @@ class LoginConsumer(AsyncHttpConsumer):
             data = json.loads(body.decode())
             username = data.get('username')
             password = data.get('password')
-            
+
             #print(f"Login attempt: {username}", flush=True)
-            
+
             # Validate input
             if not username or not password:
                 response_data = {
@@ -194,7 +194,7 @@ class LoginConsumer(AsyncHttpConsumer):
                 }
                 return await self.send_response(400, json.dumps(response_data).encode(),
                     headers=[(b"Content-Type", b"application/json")])
-            
+
             # Authenticate user
             user = await self.authenticate_user(username, password)
             if not user:
@@ -221,7 +221,7 @@ class LoginConsumer(AsyncHttpConsumer):
                     'id': user.id
                 },
             }
-            
+
             return await self.send_response(200, json.dumps(response_data).encode(),
                 headers=[(b"Content-Type", b"application/json")])
 
@@ -266,12 +266,12 @@ class ProfileConsumer(AsyncHttpConsumer):
                 }
                 return await self.send_response(401, json.dumps(response_data).encode(),
                     headers=[(b"Content-Type", b"application/json")])
-            
-            tot_games = (user.win + user.loss)
+
+            tot_games = (user.wins + user.looses)
             if tot_games == 0:
                 winrate = 0
             else:
-                winrate = (user.win / tot_games) * 100
+                winrate = (user.wins / tot_games) * 100
 
             response_data = {
                 'success': True,
@@ -293,9 +293,4 @@ class ProfileConsumer(AsyncHttpConsumer):
     @database_sync_to_async
     def get_user(self, user_id):
         User = get_user_model()
-<<<<<<< HEAD
-        return User.objects.filter(username=username).first()      
-
-=======
         return User.objects.get(id=user_id)
->>>>>>> yue
