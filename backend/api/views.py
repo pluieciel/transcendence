@@ -109,9 +109,6 @@ class HandleOAuthConsumer(AsyncHttpConsumer):
                         'message': 'Login successful',
 						'username': user_data['login']
                     }
-                    return await self.send_response(200, json.dumps(response_data).encode(),
-                        headers=[(b"Content-Type", b"application/json")])
-                    
                 else:
                     await self.create_user_oauth(user_data['login'], access_token)
                     response_data = {
@@ -120,8 +117,8 @@ class HandleOAuthConsumer(AsyncHttpConsumer):
                         'message': 'Signup && Login successful',
 						'username': user_data['login']
                     }
-                    return await self.send_response(201, json.dumps(response_data).encode(),
-                        headers=[(b"Content-Type", b"application/json")])
+                return await self.send_response(response_data['status'], json.dumps(response_data).encode(),
+                    headers=[(b"Content-Type", b"application/json")])
             else:
                 response_data = {
                     'success': False,
