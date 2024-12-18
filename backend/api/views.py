@@ -16,8 +16,6 @@ class SignupConsumer(AsyncHttpConsumer):
             username = data.get('username')
             password = data.get('password')
             
-            #print(f"Signup attempt: {username}", flush=True)
-            
             # Validate input
             if not username or not password:
                 response_data = {
@@ -70,39 +68,66 @@ class SignupConsumer(AsyncHttpConsumer):
         )
         return user
 
-class SignupOAuthConsumer(AsyncHttpConsumer):
+class HandleOAuthConsumer(AsyncHttpConsumer):
     async def handle(self, body):
         try:
             data = json.loads(body.decode())
-            token = data.get('token')
+            code = data.get('token')
 
-            url = 'https://api.intra.42.fr/v2/me'
-            headers = {
-                'Authorization': f'Bearer {token}'
+            url = 'https://api.intra.42.fr/oauth/token'
+            params = {
+                'grant_type': 'authorization_code',
+                'client_id': 'u-s4t2ud-ba5b0c72367af9ad1efbf4d20585f3c315b613ece176ca16919733a7dba999d5',
+                'client_secret': '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',
+                'code': code,
+                'redirect_uri': 'http://localhost:9000/signup/oauth'
             }
 
-            response = requests.get(url, headers=headers)
+            response = requests.post(url, data=params)
 
-            if response.status_code == 200:
-                user_data = response.json()
-                print(user_data)
-            else:
+            if response.status_code != 200:
                 response_data = {
                     'success': False,
-                    'message': str(e)
+                    'message': f"Failed to exchange code for token. Status code: {response.status_code}"
                 }
                 return await self.send_response(500, json.dumps(response_data).encode(),
                     headers=[(b"Content-Type", b"application/json")])
 
-            await self.create_user_oauth(user_data['login'], token)
-            response_data = {
-                'success': True,
-                'message': 'Signup successful'
+            access_token = response.json()['access_token']
+            headers = {
+                'Authorization': f'Bearer {access_token}'
             }
 
-            return await self.send_response(201, 
-                json.dumps(response_data).encode(),
-                headers=[(b"Content-Type", b"application/json")])
+            user_response = requests.get('https://api.intra.42.fr/v2/me', headers=headers)
+
+            if user_response.status_code == 200:
+                user_data = user_response.json()
+                if await self.get_user_exists(user_data['login']):
+                    response_data = {
+                        'success': True,
+                        'signup': False,
+                        'message': 'Login successful'
+                    }
+                    return await self.send_response(200, json.dumps(response_data).encode(),
+                        headers=[(b"Content-Type", b"application/json")])
+                    
+                else:
+                    await self.create_user_oauth(user_data['login'], access_token)
+    
+                    response_data = {
+                        'success': True,
+                        'signup': True,
+                        'message': 'Signup successful'
+                    }
+                    return await self.send_response(201, json.dumps(response_data).encode(),
+                        headers=[(b"Content-Type", b"application/json")])
+            else:
+                response_data = {
+                    'success': False,
+                    'message': f"Failed to fetch user data. Status code: {user_response.status_code}"
+                }
+                return await self.send_response(500, json.dumps(response_data).encode(),
+                    headers=[(b"Content-Type", b"application/json")])
 
         except Exception as e:
             response_data = {
@@ -111,20 +136,15 @@ class SignupOAuthConsumer(AsyncHttpConsumer):
             }
             return await self.send_response(500, json.dumps(response_data).encode(),
                 headers=[(b"Content-Type", b"application/json")])
-
+    @database_sync_to_async
+    def create_user_oauth(self, username, token):
+        User = get_user_model()
+        user = User.objects.create_user_oauth(username=username, token=token)
+        return user
     @database_sync_to_async
     def get_user_exists(self, username):
         User = get_user_model()
         return User.objects.filter(username=username).exists()
-
-    @database_sync_to_async
-    def create_user(self, username, password):
-        User = get_user_model()
-        user = User.objects.create_user(
-            username=username,
-            password=password
-        )
-        return user
 
 class LoginConsumer(AsyncHttpConsumer):
     async def handle(self, body):

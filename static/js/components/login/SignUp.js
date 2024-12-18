@@ -37,7 +37,7 @@ export default class SignUp {
                             </div>
                             <div id="passwordError" class="alert alert-danger d-none"></div>
                             <button type="submit" class="btn btn-primary w-100">Sign Up</button>
-                            <button type="button" class="btn btn-primary w-100 SignUp42">Sign Up with 42</button>
+                            <button type="button" class="btn btn-primary w-100 SignUp42 OAuth">Sign Up with 42</button>
                         </form>
                     </div>
                 </div>

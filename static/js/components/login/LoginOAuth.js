@@ -1,4 +1,4 @@
-class SignUpAuthView {
+class LoginAuthView {
     constructor(container) {
         this.container = container;
         this.render();
@@ -11,7 +11,7 @@ class SignUpAuthView {
                 <div class="row justify-content-center">
                     <div class="col-md-4">
                         <div class="card p-4 shadow">
-                            <h4 class="text-center">Sign Up with 42</h4>
+                            <h4 class="text-center">Log in with 42</h4>
                             <p>Please wait while we complete your registration...</p>
                             <div id="loadingSpinner" class="text-center">
                                 <i class="fas fa-spinner fa-spin"></i> Loading...
@@ -54,9 +54,9 @@ class SignUpAuthView {
             const data = await response.json();
 
             if (data.success) {
-                window.app.router.navigateTo('/index'); // Redirect to the main page
+                window.app.router.navigateTo('/index');
             } else {
-                this.showError(data.message || 'Sign up failed.');
+                this.showError(data.message || 'Log in failed.');
             }
         } catch (error) {
 			console.error('Error during fetch:', error);
@@ -72,4 +72,4 @@ class SignUpAuthView {
     }
 }
 
-export default SignUpAuthView;
+export default LoginAuthView;

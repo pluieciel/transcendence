@@ -1,7 +1,8 @@
 import LoginView from './components/LoginView.js';
 import MainView from './components/pages/MainView.js';
 import SettingsView from './components/pages/SettingsView.js';
-import SignUpAuthView from './components/login/OAuth.js';
+import SignUpAuthView from './components/login/SignUpOAuth.js';
+import LoginAuthView from './components/login/LoginOAuth.js';
 import GameView from './components/GameView.js';
 import Router from './router.js';
 
@@ -18,7 +19,7 @@ class App {
             { path: '/game', component: GameView },
             { path: '/settings', component: SettingsView },
             { path: '/signup/oauth', component: SignUpAuthView },
-			{ path: '*', component: LoginView },  // Default route
+			{ path: '*', component: LoginView },
 		]
         this.state = {
             isLoggedIn: sessionStorage.getItem('isLoggedIn') === 'true',

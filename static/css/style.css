@@ -248,10 +248,10 @@
     cursor: pointer;
 }
 
-.SignUp42 {
-	margin-top: 10px;
+.sendButton:hover {
+	background-color: #3aa876;
 }
 
-.sendButton:hover {
-    background-color: #3aa876;
+.OAuth {
+	margin-top: 10px;
 }
