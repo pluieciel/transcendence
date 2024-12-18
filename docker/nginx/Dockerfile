@@ -8,8 +8,13 @@ RUN apk update && \
 	apache2-utils \
 	openssl
 
-COPY ./conf/ /etc/nginx/conf.d/
+RUN mkdir -p /etc/nginx/certs
+
+COPY ./conf/nginx.conf /etc/nginx/conf.d/nginx.conf
 RUN chown nginx:nginx /etc/nginx/nginx.conf
+
+COPY ./conf/openssl.conf /etc/nginx/
+RUN chown nginx:nginx /etc/nginx/openssl.conf
 
 COPY ./tools/ /usr/local/bin
 RUN chmod +x /usr/local/bin/init_nginx.sh
