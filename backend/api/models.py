@@ -11,6 +11,14 @@ class CustomUserManager(BaseUserManager):
         user.set_password(password)
         user.save(using=self._db)
         return user
+    
+    def	create_user_oauth(self, username, token):
+        if not username:
+            raise ValueError('Users must have a username')
+        user = self.model(username=username, oauthlog=True)
+        user.save(using=self._db)
+        return user
+        
 
     def create_superuser(self, username, password=None):
         user = self.create_user(
@@ -25,6 +33,7 @@ class CustomUserManager(BaseUserManager):
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=30, unique=True)
+    oauthlog = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
@@ -35,6 +44,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     language = models.CharField(max_length=4, unique=False, default="en")
     is_playing = models.BooleanField(default=False)
     current_game_id = models.IntegerField(default=0)
+    tourn_win = models.IntegerField(default=0)
+    tourn_joined = models.IntegerField(default=0)
 
     objects = CustomUserManager()
 

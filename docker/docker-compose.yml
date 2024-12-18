@@ -74,7 +74,6 @@ services:
             - kibana-passwd
         volumes:
             - elasticsearch_data:/usr/share/elasticsearch
-            - elasticsearch_certs:/usr/share/elasticsearch/config/certs
             - elasticsearch_logs:/var/log/elasticsearch
         expose:
             - 9200
@@ -105,7 +104,6 @@ services:
             - nginx_logs:/var/log/nginx:ro
             - kibana_logs:/var/log/kibana:ro
             - elasticsearch_logs:/var/log/elasticsearch:ro
-            - elasticsearch_certs:/usr/share/logstash/config/certs:ro
         expose:
             - 5044
             - 9600
@@ -128,7 +126,6 @@ services:
             - kibana-passwd
         volumes:
             - kibana_logs:/var/log/kibana
-            - elasticsearch_certs:/usr/share/kibana/config/certs:ro
         expose:
             - 5601
         ports:
@@ -147,8 +144,6 @@ services:
             - /var/lib/docker/:/var/lib/docker:ro
         expose:
             - 8080
-        ports:
-            - 8080:8080
         networks:
             - transcendence
         restart: unless-stopped
@@ -168,8 +163,6 @@ services:
             - prometheus_data:/etc/prometheus/data
         expose:
             - 9090
-        ports:
-            - 9090:9090
         networks:
             - transcendence
         restart: unless-stopped
@@ -189,8 +182,6 @@ services:
             - grafana_data:/var/lib/grafana
         expose:
             - 3000
-        ports:
-            - 3000:3000
         networks:
             - transcendence
         restart: unless-stopped
@@ -228,8 +219,6 @@ volumes:
         name: nginx_logs
     elasticsearch_data:
         name: elasticsearch_data
-    elasticsearch_certs:
-        name: elasticsearch_certs
     elasticsearch_logs:
         name: elasticsearch_logs
     kibana_logs:

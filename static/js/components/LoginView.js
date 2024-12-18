@@ -6,7 +6,6 @@ export default class LoginView {
         this.container = container;
         this.render();
         this.addEventListeners();
-        // Show login by default
         this.showLogin();
     }
 
