@@ -25,7 +25,7 @@ export class Game {
 		this.particleSystem = null;
 		this.lastTime = 0;
 
-		this.username = sessionStorage.getItem("token");
+		this.username = sessionStorage.getItem("username");
 
 		window.addEventListener("keydown", (event) => {
 			if (event.code === "Space") {
