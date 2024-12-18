@@ -11,6 +11,14 @@ class CustomUserManager(BaseUserManager):
         user.set_password(password)
         user.save(using=self._db)
         return user
+    
+    def	create_user_oauth(self, username, token):
+        if not username:
+            raise ValueError('Users must have a username')
+        user = self.model(username=username, oauthlog=True)
+        user.save(using=self._db)
+        return user
+        
 
     def create_superuser(self, username, password=None):
         user = self.create_user(
@@ -25,13 +33,16 @@ class CustomUserManager(BaseUserManager):
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=30, unique=True)
+    oauthlog = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     elo = models.IntegerField(default=1000)
-    wins = models.IntegerField(default=0)
-    looses = models.IntegerField(default=0)
+    win = models.IntegerField(default=0)
+    loss = models.IntegerField(default=0)
+    tourn_win = models.IntegerField(default=0)
+    tourn_joined = models.IntegerField(default=0)
 
     objects = CustomUserManager()
 

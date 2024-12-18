@@ -1,22 +1,20 @@
-import ChatBox from './chat/ChatBox.js';
-import Router from '../router.js';
-import { gameinit } from './game/Main.js';
+import ChatBox from '../chat/ChatBox.js';
 
 export default class MainView {
     constructor(container, appState) {
 		this.container = container;
         this.username = appState.username;
         this.render();
+		this.setProfileFields();
         this.initComponents();
         this.addEventListeners();
-		this.getElo();
     }
 
     render() {
         this.container.innerHTML = `
     <header>
         <h1>PONG</h1>
-			<button id="settings">Settings</button>
+			<button id="settingsBtn">Settings</button>
 			<button id="logoutBtn">Log out</button>
 	</header>
 
@@ -29,7 +27,7 @@ export default class MainView {
 			<p>
 				Welcome to <strong>ft_transcendence</strong>,<br>
 				the final project of the 42 common core curriculum!<br>
-				This project is our version of the classic <em>Pong</em> game<br><br>
+				This project is our version of the classic <b>Pong</b> game<br><br>
 				Ressources used:<br>
 				The whole project is running in docker <i class="fab fa-docker"></i><br>
 				We're using nginx as our webserv <i class="fas fa-server"></i><br>
@@ -54,12 +52,12 @@ export default class MainView {
 		</div>
 		<div class="profile">
 			<h2>Profile</h2>
-			<h3 id="p-name"></h3>
-			<h3 id="p-elo"></h3>
-			<h3 id="p-winrate"></h3>
-			<h3>Tournaments wins: 0</h3>
-			</div>
-			</div>
+			<h3 id="p-name">${this.username}</h3>
+			<h3 id="p-elo">Loading...</h3>
+			<h3 id="p-winrate">Loading...</h3>
+			<h3 id="p-tourn">Loading...</h3>
+		</div>
+	</div>
 		<!-- ChatBox container -->
 		<div id="chatBoxContainer"></div>
 	</div>
@@ -85,8 +83,14 @@ export default class MainView {
     addEventListeners() {
         // Logout button
         const logoutBtn = this.container.querySelector('#logoutBtn');
-        logoutBtn.addEventListener('click', () => {
+        const settings = this.container.querySelector('#settingsBtn');
+        
+		logoutBtn.addEventListener('click', () => {
             window.app.logout();
+        });
+
+		settings.addEventListener('click', () => {
+			window.app.router.navigateTo('/settings');
         });
 
         // Navigation links
@@ -104,10 +108,12 @@ export default class MainView {
         });
     }
 
-	async getElo() {
+	async setProfileFields() {
+		var elo_div = document.getElementById("p-elo");
+		var winrate_div = document.getElementById("p-winrate");
+		var tourn_div = document.getElementById("p-tourn");
 		try {
-            // This is an async operation - waits for server response
-            const response = await fetch('/api/get/elo', {
+            const response = await fetch('/api/get/profile', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -116,18 +122,23 @@ export default class MainView {
                     username: this.username,
                 })
             });
-        
+
             const data = await response.json();
         
-			var div = document.getElementById("p-elo");
             if (data.success) {
-				div.innerHTML = "Elo: " + data.elo;
-            } else {
-				div.innerHTML = "Failed to load elo";
+				elo_div.innerHTML = "Elo: " + data['elo'];
+				winrate_div.innerHTML = "Winrate: " + data['winrate'] + "%";
+				tourn_div.innerHTML = "Tournaments won: " + data['tourn'];
+			} else {
+				elo_div.innerHTML = "Failed to load elo";
+				winrate_div.innerHTML = "Failed to load winrate";
+				tourn_div.innerHTML = "Failed to load tournaments";
             }
         } catch (error) {
-            // Handles any errors during the async operation
-			console.error('An error occurred:', error);
+			elo_div.innerHTML = "Failed to load elo";
+			winrate_div.innerHTML = "Failed to load winrate";
+			tourn_div.innerHTML = "Failed to load tournaments";
+			console.error('An error occurred: ', error);
         }
 	}
 }
