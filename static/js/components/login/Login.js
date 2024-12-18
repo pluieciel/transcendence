@@ -49,9 +49,7 @@ export default class Login {
 			if (!username || !password)
 				errorDiv.textContent = 'Must fill username and password field';
 				
-            // Handle login logic here
             try {
-                // This is an async operation - waits for server response
                 const response = await fetch('/api/login/', {
                     method: 'POST',
                     headers: {
@@ -65,7 +63,6 @@ export default class Login {
             
                 const data = await response.json();
             
-                // This code runs only after getting response from server
                 if (data.success) {
                     window.app.login(username);
                 } else {
@@ -73,7 +70,6 @@ export default class Login {
                     errorDiv.classList.remove('d-none');
                 }
             } catch (error) {
-                // Handles any errors during the async operation
                 errorDiv.textContent = 'An error occurred';
                 errorDiv.classList.remove('d-none');
             }

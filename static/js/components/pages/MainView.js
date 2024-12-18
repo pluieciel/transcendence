@@ -21,7 +21,7 @@ export default class MainView {
 	<div class="welcome">
         <p>Welcome to Pong! Get ready to play!</p>
     </div>
-	<div class ="content">
+	<div class="content">
 		<div class="credits">
 			<h2>Credits</h2>
 			<p>
@@ -71,17 +71,14 @@ export default class MainView {
     showLeaderboard() {
         const mainContent = this.container.querySelector('#mainContent');
         mainContent.innerHTML = '<h2>Leaderboard View</h2>';
-        // Add any additional logic to initialize the leaderboard view
     }
 
     initComponents() {
-        // Initialize ChatBox
         const chatBoxContainer = this.container.querySelector('#chatBoxContainer');
         this.chatBox = new ChatBox(chatBoxContainer, this.username);
     }
 
     addEventListeners() {
-        // Logout button
         const logoutBtn = this.container.querySelector('#logoutBtn');
         const settings = this.container.querySelector('#settingsBtn');
         

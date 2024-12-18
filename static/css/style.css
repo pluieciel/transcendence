@@ -255,3 +255,15 @@
 .OAuth {
 	margin-top: 10px;
 }
+
+#deleteAccBtn {
+	border-radius: 5px;
+	border: 2px solid #000;
+	background-color: #f74f5f;
+	transition: background-color 0.5s, border 0.5s;
+}
+
+#deleteAccBtn:hover {
+	border: 2px solid #f00;
+	background-color: #f00;
+}
