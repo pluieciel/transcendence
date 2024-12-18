@@ -10,6 +10,8 @@ export default class ChatBox {
         this.users = [];
         this.blocked = [];
         this.onlineusers = [];
+        this.waiting_users = [];
+        this.waiting = false;
         
         this.render();
         this.initWebSocket();
@@ -23,7 +25,7 @@ export default class ChatBox {
                     type="button" 
                     data-bs-toggle="offcanvas" 
                     data-bs-target="#offcanvas">
-                <span class="fw-bold px-3">Chat</span>
+                <i class="fas fa-comment"></i>
             </button>
             
             <!-- Chat box -->
@@ -111,6 +113,9 @@ export default class ChatBox {
             if (data.recipient === 'update_online_users') {
                 this.onlineusers = JSON.parse(data.message).sort((a, b) => a.localeCompare(b));
                 this.updateOnlineUsersList();
+            } else if (data.recipient === 'update_waiting_users') {
+                this.waiting_users = JSON.parse(data.message);
+                this.updateOnlineUsersList();
             } else if (data.recipient === 'public') {
                 if (!this.blocked.includes(data.sender)) {
 					data.message = this.escapeHtml(data.message);
@@ -135,6 +140,14 @@ export default class ChatBox {
                 </span>
                 ${user !== this.username ? `
                     <span class="d-flex align-items-center">
+                        ${this.waiting_users.includes(user) ? `
+                            <button class="btn btn-primary square-btn me-1" id="game-${user}">
+                                <i class="fa-solid fa-gamepad"></i>
+                <!-- TODO: 
+                        handle game button click to start game
+                -->
+                            </button>
+                        ` : ''}
                         <button class="btn btn-primary square-btn me-1" data-action="chat" data-user="${user}">
                             <i class="fas fa-comments"></i>
                         </button>
@@ -144,7 +157,14 @@ export default class ChatBox {
                             <i class="fas fa-ban"></i>
                         </button>
                     </span>
-                ` : ''}
+                ` : `
+                    <span class="d-flex align-items-center">
+                        <button class="btn btn-primary square-btn me-1 ${this.waiting? '' : 'square-btn-red'}"
+                        data-action="waiting">
+                            <i class="fa-solid fa-gamepad"></i>
+                        </button>
+                    </span>
+                `}
             </div>
         `).join('');
     }
@@ -301,6 +321,18 @@ export default class ChatBox {
                 if (userTab) userTab.click();
             } else if (action === 'block') {
                 this.toggleBlockUser(user);
+            } else if (action === 'waiting') {
+                this.waiting = !this.waiting;
+                this.updateOnlineUsersList();
+                const messageData = {
+                    message: "update_waiting_status",
+                    sender: this.username,
+                    recipient: "admin",
+                    wait_status: this.waiting,
+                    time: new Date().toLocaleTimeString()
+                };
+    
+                this.chatSocket.send(JSON.stringify(messageData));
             }
         });
 

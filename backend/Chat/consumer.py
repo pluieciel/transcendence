@@ -6,7 +6,7 @@ from datetime import datetime
 
 class ChatConsumer(AsyncWebsocketConsumer):
     online_users = set()
-
+    waiting_users = set()
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.username = None
@@ -94,13 +94,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
-        message = text_data_json["message"]
-        sender = text_data_json["sender"]
-        recipient = text_data_json["recipient"]
-        time = text_data_json["time"]
-        
+        message = text_data_json.get("message")
+        sender = text_data_json.get("sender")
+        recipient = text_data_json.get("recipient")
+        time = text_data_json.get("time", None)
+        wait_status = text_data_json.get("wait_status", None)
+        channel_layer = get_channel_layer()
         if recipient == "public":
-            channel_layer = get_channel_layer()
             for group in [key for key in channel_layer.groups.keys() if key.startswith("user_")]:
                 await self.channel_layer.group_send(
                     group, {
@@ -109,6 +109,21 @@ class ChatConsumer(AsyncWebsocketConsumer):
                         "sender": sender,
                         "recipient": recipient,
                         "time": time
+                    }
+                )
+        elif message == "update_waiting_status" and recipient == "admin":
+            if wait_status:
+                ChatConsumer.waiting_users.add(sender)
+            else:
+                ChatConsumer.waiting_users.remove(sender)
+            for group in [key for key in channel_layer.groups.keys() if key.startswith("user_")]:
+                await self.channel_layer.group_send(
+                    group, {
+                        "type": "send_message",
+                        "message": json.dumps(list(ChatConsumer.waiting_users)),
+                        "sender": "admin",
+                        "recipient": "update_waiting_users",
+                        "time": datetime.now().strftime("%H:%M:%S")
                     }
                 )
         else:
