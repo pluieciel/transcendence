@@ -48,9 +48,6 @@ services:
         build: ${PWD}/docker/nginx
         image: nginx
         container_name: nginx
-        depends_on:
-            django:
-                condition: service_started
         expose:
             - 9000
         ports:

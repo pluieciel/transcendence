@@ -4,10 +4,12 @@ export ELASTICSEARCH_PASSWORD=$(cat $KIBANA_PASSWORD_FILE)
 INIT_FLAG="/usr/share/kibana/.initialized"
 
 if [ ! -f "$INIT_FLAG" ]; then
+  sleep 5
   ELASTIC_PASSWORD=$(cat $ELASTICSEARCH_PASSWORD_FILE)
 
-  curl -s -u "$ELASTIC_USERNAME:$ELASTIC_PASSWORD" \
-    -X POST "$ELASTIC_HOST/_security/user/kibana_system/_password" \
+  curl -v -u "$ELASTIC_USERNAME:$ELASTIC_PASSWORD" \
+  	--cacert /etc/nginx/certs/nginx.crt \
+    -X POST "https://nginx:9000/elasticsearch/_security/user/kibana_system/_password" \
     -H "Content-Type: application/json" \
     -d "{
       \"password\": \"$ELASTICSEARCH_PASSWORD\"

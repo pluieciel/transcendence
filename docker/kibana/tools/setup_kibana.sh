@@ -6,6 +6,7 @@ ELASTIC_PASSWORD=$(cat $ELASTICSEARCH_PASSWORD_FILE)
 
 for service in "${services[@]}"; do
   curl -s -u "$ELASTIC_USERNAME:$ELASTIC_PASSWORD" \
+  	--cacert /etc/nginx/certs/nginx.crt \
    	-X PUT "$ELASTIC_HOST/_snapshot/$service-repo" \
     -H "Content-Type: application/json" \
     -d "{
@@ -16,6 +17,7 @@ for service in "${services[@]}"; do
     }"
 
   curl -s -u "$ELASTIC_USERNAME:$ELASTIC_PASSWORD" \
+  	--cacert /etc/nginx/certs/nginx.crt \
    	-X PUT "$ELASTIC_HOST/_slm/policy/$service-snapshot-policy" \
     -H "Content-Type: application/json" \
     -d "{
@@ -33,6 +35,7 @@ for service in "${services[@]}"; do
     }"
 
   curl -s -u "$ELASTIC_USERNAME:$ELASTIC_PASSWORD" \
+  	--cacert /etc/nginx/certs/nginx.crt \
    	-X PUT "$ELASTIC_HOST/_ilm/policy/$service-lifecycle-policy" \
     -H "Content-Type: application/json" \
     -d "{
@@ -80,6 +83,7 @@ for service in "${services[@]}"; do
     }"
 
   curl -s -u "$ELASTIC_USERNAME:$ELASTIC_PASSWORD" \
+  	--cacert /etc/nginx/certs/nginx.crt \
    	-X PUT "$ELASTIC_HOST/_index_template/$service-template" \
     -H "Content-Type: application/json" \
     -d "{
