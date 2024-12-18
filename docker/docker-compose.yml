@@ -234,7 +234,7 @@ secrets:
     django-passwd:
         file: ${PWD}/docker/secrets/django-passwd.txt
     elasticsearch-passwd:
-        file: ${PWD}/docker/secrets/elasticsearch-passwd.txt
+         file: ${PWD}/docker/secrets/elasticsearch-passwd.txt
     kibana-passwd:
         file: ${PWD}/docker/secrets/kibana-passwd.txt
     prometheus-passwd:
