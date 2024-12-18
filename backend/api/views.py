@@ -117,7 +117,8 @@ class HandleOAuthConsumer(AsyncHttpConsumer):
                     response_data = {
                         'success': True,
 						'status': 201,
-                        'message': 'Signup successful'
+                        'message': 'Signup && Login successful',
+						'username': user_data['login']
                     }
                     return await self.send_response(201, json.dumps(response_data).encode(),
                         headers=[(b"Content-Type", b"application/json")])

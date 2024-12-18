@@ -54,12 +54,8 @@ class SignUpAuthView {
             const data = await response.json();
 
             if (data['success']) {
-				if (data['status'] == 200) {
-					window.app.login(data['username']);
-					window.app.router.navigateTo('/index');
-				}
-				else if (data['status'] == 201)
-					window.app.router.navigateTo('/');
+				window.app.login(data['username']);
+				window.app.router.navigateTo('/index');
             } else {
                 this.showError(data.message || 'Sign up || Log in failed.');
             }
