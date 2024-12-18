@@ -19,6 +19,7 @@ class App {
         this.state = {
             isLoggedIn: sessionStorage.getItem('isLoggedIn') === 'true',
             username: sessionStorage.getItem('username') || '',
+            token: sessionStorage.getItem('token') || '',
         };
         
 		window.app = this;
@@ -26,11 +27,13 @@ class App {
 
     }
     
-    login(username) {
+    login(data) {
         this.state.isLoggedIn = true;
-        this.state.username = username;
+        this.state.username = data.user.username;
+        this.state.token = data.token;
         sessionStorage.setItem('isLoggedIn', 'true');
-        sessionStorage.setItem('username', username);
+        sessionStorage.setItem('username', this.state.username);
+        sessionStorage.setItem('token', this.state.token);
         this.router.navigateTo('/index');
     }
 

@@ -53,7 +53,7 @@ export default class Login {
             
                 // This code runs only after getting response from server
                 if (data.success) {
-                    window.app.login(username);
+                    window.app.login(data);
                 } else {
                     errorDiv.textContent = data.message || 'Login failed';
                     errorDiv.classList.remove('d-none');
