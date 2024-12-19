@@ -69,11 +69,9 @@ services:
         container_name: elasticsearch
         environment:
             ELASTICSEARCH_PASSWORD_FILE: /run/secrets/elasticsearch-passwd
-            KIBANA_PASSWORD_FILE: /run/secrets/kibana-passwd
         env_file: .env
         secrets:
             - elasticsearch-passwd
-            - kibana-passwd
         volumes:
             - elasticsearch_data:/usr/share/elasticsearch
             - elasticsearch_logs:/var/log/elasticsearch
@@ -128,7 +126,6 @@ services:
             - kibana-passwd
         volumes:
             - kibana_logs:/var/log/kibana
-            - nginx_certs:/etc/nginx/certs
         expose:
             - 5601
         networks:

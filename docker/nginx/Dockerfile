@@ -5,7 +5,6 @@ WORKDIR /var/www/html
 RUN apk update && \
 	apk upgrade && \
 	apk add --no-cache \
-	apache2-utils \
 	openssl
 
 RUN mkdir -p /etc/nginx/certs
