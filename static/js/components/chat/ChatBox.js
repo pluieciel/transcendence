@@ -120,7 +120,7 @@ export default class ChatBox {
             } else if (data.message_type === "system" && data.recipient === 'update_waiting_users') {
                 this.waiting_users = JSON.parse(data.message);
                 this.updateOnlineUsersList();
-            } else if (data.message_type === "chat" && data.recipient === 'public') {
+            } else if (data.recipient === 'public') {
                 if (!this.blocked.includes(data.sender)) {
 					data.message = this.escapeHtml(data.message);
                     this.publicMessages.push(data);
