@@ -53,16 +53,10 @@ class SignUpAuthView {
 
             const data = await response.json();
 
-            if (data['success']) {
-				if (data['status'] == 200) {
-					window.app.login(data['username']);
-					window.app.router.navigateTo('/index');
-				}
-				else if (data['status'] == 201)
-					window.app.router.navigateTo('/');
-            } else {
+            if (data['success'])
+				window.app.login42(data['username'], data['token']);
+			else
                 this.showError(data.message || 'Sign up || Log in failed.');
-            }
         } catch (error) {
 			console.error('Error during fetch:', error);
 			this.showError('An error occurred during authentication.');

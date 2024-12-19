@@ -21,7 +21,7 @@ export default class MainView {
 	<div class="welcome">
         <p>Welcome to Pong! Get ready to play!</p>
     </div>
-	<div class ="content">
+	<div class="content">
 		<div class="credits">
 			<h2>Credits</h2>
 			<p>
@@ -52,7 +52,7 @@ export default class MainView {
 		</div>
 		<div class="profile">
 			<h2>Profile</h2>
-			<h3 id="p-name">${this.username}</h3>
+			<h3 id="p-name">Loading...</h3>
 			<h3 id="p-elo">Loading...</h3>
 			<h3 id="p-winrate">Loading...</h3>
 			<h3 id="p-tourn">Loading...</h3>
@@ -71,17 +71,14 @@ export default class MainView {
     showLeaderboard() {
         const mainContent = this.container.querySelector('#mainContent');
         mainContent.innerHTML = '<h2>Leaderboard View</h2>';
-        // Add any additional logic to initialize the leaderboard view
     }
 
     initComponents() {
-        // Initialize ChatBox
         const chatBoxContainer = this.container.querySelector('#chatBoxContainer');
         this.chatBox = new ChatBox(chatBoxContainer, this.username);
     }
 
     addEventListeners() {
-        // Logout button
         const logoutBtn = this.container.querySelector('#logoutBtn');
         const settings = this.container.querySelector('#settingsBtn');
         
@@ -109,9 +106,22 @@ export default class MainView {
     }
 
 	async setProfileFields() {
+		var	name_div = document.getElementById("p-name");
 		var elo_div = document.getElementById("p-elo");
 		var winrate_div = document.getElementById("p-winrate");
 		var tourn_div = document.getElementById("p-tourn");
+
+		if (this.username.slice(-2) === "42") {
+			const img = document.createElement('img');
+			img.src = '../../../imgs/42.png';
+			img.alt = '42';
+			img.style.width = '20px';
+			img.style.marginLeft = '5px';
+			name_div.innerHTML = this.username.substring(0, this.username.length - 2);
+			name_div.appendChild(img);
+		} else {
+			name_div.innerHTML = this.username;
+		}
 		try {
             const response = await fetch('/api/get/profile', {
                 method: 'POST',

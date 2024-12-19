@@ -73,7 +73,7 @@ a {
     padding: 15px;
 }
 
-.credits, .game-buttons, .profile {
+.credits, .game-buttons, .profile, .containerBtn {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -87,6 +87,11 @@ a {
 	text-align: center;
 	margin-left: 20px;
 	margin-right: 20px;
+}
+
+.containerBtn {
+	border: 2px solid #000;
+    background-color: #fff;
 }
 
 #settingsBtn, #indexBtn, #logoutBtn, .game-buttons button {

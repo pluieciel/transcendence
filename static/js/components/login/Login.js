@@ -31,7 +31,7 @@ export default class Login {
         const form = this.container.querySelector('#loginForm');
 		const form42 = this.container.querySelector('.LogIn42');
 		const clientId = 'u-s4t2ud-ba5b0c72367af9ad1efbf4d20585f3c315b613ece176ca16919733a7dba999d5';
-		const redirectUri = encodeURIComponent('http://10.11.3.2:9000/signup/oauth');
+		const redirectUri = encodeURIComponent('https://10.11.2.1:9000/signup/oauth');
 		const scope = 'public';
 		const state = 'this_is_a_very_long_random_string_i_am_unguessable';
 		const authorizeUrl = `https://api.intra.42.fr/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&state=${state}`;
@@ -48,10 +48,7 @@ export default class Login {
             
 			if (!username || !password)
 				errorDiv.textContent = 'Must fill username and password field';
-				
-            // Handle login logic here
             try {
-                // This is an async operation - waits for server response
                 const response = await fetch('/api/login/', {
                     method: 'POST',
                     headers: {
@@ -65,7 +62,6 @@ export default class Login {
             
                 const data = await response.json();
             
-                // This code runs only after getting response from server
                 if (data.success) {
                     window.app.login(data);
                 } else {
@@ -73,7 +69,6 @@ export default class Login {
                     errorDiv.classList.remove('d-none');
                 }
             } catch (error) {
-                // Handles any errors during the async operation
                 errorDiv.textContent = 'An error occurred';
                 errorDiv.classList.remove('d-none');
             }
