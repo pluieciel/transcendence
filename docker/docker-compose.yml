@@ -57,6 +57,8 @@ services:
             - 9000:9000
         volumes:
             - nginx_data:/var/www/html
+            - nginx_logs:/var/log/nginx
+            - nginx_certs:/etc/nginx/certs
             - django_static_data:/var/www/django/static
         networks:
             - transcendence
@@ -67,11 +69,9 @@ services:
         container_name: elasticsearch
         environment:
             ELASTICSEARCH_PASSWORD_FILE: /run/secrets/elasticsearch-passwd
-            KIBANA_PASSWORD_FILE: /run/secrets/kibana-passwd
         env_file: .env
         secrets:
             - elasticsearch-passwd
-            - kibana-passwd
         volumes:
             - elasticsearch_data:/usr/share/elasticsearch
             - elasticsearch_logs:/var/log/elasticsearch
@@ -128,8 +128,6 @@ services:
             - kibana_logs:/var/log/kibana
         expose:
             - 5601
-        ports:
-            - 5601:5601
         networks:
             - transcendence
         restart: unless-stopped
@@ -217,6 +215,8 @@ volumes:
         name: postgres_logs
     nginx_logs:
         name: nginx_logs
+    nginx_certs:
+        name: nginx_certs
     elasticsearch_data:
         name: elasticsearch_data
     elasticsearch_logs:

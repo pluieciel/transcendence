@@ -1,2 +1,2 @@
-secrets
+docker/secrets
 *.pyc
