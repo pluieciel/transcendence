@@ -1,7 +1,6 @@
-//import * as THREE from 'three';
-import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
 import { UIManager } from "./UIManager.js";
-//import { OrbitControls } from '/static/three/examples/jsm/controls/OrbitControls.js';
+//import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
 export class SceneManager {
 	constructor() {
@@ -15,7 +14,43 @@ export class SceneManager {
 		this.bottomBorder = null;
 		this.rightBorder = null;
 		this.leftBorder = null;
+		//this.loadModel();
+		this.model = null;
 	}
+
+	/*loadModel() {
+		const loader = new GLTFLoader();
+		console.log("Loading");
+		loader.load(
+			"/js/components/game/Lightning.glb",
+
+			// Success callback
+			(gltf) => {
+				const model = gltf.scene;
+				// You can modify the model's position, scale, rotation here
+				model.position.set(0, 0, 0);
+				model.scale.set(0.1, 0.1, 0.1);
+				const material = new THREE.MeshStandardMaterial({ color: 0xf2f0f2 });
+				model.material = material;
+
+				// Add the model to the scene
+				this.model = model;
+				this.scene.add(model);
+
+				console.log("added");
+			},
+
+			// Progress callback (optional)
+			(progress) => {
+				console.log("Loading model...", (progress.loaded / progress.total) * 100 + "%");
+			},
+
+			// Error callback
+			(error) => {
+				console.error("Error loading model:", error);
+			},
+		);
+		}*/
 
 	hideObjects() {
 		// Hide all game objects

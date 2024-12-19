@@ -57,6 +57,8 @@ services:
             - 9000:9000
         volumes:
             - nginx_data:/var/www/html
+            - nginx_logs:/var/log/nginx
+            - nginx_certs:/etc/nginx/certs
             - django_static_data:/var/www/django/static
         networks:
             - transcendence
@@ -67,14 +69,11 @@ services:
         container_name: elasticsearch
         environment:
             ELASTICSEARCH_PASSWORD_FILE: /run/secrets/elasticsearch-passwd
-            KIBANA_PASSWORD_FILE: /run/secrets/kibana-passwd
         env_file: .env
         secrets:
             - elasticsearch-passwd
-            - kibana-passwd
         volumes:
             - elasticsearch_data:/usr/share/elasticsearch
-            - elasticsearch_certs:/usr/share/elasticsearch/config/certs
             - elasticsearch_logs:/var/log/elasticsearch
         expose:
             - 9200
@@ -105,7 +104,6 @@ services:
             - nginx_logs:/var/log/nginx:ro
             - kibana_logs:/var/log/kibana:ro
             - elasticsearch_logs:/var/log/elasticsearch:ro
-            - elasticsearch_certs:/usr/share/logstash/config/certs:ro
         expose:
             - 5044
             - 9600
@@ -128,11 +126,8 @@ services:
             - kibana-passwd
         volumes:
             - kibana_logs:/var/log/kibana
-            - elasticsearch_certs:/usr/share/kibana/config/certs:ro
         expose:
             - 5601
-        ports:
-            - 5601:5601
         networks:
             - transcendence
         restart: unless-stopped
@@ -147,8 +142,6 @@ services:
             - /var/lib/docker/:/var/lib/docker:ro
         expose:
             - 8080
-        ports:
-            - 8080:8080
         networks:
             - transcendence
         restart: unless-stopped
@@ -168,8 +161,6 @@ services:
             - prometheus_data:/etc/prometheus/data
         expose:
             - 9090
-        ports:
-            - 9090:9090
         networks:
             - transcendence
         restart: unless-stopped
@@ -189,8 +180,6 @@ services:
             - grafana_data:/var/lib/grafana
         expose:
             - 3000
-        ports:
-            - 3000:3000
         networks:
             - transcendence
         restart: unless-stopped
@@ -226,10 +215,10 @@ volumes:
         name: postgres_logs
     nginx_logs:
         name: nginx_logs
+    nginx_certs:
+        name: nginx_certs
     elasticsearch_data:
         name: elasticsearch_data
-    elasticsearch_certs:
-        name: elasticsearch_certs
     elasticsearch_logs:
         name: elasticsearch_logs
     kibana_logs:
@@ -245,7 +234,7 @@ secrets:
     django-passwd:
         file: ${PWD}/docker/secrets/django-passwd.txt
     elasticsearch-passwd:
-        file: ${PWD}/docker/secrets/elasticsearch-passwd.txt
+         file: ${PWD}/docker/secrets/elasticsearch-passwd.txt
     kibana-passwd:
         file: ${PWD}/docker/secrets/kibana-passwd.txt
     prometheus-passwd:

@@ -113,7 +113,8 @@ export default class MainView {
             const response = await fetch('/api/get/profile', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `${window.app.state.token}`
                 },
                 body: JSON.stringify({
                     username: this.username,

@@ -1,7 +1,12 @@
 from channels.generic.websocket import AsyncWebsocketConsumer
 from .game_instance import GameInstance  # Add this import
 from channels.layers import get_channel_layer
+from channels.db import database_sync_to_async
+from django.contrib.auth import get_user_model, authenticate
 import json
+import logging
+from urllib.parse import parse_qs
+from api.views import jwt_to_user
 
 class GameManager:
 	def __init__(self):
@@ -10,7 +15,7 @@ class GameManager:
 
 	def create_game(self):
 		self.current_room_id += 1
-		room_id = f"game_{self.current_room_id}"
+		room_id = self.current_room_id
 		self.games[room_id] = GameInstance(room_id)
 		return room_id
 
@@ -26,25 +31,46 @@ class GameManager:
 
 game_manager = GameManager()
 
+
 class GameConsumer(AsyncWebsocketConsumer):
+
+	@database_sync_to_async
+	def save_user(self, user):
+		user.save()
+
 	async def connect(self):
-	 # Initialize game-specific attributes
 		self.game = None
 		self.game_id = None
-		self.player_side = None
 
-		# Get game instance
-		self.game_id = game_manager.get_available_game()
-		self.game = game_manager.get_game(self.game_id)
+		logger = logging.getLogger('game')
+
+		query_string = self.scope["query_string"].decode()
+		query_params = parse_qs(query_string)
+		token = query_params.get("token", [None])[0]
+		user = await jwt_to_user(token)
+
+		if (user.is_playing):
+			#TODO update websocket
+			self.game_id = user.current_game_id
+			self.game = game_manager.get_game(user.current_game_id)
+			logger.info("User was in a game, joining it")
+		else:
+			self.game_id = game_manager.get_available_game()
+			self.game = game_manager.get_game(self.game_id)
+			user.is_playing = True
+			user.current_game_id = self.game_id
+			await self.save_user(user)
+			logger.info("User was not in a game, joined/created one")
+			logger.info(user.is_playing)
 
 	 # Use channel layer
 		await self.channel_layer.group_add(
-	  self.game_id,
-	  self.channel_name
+		str(self.game_id),
+		self.channel_name
 		)
 		await self.accept()
 
-		self.player_side = self.game.assign_player(self)
+		self.player_side = self.game.assign_player(self, user)
 
 		# Send initial game state
 		init_response = {
@@ -97,6 +123,8 @@ class GameConsumer(AsyncWebsocketConsumer):
 				}
 		  	)
 			self.game.start_game(self.channel_layer)
+
+
 
 	async def game_message(self, event):
 	 # Send message to WebSocket

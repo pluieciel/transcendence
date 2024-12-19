@@ -6,7 +6,6 @@ ELASTIC_PASSWORD=$(cat $ELASTICSEARCH_PASSWORD_FILE)
 
 for service in "${services[@]}"; do
   curl -s -u "$ELASTIC_USERNAME:$ELASTIC_PASSWORD" \
-  	--cacert ./config/certs/elastic-certificates.pem \
    	-X PUT "$ELASTIC_HOST/_snapshot/$service-repo" \
     -H "Content-Type: application/json" \
     -d "{
@@ -17,7 +16,6 @@ for service in "${services[@]}"; do
     }"
 
   curl -s -u "$ELASTIC_USERNAME:$ELASTIC_PASSWORD" \
-  	--cacert ./config/certs/elastic-certificates.pem \
    	-X PUT "$ELASTIC_HOST/_slm/policy/$service-snapshot-policy" \
     -H "Content-Type: application/json" \
     -d "{
@@ -35,7 +33,6 @@ for service in "${services[@]}"; do
     }"
 
   curl -s -u "$ELASTIC_USERNAME:$ELASTIC_PASSWORD" \
-  	--cacert ./config/certs/elastic-certificates.pem \
    	-X PUT "$ELASTIC_HOST/_ilm/policy/$service-lifecycle-policy" \
     -H "Content-Type: application/json" \
     -d "{
@@ -83,7 +80,6 @@ for service in "${services[@]}"; do
     }"
 
   curl -s -u "$ELASTIC_USERNAME:$ELASTIC_PASSWORD" \
-  	--cacert ./config/certs/elastic-certificates.pem \
    	-X PUT "$ELASTIC_HOST/_index_template/$service-template" \
     -H "Content-Type: application/json" \
     -d "{
@@ -108,13 +104,12 @@ done
 
 retries=10
 while [ $retries -gt 0 ]; do
-  response=$(curl -s --cacert ./config/certs/kibana-certificates.pem \
+  response=$(curl -s \
      			-X GET "$KIBANA_HOST/api/status" | grep -o '"level":"[^"]*"' | awk -F ':"' '{print $2}' | tr -d '"')
 
   if [ "$response" = "available" ]; then
     for service in "${services[@]}"; do
       curl -s -u "$ELASTIC_USERNAME:$ELASTIC_PASSWORD" \
-      	--cacert ./config/certs/kibana-certificates.pem \
        	-X POST "$KIBANA_HOST/api/data_views/data_view" \
         -H "Content-Type: application/json" \
         -H "kbn-xsrf: true" \
@@ -127,7 +122,6 @@ while [ $retries -gt 0 ]; do
     done
 
     curl -s -u "$ELASTIC_USERNAME:$ELASTIC_PASSWORD" \
-    	--cacert ./config/certs/kibana-certificates.pem \
      	-X POST "$KIBANA_HOST/api/saved_objects/_import?createNewCopies=true" \
       	-H "kbn-xsrf: true" --form file=@./config/export.ndjson
     exit 0

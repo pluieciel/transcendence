@@ -64,7 +64,7 @@ export default class Login {
                 const data = await response.json();
             
                 if (data.success) {
-                    window.app.login(username);
+                    window.app.login(data);
                 } else {
                     errorDiv.textContent = data.message || 'Login failed';
                     errorDiv.classList.remove('d-none');

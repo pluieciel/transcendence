@@ -193,7 +193,7 @@ class GameInstance:
 		elif websocket == self.player_right.websocket:
 			self.player_right.keys[key] = is_down
 
-	def assign_player(self, consumer):
+	def assign_player(self, consumer, username):
 		if not self.player_left.websocket:
 			self.player_left.websocket = consumer
 			return 'left'

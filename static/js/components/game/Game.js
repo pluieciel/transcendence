@@ -3,7 +3,7 @@ import { SceneManager } from "./SceneManager.js";
 import { InputManager } from "./InputManager.js";
 import { ParticleSystem } from "./ParticleSystem.js";
 //import * as THREE from 'three';
-import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
 
 export class Game {
 	constructor(canvas) {
@@ -25,6 +25,8 @@ export class Game {
 		this.particleSystem = null;
 		this.lastTime = 0;
 
+		this.username = sessionStorage.getItem("username");
+
 		window.addEventListener("keydown", (event) => {
 			if (event.code === "Space") {
 				this.emitParticles();
@@ -32,10 +34,15 @@ export class Game {
 		});
 	}
 
+	handleUnrecognizedToken() {}
+
 	setupWebSocket() {
 		const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
 		const host = window.location.host;
-		const wsUrl = `${protocol}//${host}/ws/game/`;
+		const token = window.app.state.token;
+
+		if (!token) this.handleUnrecognizedToken();
+		const wsUrl = `${protocol}//${host}/ws/game/?token=${token}`;
 
 		this.ws = new WebSocket(wsUrl);
 		this.inputManager.ws = this.ws;
@@ -120,9 +127,14 @@ export class Game {
 		this.sceneManager.rightBorder.position.set(positions.borders.right.x, positions.borders.right.y, positions.borders.right.z);
 
 		this.playerSide = data.side;
+		if (this.playerSide == "left") {
+			this.uiManager.updateNameLeft(this.username + " [" + data.player.left.rank + "]");
+			this.uiManager.updateNameRight("Opponent" + " [" + data.player.left.rank + "]");
+		} else {
+			this.uiManager.updateNameRight(this.username + " [" + data.player.right.rank + "]");
+			this.uiManager.updateNameLeft("Opponent" + " [" + data.player.left.rank + "]");
+		}
 
-		this.uiManager.updateNameLeft(data.player.left.name + " [" + data.player.left.rank + "]");
-		this.uiManager.updateNameRight(data.player.right.name + " [" + data.player.right.rank + "]");
 		this.uiManager.updateScoreLeft(data.player.left.score);
 		this.uiManager.updateScoreRight(data.player.right.score);
 
@@ -185,6 +197,9 @@ export class Game {
 
 		if (this.particleSystem) {
 			this.particleSystem.update(deltaTime);
+		}
+		if (this.sceneManager.model) {
+			this.sceneManager.model.rotation.y += 0.02;
 		}
 
 		this.renderer.render(this.sceneManager.getScene(), this.sceneManager.getCamera());
