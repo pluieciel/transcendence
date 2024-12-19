@@ -252,9 +252,7 @@ class LoginConsumer(AsyncHttpConsumer):
 class ProfileConsumer(AsyncHttpConsumer):
     async def handle(self, body):
         try:
-            #print(self.scope, flush=True)
             headers = dict((key.decode('utf-8'), value.decode('utf-8')) for key, value in self.scope['headers'])
-            #print(headers, flush=True)
             auth_header = headers.get('authorization', None)
             if not auth_header:
                 response_data = {

@@ -48,17 +48,35 @@ export default class MainView {
 			const response = await fetch('/api/del/user', {
 				method: 'POST',
 				headers: {
-					'Content-Type': 'application/json'
+					'Content-Type': 'application/json',
+                    'Authorization': `${window.app.state.token}`
 				},
 				body: JSON.stringify({
 					username: this.username,
 				})
 			});
 
-			const data = await response.json();
-		
+			if (!response.ok) {
+				console.error(`Error: ${response.status} - ${response.statusText}`);
+				return;
+			}
+	
+			// Check if there is any content in the response
+			const responseText = await response.text(); // Read response as text first
+			if (!responseText) {
+				console.error('Empty response body');
+				return;
+			}
+	
+			// Now parse the text into JSON
+			const data = JSON.parse(responseText);
+			console.log(data);
+
 			if (data.success) {
+				alert("deleted user successfully");
+				console.log("deleted user successfully");
 			} else {
+				console.log("smth is wrong");
 			}
 		} catch (error) {
 			console.error('An error occurred: ', error);
