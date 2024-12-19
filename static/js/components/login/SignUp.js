@@ -49,7 +49,7 @@ export default class SignUp {
 		const form = this.container.querySelector('#signupForm');
 		const form42 = this.container.querySelector('.SignUp42');
 		const clientId = 'u-s4t2ud-ba5b0c72367af9ad1efbf4d20585f3c315b613ece176ca16919733a7dba999d5';
-		const redirectUri = encodeURIComponent('http://10.11.3.2:9000/signup/oauth');
+		const redirectUri = encodeURIComponent('http://10.11.2.1:9000/signup/oauth');
 		const scope = 'public';
 		const state = 'this_is_a_very_long_random_string_i_am_unguessable';
 		const authorizeUrl = `https://api.intra.42.fr/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&state=${state}`;

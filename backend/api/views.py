@@ -80,7 +80,7 @@ class HandleOAuthConsumer(AsyncHttpConsumer):
                 'client_id': 'u-s4t2ud-ba5b0c72367af9ad1efbf4d20585f3c315b613ece176ca16919733a7dba999d5',
                 'client_secret': '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',
                 'code': code,
-                'redirect_uri': 'http://10.11.3.2:9000/signup/oauth'
+                'redirect_uri': 'http://10.11.2.1:9000/signup/oauth'
             }
 
             response = requests.post(url, data=params)
@@ -151,9 +151,6 @@ class LoginConsumer(AsyncHttpConsumer):
             username = data.get('username')
             password = data.get('password')
             
-            #print(f"Login attempt: {username}", flush=True)
-            
-            # Validate input
             if not username or not password:
                 response_data = {
                     'success': False,
