@@ -5,8 +5,31 @@ from channels.db import database_sync_to_async
 import json
 import logging
 import requests
+import jwt
+import datetime
 
+SECRET_KEY = 'ultrasafe_secret_key'
 logger = logging.getLogger(__name__)
+
+async def jwt_to_user(token):
+    @database_sync_to_async
+    def get_user(user_id):
+        User = get_user_model()
+        return User.objects.get(id=user_id)
+
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
+        user = await get_user(payload.get('user_id'))
+        if user:
+            return user
+        else:
+            return False
+
+    except jwt.ExpiredSignatureError:
+        return False
+    except jwt.InvalidTokenError:
+        return False
+
 
 
 class SignupConsumer(AsyncHttpConsumer):
@@ -15,7 +38,7 @@ class SignupConsumer(AsyncHttpConsumer):
             data = json.loads(body.decode())
             username = data.get('username')
             password = data.get('password')
-            
+
             # Validate input
             if not username or not password:
                 response_data = {
@@ -36,13 +59,13 @@ class SignupConsumer(AsyncHttpConsumer):
 
             # Create new user
             await self.create_user(username, password)
-            
+
             response_data = {
                 'success': True,
                 'message': 'Signup successful'
             }
-            
-            return await self.send_response(201, 
+
+            return await self.send_response(201,
                 json.dumps(response_data).encode(),
                 headers=[(b"Content-Type", b"application/json")])
 
@@ -111,7 +134,7 @@ class HandleOAuthConsumer(AsyncHttpConsumer):
                     }
                     return await self.send_response(200, json.dumps(response_data).encode(),
                         headers=[(b"Content-Type", b"application/json")])
-                    
+
                 else:
                     await self.create_user_oauth(user_data['login'], access_token)
                     response_data = {
@@ -152,9 +175,9 @@ class LoginConsumer(AsyncHttpConsumer):
             data = json.loads(body.decode())
             username = data.get('username')
             password = data.get('password')
-            
+
             #print(f"Login attempt: {username}", flush=True)
-            
+
             # Validate input
             if not username or not password:
                 response_data = {
@@ -171,7 +194,7 @@ class LoginConsumer(AsyncHttpConsumer):
                 }
                 return await self.send_response(400, json.dumps(response_data).encode(),
                     headers=[(b"Content-Type", b"application/json")])
-            
+
             # Authenticate user
             user = await self.authenticate_user(username, password)
             if not user:
@@ -182,16 +205,23 @@ class LoginConsumer(AsyncHttpConsumer):
                 return await self.send_response(401, json.dumps(response_data).encode(),
                     headers=[(b"Content-Type", b"application/json")])
 
+            # Generate JWT
+            token = jwt.encode({
+                'user_id': user.id,
+                'exp': datetime.datetime.now(datetime.UTC) + datetime.timedelta(hours=1)
+            }, SECRET_KEY, algorithm='HS256')
+
             # Login successful
             response_data = {
                 'success': True,
                 'message': 'Login successful',
+                'token': token,
                 'user': {
                     'username': user.username,
                     'id': user.id
-                }
+                },
             }
-            
+
             return await self.send_response(200, json.dumps(response_data).encode(),
                 headers=[(b"Content-Type", b"application/json")])
 
@@ -217,33 +247,31 @@ class LoginConsumer(AsyncHttpConsumer):
 class ProfileConsumer(AsyncHttpConsumer):
     async def handle(self, body):
         try:
-            data = json.loads(body.decode())
-            username = data.get('username')
-            
-            # Validate input
-            if not username:
+            #print(self.scope, flush=True)
+            headers = dict((key.decode('utf-8'), value.decode('utf-8')) for key, value in self.scope['headers'])
+            #print(headers, flush=True)
+            auth_header = headers.get('authorization', None)
+            if not auth_header:
                 response_data = {
                     'success': False,
-                    'message': 'Username is required'
+                    'message': 'Authorization header missing'
                 }
-                return await self.send_response(400, json.dumps(response_data).encode(),
+                return await self.send_response(401, json.dumps(response_data).encode(),
                     headers=[(b"Content-Type", b"application/json")])
-            
-            # Fetch user and elo
-            user = await self.get_user(username)
+            user = await jwt_to_user(auth_header)
             if not user:
                 response_data = {
                     'success': False,
-                    'message': 'User not found'
+                    'message': 'Invalid token or User not found'
                 }
-                return await self.send_response(404, json.dumps(response_data).encode(),
+                return await self.send_response(401, json.dumps(response_data).encode(),
                     headers=[(b"Content-Type", b"application/json")])
-            
-            tot_games = (user.win + user.loss)
+
+            tot_games = (user.wins + user.looses)
             if tot_games == 0:
                 winrate = 0
             else:
-                winrate = (user.win / tot_games) * 100
+                winrate = (user.wins / tot_games) * 100
 
             response_data = {
                 'success': True,
@@ -263,7 +291,6 @@ class ProfileConsumer(AsyncHttpConsumer):
                 headers=[(b"Content-Type", b"application/json")])
 
     @database_sync_to_async
-    def get_user(self, username):
+    def get_user(self, user_id):
         User = get_user_model()
-        return User.objects.filter(username=username).first()      
-
+        return User.objects.get(id=user_id)

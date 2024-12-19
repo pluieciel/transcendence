@@ -14,10 +14,14 @@ export default class Router {
 
     handleRoute() {
         const path = window.location.pathname;
-        const route = this.routes.find(r => r.path === path) || this.routes.find(r => r.path === '*');
+        let route;
         
-        if (route) {
+        if (window.app.state.isLoggedIn)
+            route = this.routes.find(r => r.path === path);
+        else
+            route = this.routes.find(r => r.path === '*');
+        
+        if (route)
             this.currentComponent = new route.component(document.getElementById('app'), this.appState);
-        }
     }
 }
