@@ -11,7 +11,7 @@ export default class ChatBox {
         this.blocked = [];
         this.onlineusers = [];
         this.waiting_users = [];
-        this.waiting = false;
+        this.waiting = true;
         
         this.render();
         this.initWebSocket();
@@ -110,19 +110,24 @@ export default class ChatBox {
         this.chatSocket.onmessage = (e) => {
             const data = JSON.parse(e.data);
             //console.log(data);
-            if (data.recipient === 'update_online_users') {
-                this.onlineusers = JSON.parse(data.message).filter(user => user !== this.username).sort((a, b) => a.localeCompare(b));
+            if (data.message_type === "system" && data.recipient === 'update_online_users') {
+                const dict = JSON.parse(data.message)
+                //console.log(data);
+                this.onlineusers = dict.online_users.filter(user => user !== this.username).sort((a, b) => a.localeCompare(b));
                 this.onlineusers.unshift(this.username);
+                this.waiting_users = dict.waiting_users;
                 this.updateOnlineUsersList();
-            } else if (data.recipient === 'update_waiting_users') {
+            } else if (data.message_type === "system" && data.recipient === 'update_waiting_users') {
                 this.waiting_users = JSON.parse(data.message);
                 this.updateOnlineUsersList();
-            } else if (data.recipient === 'public') {
+            } else if (data.message_type === "chat" && data.recipient === 'public') {
                 if (!this.blocked.includes(data.sender)) {
 					data.message = this.escapeHtml(data.message);
                     this.publicMessages.push(data);
                     this.updatePublicChat();
                 }
+            } else if (data.message_type === "system_accept") {
+                console.log(data);
             } else {
                 this.handlePrivateMessage(data);
             }
@@ -142,13 +147,13 @@ export default class ChatBox {
                 ${user !== this.username ? `
                     <span class="d-flex align-items-center">
                         ${this.waiting_users.includes(user) ? `
-                            <button class="btn btn-primary square-btn me-1" id="game-${user}">
+                            <button class="btn btn-primary square-btn me-1" data-action="invite" data-user="${user}">
                                 <i class="fa-solid fa-gamepad"></i>
-                <!-- TODO: 
-                        handle game button click to start game
-                -->
                             </button>
                         ` : ''}
+                        <button class="btn btn-primary square-btn me-1" data-action="profile" data-user="${user}">
+                            <i class="fas fa-user"></i>
+                        </button>
                         <button class="btn btn-primary square-btn me-1" data-action="chat" data-user="${user}">
                             <i class="fas fa-comments"></i>
                         </button>
@@ -197,20 +202,25 @@ export default class ChatBox {
 	
     createMessageHTML(msg) {
         return `
-            <div class="chat-message ${msg.sender === this.username ? 'right' : msg.sender !== 'admin' ? 'left' : 'admin'}">
-                <div class="message-content ${msg.sender === 'admin' ? 'admin-message' : ''}">
+            <div class="chat-message ${msg.sender === this.username ? 'right' : msg.message_type === 'chat' ? 'left' : 'admin'}">
+                <div class="message-content ${msg.message_type !== 'chat' ? msg.message_type === 'system' ? 'admin-message' : 'invite-message' : ''}">
                     <div class="message-header">
                         <span class="message-username">${this.capitalizeFirstLetter(msg.sender)}</span>
                         <span class="message-timestamp">${msg.time}</span>
                     </div>
-					<span class="message-text">${msg.message}</span>
+					<span class="message-text" id="invite-message">${msg.message_type === 'system_invite' ? 
+                        '<strong>' + msg.sender + '</strong> ' + msg.message +
+                        `<button class="btn btn-primary square-btn me-1" data-action="accept" data-user="${msg.sender}">
+                                <i class="fa-solid fa-check"></i>
+                            </button>`
+                        : msg.message}</span>
                 </div>
             </div>
         `;
     }
 
     addUserTab(user) {
-        if (!this.users.includes(user) && user !== this.username) {
+        if (!this.users.includes(user) && user !== this.username && user !== "admin" && user !== "public") {
             this.users.push(user);
             this.updateUserTabs();
         }
@@ -262,6 +272,7 @@ export default class ChatBox {
 
             const messageData = {
                 message: message,
+                message_type: "chat",
                 sender: this.username,
                 recipient: this.activeTab === 'public' ? 'public' : this.activeTab.replace('user-', ''),
                 time: new Date().toLocaleTimeString()
@@ -329,11 +340,22 @@ export default class ChatBox {
                     message: "update_waiting_status",
                     sender: this.username,
                     recipient: "admin",
+                    message_type: "system",
                     wait_status: this.waiting,
                     time: new Date().toLocaleTimeString()
                 };
-    
                 this.chatSocket.send(JSON.stringify(messageData));
+            } else if (action === 'invite') {
+                const messageData = {
+                    message: "invite_user",
+                    sender: this.username,
+                    recipient: user,
+                    message_type: "system",
+                    time: new Date().toLocaleTimeString()
+                };
+                this.chatSocket.send(JSON.stringify(messageData));
+            } else if (action === 'profile') {
+                window.app.router.navigateTo(`/profile/${user}`);
             }
         });
 
@@ -350,6 +372,28 @@ export default class ChatBox {
             // Switch to public chat if removed tab was active
             if (this.activeTab === `user-${user}`) {
                 this.container.querySelector('[data-tab="public"]').click();
+            }
+        });
+
+        // accept invite
+        const invitemsg = this.container.querySelector('#privateChats');
+        invitemsg.addEventListener('click', (e) => {
+            const button = e.target.closest('button');
+            if (!button) return;
+
+            const action = button.dataset.action;
+            const user = button.dataset.user;
+
+            if (action === 'accept') {
+                //console.log("accept invite");
+                const messageData = {
+                    message: "accept_invite",
+                    sender: this.username,
+                    recipient: user,
+                    message_type: "system_accept",
+                    time: new Date().toLocaleTimeString()
+                };
+                this.chatSocket.send(JSON.stringify(messageData));
             }
         });
     }

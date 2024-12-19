@@ -46,6 +46,14 @@
     margin: 0;
 }
 
+.chat-message.admin .message-content.invite-message {
+    background: burlywood;
+    text-align: center;
+    color: rgb(10, 10, 10);
+    padding: 8px 12px;
+    border-radius: 8px;
+}
+
 .chat-message.admin .message-header {
     display: none; /* Hide the header for admin messages if needed */
 }
