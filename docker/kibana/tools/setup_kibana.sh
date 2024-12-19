@@ -7,7 +7,7 @@ ELASTIC_PASSWORD=$(cat $ELASTICSEARCH_PASSWORD_FILE)
 for service in "${services[@]}"; do
   curl -s -u "$ELASTIC_USERNAME:$ELASTIC_PASSWORD" \
   	--cacert /etc/nginx/certs/nginx.crt \
-   	-X PUT "$ELASTIC_HOST/_snapshot/$service-repo" \
+   	-X PUT "$ELASTICSEARCH_HOST/_snapshot/$service-repo" \
     -H "Content-Type: application/json" \
     -d "{
       \"type\": \"fs\",
@@ -18,7 +18,7 @@ for service in "${services[@]}"; do
 
   curl -s -u "$ELASTIC_USERNAME:$ELASTIC_PASSWORD" \
   	--cacert /etc/nginx/certs/nginx.crt \
-   	-X PUT "$ELASTIC_HOST/_slm/policy/$service-snapshot-policy" \
+   	-X PUT "$ELASTICSEARCH_HOST/_slm/policy/$service-snapshot-policy" \
     -H "Content-Type: application/json" \
     -d "{
       \"name\": \"<$service-snapshot-{now/d}>\",
@@ -36,7 +36,7 @@ for service in "${services[@]}"; do
 
   curl -s -u "$ELASTIC_USERNAME:$ELASTIC_PASSWORD" \
   	--cacert /etc/nginx/certs/nginx.crt \
-   	-X PUT "$ELASTIC_HOST/_ilm/policy/$service-lifecycle-policy" \
+   	-X PUT "$ELASTICSEARCH_HOST/_ilm/policy/$service-lifecycle-policy" \
     -H "Content-Type: application/json" \
     -d "{
       \"policy\": {
@@ -84,7 +84,7 @@ for service in "${services[@]}"; do
 
   curl -s -u "$ELASTIC_USERNAME:$ELASTIC_PASSWORD" \
   	--cacert /etc/nginx/certs/nginx.crt \
-   	-X PUT "$ELASTIC_HOST/_index_template/$service-template" \
+   	-X PUT "$ELASTICSEARCH_HOST/_index_template/$service-template" \
     -H "Content-Type: application/json" \
     -d "{
       \"version\": 1,
@@ -109,11 +109,13 @@ done
 retries=10
 while [ $retries -gt 0 ]; do
   response=$(curl -s \
+  				--cacert /etc/nginx/certs/nginx.crt \
      			-X GET "$KIBANA_HOST/api/status" | grep -o '"level":"[^"]*"' | awk -F ':"' '{print $2}' | tr -d '"')
 
   if [ "$response" = "available" ]; then
     for service in "${services[@]}"; do
       curl -s -u "$ELASTIC_USERNAME:$ELASTIC_PASSWORD" \
+      	--cacert /etc/nginx/certs/nginx.crt \
        	-X POST "$KIBANA_HOST/api/data_views/data_view" \
         -H "Content-Type: application/json" \
         -H "kbn-xsrf: true" \
@@ -126,6 +128,7 @@ while [ $retries -gt 0 ]; do
     done
 
     curl -s -u "$ELASTIC_USERNAME:$ELASTIC_PASSWORD" \
+    	--cacert /etc/nginx/certs/nginx.crt \
      	-X POST "$KIBANA_HOST/api/saved_objects/_import?createNewCopies=true" \
       	-H "kbn-xsrf: true" --form file=@./config/export.ndjson
     exit 0
