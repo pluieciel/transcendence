@@ -52,7 +52,7 @@ export default class MainView {
 		</div>
 		<div class="profile">
 			<h2>Profile</h2>
-			<h3 id="p-name">${this.username}</h3>
+			<h3 id="p-name">Loading...</h3>
 			<h3 id="p-elo">Loading...</h3>
 			<h3 id="p-winrate">Loading...</h3>
 			<h3 id="p-tourn">Loading...</h3>
@@ -106,9 +106,22 @@ export default class MainView {
     }
 
 	async setProfileFields() {
+		var	name_div = document.getElementById("p-name");
 		var elo_div = document.getElementById("p-elo");
 		var winrate_div = document.getElementById("p-winrate");
 		var tourn_div = document.getElementById("p-tourn");
+
+		if (this.username.slice(-2) === "42") {
+			const img = document.createElement('img');
+			img.src = '../../../imgs/42.png';
+			img.alt = '42';
+			img.style.width = '20px';
+			img.style.marginLeft = '5px';
+			name_div.innerHTML = this.username.substring(0, this.username.length - 2);
+			name_div.appendChild(img);
+		} else {
+			name_div.innerHTML = this.username;
+		}
 		try {
             const response = await fetch('/api/get/profile', {
                 method: 'POST',

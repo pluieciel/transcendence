@@ -103,7 +103,7 @@ class HandleOAuthConsumer(AsyncHttpConsumer):
                 'client_id': 'u-s4t2ud-ba5b0c72367af9ad1efbf4d20585f3c315b613ece176ca16919733a7dba999d5',
                 'client_secret': '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',
                 'code': code,
-                'redirect_uri': 'http://10.11.2.1:9000/signup/oauth'
+                'redirect_uri': 'https://10.11.2.1:9000/signup/oauth'
             }
 
             response = requests.post(url, data=params)
@@ -125,21 +125,27 @@ class HandleOAuthConsumer(AsyncHttpConsumer):
 
             if user_response.status_code == 200:
                 user_data = user_response.json()
-                if await self.get_user_exists(user_data['login']):
+                if await self.get_user_exists(user_data['login'] + "42"):
                     response_data = {
                         'success': True,
-						'status': 200,
+                        'status': 200,
                         'message': 'Login successful',
-						'username': user_data['login']
+                        'username': user_data['login'] + "42"
                     }
                 else:
-                    await self.create_user_oauth(user_data['login'], access_token)
+                    await self.create_user_oauth(user_data['login'] + "42")
                     response_data = {
                         'success': True,
-						'status': 201,
+                        'status': 201,
                         'message': 'Signup && Login successful',
-						'username': user_data['login']
+                        'username': user_data['login'] + "42"
                     }
+                user = await self.get_user(user_data['login'] + "42")
+                token = jwt.encode({
+                    'user_id': user.id,
+                    'exp': datetime.datetime.now(datetime.UTC) + datetime.timedelta(hours=1)
+                }, SECRET_KEY, algorithm='HS256')
+                response_data['token'] = token
                 return await self.send_response(response_data['status'], json.dumps(response_data).encode(),
                     headers=[(b"Content-Type", b"application/json")])
             else:
@@ -158,14 +164,18 @@ class HandleOAuthConsumer(AsyncHttpConsumer):
             return await self.send_response(500, json.dumps(response_data).encode(),
                 headers=[(b"Content-Type", b"application/json")])
     @database_sync_to_async
-    def create_user_oauth(self, username, token):
+    def create_user_oauth(self, username):
         User = get_user_model()
-        user = User.objects.create_user_oauth(username=username, token=token)
+        user = User.objects.create_user_oauth(username=username)
         return user
     @database_sync_to_async
     def get_user_exists(self, username):
         User = get_user_model()
         return User.objects.filter(username=username).exists()
+    @database_sync_to_async
+    def get_user(self, username):
+        User = get_user_model()
+        return User.objects.filter(username=username).first()
 
 class LoginConsumer(AsyncHttpConsumer):
     async def handle(self, body):

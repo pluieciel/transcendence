@@ -7,11 +7,6 @@ import Router from './router.js';
 
 class App {
     constructor() {
-		this.state = {
-			isLoggedIn: sessionStorage.getItem('isLoggedIn') === 'true',
-			username: sessionStorage.getItem('username') || '',
-		};
-		
 		this.routes = [
 			{ path: '/', component: LoginView },
             { path: '/index', component: MainView },
@@ -40,6 +35,16 @@ class App {
         sessionStorage.setItem('token', this.state.token);
         this.router.navigateTo('/index');
     }
+
+	login42(username, token) {
+		this.state.isLoggedIn = true;
+        this.state.username = username;
+        this.state.token = token;
+        sessionStorage.setItem('isLoggedIn', 'true');
+        sessionStorage.setItem('username', this.state.username);
+        sessionStorage.setItem('token', this.state.token);
+        this.router.navigateTo('/index');
+	}
 
     logout() {
         this.state.isLoggedIn = false;
