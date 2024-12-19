@@ -58,7 +58,6 @@ export default class MainView {
 			<h3 id="p-tourn">Loading...</h3>
 		</div>
 	</div>
-		<!-- ChatBox container -->
 		<div id="chatBoxContainer"></div>
 	</div>
         `;

@@ -2,6 +2,7 @@ import LoginView from './components/LoginView.js';
 import MainView from './components/pages/MainView.js';
 import SettingsView from './components/pages/SettingsView.js';
 import SignUpAuthView from './components/login/SignUpOAuth.js';
+import ProfileView from './components/pages/ProfileView.js';
 import GameView from './components/GameView.js';
 import Router from './router.js';
 
@@ -13,6 +14,7 @@ class App {
             { path: '/game', component: GameView },
             { path: '/settings', component: SettingsView },
             { path: '/signup/oauth', component: SignUpAuthView },
+            { path: '/profile', component: ProfileView },
 			{ path: '*', component: LoginView },
 		]
         this.state = {
@@ -25,7 +27,7 @@ class App {
         this.router = new Router(this.routes, this.state);
 
     }
-    
+
     login(data) {
         this.state.isLoggedIn = true;
         this.state.username = data.user.username;
