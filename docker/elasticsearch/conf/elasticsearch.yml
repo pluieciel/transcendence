@@ -4,5 +4,3 @@ path.repo: "/usr/share/elasticsearch/snapshots"
 path.logs: "/var/log/elasticsearch"
 discovery.type: single-node
 xpack.security.enabled: true
-http.cors.enabled: true
-http.cors.allow-origin: "${KIBANA_HOST}"

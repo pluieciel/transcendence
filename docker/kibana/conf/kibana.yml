@@ -4,10 +4,8 @@ logging.appenders.default:
     layout:
         type: pattern
 server.host: "0.0.0.0"
-elasticsearch.hosts: ["${ELASTICSEARCH_HOST}"]
+elasticsearch.hosts: ["${ELASTIC_HOST}"]
 elasticsearch.username: "${ELASTICSEARCH_USERNAME}"
 elasticsearch.password: "${ELASTICSEARCH_PASSWORD}"
-elasticsearch.ssl.certificateAuthorities: ["/etc/nginx/certs/nginx.crt"]
-elasticsearch.ssl.verificationMode: certificate
 xpack.reporting.roles.enabled: false
-server.basePath: /kibana
+server.basePath: "/kibana"
