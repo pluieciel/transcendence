@@ -44,6 +44,16 @@ class GameBackend:
 			return True
 		return False
 
+	async def disconnect_user(self, user):
+		old_channel = None
+		if (self.player_left and self.player_left.user.id == user.id):
+			old_channel = self.player_left.channel
+			self.player_left = None
+		elif (self.player_right and self.player_right.user.id == user.id):
+			old_channel = self.player_right.channel
+			self.player_right = None
+		return old_channel
+
 
 	def assign_player(self, user, channel):
 		if not self.player_left:

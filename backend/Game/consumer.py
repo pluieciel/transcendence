@@ -19,16 +19,13 @@ class GameManager:
 
 	def get_game(self, user):
 		self.logger.info(f"Getting game for user {user.username}")
-		game = self.get_player_current_game(user)
-		if (game is None):
-			game = self.check_available_game()
+		game = self.check_available_game()
 		if (game is None):
 			game = self.create_game()
 		return (game)
 
 	def get_player_current_game(self, user):
 		if (user.is_playing and self.games and self.games[user.current_game_id]):
-			self.logger.info("User found in a game")
 			return (self.games[user.current_game_id])
 		return None
 
@@ -79,23 +76,35 @@ class GameConsumer(AsyncWebsocketConsumer):
 
 		if not user:
 			await self.send(text_data=json.dumps({
-				"type": "error",
+				"type": "handle_error",
 				"message": "User not found or invalid token."
 			}))
 			return
 
 		self.logger.info("Searching for a game for " + user.username)
-		self.game = game_manager.get_game(user)
+		self.game = game_manager.get_player_current_game(user)
+		if (self.game):
+			self.logger.info("User found in a game, disconnecting the old session")
+			channel_name = await self.game.disconnect_user(user)
+			await self.channel_layer.send(channel_name, {
+					"type": "handle_error",
+					"message": "You have been disconnected. A new connection was made from another device."
+			})
+			await self.channel_layer.group_discard(str(self.game.game_id), channel_name)
+		else:
+			self.game = game_manager.get_game(user)
 		self.game.assign_player(user, self.channel_name)
+		user.is_playing = True
+		user.current_game_id = self.game.game_id
+		await self.save_user(user)
 		await self.accept()
+		await self.channel_layer.group_add(str(self.game.game_id), self.channel_name)
 
 		if (self.game.is_full()):
 			self.logger.info(f"Game {self.game.game_id} is full and ready to start with {self.game.player_left.user.username} and {self.game.player_right.user.username}")
 
-
-
-
 	async def receive(self, text_data):
+		logging.getLogger('game').info(f"*text_data")
 		try:
 			data = json.loads(text_data)
 			print(f"Received message: {data}")
@@ -114,10 +123,21 @@ class GameConsumer(AsyncWebsocketConsumer):
 						"type": data["type"]
 					}
 				}))
+
+			elif data["type"] == "error":
+				print(f"Error message received: {data['message']}")
+				await self.send(json.dumps({
+					"type": "error_acknowledged",
+					"message": data["message"]
+				}))
+
 		except json.JSONDecodeError:
 			print("Error decoding JSON message")
 		except Exception as e:
 			print(f"Error handling message: {e}")
+
+	async def handle_error(self, event):
+		self.logger.info(f"Errorr received  {event}")
 
 
 	async def disconnect(self, close_code):
