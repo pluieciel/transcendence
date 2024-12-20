@@ -1,7 +1,6 @@
 export default class Router {
-    constructor(routes, appState) {
+    constructor(routes) {
         this.routes = routes;
-        this.appState = appState;
         this.currentComponent = null;
         window.addEventListener('popstate', () => this.handleRoute());
         this.handleRoute();
@@ -22,6 +21,6 @@ export default class Router {
             route = this.routes.find(r => r.path === '*');
         
         if (route)
-            this.currentComponent = new route.component(document.getElementById('app'), this.appState);
+            this.currentComponent = new route.component(document.getElementById('app'), window.app.state);
     }
 }

@@ -1,7 +1,9 @@
 export default class ChatBox {
-    constructor(container, username) {
+    constructor(container, token) {
+        const decodedPayload = jwt_decode(token);
+        //console.log(decodedPayload);
         this.container = container;
-        this.username = username;
+        this.username = decodedPayload.username;
         this.chatSocket = null;
         this.publicMessages = [];
         this.privateMessages = {};
@@ -12,6 +14,7 @@ export default class ChatBox {
         this.onlineusers = [];
         this.waiting_users = [];
         this.waiting = true;
+        this.focususer = undefined;
         
         this.render();
         this.initWebSocket();
@@ -87,6 +90,25 @@ export default class ChatBox {
                     </div>
                 </div>
             </div>
+
+            <!-- Modal for invitation -->
+            <div class="modal fade" id="sendInvitation" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="staticBackdropLabel">Send Invitation</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            ...
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary" data-bs-dismiss="modal" id="sendInvitationButton">Send</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         `;
 
         // Initialize Bootstrap offcanvas
@@ -119,6 +141,7 @@ export default class ChatBox {
                 this.updateOnlineUsersList();
             } else if (data.message_type === "system" && data.recipient === 'update_waiting_users') {
                 this.waiting_users = JSON.parse(data.message);
+                console.log(this.waiting_users);
                 this.updateOnlineUsersList();
             } else if (data.recipient === 'public') {
                 if (!this.blocked.includes(data.sender)) {
@@ -147,7 +170,8 @@ export default class ChatBox {
                 ${user !== this.username ? `
                     <span class="d-flex align-items-center">
                         ${this.waiting_users.includes(user) ? `
-                            <button class="btn btn-primary square-btn me-1" data-action="invite" data-user="${user}">
+                            <button class="btn btn-primary square-btn me-1" data-action="invite" data-user="${user}"
+                                data-bs-toggle="modal" data-bs-target="#sendInvitation">
                                 <i class="fa-solid fa-gamepad"></i>
                             </button>
                         ` : ''}
@@ -166,13 +190,16 @@ export default class ChatBox {
                 ` : `
                     <span class="d-flex align-items-center">
                         <button class="btn btn-primary square-btn me-1 ${this.waiting? '' : 'square-btn-red'}"
-                        data-action="waiting">
+                            data-action="waiting"
+                            data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Do not disturb">
                             <i class="fa-solid fa-gamepad"></i>
                         </button>
                     </span>
                 `}
             </div>
         `).join('');
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+        const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
     }
 
     updatePublicChat() {
@@ -209,8 +236,8 @@ export default class ChatBox {
                         <span class="message-timestamp">${msg.time}</span>
                     </div>
 					<span class="message-text" id="invite-message">${msg.message_type === 'system_invite' ? 
-                        '<strong>' + msg.sender + '</strong> ' + msg.message +
-                        `<button class="btn btn-primary square-btn me-1" data-action="accept" data-user="${msg.sender}">
+                        '<strong>' + msg.sender + '</strong> ' + msg.message + " in mode: " + msg.game_mode +
+                        `<button class="btn btn-primary square-btn me-1" data-action="accept" data-user="${msg.sender}" data-mode="${msg.game_mode}">
                                 <i class="fa-solid fa-check"></i>
                             </button>`
                         : msg.message}</span>
@@ -335,7 +362,11 @@ export default class ChatBox {
                 this.toggleBlockUser(user);
             } else if (action === 'waiting') {
                 this.waiting = !this.waiting;
+                let tooltip = bootstrap.Tooltip.getInstance(button);
+                if (tooltip) tooltip.hide();
                 this.updateOnlineUsersList();
+                tooltip = bootstrap.Tooltip.getInstance(button);
+                if (tooltip) tooltip.hide();
                 const messageData = {
                     message: "update_waiting_status",
                     sender: this.username,
@@ -346,14 +377,22 @@ export default class ChatBox {
                 };
                 this.chatSocket.send(JSON.stringify(messageData));
             } else if (action === 'invite') {
-                const messageData = {
-                    message: "invite_user",
-                    sender: this.username,
-                    recipient: user,
-                    message_type: "system",
-                    time: new Date().toLocaleTimeString()
-                };
-                this.chatSocket.send(JSON.stringify(messageData));
+                this.focususer = user;
+                const modalBody = document.querySelector('#sendInvitation .modal-body');
+                modalBody.innerHTML = `<p>Invite <strong>${user}</strong> to game, choose game mode:</p>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1" value="Vanilla" checked>
+                        <label class="form-check-label" for="flexRadioDefault1">
+                            Vanilla
+                        </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2" value="Rumble">
+                        <label class="form-check-label" for="flexRadioDefault2">
+                            Rumble
+                        </label>
+                </div>
+`;
             } else if (action === 'profile') {
                 window.app.router.navigateTo(`/profile/${user}`);
             }
@@ -375,6 +414,29 @@ export default class ChatBox {
             }
         });
 
+        // send invite
+        const sendbutton = this.container.querySelector('#sendInvitationButton');
+        sendbutton.addEventListener('click', (e) => {
+            const button = e.target.closest('button');
+            if (!button) return;
+
+            const radios = document.querySelectorAll('input[name="flexRadioDefault"]');
+            let selectedValue;
+            radios.forEach((radio) => {
+                if (radio.checked)
+                    selectedValue = radio.value; // Get the value of the checked radio
+            });
+            const messageData = {
+                    message: "invite_user",
+                    sender: this.username,
+                    recipient: this.focususer,
+                    message_type: "system",
+                    game_mode: selectedValue,
+                    time: new Date().toLocaleTimeString()
+                };
+                this.chatSocket.send(JSON.stringify(messageData));
+        });
+
         // accept invite
         const invitemsg = this.container.querySelector('#privateChats');
         invitemsg.addEventListener('click', (e) => {
@@ -383,6 +445,7 @@ export default class ChatBox {
 
             const action = button.dataset.action;
             const user = button.dataset.user;
+            const mode = button.dataset.mode;
 
             if (action === 'accept') {
                 //console.log("accept invite");
@@ -390,6 +453,7 @@ export default class ChatBox {
                     message: "accept_invite",
                     sender: this.username,
                     recipient: user,
+                    game_mode: mode,
                     message_type: "system_accept",
                     time: new Date().toLocaleTimeString()
                 };

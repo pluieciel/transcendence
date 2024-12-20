@@ -110,6 +110,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         time = text_data_json.get("time", None)
         wait_status = text_data_json.get("wait_status", None)
         message_type = text_data_json.get("message_type", None)
+        game_mode = text_data_json.get("game_mode", None)
         channel_layer = get_channel_layer()
         if recipient == "public":
             for group in [key for key in channel_layer.groups.keys() if key.startswith("user_")]:
@@ -124,7 +125,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     }
                 )
         elif message_type == "system" and message == "update_waiting_status":
-            if wait_status:
+            if wait_status == "true":
                 ChatConsumer.waiting_users.add(sender)
             else:
                 ChatConsumer.waiting_users.remove(sender)
@@ -168,6 +169,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     "message_type": "system_invite",
                     "sender": sender,
                     "recipient": recipient,
+                    "game_mode": game_mode,
                     "time": time
                 }
             )
@@ -181,6 +183,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     "message": "accepted your invite",
                     "message_type": "system_accept",
                     "sender": sender,
+                    "game_mode": game_mode,
                     "recipient": recipient,
                     "time": time
                 }
@@ -192,11 +195,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
         recipient = event["recipient"]
         time = event["time"]
         message_type = event["message_type"]
+        game_mode = event.get("game_mode", None)
         # 发送消息到 WebSocket
         await self.send(text_data=json.dumps({
             "message": message,
             "message_type": message_type,
             "sender": sender,
             "recipient": recipient,
+            "game_mode": game_mode,
             "time": time
         }))

@@ -7,6 +7,7 @@ export default class LoginView {
         this.render();
         this.addEventListeners();
         this.showLogin();
+        this.createDefaultUsers();
     }
 
     render() {
@@ -45,6 +46,30 @@ export default class LoginView {
                     this.showSignup();
                 }
             });
+        });
+    }
+
+    async createDefaultUsers() {
+        const hashedPassword = CryptoJS.SHA256("1").toString();
+        const response1 = await fetch('/api/signup/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                username: "t1",
+                password: hashedPassword
+            })
+        });
+        const response2 = await fetch('/api/signup/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                username: "t2",
+                password: hashedPassword
+            })
         });
     }
 }

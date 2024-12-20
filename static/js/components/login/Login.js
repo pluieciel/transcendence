@@ -74,7 +74,7 @@ export default class Login {
                 }
             } catch (error) {
                 // Handles any errors during the async operation
-                errorDiv.textContent = 'An error occurred';
+                errorDiv.textContent = 'An error occurred:' + error;
                 errorDiv.classList.remove('d-none');
             }
         });

@@ -1,0 +1,6 @@
+change Chat with JWT
+use same chat instance
+use bootstrap modal, toast, tooltip
+save online/login info in DB
+add game_mode in invitation
+add invitation status in backend
