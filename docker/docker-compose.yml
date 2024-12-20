@@ -57,135 +57,137 @@ services:
             - 9000:9000
         volumes:
             - nginx_data:/var/www/html
+            - nginx_logs:/var/log/nginx
+            - nginx_certs:/etc/nginx/certs
             - django_static_data:/var/www/django/static
         networks:
             - transcendence
         restart: unless-stopped
-    elasticsearch:
-        build: ${PWD}/docker/elasticsearch
-        image: elasticsearch
-        container_name: elasticsearch
-        environment:
-            ELASTICSEARCH_PASSWORD_FILE: /run/secrets/elasticsearch-passwd
-            KIBANA_PASSWORD_FILE: /run/secrets/kibana-passwd
-        env_file: .env
-        secrets:
-            - elasticsearch-passwd
-            - kibana-passwd
-        volumes:
-            - elasticsearch_data:/usr/share/elasticsearch
-            - elasticsearch_logs:/var/log/elasticsearch
-        expose:
-            - 9200
-            - 9300
-        networks:
-            - transcendence
-        restart: unless-stopped
-        healthcheck:
-            test: ["CMD-SHELL", "/usr/local/bin/healthcheck.sh"]
-            interval: 10s
-            timeout: 10s
-            retries: 10
-    logstash:
-        build: ${PWD}/docker/logstash
-        image: logstash
-        container_name: logstash
-        depends_on:
-            elasticsearch:
-                condition: service_healthy
-        environment:
-            ELASTICSEARCH_PASSWORD_FILE: /run/secrets/elasticsearch-passwd
-        env_file: .env
-        secrets:
-            - elasticsearch-passwd
-        volumes:
-            - postgres_logs:/var/log/postgres:ro
-            - django_logs:/var/log/django:ro
-            - nginx_logs:/var/log/nginx:ro
-            - kibana_logs:/var/log/kibana:ro
-            - elasticsearch_logs:/var/log/elasticsearch:ro
-        expose:
-            - 5044
-            - 9600
-        networks:
-            - transcendence
-        restart: unless-stopped
-    kibana:
-        build: ${PWD}/docker/kibana
-        image: kibana
-        container_name: kibana
-        depends_on:
-            elasticsearch:
-                condition: service_healthy
-        environment:
-            ELASTICSEARCH_PASSWORD_FILE: /run/secrets/elasticsearch-passwd
-            KIBANA_PASSWORD_FILE: /run/secrets/kibana-passwd
-        env_file: .env
-        secrets:
-            - elasticsearch-passwd
-            - kibana-passwd
-        volumes:
-            - kibana_logs:/var/log/kibana
-        expose:
-            - 5601
-        ports:
-            - 5601:5601
-        networks:
-            - transcendence
-        restart: unless-stopped
-    cadvisor:
-        build: ${PWD}/docker/cadvisor
-        image: cadvisor
-        container_name: cadvisor
-        volumes:
-            - /:/rootfs:ro
-            - /var/run:/var/run:ro
-            - /sys:/sys:ro
-            - /var/lib/docker/:/var/lib/docker:ro
-        expose:
-            - 8080
-        networks:
-            - transcendence
-        restart: unless-stopped
-    prometheus:
-        build: ${PWD}/docker/prometheus
-        image: prometheus
-        container_name: prometheus
-        depends_on:
-            cadvisor:
-                condition: service_started
-        environment:
-            PROMETHEUS_PASSWORD_FILE: /run/secrets/prometheus-passwd
-        env_file: .env
-        secrets:
-            - prometheus-passwd
-        volumes:
-            - prometheus_data:/etc/prometheus/data
-        expose:
-            - 9090
-        networks:
-            - transcendence
-        restart: unless-stopped
-    grafana:
-        build: ${PWD}/docker/grafana
-        image: grafana
-        container_name: grafana
-        depends_on:
-            prometheus:
-                condition: service_started
-        environment:
-            GF_SECURITY_ADMIN_PASSWORD__FILE: /run/secrets/grafana-passwd
-        env_file: .env
-        secrets:
-            - grafana-passwd
-        volumes:
-            - grafana_data:/var/lib/grafana
-        expose:
-            - 3000
-        networks:
-            - transcendence
-        restart: unless-stopped
-
+#    elasticsearch:
+#        build: ${PWD}/docker/elasticsearch
+#        image: elasticsearch
+#        container_name: elasticsearch
+#        environment:
+#            ELASTICSEARCH_PASSWORD_FILE: /run/secrets/elasticsearch-passwd
+#            KIBANA_PASSWORD_FILE: /run/secrets/kibana-passwd
+#        env_file: .env
+#        secrets:
+#            - elasticsearch-passwd
+#            - kibana-passwd
+#        volumes:
+#            - elasticsearch_data:/usr/share/elasticsearch
+#            - elasticsearch_logs:/var/log/elasticsearch
+#        expose:
+#            - 9200
+#            - 9300
+#        networks:
+#            - transcendence
+#        restart: unless-stopped
+#        healthcheck:
+#            test: ["CMD-SHELL", "/usr/local/bin/healthcheck.sh"]
+#            interval: 10s
+#            timeout: 10s
+#            retries: 10
+#    logstash:
+#        build: ${PWD}/docker/logstash
+#        image: logstash
+#        container_name: logstash
+#        depends_on:
+#            elasticsearch:
+#                condition: service_healthy
+#        environment:
+#            ELASTICSEARCH_PASSWORD_FILE: /run/secrets/elasticsearch-passwd
+#        env_file: .env
+#        secrets:
+#            - elasticsearch-passwd
+#        volumes:
+#            - postgres_logs:/var/log/postgres:ro
+#            - django_logs:/var/log/django:ro
+#            - nginx_logs:/var/log/nginx:ro
+#            - kibana_logs:/var/log/kibana:ro
+#            - elasticsearch_logs:/var/log/elasticsearch:ro
+#        expose:
+#            - 5044
+#            - 9600
+#        networks:
+#            - transcendence
+#        restart: unless-stopped
+#    kibana:
+#        build: ${PWD}/docker/kibana
+#        image: kibana
+#        container_name: kibana
+#        depends_on:
+#            elasticsearch:
+#                condition: service_healthy
+#        environment:
+#            ELASTICSEARCH_PASSWORD_FILE: /run/secrets/elasticsearch-passwd
+#            KIBANA_PASSWORD_FILE: /run/secrets/kibana-passwd
+#        env_file: .env
+#        secrets:
+#            - elasticsearch-passwd
+#            - kibana-passwd
+#        volumes:
+#            - kibana_logs:/var/log/kibana
+#        expose:
+#            - 5601
+#        ports:
+#            - 5601:5601
+#        networks:
+#            - transcendence
+#        restart: unless-stopped
+#    cadvisor:
+#        build: ${PWD}/docker/cadvisor
+#        image: cadvisor
+#        container_name: cadvisor
+#        volumes:
+#            - /:/rootfs:ro
+#            - /var/run:/var/run:ro
+#            - /sys:/sys:ro
+#            - /var/lib/docker/:/var/lib/docker:ro
+#        expose:
+#            - 8080
+#        networks:
+#            - transcendence
+#        restart: unless-stopped
+#    prometheus:
+#        build: ${PWD}/docker/prometheus
+#        image: prometheus
+#        container_name: prometheus
+#        depends_on:
+#            cadvisor:
+#                condition: service_started
+#        environment:
+#            PROMETHEUS_PASSWORD_FILE: /run/secrets/prometheus-passwd
+#        env_file: .env
+#        secrets:
+#            - prometheus-passwd
+#        volumes:
+#            - prometheus_data:/etc/prometheus/data
+#        expose:
+#            - 9090
+#        networks:
+#            - transcendence
+#        restart: unless-stopped
+#    grafana:
+#        build: ${PWD}/docker/grafana
+#        image: grafana
+#        container_name: grafana
+#        depends_on:
+#            prometheus:
+#                condition: service_started
+#        environment:
+#            GF_SECURITY_ADMIN_PASSWORD__FILE: /run/secrets/grafana-passwd
+#        env_file: .env
+#        secrets:
+#            - grafana-passwd
+#        volumes:
+#            - grafana_data:/var/lib/grafana
+#        expose:
+#            - 3000
+#        networks:
+#            - transcendence
+#        restart: unless-stopped
+#
 networks:
     transcendence:
         name: transcendence
@@ -217,6 +219,8 @@ volumes:
         name: postgres_logs
     nginx_logs:
         name: nginx_logs
+    nginx_certs:
+        name: nginx_certs
     elasticsearch_data:
         name: elasticsearch_data
     elasticsearch_logs:

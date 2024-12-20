@@ -14,6 +14,6 @@ fi
 exec /bin/prometheus \
     --web.config.file=/etc/prometheus/config/web-config.yml \
     --config.file=/etc/prometheus/config/prometheus.yml \
-    --web.external-url=/prometheus/ \
-    --web.route-prefix=/prometheus/ \
+    --web.external-url=/admin/prometheus/ \
+    --web.route-prefix=/admin/prometheus/ \
     --storage.tsdb.path=/etc/prometheus/data
