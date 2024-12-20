@@ -1,7 +1,9 @@
 export default class ChatBox {
-    constructor(container, username) {
+    constructor(container, token) {
+        const decodedPayload = jwt_decode(token);
+        //console.log(decodedPayload);
         this.container = container;
-        this.username = username;
+        this.username = decodedPayload.username;
         this.chatSocket = null;
         this.publicMessages = [];
         this.privateMessages = {};
@@ -10,6 +12,9 @@ export default class ChatBox {
         this.users = [];
         this.blocked = [];
         this.onlineusers = [];
+        this.waiting_users = [];
+        this.waiting = true;
+        this.focususer = undefined;
         
         this.render();
         this.initWebSocket();
@@ -23,7 +28,7 @@ export default class ChatBox {
                     type="button" 
                     data-bs-toggle="offcanvas" 
                     data-bs-target="#offcanvas">
-                <span class="fw-bold px-3">Chat</span>
+                <i class="fas fa-comment"></i>
             </button>
             
             <!-- Chat box -->
@@ -85,6 +90,25 @@ export default class ChatBox {
                     </div>
                 </div>
             </div>
+
+            <!-- Modal for invitation -->
+            <div class="modal fade" id="sendInvitation" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="staticBackdropLabel">Send Invitation</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            ...
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary" data-bs-dismiss="modal" id="sendInvitationButton">Send</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         `;
 
         // Initialize Bootstrap offcanvas
@@ -108,8 +132,15 @@ export default class ChatBox {
         this.chatSocket.onmessage = (e) => {
             const data = JSON.parse(e.data);
             //console.log(data);
-            if (data.recipient === 'update_online_users') {
-                this.onlineusers = JSON.parse(data.message).sort((a, b) => a.localeCompare(b));
+            if (data.message_type === "system" && data.recipient === 'update_online_users') {
+                const dict = JSON.parse(data.message)
+                //console.log(data);
+                this.onlineusers = dict.online_users.filter(user => user !== this.username).sort((a, b) => a.localeCompare(b));
+                this.onlineusers.unshift(this.username);
+                this.waiting_users = dict.waiting_users;
+                this.updateOnlineUsersList();
+            } else if (data.message_type === "system" && data.recipient === 'update_waiting_users') {
+                this.waiting_users = JSON.parse(data.message);
                 this.updateOnlineUsersList();
             } else if (data.recipient === 'public') {
                 if (!this.blocked.includes(data.sender)) {
@@ -117,6 +148,8 @@ export default class ChatBox {
                     this.publicMessages.push(data);
                     this.updatePublicChat();
                 }
+            } else if (data.message_type === "system_accept") {
+                console.log(data);
             } else {
                 this.handlePrivateMessage(data);
             }
@@ -135,6 +168,15 @@ export default class ChatBox {
                 </span>
                 ${user !== this.username ? `
                     <span class="d-flex align-items-center">
+                        ${this.waiting_users.includes(user) ? `
+                            <button class="btn btn-primary square-btn me-1" data-action="invite" data-user="${user}"
+                                data-bs-toggle="modal" data-bs-target="#sendInvitation">
+                                <i class="fa-solid fa-gamepad"></i>
+                            </button>
+                        ` : ''}
+                        <button class="btn btn-primary square-btn me-1" data-action="profile" data-user="${user}">
+                            <i class="fas fa-user"></i>
+                        </button>
                         <button class="btn btn-primary square-btn me-1" data-action="chat" data-user="${user}">
                             <i class="fas fa-comments"></i>
                         </button>
@@ -144,9 +186,24 @@ export default class ChatBox {
                             <i class="fas fa-ban"></i>
                         </button>
                     </span>
-                ` : ''}
+                ` : `
+                    <span class="d-flex align-items-center">
+                        <button id="Donotdisturb" class="btn btn-primary square-btn me-1 ${this.waiting? '' : 'square-btn-red'}"
+                            data-action="waiting"
+                            data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Do not disturb">
+                            <i class="fa-solid fa-gamepad"></i>
+                        </button>
+                    </span>
+                `}
             </div>
         `).join('');
+
+        const donotdisbutton = this.container.querySelector('#Donotdisturb');
+        const tooltip = bootstrap.Tooltip.getInstance(donotdisbutton);
+        if (tooltip) tooltip.dispose();
+        setTimeout(() => {
+            new bootstrap.Tooltip(donotdisbutton); // Initialize the tooltip
+        }, 200);
     }
 
     updatePublicChat() {
@@ -176,20 +233,25 @@ export default class ChatBox {
 	
     createMessageHTML(msg) {
         return `
-            <div class="chat-message ${msg.sender === this.username ? 'right' : msg.sender !== 'admin' ? 'left' : 'admin'}">
-                <div class="message-content ${msg.sender === 'admin' ? 'admin-message' : ''}">
+            <div class="chat-message ${msg.sender === this.username ? 'right' : msg.message_type === 'chat' ? 'left' : 'admin'}">
+                <div class="message-content ${msg.message_type !== 'chat' ? msg.message_type === 'system' ? 'admin-message' : 'invite-message' : ''}">
                     <div class="message-header">
                         <span class="message-username">${this.capitalizeFirstLetter(msg.sender)}</span>
                         <span class="message-timestamp">${msg.time}</span>
                     </div>
-					<span class="message-text">${msg.message}</span>
+					<span class="message-text" id="invite-message">${msg.message_type === 'system_invite' ? 
+                        '<strong>' + msg.sender + '</strong> ' + msg.message + " in mode: " + msg.game_mode +
+                        `<button class="btn btn-primary square-btn me-1" data-action="accept" data-user="${msg.sender}" data-mode="${msg.game_mode}">
+                                <i class="fa-solid fa-check"></i>
+                            </button>`
+                        : msg.message}</span>
                 </div>
             </div>
         `;
     }
 
     addUserTab(user) {
-        if (!this.users.includes(user) && user !== this.username) {
+        if (!this.users.includes(user) && user !== this.username && user !== "admin" && user !== "public") {
             this.users.push(user);
             this.updateUserTabs();
         }
@@ -241,6 +303,7 @@ export default class ChatBox {
 
             const messageData = {
                 message: message,
+                message_type: "chat",
                 sender: this.username,
                 recipient: this.activeTab === 'public' ? 'public' : this.activeTab.replace('user-', ''),
                 time: new Date().toLocaleTimeString()
@@ -301,6 +364,39 @@ export default class ChatBox {
                 if (userTab) userTab.click();
             } else if (action === 'block') {
                 this.toggleBlockUser(user);
+            } else if (action === 'waiting') {
+                const tooltip = bootstrap.Tooltip.getInstance(button);
+                if (tooltip) tooltip.dispose();
+                this.waiting = !this.waiting;
+                this.updateOnlineUsersList();
+                const messageData = {
+                    message: "update_waiting_status",
+                    sender: this.username,
+                    recipient: "admin",
+                    message_type: "system",
+                    wait_status: this.waiting,
+                    time: new Date().toLocaleTimeString()
+                };
+                this.chatSocket.send(JSON.stringify(messageData));
+            } else if (action === 'invite') {
+                this.focususer = user;
+                const modalBody = document.querySelector('#sendInvitation .modal-body');
+                modalBody.innerHTML = `<p>Invite <strong>${user}</strong> to game, choose game mode:</p>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1" value="Vanilla" checked>
+                        <label class="form-check-label" for="flexRadioDefault1">
+                            Vanilla
+                        </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2" value="Rumble">
+                        <label class="form-check-label" for="flexRadioDefault2">
+                            Rumble
+                        </label>
+                </div>
+            `;
+            } else if (action === 'profile') {
+                window.app.router.navigateTo(`/profile/${user}`);
             }
         });
 
@@ -317,6 +413,53 @@ export default class ChatBox {
             // Switch to public chat if removed tab was active
             if (this.activeTab === `user-${user}`) {
                 this.container.querySelector('[data-tab="public"]').click();
+            }
+        });
+
+        // send invite
+        const sendbutton = this.container.querySelector('#sendInvitationButton');
+        sendbutton.addEventListener('click', (e) => {
+            const button = e.target.closest('button');
+            if (!button) return;
+
+            const radios = document.querySelectorAll('input[name="flexRadioDefault"]');
+            let selectedValue;
+            radios.forEach((radio) => {
+                if (radio.checked)
+                    selectedValue = radio.value; // Get the value of the checked radio
+            });
+            const messageData = {
+                    message: "invite_user",
+                    sender: this.username,
+                    recipient: this.focususer,
+                    message_type: "system",
+                    game_mode: selectedValue,
+                    time: new Date().toLocaleTimeString()
+                };
+                this.chatSocket.send(JSON.stringify(messageData));
+        });
+
+        // accept invite
+        const invitemsg = this.container.querySelector('#privateChats');
+        invitemsg.addEventListener('click', (e) => {
+            const button = e.target.closest('button');
+            if (!button) return;
+
+            const action = button.dataset.action;
+            const user = button.dataset.user;
+            const mode = button.dataset.mode;
+
+            if (action === 'accept') {
+                //console.log("accept invite");
+                const messageData = {
+                    message: "accept_invite",
+                    sender: this.username,
+                    recipient: user,
+                    game_mode: mode,
+                    message_type: "system_accept",
+                    time: new Date().toLocaleTimeString()
+                };
+                this.chatSocket.send(JSON.stringify(messageData));
             }
         });
     }

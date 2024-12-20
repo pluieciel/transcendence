@@ -19,7 +19,7 @@ async def jwt_to_user(token):
 
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
-        user = await get_user(payload.get('user_id'))
+        user = await get_user(payload.get('id'))
         if user:
             return user
         else:
@@ -207,7 +207,8 @@ class LoginConsumer(AsyncHttpConsumer):
 
             # Generate JWT
             token = jwt.encode({
-                'user_id': user.id,
+                'id': user.id,
+                'username': user.username,
                 'exp': datetime.datetime.now(datetime.UTC) + datetime.timedelta(hours=1)
             }, SECRET_KEY, algorithm='HS256')
 
@@ -216,10 +217,6 @@ class LoginConsumer(AsyncHttpConsumer):
                 'success': True,
                 'message': 'Login successful',
                 'token': token,
-                'user': {
-                    'username': user.username,
-                    'id': user.id
-                },
             }
 
             return await self.send_response(200, json.dumps(response_data).encode(),
