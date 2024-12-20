@@ -141,7 +141,6 @@ export default class ChatBox {
                 this.updateOnlineUsersList();
             } else if (data.message_type === "system" && data.recipient === 'update_waiting_users') {
                 this.waiting_users = JSON.parse(data.message);
-                console.log(this.waiting_users);
                 this.updateOnlineUsersList();
             } else if (data.recipient === 'public') {
                 if (!this.blocked.includes(data.sender)) {
@@ -189,17 +188,22 @@ export default class ChatBox {
                     </span>
                 ` : `
                     <span class="d-flex align-items-center">
-                        <button class="btn btn-primary square-btn me-1 ${this.waiting? '' : 'square-btn-red'}"
+                        <button id="Donotdisturb" class="btn btn-primary square-btn me-1 ${this.waiting? '' : 'square-btn-red'}"
                             data-action="waiting"
-                            data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Do not disturb">
+                            data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Do not disturb">
                             <i class="fa-solid fa-gamepad"></i>
                         </button>
                     </span>
                 `}
             </div>
         `).join('');
-        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
-        const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+
+        const donotdisbutton = this.container.querySelector('#Donotdisturb');
+        const tooltip = bootstrap.Tooltip.getInstance(donotdisbutton);
+        if (tooltip) tooltip.dispose();
+        setTimeout(() => {
+            new bootstrap.Tooltip(donotdisbutton); // Initialize the tooltip
+        }, 200);
     }
 
     updatePublicChat() {
@@ -361,12 +365,10 @@ export default class ChatBox {
             } else if (action === 'block') {
                 this.toggleBlockUser(user);
             } else if (action === 'waiting') {
+                const tooltip = bootstrap.Tooltip.getInstance(button);
+                if (tooltip) tooltip.dispose();
                 this.waiting = !this.waiting;
-                let tooltip = bootstrap.Tooltip.getInstance(button);
-                if (tooltip) tooltip.hide();
                 this.updateOnlineUsersList();
-                tooltip = bootstrap.Tooltip.getInstance(button);
-                if (tooltip) tooltip.hide();
                 const messageData = {
                     message: "update_waiting_status",
                     sender: this.username,
@@ -392,7 +394,7 @@ export default class ChatBox {
                             Rumble
                         </label>
                 </div>
-`;
+            `;
             } else if (action === 'profile') {
                 window.app.router.navigateTo(`/profile/${user}`);
             }

@@ -125,9 +125,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     }
                 )
         elif message_type == "system" and message == "update_waiting_status":
-            if wait_status == "true":
+            if wait_status == True:
                 ChatConsumer.waiting_users.add(sender)
-            else:
+            elif wait_status == False and sender in ChatConsumer.waiting_users:
                 ChatConsumer.waiting_users.remove(sender)
             for group in [key for key in channel_layer.groups.keys() if key.startswith("user_")]:
                 await self.channel_layer.group_send(
