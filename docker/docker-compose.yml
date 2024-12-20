@@ -1,0 +1,243 @@
+services:
+    postgres:
+        build: ${PWD}/docker/postgres
+        image: postgres
+        container_name: postgres
+        environment:
+            POSTGRES_PASSWORD_FILE: /run/secrets/postgres-passwd
+        env_file: .env
+        secrets:
+            - postgres-passwd
+        volumes:
+            - postgres_data:/var/lib/postgresql/data
+            - postgres_logs:/var/log/postgres
+        expose:
+            - 5432
+        networks:
+            - transcendence
+        restart: unless-stopped
+        healthcheck:
+            test:
+                [
+                    "CMD-SHELL",
+                    "pg_isready -h localhost -p $POSTGRES_PORT -U postgres",
+                ]
+            interval: 5s
+            timeout: 2s
+            retries: 3
+    django:
+        build: ${PWD}/docker/django
+        image: django
+        container_name: django
+        depends_on:
+            postgres:
+                condition: service_healthy
+        environment:
+            POSTGRES_PASSWORD_FILE: /run/secrets/postgres-passwd
+            DJANGO_SUPERUSER_PASSWORD_FILE: /run/secrets/django-passwd
+        env_file: .env
+        secrets:
+            - postgres-passwd
+            - django-passwd
+        volumes:
+            - django_data:/usr/src/app
+        networks:
+            - transcendence
+        restart: unless-stopped
+    nginx:
+        build: ${PWD}/docker/nginx
+        image: nginx
+        container_name: nginx
+        depends_on:
+            django:
+                condition: service_started
+        expose:
+            - 9000
+        ports:
+            - 9000:9000
+        volumes:
+            - nginx_data:/var/www/html
+            - django_static_data:/var/www/django/static
+        networks:
+            - transcendence
+        restart: unless-stopped
+#    elasticsearch:
+#        build: ${PWD}/docker/elasticsearch
+#        image: elasticsearch
+#        container_name: elasticsearch
+#        environment:
+#            ELASTICSEARCH_PASSWORD_FILE: /run/secrets/elasticsearch-passwd
+#            KIBANA_PASSWORD_FILE: /run/secrets/kibana-passwd
+#        env_file: .env
+#        secrets:
+#            - elasticsearch-passwd
+#            - kibana-passwd
+#        volumes:
+#            - elasticsearch_data:/usr/share/elasticsearch
+#            - elasticsearch_logs:/var/log/elasticsearch
+#        expose:
+#            - 9200
+#            - 9300
+#        networks:
+#            - transcendence
+#        restart: unless-stopped
+#        healthcheck:
+#            test: ["CMD-SHELL", "/usr/local/bin/healthcheck.sh"]
+#            interval: 10s
+#            timeout: 10s
+#            retries: 10
+#    logstash:
+#        build: ${PWD}/docker/logstash
+#        image: logstash
+#        container_name: logstash
+#        depends_on:
+#            elasticsearch:
+#                condition: service_healthy
+#        environment:
+#            ELASTICSEARCH_PASSWORD_FILE: /run/secrets/elasticsearch-passwd
+#        env_file: .env
+#        secrets:
+#            - elasticsearch-passwd
+#        volumes:
+#            - postgres_logs:/var/log/postgres:ro
+#            - django_logs:/var/log/django:ro
+#            - nginx_logs:/var/log/nginx:ro
+#            - kibana_logs:/var/log/kibana:ro
+#            - elasticsearch_logs:/var/log/elasticsearch:ro
+#        expose:
+#            - 5044
+#            - 9600
+#        networks:
+#            - transcendence
+#        restart: unless-stopped
+#    kibana:
+#        build: ${PWD}/docker/kibana
+#        image: kibana
+#        container_name: kibana
+#        depends_on:
+#            elasticsearch:
+#                condition: service_healthy
+#        environment:
+#            ELASTICSEARCH_PASSWORD_FILE: /run/secrets/elasticsearch-passwd
+#            KIBANA_PASSWORD_FILE: /run/secrets/kibana-passwd
+#        env_file: .env
+#        secrets:
+#            - elasticsearch-passwd
+#            - kibana-passwd
+#        volumes:
+#            - kibana_logs:/var/log/kibana
+#        expose:
+#            - 5601
+#        ports:
+#            - 5601:5601
+#        networks:
+#            - transcendence
+#        restart: unless-stopped
+#    cadvisor:
+#        build: ${PWD}/docker/cadvisor
+#        image: cadvisor
+#        container_name: cadvisor
+#        volumes:
+#            - /:/rootfs:ro
+#            - /var/run:/var/run:ro
+#            - /sys:/sys:ro
+#            - /var/lib/docker/:/var/lib/docker:ro
+#        expose:
+#            - 8080
+#        networks:
+#            - transcendence
+#        restart: unless-stopped
+#    prometheus:
+#        build: ${PWD}/docker/prometheus
+#        image: prometheus
+#        container_name: prometheus
+#        depends_on:
+#            cadvisor:
+#                condition: service_started
+#        environment:
+#            PROMETHEUS_PASSWORD_FILE: /run/secrets/prometheus-passwd
+#        env_file: .env
+#        secrets:
+#            - prometheus-passwd
+#        volumes:
+#            - prometheus_data:/etc/prometheus/data
+#        expose:
+#            - 9090
+#        networks:
+#            - transcendence
+#        restart: unless-stopped
+#    grafana:
+#        build: ${PWD}/docker/grafana
+#        image: grafana
+#        container_name: grafana
+#        depends_on:
+#            prometheus:
+#                condition: service_started
+#        environment:
+#            GF_SECURITY_ADMIN_PASSWORD__FILE: /run/secrets/grafana-passwd
+#        env_file: .env
+#        secrets:
+#            - grafana-passwd
+#        volumes:
+#            - grafana_data:/var/lib/grafana
+#        expose:
+#            - 3000
+#        networks:
+#            - transcendence
+#        restart: unless-stopped
+#
+networks:
+    transcendence:
+        name: transcendence
+
+volumes:
+    django_data:
+        name: django_data
+        driver_opts:
+            type: none
+            o: bind
+            device: ${PWD}/backend
+    nginx_data:
+        name: nginx_data
+        driver_opts:
+            type: none
+            o: bind
+            device: ${PWD}/static
+    django_static_data:
+        name: django_static_data
+        driver_opts:
+            type: none
+            o: bind
+            device: ${PWD}/backend/staticfiles
+    django_logs:
+        name: django_logs
+    postgres_data:
+        name: postgres_data
+    postgres_logs:
+        name: postgres_logs
+    nginx_logs:
+        name: nginx_logs
+    elasticsearch_data:
+        name: elasticsearch_data
+    elasticsearch_logs:
+        name: elasticsearch_logs
+    kibana_logs:
+        name: kibana_logs
+    prometheus_data:
+        name: prometheus_data
+    grafana_data:
+        name: grafana_data
+
+secrets:
+    postgres-passwd:
+        file: ${PWD}/docker/secrets/postgres-passwd.txt
+    django-passwd:
+        file: ${PWD}/docker/secrets/django-passwd.txt
+    elasticsearch-passwd:
+         file: ${PWD}/docker/secrets/elasticsearch-passwd.txt
+    kibana-passwd:
+        file: ${PWD}/docker/secrets/kibana-passwd.txt
+    prometheus-passwd:
+        file: ${PWD}/docker/secrets/prometheus-passwd.txt
+    grafana-passwd:
+        file: ${PWD}/docker/secrets/grafana-passwd.txt

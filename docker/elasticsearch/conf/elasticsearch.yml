@@ -1,0 +1,6 @@
+network.host: 0.0.0.0
+cluster.name: "docker-cluster"
+path.repo: "/usr/share/elasticsearch/snapshots"
+path.logs: "/var/log/elasticsearch"
+discovery.type: single-node
+xpack.security.enabled: true

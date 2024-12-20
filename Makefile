@@ -1,7 +1,7 @@
 .PHONY: help setup build up down stop restart logs list clean all re
 
 NAME = transcendence
-DOCKER_COMPOSE_YML = ./docker-compose.yml
+DOCKER_COMPOSE_YML = ./docker/docker-compose.yml
 DOCKER_COMPOSE_CMD = docker-compose
 
 BOLD_GREEN = \033[1;32m
@@ -22,10 +22,6 @@ help:
 	@echo "  clean             Remove all stopped containers, networks, and volumes, and cleanup setup"
 	@echo "  all               Run setup, build, and up"
 	@echo "  re                Clean, rebuild, and restart the services"
-
-setup:
-	@mkdir -p $(HOME)/data/postgres
-	@mkdir -p $(HOME)/data/django
 
 build:
 	@$(DOCKER_COMPOSE_CMD) -f $(DOCKER_COMPOSE_YML) -p $(NAME) build
@@ -56,8 +52,7 @@ list:
 	@docker network ls
 
 clean: down
-	#@sudo rm -rf $(HOME)/data
 
-all: setup build up
+all: build up
 
 re: clean all
