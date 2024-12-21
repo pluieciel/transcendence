@@ -17,8 +17,15 @@ export default class MainView {
         <p>Welcome to your settings, you can change everything here!</p>
     </div>
 	<div class ="content">
-		<div class="containerBtn">
+		<div class="containerPrivate">
+			<h3>Profile info i guess</h3>
+			<button id="changeUsernameBtn">Change your username</button>
+			<button id="changePpBtn">Change your profile picture</button>
+		</div>
+		<div class="containerSensitive">
 			<h3>Be careful with those</h3>
+			<button id="passwordButton">Set New Password</button>
+        	<input type="password" id="passwordInput" placeholder="Enter your new password">
 			<button id="deleteAccBtn">Delete my account</button>
 		</div>
 	</div>
@@ -26,10 +33,28 @@ export default class MainView {
     }
 
     addEventListeners() {
-        // Logout button
         const logoutBtn = this.container.querySelector('#logoutBtn');
 		const indexBtn = this.container.querySelector('#indexBtn');
 		const wipeBtn = this.container.querySelector('#deleteAccBtn');
+		const button = document.getElementById('passwordButton');
+        const input = document.getElementById('passwordInput');
+		//should input password for the sensitive info ?w
+
+        button.addEventListener('click', () => {
+            button.style.display = 'none';
+            input.style.display = 'inline-block';
+            input.focus();
+        });
+
+		input.addEventListener('keydown', (event) => {
+			if (event.key === "Enter") {
+				const newPassword = input.value;
+				if (!newPassword)
+					return (alert('Password cannot be empty!'));
+				
+			}
+		});
+
 
 		wipeBtn.addEventListener('click', () => {
 			this.eraseInDB()

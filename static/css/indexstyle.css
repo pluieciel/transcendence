@@ -11,7 +11,7 @@
 body {
     font-family: Arial, sans-serif;
     color: #000000;
-    background-color: #c7f0c7;
+    background-color: #000;
     margin: 0;
     padding: 0;
     display: flex;
@@ -20,13 +20,13 @@ body {
 
 /* Header styles */
 header {
-    background-color: #013f05;
+    background-color: #000;
     padding: 20px;
-    color: #FFFFFF;
+    color: #FFF;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 10px rgba(255, 255, 255, 0.3);
     width: 100%;
     top: 0;
     left: 0;
@@ -51,9 +51,9 @@ a {
 	text-decoration: none;
 }
 
-/* Center the Welcome message under the header */
 .welcome {
-    margin-top: 100px; /* Adjust spacing from header */
+	color: #FFF;
+    margin-top: 100px;
     text-align: center;
     width: 100%;
     font-size: 1.5rem;
@@ -73,7 +73,7 @@ a {
     padding: 15px;
 }
 
-.credits, .game-buttons, .profile, .containerBtn {
+.credits, .game-buttons, .profile, .containerSensitive, .containerPrivate {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -89,7 +89,7 @@ a {
 	margin-right: 20px;
 }
 
-.containerBtn {
+.containerSensitive, .containerPrivate {
 	border: 2px solid #000;
     background-color: #fff;
 }
@@ -139,7 +139,12 @@ a {
 }
 
 #settingsBtn {
+	color: #00F;
 	right: 150px;
+	border: 0.5px solid #00F;
+	background-color: #000;
+	box-shadow: #00F;
+	box-shadow: 0 4px 15px rgba(0, 0, 255, 0.8);
 }
 
 #indexBtn {
@@ -147,6 +152,12 @@ a {
 }
 
 #logoutBtn {
+	color: #F00;
+	right: 150px;
+	border: 0.5px solid #F00;
+	background-color: #000;
+	box-shadow: #F00;
+	box-shadow: 0 4px 15px rgba(255, 0, 0, 0.8);
 	right: 5px;
 }
 
@@ -158,6 +169,24 @@ a {
     box-shadow: 0 4px 15px rgba(255, 255, 255, 0.8);
 }
 
-#fab fa-js {
-	background-color: yellow;
+#passwordInput {
+	display: none;
+	padding: 10px;
+	font-size: 16px;
+	border: 1px solid #ccc;
+	border-radius: 5px;
+}
+
+#passwordButton {
+	padding: 10px 20px;
+	font-size: 16px;
+	border: none;
+	border-radius: 5px;
+	background-color: #007bff;
+	color: white;
+	cursor: pointer;
+}
+
+#passwordButton:hover {
+	background-color: #0056b3;
 }
