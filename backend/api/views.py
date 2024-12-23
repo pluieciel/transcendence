@@ -7,6 +7,7 @@ import logging
 import requests
 import jwt
 import datetime
+import re
 
 SECRET_KEY = os.environ.get('JWT_SECRET_KEY')
 logger = logging.getLogger(__name__)
@@ -291,3 +292,66 @@ class ProfileConsumer(AsyncHttpConsumer):
     def get_user(self, user_id):
         User = get_user_model()
         return User.objects.get(id=user_id)
+
+class ProfileConsumer2(AsyncHttpConsumer):
+    async def handle(self, body):
+        try:
+            #print(self.scope, flush=True)
+            headers = dict((key.decode('utf-8'), value.decode('utf-8')) for key, value in self.scope['headers'])
+            #print(headers, flush=True)
+            auth_header = headers.get('authorization', None)
+            if not auth_header:
+                response_data = {
+                    'success': False,
+                    'message': 'Authorization header missing'
+                }
+                return await self.send_response(401, json.dumps(response_data).encode(),
+                    headers=[(b"Content-Type", b"application/json")])
+            user = await jwt_to_user(auth_header)
+            if not user:
+                response_data = {
+                    'success': False,
+                    'message': 'Invalid token or User not found'
+                }
+                return await self.send_response(401, json.dumps(response_data).encode(),
+                    headers=[(b"Content-Type", b"application/json")])
+            
+            path = self.scope['path']
+            #print(f"Request path: {path}", flush=True)
+            match = re.search(r'/api/get/profile/(\w+)', path)
+            user_name = match.group(1)
+            user = await self.get_user_by_name(user_name)
+
+            tot_games = (user.wins + user.looses)
+            if tot_games == 0:
+                winrate = 0
+            else:
+                winrate = (user.wins / tot_games) * 100
+
+            response_data = {
+                'username': user.username,
+                'success': True,
+                'elo': user.elo,
+                'winrate': winrate,
+                'tourn': user.tourn_win,
+            }
+            return await self.send_response(200, json.dumps(response_data).encode(),
+                headers=[(b"Content-Type", b"application/json")])
+
+        except Exception as e:
+            response_data = {
+                'success': False,
+                'message': str(e)
+            }
+            return await self.send_response(500, json.dumps(response_data).encode(),
+                headers=[(b"Content-Type", b"application/json")])
+
+    @database_sync_to_async
+    def get_user(self, user_id):
+        User = get_user_model()
+        return User.objects.get(id=user_id)
+    
+    @database_sync_to_async
+    def get_user_by_name(self, username):
+        User = get_user_model()
+        return User.objects.filter(username=username).first()
