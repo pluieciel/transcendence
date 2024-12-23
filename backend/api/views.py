@@ -2,13 +2,13 @@
 from channels.generic.http import AsyncHttpConsumer
 from django.contrib.auth import get_user_model, authenticate
 from channels.db import database_sync_to_async
-import json
+import json, os
 import logging
 import requests
 import jwt
 import datetime
 
-SECRET_KEY = 'ultrasafe_secret_key'
+SECRET_KEY = os.environ.get('JWT_SECRET_KEY')
 logger = logging.getLogger(__name__)
 
 async def jwt_to_user(token):

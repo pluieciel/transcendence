@@ -35,10 +35,12 @@ services:
         environment:
             POSTGRES_PASSWORD_FILE: /run/secrets/postgres-passwd
             DJANGO_SUPERUSER_PASSWORD_FILE: /run/secrets/django-passwd
+            JWT_SECRET_KEY_FILE: /run/secrets/jwt-secret-key
         env_file: .env
         secrets:
             - postgres-passwd
             - django-passwd
+            - jwt-secret-key
         volumes:
             - django_data:/usr/src/app
         networks:
@@ -245,3 +247,5 @@ secrets:
         file: ${PWD}/docker/secrets/prometheus-passwd.txt
     grafana-passwd:
         file: ${PWD}/docker/secrets/grafana-passwd.txt
+    jwt-secret-key:
+        file: ${PWD}/docker/secrets/jwt-secret-key.txt
