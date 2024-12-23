@@ -1,6 +1,6 @@
 export default class ChatBox {
-    constructor(container, token) {
-        const decodedPayload = jwt_decode(token);
+    constructor(container) {
+        const decodedPayload = jwt_decode(window.app.getToken());
         //console.log(decodedPayload);
         this.container = container;
         this.username = decodedPayload.username;
