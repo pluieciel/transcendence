@@ -160,7 +160,8 @@ export default class ChatBox {
 
     updateOnlineUsersList() {
         const container = this.container.querySelector('#onlineUsers');
-        container.innerHTML = this.onlineusers.map(user => `
+        container.innerHTML = this.onlineusers.map(user => {
+        return `
             <div class="user-item d-flex align-items-center p-2 justify-content-between">
                 <span class="d-flex align-items-center">
                     <span class="online-indicator me-2"></span>
@@ -174,9 +175,18 @@ export default class ChatBox {
                                 <i class="fa-solid fa-gamepad"></i>
                             </button>
                         ` : ''}
-                        <button class="btn btn-primary square-btn me-1" data-action="profile" data-user="${user}">
-                            <i class="fas fa-user"></i>
                         </button>
+                        <div class="dropdown">
+                            <button class="btn btn-primary square-btn me-1" data-action="profile" data-user="${user}"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user"></i>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li class="dropdown-item" id='elo_${user}'>Loading...</li>
+                                <li class="dropdown-item" id='wr_${user}'>Loading...</li>
+                                <li class="dropdown-item" id='tn_${user}'>Loading...</li>
+                            </ul>
+                        </div>
                         <button class="btn btn-primary square-btn me-1" data-action="chat" data-user="${user}">
                             <i class="fas fa-comments"></i>
                         </button>
@@ -196,7 +206,30 @@ export default class ChatBox {
                     </span>
                 `}
             </div>
-        `).join('');
+        `}).join('');
+
+        this.onlineusers.map(async (user) => {
+            const elo_div = this.container.querySelector(`#elo_${user}`);
+            //console.log(elo_div);
+            const wr_div = this.container.querySelector(`#wr_${user}`);
+            const tn_div = this.container.querySelector(`#tn_${user}`);
+            if (elo_div) {
+                const response = await fetch(`/api/get/profile/${user}`,{
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `${window.app.getToken()}`,
+                    },
+                });
+                const data = await response.json();
+                //console.log(data);
+                if (data.elo) {
+                    elo_div.innerHTML = `Elo: ${data.elo}`;
+                    wr_div.innerHTML = `Winrate: ${data.winrate}%`;
+                    tn_div.innerHTML = `Tournaments won: ${data['tourn']}`;
+                }
+            }
+        });
 
         const donotdisbutton = this.container.querySelector('#Donotdisturb');
         const tooltip = bootstrap.Tooltip.getInstance(donotdisbutton);
@@ -204,6 +237,9 @@ export default class ChatBox {
         setTimeout(() => {
             new bootstrap.Tooltip(donotdisbutton); // Initialize the tooltip
         }, 200);
+
+        const popoverTriggerList = this.container.querySelectorAll('[data-bs-toggle="popover"]');
+        const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl));
     }
 
     updatePublicChat() {
@@ -396,7 +432,8 @@ export default class ChatBox {
                 </div>
             `;
             } else if (action === 'profile') {
-                window.app.router.navigateTo(`/profile/${user}`);
+                //window.app.router.navigateTo(`/profile/${user}`);
+
             }
         });
 
