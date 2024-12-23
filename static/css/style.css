@@ -2,6 +2,7 @@
 .nav-container {
     padding: 30px;
     text-align: center;
+	color: #FFF;
 }
 
 .nav-link:hover {
@@ -264,14 +265,16 @@
 	margin-top: 10px;
 }
 
-#deleteAccBtn {
-	border-radius: 5px;
-	border: 2px solid #000;
-	background-color: #f74f5f;
-	transition: background-color 0.5s, border 0.5s;
+#usrnm-form, #pwd-form, #cfm-pwd-form {
+	border: none;
+	color: #FFF;
+	background-color: #000;
 }
 
-#deleteAccBtn:hover {
-	border: 2px solid #f00;
-	background-color: #f00;
+#usrnm-form::placeholder, #pwd-form::placeholder, #cfm-pwd-form::placeholder{
+	color: #FFF;
+}
+
+#loginForm, #signupForm {
+	background-color: #333;
 }

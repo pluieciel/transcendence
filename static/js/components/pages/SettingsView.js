@@ -1,7 +1,11 @@
 export default class MainView {
+	
+	#isAllowed;
+
     constructor(container, appState) {
 		this.container = container;
         this.username = appState.username;
+		this.#isAllowed = false;
         this.render();
         this.addEventListeners();
     }
@@ -21,11 +25,13 @@ export default class MainView {
 			<h3>Profile info i guess</h3>
 			<button id="changeUsernameBtn">Change your username</button>
 			<button id="changePpBtn">Change your profile picture</button>
+			<button id="changeThemeBtn">Change the theme</button>
 		</div>
 		<div class="containerSensitive">
 			<h3>Be careful with those</h3>
+        	<input type="password" id="passwordInput" placeholder="Enter password to access">
 			<button id="passwordButton">Set New Password</button>
-        	<input type="password" id="passwordInput" placeholder="Enter your new password">
+        	<input type="password" id="newPasswordInput" placeholder="Enter your new password">
 			<button id="deleteAccBtn">Delete my account</button>
 		</div>
 	</div>
@@ -33,37 +39,63 @@ export default class MainView {
     }
 
     addEventListeners() {
-        const logoutBtn = this.container.querySelector('#logoutBtn');
-		const indexBtn = this.container.querySelector('#indexBtn');
-		const wipeBtn = this.container.querySelector('#deleteAccBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+		const indexBtn = document.getElementById('indexBtn');
+		const wipeBtn = document.getElementById('deleteAccBtn');
 		const button = document.getElementById('passwordButton');
         const input = document.getElementById('passwordInput');
-		//should input password for the sensitive info ?w
-
+		
         button.addEventListener('click', () => {
-            button.style.display = 'none';
+			button.style.display = 'none';
             input.style.display = 'inline-block';
             input.focus();
         });
-
-		input.addEventListener('keydown', (event) => {
+		
+		input.addEventListener('keydown', async (event) => {
 			if (event.key === "Enter") {
-				const newPassword = input.value;
-				if (!newPassword)
-					return (alert('Password cannot be empty!'));
+				const password = this.container.querySelector('#passwordInput').value;
+				const hashedPassword = CryptoJS.SHA256(password).toString();
+				try {
+					const response = await fetch('/api/login/', {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json'
+						},
+						body: JSON.stringify({
+							username: this.username,
+							password: hashedPassword
+						})
+					});
 				
+					const data = await response.json();
+				
+					if (data.success) {
+						wipeBtn.style.display = "inline-block";
+						button.style.display = "inline-block";
+						input.style.display = "none";
+						this.isAllowed = true; //check isallowed when clicking the new pwd button or the wipe button
+					} else {
+						console.log("login failed");
+					}
+				} catch (error) {
+					console.error(error);
+				}
 			}
 		});
 
 
 		wipeBtn.addEventListener('click', () => {
+			if (!this.isAllowed)
+				return ;
 			this.eraseInDB()
             window.app.logout();
         });
+
 		logoutBtn.addEventListener('click', () => {
             window.app.logout();
         });
-        indexBtn.addEventListener('click', () => {
+        
+		indexBtn.addEventListener('click', () => {
             window.app.router.navigateTo('/index');
         });
     }
@@ -86,22 +118,17 @@ export default class MainView {
 				return;
 			}
 	
-			// Check if there is any content in the response
-			const responseText = await response.text(); // Read response as text first
+			const responseText = await response.text();
 			if (!responseText) {
 				console.error('Empty response body');
 				return;
 			}
-	
-			// Now parse the text into JSON
-			const data = JSON.parse(responseText);
-			console.log(data);
+				const data = JSON.parse(responseText);
 
 			if (data.success) {
 				alert("deleted user successfully");
-				console.log("deleted user successfully");
 			} else {
-				console.log("smth is wrong");
+				console.error("smth is wrong");
 			}
 		} catch (error) {
 			console.error('An error occurred: ', error);

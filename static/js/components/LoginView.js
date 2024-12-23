@@ -14,8 +14,8 @@ export default class LoginView {
             <div>
                 <nav class="nav-container">
                     <div class="nav-links d-flex justify-content-center">
-                        <a href="#" class="nav-link" data-view="signup">Sign Up</a> |
-                        <a href="#" class="nav-link" data-view="login">Login</a>
+                        <a href="#" class="nav-link" data-view="signup">Sign Up </a>|
+                        <a href="#" class="nav-link" data-view="login"> Login</a>
                     </div>
                 </nav>
                 <div id="authContent"></div>

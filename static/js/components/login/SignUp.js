@@ -14,7 +14,7 @@ export default class SignUp {
                             <div class="mb-3">
                                 <input 
                                     type="text" 
-                                    id="username" 
+                                    id="usrnm-form" 
                                     placeholder="Enter username"
                                     class="form-control"
                                 >
@@ -22,7 +22,7 @@ export default class SignUp {
                             <div class="mb-3">
                                 <input 
                                     type="password" 
-                                    id="password" 
+                                    id="pwd-form" 
                                     placeholder="Enter password"
                                     class="form-control"
                                 >
@@ -30,7 +30,7 @@ export default class SignUp {
                             <div class="mb-3">
                                 <input 
                                     type="password" 
-                                    id="confirmPassword" 
+                                    id="cfm-pwd-form" 
                                     placeholder="Confirm password"
                                     class="form-control"
                                 >
@@ -49,7 +49,7 @@ export default class SignUp {
 		const form = this.container.querySelector('#signupForm');
 		const form42 = this.container.querySelector('.SignUp42');
 		const clientId = 'u-s4t2ud-ba5b0c72367af9ad1efbf4d20585f3c315b613ece176ca16919733a7dba999d5';
-		const redirectUri = encodeURIComponent('https://172.17.0.1:9000/signup/oauth');
+		const redirectUri = encodeURIComponent('https://192.168.1.74:9000/signup/oauth');
 		const scope = 'public';
 		const state = 'this_is_a_very_long_random_string_i_am_unguessable';
 		const authorizeUrl = `https://api.intra.42.fr/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&state=${state}`;
@@ -59,9 +59,9 @@ export default class SignUp {
         });
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const username = this.container.querySelector('#username').value;
-            const password = this.container.querySelector('#password').value;
-            const confirmPassword = this.container.querySelector('#confirmPassword').value;
+            const username = this.container.querySelector('#usrnm-form').value;
+            const password = this.container.querySelector('#pwd-form').value;
+            const confirmPassword = this.container.querySelector('#cfm-pwd-form').value;
             const errorDiv = this.container.querySelector('#passwordError');
 
 			if (!password || !confirmPassword || !username)

@@ -1,32 +1,28 @@
-/* General body styles */
 :root {
-    --primary-color: #013f05;
-    --secondary-color: #c7f0c7;
-    --accent-color: #057e0d;
-    --text-color: #000000;
-    --button-hover-bg: #06550c;
-    --button-hover-text: #FFFFFF;
+    --primary-color: #000;
+    --secondary-color: #fff;
+    --accent-color: #111;
+	--header-shadow-color: rgba(255, 255, 255, 0.3);
 }
 
 body {
     font-family: Arial, sans-serif;
-    color: #000000;
-    background-color: #000;
+    color: var(--primary-color);
+    background-color: var(--primary-color);
     margin: 0;
     padding: 0;
     display: flex;
     flex-direction: column;
 }
 
-/* Header styles */
 header {
-    background-color: #000;
+    background-color: var(--primary-color);
     padding: 20px;
-    color: #FFF;
+    color: var(--secondary-color);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 4px 10px rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 10px var(--header-shadow-color);
     width: 100%;
     top: 0;
     left: 0;
@@ -52,7 +48,7 @@ a {
 }
 
 .welcome {
-	color: #FFF;
+	color: var(--secondary-color);
     margin-top: 100px;
     text-align: center;
     width: 100%;
@@ -62,8 +58,8 @@ a {
 .content {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start; /* Align items to the top */
-    gap: 20px; /* Space between sections */
+    align-items: flex-start;
+    gap: 20px;
 }
 
 .content > div {
@@ -78,8 +74,9 @@ a {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    border: 2px solid #057e0d;
-    background-color: #dcf7dc;
+	color: var(--secondary-color);
+    border: 2px solid var(--secondary-color);
+    background-color: #111;
     padding: 20px;
     border-radius: 10px;
     width: fit-content;
@@ -89,21 +86,15 @@ a {
 	margin-right: 20px;
 }
 
-.containerSensitive, .containerPrivate {
-	border: 2px solid #000;
-    background-color: #fff;
-}
-
 #settingsBtn, #indexBtn, #logoutBtn, .game-buttons button {
 	display: block;
 	padding: 10px 20px;
 	font-size: 1rem;
-	background-color: #FFFFFF;
+	background-color: var(--primary-color);
 	border-radius: 10px;
-	color: #0CF31C;
+	color: var(--secondary-color);
     cursor: pointer; 
-	border: 0px solid #fff;
-    transition: background-color 0.3s, color 0.3s, border 0.2s, transform 0.2s;
+    transition: background-color 0.5s, color 0.3s, border 0.2s, transform 0.2s;
     margin: 10px 0; /* Adjust vertical spacing */
     text-align: center;
     width: 100%; /* Ensure consistent button width */
@@ -112,13 +103,13 @@ a {
 }
 
 .game-buttons button {
-	border: 2px solid #057e0d;
+	border: 2px solid var(--secondary-color);
 }
 
 .game-buttons button:hover {
-    background-color: #057e0d;
-    color: #000;
-    border: #000 solid 2px;
+	background-color: var(--secondary-color);
+    color: var(--primary-color);
+	border: 2px solid var(--primary-color);
 }
 
 .sendButton, .btn-closing-chat {
@@ -136,57 +127,68 @@ a {
 	position: absolute;
 	order: -1; /* Move it to the start of the flex container */
 	color: #013f05;
+	transition: background-color 0.2s, transform 0.2s;
 }
 
 #settingsBtn {
-	color: #00F;
+	color: #36F;
 	right: 150px;
-	border: 0.5px solid #00F;
-	background-color: #000;
-	box-shadow: #00F;
-	box-shadow: 0 4px 15px rgba(0, 0, 255, 0.8);
+	border: 0.5px solid #36F;
+	background-color: var(--primary-color);
+	box-shadow: 0 4px 15px rgba(51, 102, 255, 0.8);
 }
 
 #indexBtn {
+	color: #FF0;
 	right: 150px;
+	border: 0.5px solid #FF0;
+	background-color: var(--primary-color);
+	box-shadow: 0 4px 15px rgba(255, 255, 0.2, 0.8);
 }
 
 #logoutBtn {
 	color: #F00;
 	right: 150px;
 	border: 0.5px solid #F00;
-	background-color: #000;
-	box-shadow: #F00;
+	background-color: var(--primary-color);
 	box-shadow: 0 4px 15px rgba(255, 0, 0, 0.8);
 	right: 5px;
 }
 
 #settingsBtn:hover, #indexBtn:hover, #logoutBtn:hover {
-	background-color: #06550c;
-    color: #FFFFFF;
-    border: #FFFFFF solid 2px;
+	background-color: rgb(25, 25, 25);
     transform: scale(1.1);
-    box-shadow: 0 4px 15px rgba(255, 255, 255, 0.8);
+}
+
+.containerSensitive > button {
+	padding: 10px 20px;
+	font-size: 16px;
+	border: 2px solid var(--primary-color);
+	border-radius: 5px;
+	background-color: #f74f5f;
+	cursor: pointer;
+	transition: background-color 0.5s, border 0.5s;
+	display: none;
+}
+
+.containerSensitive > button:hover {
+	border: 2px solid #f00;
+	background-color: #f00;
 }
 
 #passwordInput {
-	display: none;
 	padding: 10px;
 	font-size: 16px;
 	border: 1px solid #ccc;
 	border-radius: 5px;
+	text-align: center;
 }
 
-#passwordButton {
-	padding: 10px 20px;
+#newPasswordInput {
+	padding: 10px;
 	font-size: 16px;
-	border: none;
+	border: 1px solid #ccc;
 	border-radius: 5px;
-	background-color: #007bff;
-	color: white;
-	cursor: pointer;
-}
-
-#passwordButton:hover {
-	background-color: #0056b3;
+	text-align: center;
+	display: none;
 }
