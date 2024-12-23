@@ -531,4 +531,8 @@ export default class ChatBox {
 			}
 		});
 	}
+
+    disconnect() {
+        this.chatSocket.close();
+    }
 }

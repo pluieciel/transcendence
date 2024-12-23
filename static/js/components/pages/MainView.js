@@ -88,6 +88,7 @@ export default class MainView {
         const settings = this.container.querySelector('#settingsBtn');
         
 		logoutBtn.addEventListener('click', () => {
+			this.chatBox.disconnect();
             window.app.logout();
         });
 
