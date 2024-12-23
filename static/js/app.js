@@ -6,6 +6,9 @@ import GameView from './components/GameView.js';
 import Router from './router.js';
 
 class App {
+    // Private
+    #state;
+
     constructor() {
 		
 		this.routes = [
@@ -16,7 +19,7 @@ class App {
             { path: '/signup/oauth', component: SignUpAuthView },
 			{ path: '*', component: LoginView },
 		]
-        this.state = {
+        this.#state = {
             isLoggedIn: sessionStorage.getItem('isLoggedIn') === 'true',
             token: sessionStorage.getItem('token') || '',
         };
@@ -27,19 +30,27 @@ class App {
     }
     
     login(data) {
-        this.state.isLoggedIn = true;
-        this.state.token = data.token;
+        this.#state.isLoggedIn = true;
+        this.#state.token = data.token;
         //console.log(this.state.token);
         sessionStorage.setItem('isLoggedIn', 'true');
-        sessionStorage.setItem('token', this.state.token);
+        sessionStorage.setItem('token', this.#state.token);
         this.router.navigateTo('/index');
     }
 
     logout() {
-        this.state.isLoggedIn = false;
-        this.state.username = '';
+        this.#state.isLoggedIn = false;
+        this.#state.token = '';
         sessionStorage.clear();
         this.router.navigateTo('/');
+    }
+
+    getIsLoggedIn() {
+        return this.#state.isLoggedIn;
+    }
+
+    getToken() {
+        return this.#state.token;
     }
 }
 

@@ -74,7 +74,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
             self.room_group_name,
             self.channel_name
         )
-        ChatConsumer.online_users.remove(self.username)
+        if self.username in ChatConsumer.online_users:
+            ChatConsumer.online_users.remove(self.username)
+        if self.username in ChatConsumer.waiting_users:
+            ChatConsumer.waiting_users.remove(self.username)
 
         channel_layer = get_channel_layer()
         for group in [key for key in channel_layer.groups.keys() if key.startswith("user_")]:

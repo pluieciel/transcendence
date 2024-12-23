@@ -1,10 +1,9 @@
 import ChatBox from '../chat/ChatBox.js';
 
 export default class MainView {
-    constructor(container, appState) {
+    constructor(container) {
 		this.container = container;
-		this.token = appState.token;
-		const decodedPayload = jwt_decode(this.token);
+		const decodedPayload = jwt_decode(window.app.getToken());
 		//console.log(appState.token);
 		//console.log(decodedPayload);
         this.username = decodedPayload.username;
@@ -80,7 +79,7 @@ export default class MainView {
     initComponents() {
         // Initialize ChatBox
         const chatBoxContainer = this.container.querySelector('#chatBoxContainer');
-        this.chatBox = new ChatBox(chatBoxContainer, this.token);
+        this.chatBox = new ChatBox(chatBoxContainer);
     }
 
     addEventListeners() {
@@ -120,7 +119,7 @@ export default class MainView {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `${window.app.state.token}`
+                    'Authorization': `${window.app.getToken()}`,
                 },
             });
 

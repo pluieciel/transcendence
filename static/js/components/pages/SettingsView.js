@@ -1,7 +1,8 @@
 export default class MainView {
-    constructor(container, appState) {
+    constructor(container) {
 		this.container = container;
-        this.username = appState.username;
+        const decodedPayload = jwt_decode(window.app.getToken());
+        this.username = decodedPayload.username;
         this.render();
         this.addEventListeners();
     }
