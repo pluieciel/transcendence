@@ -2,9 +2,9 @@ export default class MainView {
 	
 	#isAllowed;
 
-    constructor(container, appState) {
+	constructor(container, appState) {
 		this.container = container;
-        this.username = appState.username;
+		this.appState = appState;
 		this.#isAllowed = false;
         this.render();
         this.addEventListeners();
@@ -24,6 +24,7 @@ export default class MainView {
 		<div class="containerPrivate">
 			<h3>Profile info i guess</h3>
 			<button id="changeUsernameBtn">Change your username</button>
+			<input type="text" id="newUsername" placeholder="Enter new username">
 			<button id="changePpBtn">Change your profile picture</button>
 			<button id="changeThemeBtn">Switch theme</button>
 		</div>
@@ -35,27 +36,65 @@ export default class MainView {
 			<button id="deleteAccBtn">Delete my account</button>
 		</div>
 	</div>
+    <div id="passwordError" class="alert alert-danger d-none"></div>
+
         `;
     }
 
     addEventListeners() {
-        const logoutBtn = document.getElementById('logoutBtn');
+		const changeUsernameBtn = document.getElementById('changeUsernameBtn');
         const changeThemeBtn = document.getElementById('changeThemeBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
 		const indexBtn = document.getElementById('indexBtn');
 		const wipeBtn = document.getElementById('deleteAccBtn');
 		const button = document.getElementById('passwordButton');
         const input = document.getElementById('passwordInput');
-		
+
         button.addEventListener('click', () => {
 			button.style.display = 'none';
             input.style.display = 'inline-block';
             input.focus();
         });
 		
-		let isSwitching = false;
+		newUsername.addEventListener('keydown', async (event) => {
+			if (event.key === "Enter") {
+				if (newUsername.value.slice(-2) === "42")
+					return this.error('Dont put 42 at the end of your username!!');
+				try {
+					const response = await fetch('/api/change/username', {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+							'Authorization': `${window.app.state.token}`
+						},
+						body: JSON.stringify({
+							newUsername: newUsername.value,
+							username: this.appState.username,
+						})
+					});
+				
+					const data = await response.json();
+				
+					if (data.success) {
+						console.log("changing username success");
+						this.appState.username = newUsername.value;
+					} else {
+						console.log("changing username failed");
+					}
+				} catch (error) {
+					console.error(error);
+				}
+			}
+		});
+
+		changeUsernameBtn.addEventListener('click', async () => {
+			const newUsername = document.getElementById('newUsername');
+			changeUsernameBtn.style.display = 'none';
+			newUsername.style.display = 'inline-block';
+			newUsername.focus();
+		});
+
 		changeThemeBtn.addEventListener('click', async () => {
-			if (isSwitching) return;
-			isSwitching = true;
 			try {
 				console.log("calling the api");
 				const response = await fetch('/api/change/theme', {
@@ -66,7 +105,7 @@ export default class MainView {
 					},
 					body: JSON.stringify({
 						currentTheme: window.app.state.theme,
-						username: this.username,
+						username: this.appState.username,
 					})
 				});
 		
@@ -82,8 +121,6 @@ export default class MainView {
 				}
 			} catch (error) {
 				console.error(error);
-			} finally {
-				isSwitching = false;
 			}
 		});
 		
@@ -99,7 +136,7 @@ export default class MainView {
 							'Content-Type': 'application/json'
 						},
 						body: JSON.stringify({
-							username: this.username,
+							username: this.appState.username,
 							password: hashedPassword
 						})
 					});
@@ -147,7 +184,7 @@ export default class MainView {
                     'Authorization': `${window.app.state.token}`
 				},
 				body: JSON.stringify({
-					username: this.username,
+					username: this.appState.username,
 				})
 			});
 			
@@ -166,5 +203,13 @@ export default class MainView {
 		} catch (error) {
 			console.error('An error occurred: ', error);
 		}
+	}
+	
+	error(error) {
+		const errorDiv = this.container.querySelector('#passwordError');
+
+		errorDiv.textContent = 'error: ' + error;
+		errorDiv.classList.remove('d-none');
+		return;
 	}
 }

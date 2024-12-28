@@ -15,7 +15,7 @@ from Chat.routing import websocket_urlpatterns as chat_websocket_patterns
 from Game.routing import websocket_urlpatterns as game_websocket_patterns
 from django.urls import path
 from api.views import SignupConsumer, LoginConsumer, ProfileConsumer, HandleOAuthConsumer
-from api.views2 import RemoveConsumer, setThemeConsumer
+from api.views2 import RemoveConsumer, setTheme, setNewUsername
 from django.contrib import admin
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "backend.settings")
@@ -31,7 +31,8 @@ http_patterns = [
     path('api/get/profile', ProfileConsumer.as_asgi()),
     path('api/signup/oauth', HandleOAuthConsumer.as_asgi()),
     path('api/del/user', RemoveConsumer.as_asgi()),
-    path('api/change/theme', setThemeConsumer.as_asgi()),
+    path('api/change/theme', setTheme.as_asgi()),
+    path('api/change/username', setNewUsername.as_asgi()),
     path('admin/', get_asgi_application()),
 ]
 
