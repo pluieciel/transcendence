@@ -2,7 +2,7 @@
 .nav-container {
     padding: 30px;
     text-align: center;
-	color: #FFF;
+	color: var(--secondary-color);
 }
 
 .nav-link:hover {
@@ -267,14 +267,18 @@
 
 #usrnm-form, #pwd-form, #cfm-pwd-form {
 	border: none;
-	color: #FFF;
-	background-color: #000;
+	color: var(--secondary-color);
+	background-color: var(--primary-color);
 }
 
 #usrnm-form::placeholder, #pwd-form::placeholder, #cfm-pwd-form::placeholder{
-	color: #FFF;
+	color: var(--secondary-color);
+}
+
+#nav-links {
+	color: var(--secondary-color);
 }
 
 #loginForm, #signupForm {
-	background-color: #333;
+	background-color: var(--accent-color);
 }

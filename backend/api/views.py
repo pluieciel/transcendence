@@ -2,35 +2,16 @@
 from channels.generic.http import AsyncHttpConsumer
 from django.contrib.auth import get_user_model, authenticate
 from channels.db import database_sync_to_async
+from .utils import jwt_to_user
 import json
+from dotenv import load_dotenv
+import os
 import logging
 import requests
 import jwt
 import datetime
 
-SECRET_KEY = 'ultrasafe_secret_key'
 logger = logging.getLogger(__name__)
-
-async def jwt_to_user(token):
-    @database_sync_to_async
-    def get_user(user_id):
-        User = get_user_model()
-        return User.objects.get(id=user_id)
-
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
-        user = await get_user(payload.get('user_id'))
-        if user:
-            return user
-        else:
-            return False
-
-    except jwt.ExpiredSignatureError:
-        return False
-    except jwt.InvalidTokenError:
-        return False
-
-
 
 class SignupConsumer(AsyncHttpConsumer):
     async def handle(self, body):
@@ -103,7 +84,7 @@ class HandleOAuthConsumer(AsyncHttpConsumer):
                 'client_id': 'u-s4t2ud-ba5b0c72367af9ad1efbf4d20585f3c315b613ece176ca16919733a7dba999d5',
                 'client_secret': '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',
                 'code': code,
-                'redirect_uri': 'https://192.168.1.74:9000/signup/oauth'
+                'redirect_uri': 'https://192.168.1.37:9000/signup/oauth'
             }
 
             response = requests.post(url, data=params)
@@ -144,7 +125,7 @@ class HandleOAuthConsumer(AsyncHttpConsumer):
                 token = jwt.encode({
                     'user_id': user.id,
                     'exp': datetime.datetime.now(datetime.UTC) + datetime.timedelta(hours=1)
-                }, SECRET_KEY, algorithm='HS256')
+                }, os.getenv("SECRET_KEY"), algorithm='HS256')
                 response_data['token'] = token
                 return await self.send_response(response_data['status'], json.dumps(response_data).encode(),
                     headers=[(b"Content-Type", b"application/json")])
@@ -200,7 +181,6 @@ class LoginConsumer(AsyncHttpConsumer):
                 return await self.send_response(400, json.dumps(response_data).encode(),
                     headers=[(b"Content-Type", b"application/json")])
 
-            # Authenticate user
             user = await self.authenticate_user(username, password)
             if not user:
                 response_data = {
@@ -210,11 +190,12 @@ class LoginConsumer(AsyncHttpConsumer):
                 return await self.send_response(401, json.dumps(response_data).encode(),
                     headers=[(b"Content-Type", b"application/json")])
 
-            # Generate JWT
+            load_dotenv()
+            secret = os.getenv("SECRET_KEY")
             token = jwt.encode({
                 'user_id': user.id,
                 'exp': datetime.datetime.now(datetime.UTC) + datetime.timedelta(hours=1)
-            }, SECRET_KEY, algorithm='HS256')
+            }, secret, algorithm='HS256')
 
             # Login successful
             response_data = {
@@ -223,6 +204,7 @@ class LoginConsumer(AsyncHttpConsumer):
                 'token': token,
                 'user': {
                     'username': user.username,
+                	'theme': user.theme,
                     'id': user.id
                 },
             }

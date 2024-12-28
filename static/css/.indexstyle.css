@@ -1,10 +1,10 @@
 /* :root {
-    --primary-color: #121212;
+    --primary-color: #111;
     --secondary-color: #fff;
     --accent-color: #353535;
 	--hover-color: #666;
-	--header-color: #0a0a0a;
-	--button-box-color: rgba(255, 255, 255, 0.5);
+	--header-color: #111;
+	--header-shadow-color: rgba(255, 255, 255, 0.3);
 } */
 
 :root {
@@ -13,7 +13,7 @@
     --accent-color: #E8C4A2;
 	--hover-color: #FFE4C4;
 	--header-color: #E8C4A2;
-	--button-box-color: rgba(0, 0, 0, 0.5);
+	--header-shadow-color: rgba(0, 0, 0, 0.5);
 }
 
 body {
@@ -33,6 +33,7 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    box-shadow: 0 4px 10px var(--header-shadow-color);
     width: 100%;
     top: 0;
     left: 0;
@@ -73,9 +74,9 @@ a {
 }
 
 .content > div {
-    flex: 1;
-    min-width: 250px;
-    max-width: 400px;
+    flex: 1; /* Make each section take equal width by default */
+    min-width: 250px; /* Ensure a minimum width to fit smaller contents */
+    max-width: 400px; /* Prevent excessive expansion */
     padding: 15px;
 }
 
@@ -85,8 +86,10 @@ a {
     align-items: center;
     justify-content: center;
 	color: var(--secondary-color);
+    border: 2px solid var(--secondary-color);
     background-color: var(--accent-color);
     padding: 20px;
+    border-radius: 10px;
     width: fit-content;
     height: fit-content;
 	text-align: center;
@@ -99,31 +102,38 @@ a {
 	padding: 10px 20px;
 	font-size: 1rem;
 	background-color: var(--primary-color);
+	border-radius: 10px;
 	color: var(--secondary-color);
     cursor: pointer;
-	/* border-radius: 10px; */
-	border: 0px solid var(--secondary-color);
+	border: 2px solid var(--secondary-color);
     transition: background-color 0.2s, color 0.3s, scale 0.2s, transform 0.2s;
-    margin: 10px 0;
+    margin: 10px 0; /* Adjust vertical spacing */
     text-align: center;
-    width: 100%;
-    max-width: 200px;
+    width: 100%; /* Ensure consistent button width */
+    max-width: 200px; /* Limit maximum width */
 	position: static;
 }
 
+.game-buttons button:hover {
+	background-color: var(--hover-color);
+	scale: 1.1;
+	color: var(--secondary-color);
+}
+
 .sendButton, .btn-closing-chat {
-    background-color: #f0f0f0;
-    color: #333;
+    background-color: #f0f0f0; /* Example custom background */
+    color: #333; /* Example custom text color */
     border: #ddd solid 1px;
 }
 
+/* Ensure login button is fully visible */
 #settingsBtn, #indexBtn, #logoutBtn {
-    margin-right: 10px;
+    margin-right: 10px; /* Add spacing from the edge */
     padding: 10px;
 	width: 100px;
     font-size: 1rem;
 	position: absolute;
-	order: -1;
+	order: -1; /* Move it to the start of the flex container */
 	transition: background-color 0.2s, transform 0.2s;
 }
 
@@ -157,25 +167,15 @@ a {
     transform: scale(1.1);
 }
 
-.containerPrivate > button {
-	padding: 10px 20px;
-	font-size: 16px;
-	border: 2px solid var(--primary-color);
-	background-color: var(--primary-color);
-	cursor: pointer;
-	transition: background-color 0.5s, border 0.5s;
-	margin: 5px;
-}
-
 .containerSensitive > button {
 	padding: 10px 20px;
 	font-size: 16px;
-	border: 2px solid #f74f5f;
+	border: 2px solid var(--primary-color);
+	border-radius: 5px;
 	background-color: #f74f5f;
 	cursor: pointer;
 	transition: background-color 0.5s, border 0.5s;
 	display: none;
-	margin: 5px;
 }
 
 .containerSensitive > button:hover {
@@ -187,6 +187,7 @@ a {
 	padding: 10px;
 	font-size: 16px;
 	border: 1px solid var(--primary-color);
+	border-radius: 5px;
 	text-align: center;
 }
 

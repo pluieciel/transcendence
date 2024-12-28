@@ -48,6 +48,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     current_game_id = models.IntegerField(default=0)
     tourn_win = models.IntegerField(default=0)
     tourn_joined = models.IntegerField(default=0)
+    theme = models.CharField(default="light", max_length=5)
 
     objects = CustomUserManager()
 

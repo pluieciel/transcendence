@@ -25,7 +25,7 @@ export default class MainView {
 			<h3>Profile info i guess</h3>
 			<button id="changeUsernameBtn">Change your username</button>
 			<button id="changePpBtn">Change your profile picture</button>
-			<button id="changeThemeBtn">Change the theme</button>
+			<button id="changeThemeBtn">Switch theme</button>
 		</div>
 		<div class="containerSensitive">
 			<h3>Be careful with those</h3>
@@ -40,6 +40,7 @@ export default class MainView {
 
     addEventListeners() {
         const logoutBtn = document.getElementById('logoutBtn');
+        const changeThemeBtn = document.getElementById('changeThemeBtn');
 		const indexBtn = document.getElementById('indexBtn');
 		const wipeBtn = document.getElementById('deleteAccBtn');
 		const button = document.getElementById('passwordButton');
@@ -51,6 +52,42 @@ export default class MainView {
             input.focus();
         });
 		
+		let isSwitching = false;
+		changeThemeBtn.addEventListener('click', async () => {
+			if (isSwitching) return;
+			isSwitching = true;
+			try {
+				console.log("calling the api");
+				const response = await fetch('/api/change/theme', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						'Authorization': `${window.app.state.token}`
+					},
+					body: JSON.stringify({
+						currentTheme: window.app.state.theme,
+						username: this.username,
+					})
+				});
+		
+				const data = await response.json();
+		
+				if (data.success) {
+					console.log("changing theme success");
+					window.app.state.theme = data['theme'];
+					window.app.applyTheme();
+					console.log("theme = " + window.app.state.theme);
+				} else {
+					console.log("changing theme failed");
+				}
+			} catch (error) {
+				console.error(error);
+			} finally {
+				isSwitching = false;
+			}
+		});
+		
+
 		input.addEventListener('keydown', async (event) => {
 			if (event.key === "Enter") {
 				const password = this.container.querySelector('#passwordInput').value;
@@ -73,7 +110,8 @@ export default class MainView {
 						wipeBtn.style.display = "inline-block";
 						button.style.display = "inline-block";
 						input.style.display = "none";
-						this.isAllowed = true; //check isallowed when clicking the new pwd button or the wipe button
+						this.isAllowed = true;
+						sessionStorage.setItem('token', data['token']);
 					} else {
 						console.log("login failed");
 					}
@@ -87,8 +125,8 @@ export default class MainView {
 		wipeBtn.addEventListener('click', () => {
 			if (!this.isAllowed)
 				return ;
-			this.eraseInDB()
-            window.app.logout();
+			if (this.eraseInDB())
+				window.app.logout();
         });
 
 		logoutBtn.addEventListener('click', () => {
@@ -112,18 +150,13 @@ export default class MainView {
 					username: this.username,
 				})
 			});
-
+			
 			if (!response.ok) {
 				console.error(`Error: ${response.status} - ${response.statusText}`);
 				return;
 			}
-	
 			const responseText = await response.text();
-			if (!responseText) {
-				console.error('Empty response body');
-				return;
-			}
-				const data = JSON.parse(responseText);
+			const data = JSON.parse(responseText);
 
 			if (data.success) {
 				alert("deleted user successfully");
