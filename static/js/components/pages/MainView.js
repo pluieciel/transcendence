@@ -1,4 +1,5 @@
 import ChatBox from "../chat/ChatBox.js";
+import { Game } from "../game/Game.js";
 
 export default class MainView {
 	constructor(container) {
@@ -67,18 +68,19 @@ export default class MainView {
 		</div>
 	</div>
 	<!-- ChatBox container -->
-	<div id="chatBoxContainer">
-	</div>
+	<div id="chatBoxContainer"></div>
 
 	<div class="modal fade" id="matchSearch" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content modal-content-game d-flex flex-column align-items-center justify-content-center text-center">
-            <h5 class="modal-title w-70 mt-3 mb-3" id="staticBackdropLabel">Searching for a game</h5>
-            <h2 id="timer">0s</h2> <!-- Timer below the header -->
-            <button type="button" class="btn btn-secondary m-3" id="gameSearchCancel" data-bs-dismiss="modal">Cancel</button>
-        </div>
-    </div>
-</div>
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content modal-content-game d-flex flex-column align-items-center justify-content-center text-center">
+				<h5 class="modal-title w-70 mt-3 mb-3" id="staticBackdropLabel">Searching for a game</h5>
+				<h2 id="timer">0s</h2> <!-- Timer below the header -->
+				<button type="button" class="btn btn-secondary m-3" id="gameSearchCancel" data-bs-dismiss="modal">Cancel</button>
+			</div>
+		</div>
+	</div>
+
+	<canvas id="gameCanvas"></canvas>
         `;
 		this.timerElement = document.getElementById("timer");
 	}
@@ -88,7 +90,7 @@ export default class MainView {
 		const host = window.location.host;
 		const token = window.app.getToken();
 
-		if (!token) this.handleUnrecognizedToken();
+		//if (!token) this.handleUnrecognizedToken();
 		const wsUrl = `${protocol}//${host}/ws/game/?token=${token}`;
 
 		this.ws = new WebSocket(wsUrl);
@@ -97,8 +99,26 @@ export default class MainView {
 		this.ws.onmessage = (event) => {
 			console.log(event);
 			this.stopTimerAndDismissModal();
+			const event = JSON.parse(event)
+			if (event.type === "init") { //condition for ready game
+				// identify self as player_left or player_right
+				const canvas = container.querySelector('#gameCanvas');
+				const game = new Game(canvas, this.ws);
+				game.initialize();
+			}
 		};
-		//window.app.router.navigateTo("/game");
+
+		this.ws.onopen = () => {
+			console.log("Connected to server");
+		};
+
+		this.ws.onclose = () => {
+			console.log("Disconnected from server");
+		};
+
+		this.ws.onerror = (error) => {
+			console.error("WebSocket error:", error);
+		};
 	}
 
 	stopTimerAndDismissModal() {
