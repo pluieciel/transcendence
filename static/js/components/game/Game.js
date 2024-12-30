@@ -1,36 +1,60 @@
 import { Renderer } from "./Renderer.js";
 import { SceneManager } from "./SceneManager.js";
 import { InputManager } from "./InputManager.js";
-import { Player } from "./Player.js";
-import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import * as THREE from "three";
+import { ParticleSystem } from "./ParticleSystem.js";
+//import * as THREE from 'three';
+import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
 
 export class Game {
-	constructor(canvasId) {
-		this.renderer = new Renderer(canvasId);
+	constructor(canvas) {
+		this.renderer = new Renderer(canvas);
 		this.sceneManager = new SceneManager();
 		this.inputManager = new InputManager();
-		this.players = [];
-		this.controls = null;
+		this.uiManager = this.sceneManager.UIManager;
+
 		this.ball = null;
 		this.initialized = false;
+		this.gameStarted = false;
+		this.sceneInitialized = false;
+
+		this.uiManager.setOverlayVisibility(true);
+		this.uiManager.setOverText("Waiting for server...");
+
 		this.setupWebSocket();
+
+		this.particleSystem = null;
+		this.lastTime = 0;
+
+		this.username = sessionStorage.getItem("username");
+
+		window.addEventListener("keydown", (event) => {
+			if (event.code === "Space") {
+				this.emitParticles();
+			}
+		});
 	}
 
+	handleUnrecognizedToken() {}
+
 	setupWebSocket() {
-		this.ws = new WebSocket("ws://localhost:8765");
+		const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+		const host = window.location.host;
+		const token = window.app.getToken();
+
+		if (!token) this.handleUnrecognizedToken();
+		const wsUrl = `${protocol}//${host}/ws/game/?token=${token}`;
+
+		this.ws = new WebSocket(wsUrl);
 		this.inputManager.ws = this.ws;
 
 		this.ws.onopen = () => {
 			console.log("Connected to server");
-			//if (this.sceneManager.paddles.length > 0) {
-			//	this.sendInitMessage();
-			//}
 		};
 
 		this.ws.onclose = () => {
 			console.log("Disconnected from server");
-			// Attempt to reconnect after a delay
+			this.uiManager.setOverlayVisibility(true);
+			this.uiManager.setOverText("Disconnected from server");
 			setTimeout(() => this.setupWebSocket(), 1000);
 		};
 
@@ -41,122 +65,145 @@ export class Game {
 		this.ws.onmessage = (event) => {
 			console.log(event);
 			const message = JSON.parse(event.data);
-			console.log(message);
-			if (message.type === "handle_error") {
-				console.error("Received error:", message.message); // Handle the error message
-			}
-			if (!this.initialized) {
-				this.onInitMessageReceived(message);
-			} else {
-				this.onMessageReceived(message);
+			this.uiManager.setOverText(message.message);
+			if (message.type === "init_response") {
+				this.handleInitResponse(message.data);
+			} else if (message.type === "game_update") {
+				this.handleGameUpdate(message.data);
 			}
 		};
-	}
-
-	sendInitMessage() {
-		if (this.ws.readyState === WebSocket.OPEN) {
-			this.ws.send(
-				JSON.stringify({
-					type: "init",
-					data: {
-						positions: {
-							player_left: this.sceneManager.paddles[0].position,
-							player_right: this.sceneManager.paddles[1].position,
-							ball: this.ball.position,
-							corners: this.sceneManager.corners,
-						},
-					},
-				}),
-			);
-		}
 	}
 
 	initialize() {
 		this.sceneManager.setupLights();
 		this.sceneManager.createObjects();
-		const paddles = this.sceneManager.getPaddles();
-
-		this.controls = new OrbitControls(this.sceneManager.camera, this.renderer.canvas);
+		this.sceneManager.hideObjects();
 		this.ball = this.sceneManager.ball;
-		this.controls.target.set(0, 0, 0);
-
-		// If WebSocket is already open, send init message
-		if (this.ws.readyState === WebSocket.OPEN) {
+		this.sceneManager.hideBall();
+		this.sceneInitialized = this.validateSceneInitialization();
+		if (this.sceneInitialized && this.ws.readyState === WebSocket.OPEN) {
 			this.sendInitMessage();
 		}
-
 		this.animate();
+
+		this.particleSystem = new ParticleSystem(this.sceneManager.getScene());
 	}
 
-	onInitMessageReceived(message) {
-		if (message.type === "init_response") {
-			// Update all positions from server
-			const positions = message.data.positions;
+	emitParticles(position = new THREE.Vector3(0, 0, 0)) {
+		const particleCount = 40;
+		const geometry = "square";
+		const velocity = 0.2;
+		const lifetime = 0.5;
+		const size = 0.1;
+		if (this.particleSystem) {
+			this.particleSystem.emit(particleCount, geometry, velocity, lifetime, size, position);
+		}
+	}
 
-			// Update paddles
+	validateSceneInitialization() {
+		return (
+			this.sceneManager.paddles.length === 2 &&
+			this.sceneManager.ball !== null &&
+			this.sceneManager.topBorder !== null &&
+			this.sceneManager.bottomBorder !== null &&
+			this.sceneManager.leftBorder !== null &&
+			this.sceneManager.rightBorder !== null &&
+			this.sceneManager.playerLeftScore !== null &&
+			this.sceneManager.playerRightScore !== null &&
+			this.sceneManager.playerLeftName !== null &&
+			this.sceneManager.playerRightName !== null
+		);
+	}
+
+	handleInitResponse(data) {
+		const positions = data.positions;
+
+		this.sceneManager.paddles[0].position.set(positions.player_left.x, positions.player_left.y, positions.player_left.z);
+		this.sceneManager.paddles[1].position.set(positions.player_right.x, positions.player_right.y, positions.player_right.z);
+
+		this.sceneManager.ball.position.set(positions.ball.x, positions.ball.y, positions.ball.z);
+
+		this.sceneManager.topBorder.position.set(positions.borders.top.x, positions.borders.top.y, positions.borders.top.z);
+		this.sceneManager.bottomBorder.position.set(positions.borders.bottom.x, positions.borders.bottom.y, positions.borders.bottom.z);
+		this.sceneManager.leftBorder.position.set(positions.borders.left.x, positions.borders.left.y, positions.borders.left.z);
+		this.sceneManager.rightBorder.position.set(positions.borders.right.x, positions.borders.right.y, positions.borders.right.z);
+
+		this.playerSide = data.side;
+		if (this.playerSide == "left") {
+			this.uiManager.updateNameLeft(this.username + " [" + data.player.left.rank + "]");
+			this.uiManager.updateNameRight("Opponent" + " [" + data.player.left.rank + "]");
+		} else {
+			this.uiManager.updateNameRight(this.username + " [" + data.player.right.rank + "]");
+			this.uiManager.updateNameLeft("Opponent" + " [" + data.player.left.rank + "]");
+		}
+
+		this.uiManager.updateScoreLeft(data.player.left.score);
+		this.uiManager.updateScoreRight(data.player.right.score);
+
+		this.sceneManager.showObjects();
+
+		if (data.game_started) {
+			this.uiManager.setOverlayVisibility(false);
+			this.gameStarted = true;
+		} else {
+			this.uiManager.setOverlayVisibility(true);
+			this.uiManager.setOverText("Waiting for opponent...");
+		}
+	}
+
+	handleGameUpdate(data) {
+		if (data.player) {
+			const leftPos = data.player.left.position;
+			const rightPos = data.player.right.position;
+
 			if (this.sceneManager.paddles[0]) {
-				this.sceneManager.paddles[0].position.copy(positions.player_left);
+				this.sceneManager.paddles[0].position.set(leftPos.x, leftPos.y, leftPos.z);
 			}
 			if (this.sceneManager.paddles[1]) {
-				this.sceneManager.paddles[1].position.copy(positions.player_right);
+				this.sceneManager.paddles[1].position.set(rightPos.x, rightPos.y, rightPos.z);
 			}
 
-			// Update ball
-			if (this.sceneManager.ball) {
-				this.sceneManager.ball.position.copy(positions.ball);
-			}
+			this.uiManager.updateScoreLeft(data.player.left.score);
+			this.uiManager.updateScoreRight(data.player.right.score);
+		}
 
-			// Update borders
-			if (positions.borders) {
-				this.sceneManager.topBorder.position.copy(positions.borders.top);
-				this.sceneManager.bottomBorder.position.copy(positions.borders.bottom);
-				this.sceneManager.leftBorder.position.copy(positions.borders.left);
-				this.sceneManager.rightBorder.position.copy(positions.borders.right);
-			}
+		if (data.ball && this.sceneManager.ball) {
+			this.sceneManager.ball.position.set(data.ball.position.x, data.ball.position.y, data.ball.position.z);
+			console.log(data.ball.visibility == true ? "Visible" : "Not");
+			console.log(data.ball.visibility == false ? "Invisible" : "Not");
+			this.sceneManager.ball.visible = data.ball.visibility;
+		}
 
-			// Update corners
-			this.sceneManager.corners = positions.corners;
+		if (!this.gameStarted) {
+			this.gameStarted = true;
+			this.uiManager.setOverlayVisibility(false);
+		}
 
-			// Update player information
-			this.sceneManager.updateNameLeft(message.data.player.left.name + " [" + message.data.player.left.rank + "]");
-			this.sceneManager.updateNameRight(message.data.player.right.name + " [" + message.data.player.right.rank + "]");
-			this.sceneManager.updateScoreLeft(0);
-			this.sceneManager.updateScoreRight(0);
-
-			this.initialized = true;
+		if (data.events && data.events.length > 0) {
+			data.events.forEach((event) => {
+				if (event.type === "score" && event.position) {
+					const scorePosition = new THREE.Vector3(event.position.x, event.position.y, event.position.z);
+					this.emitParticles(scorePosition);
+					//this.sceneManager.hideBall();
+					console.log("Spawning particles at:", scorePosition);
+				}
+			});
 		}
 	}
 
-	onMessageReceived(message) {
-		if (message.type === "update") {
-			this.updateGame(
-				message.data.player.left.position,
-				message.data.player.right.position,
-				message.data.ball.position,
-				message.data.player.left.score,
-				message.data.player.right.score,
-			);
-		}
-	}
+	animate(currentTime) {
+		requestAnimationFrame(this.animate.bind(this));
 
-	updateGame(playerLeftPos, playerRightPos, ballPos, scoreLeft, scoreRight) {
-		const paddles = this.sceneManager.getPaddles();
-		if (paddles[0]) {
-			paddles[0].position.set(playerLeftPos.x, playerLeftPos.y, playerLeftPos.z);
-		}
-		if (paddles[1]) {
-			paddles[1].position.set(playerRightPos.x, playerRightPos.y, playerRightPos.z);
-		}
-		if (this.ball && ballPos) {
-			this.ball.position.set(ballPos.x, ballPos.y, ballPos.z);
-		}
-		this.sceneManager.updateScoreLeft(scoreLeft);
-		this.sceneManager.updateScoreRight(scoreRight);
-	}
+		const deltaTime = (currentTime - this.lastTime) / 1000;
+		this.lastTime = currentTime;
 
-	animate() {
-		requestAnimationFrame(this.animate.bind(this)); // This ensures the `this` context is correct
-		this.controls.update();
+		if (this.particleSystem) {
+			this.particleSystem.update(deltaTime);
+		}
+		if (this.sceneManager.model) {
+			this.sceneManager.model.rotation.y += 0.02;
+		}
+
 		this.renderer.render(this.sceneManager.getScene(), this.sceneManager.getCamera());
 	}
 }

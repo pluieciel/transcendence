@@ -92,9 +92,9 @@ class GameConsumer(AsyncWebsocketConsumer):
 			self.logger.info(channel_name)
 			logging.info(self.game.game_id)
 			await self.channel_layer.send(channel_name, {
-		   "type": "chat.message",
-		   "text": "Hello there!",
-		})
+			    "type": "chat.message",
+			    "text": "Hello there!",
+			})
 			##await self.channel_layer.group_discard(str(self.game.game_id), channel_name)
 		else:
 			self.game = game_manager.get_game(user)
@@ -150,7 +150,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 		pass
 
 	async def chat_message(self, event):
-		await self.send(text_data=event["text"])
+		await self.send(text_data=json.dumps({"message":event["text"]}))
 
 
 
