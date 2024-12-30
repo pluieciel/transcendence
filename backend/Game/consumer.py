@@ -54,6 +54,8 @@ class GameManager:
 					self.games[random_id] = GameBackend(random_id)
 					return self.games[random_id]
 					break
+		else:
+			self.logger.info("Cannot create game, maximum number of concurrent games reached")
 
 game_manager = GameManager()
 
@@ -66,6 +68,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 	async def connect(self):
 		self.game = None
 		self.logger = logging.getLogger('game')
+		self.logger.info(f"Websocket connection made with channel name {self.channel_name}")
 
 		query_string = self.scope["query_string"].decode()
 		query_params = parse_qs(query_string)
@@ -86,11 +89,13 @@ class GameConsumer(AsyncWebsocketConsumer):
 		if (self.game):
 			self.logger.info("User found in a game, disconnecting the old session")
 			channel_name = await self.game.disconnect_user(user)
+			self.logger.info(channel_name)
+			logging.info(self.game.game_id)
 			await self.channel_layer.send(channel_name, {
-					"type": "handle_error",
-					"message": "You have been disconnected. A new connection was made from another device."
-			})
-			await self.channel_layer.group_discard(str(self.game.game_id), channel_name)
+		   "type": "chat.message",
+		   "text": "Hello there!",
+		})
+			##await self.channel_layer.group_discard(str(self.game.game_id), channel_name)
 		else:
 			self.game = game_manager.get_game(user)
 		self.game.assign_player(user, self.channel_name)
@@ -104,7 +109,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 			self.logger.info(f"Game {self.game.game_id} is full and ready to start with {self.game.player_left.user.username} and {self.game.player_right.user.username}")
 
 	async def receive(self, text_data):
-		logging.getLogger('game').info(f"*text_data")
+		logging.getLogger('game').info(text_data)
 		try:
 			data = json.loads(text_data)
 			print(f"Received message: {data}")
@@ -127,8 +132,8 @@ class GameConsumer(AsyncWebsocketConsumer):
 			elif data["type"] == "error":
 				print(f"Error message received: {data['message']}")
 				await self.send(json.dumps({
-					"type": "error_acknowledged",
-					"message": data["message"]
+					"type": "handle_error",
+    	"message": "You have been disconnected. A new connection was made from another device."
 				}))
 
 		except json.JSONDecodeError:
@@ -138,10 +143,14 @@ class GameConsumer(AsyncWebsocketConsumer):
 
 	async def handle_error(self, event):
 		self.logger.info(f"Errorr received  {event}")
+		await self.send(text_data=json.dumps(event))
 
 
 	async def disconnect(self, close_code):
 		pass
+
+	async def chat_message(self, event):
+		await self.send(text_data=event["text"])
 
 
 

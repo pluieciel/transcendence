@@ -23,9 +23,9 @@ export class Game {
 
 		this.ws.onopen = () => {
 			console.log("Connected to server");
-			if (this.sceneManager.paddles.length > 0) {
-				this.sendInitMessage();
-			}
+			//if (this.sceneManager.paddles.length > 0) {
+			//	this.sendInitMessage();
+			//}
 		};
 
 		this.ws.onclose = () => {
@@ -39,8 +39,12 @@ export class Game {
 		};
 
 		this.ws.onmessage = (event) => {
+			console.log(event);
 			const message = JSON.parse(event.data);
 			console.log(message);
+			if (message.type === "handle_error") {
+				console.error("Received error:", message.message); // Handle the error message
+			}
 			if (!this.initialized) {
 				this.onInitMessageReceived(message);
 			} else {
