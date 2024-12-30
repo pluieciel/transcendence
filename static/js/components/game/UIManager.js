@@ -92,7 +92,7 @@ export class UIManager {
 		overlay.style.fontSize = "48px";
 		overlay.style.fontFamily = "Arial, sans-serif";
 		overlay.style.zIndex = "1000"; // Make sure it's above other elements
-		overlay.innerText = "Waiting for server...";
+		overlay.innerText = "Waiting for game start...";
 		document.body.appendChild(overlay);
 		this.overlay = overlay;
 	}

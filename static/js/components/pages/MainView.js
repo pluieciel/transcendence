@@ -97,14 +97,20 @@ export default class MainView {
 		this.startSearchGameTimer();
 
 		this.ws.onmessage = (event) => {
-			console.log(event);
-			this.stopTimerAndDismissModal();
-			const event = JSON.parse(event)
-			if (event.type === "init") { //condition for ready game
+			console.log(event.data);
+			setTimeout(() => {
+				this.stopTimerAndDismissModal();
+			}, 1000);
+			const events = JSON.parse(event.data);
+			if (events.message_type === "init") {
+				//condition for ready game
 				// identify self as player_left or player_right
-				const canvas = container.querySelector('#gameCanvas');
-				const game = new Game(canvas, this.ws);
-				game.initialize();
+
+				setTimeout(() => {
+					const canvas = this.container.querySelector("#gameCanvas");
+					const game = new Game(canvas, this.ws);
+					game.initialize(events.data, "left");
+				}, 1000);
 			}
 		};
 
@@ -127,6 +133,7 @@ export default class MainView {
 
 		// Hide the modal using Bootstrap
 		const matchSearchModal = bootstrap.Modal.getInstance(document.getElementById("matchSearch"));
+		console.log("Hiding " + matchSearchModal);
 		matchSearchModal.hide(); // Hide the modal
 
 		// Optionally reset other modal states if needed

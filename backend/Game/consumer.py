@@ -25,10 +25,11 @@ class GameManager:
 		return (game)
 
 	def get_player_current_game(self, user):
-		self.logger.info(f"currentGame {user.current_game_id}")
-		self.logger.info(self.games)
-		if (user.is_playing and self.games and self.games[user.current_game_id]):
-			return (self.games[user.current_game_id])
+		#TODO uncomment
+		#self.logger.info(f"currentGame {user.current_game_id}")
+		#self.logger.info(self.games)
+		#if (user.is_playing and self.games and self.games[user.current_game_id]):
+		#	return (self.games[user.current_game_id])
 		return None
 
 	def check_available_game(self):
@@ -150,6 +151,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 		await self.send(text_data=json.dumps({"message":event["text"]}))
 
 	async def send_initial_game_state(self, instance):
+		self.logger.info(instance.game.player_left.position)
 		init_response = {
 			"type": "init",
 			"data": {
@@ -178,7 +180,11 @@ class GameConsumer(AsyncWebsocketConsumer):
 					}
 				}
 			}
+
+		    # Send the response to the group (or WebSocket connection)
 		await self.channel_layer.group_send(str(instance.game_id), init_response)
 
 	async def init(self, event):
-		await self.send(text_data=json.dumps(event))
+		await self.send(text_data=json.dumps({
+			"message_type": "init",
+			"data": event["data"]}))
