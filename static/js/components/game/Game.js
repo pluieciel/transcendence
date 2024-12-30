@@ -6,11 +6,12 @@ import { ParticleSystem } from "./ParticleSystem.js";
 import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
 
 export class Game {
-	constructor(canvas) {
+	constructor(canvas, ws) {
 		this.renderer = new Renderer(canvas);
 		this.sceneManager = new SceneManager();
 		this.inputManager = new InputManager();
 		this.uiManager = this.sceneManager.UIManager;
+		this.ws = ws;
 
 		this.ball = null;
 		this.initialized = false;
@@ -37,30 +38,14 @@ export class Game {
 	handleUnrecognizedToken() {}
 
 	setupWebSocket() {
-		const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-		const host = window.location.host;
-		const token = window.app.getToken();
+		//const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+		//const host = window.location.host;
+		//const token = window.app.getToken();
+		//if (!token) this.handleUnrecognizedToken();
+		//const wsUrl = `${protocol}//${host}/ws/game/?token=${token}`;
 
-		if (!token) this.handleUnrecognizedToken();
-		const wsUrl = `${protocol}//${host}/ws/game/?token=${token}`;
-
-		this.ws = new WebSocket(wsUrl);
+		//this.ws = new WebSocket(wsUrl);
 		this.inputManager.ws = this.ws;
-
-		this.ws.onopen = () => {
-			console.log("Connected to server");
-		};
-
-		this.ws.onclose = () => {
-			console.log("Disconnected from server");
-			this.uiManager.setOverlayVisibility(true);
-			this.uiManager.setOverText("Disconnected from server");
-			setTimeout(() => this.setupWebSocket(), 1000);
-		};
-
-		this.ws.onerror = (error) => {
-			console.error("WebSocket error:", error);
-		};
 
 		this.ws.onmessage = (event) => {
 			console.log(event);
@@ -81,9 +66,9 @@ export class Game {
 		this.ball = this.sceneManager.ball;
 		this.sceneManager.hideBall();
 		this.sceneInitialized = this.validateSceneInitialization();
-		if (this.sceneInitialized && this.ws.readyState === WebSocket.OPEN) {
-			this.sendInitMessage();
-		}
+		// if (this.sceneInitialized && this.ws.readyState === WebSocket.OPEN) {
+		// 	this.sendInitMessage();
+		// }
 		this.animate();
 
 		this.particleSystem = new ParticleSystem(this.sceneManager.getScene());
