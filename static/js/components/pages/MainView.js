@@ -1,9 +1,12 @@
 import ChatBox from '../chat/ChatBox.js';
 
 export default class MainView {
-    constructor(container, appState) {
+    constructor(container) {
 		this.container = container;
-        this.username = appState.username;
+		const decodedPayload = jwt_decode(window.app.getToken());
+		//console.log(appState.token);
+		//console.log(decodedPayload);
+        this.username = decodedPayload.username;
         this.render();
 		this.setProfileFields();
         this.initComponents();
@@ -60,7 +63,6 @@ export default class MainView {
 	</div>
 		<!-- ChatBox container -->
 		<div id="chatBoxContainer"></div>
-	</div>
         `;
     }
 
@@ -77,7 +79,7 @@ export default class MainView {
     initComponents() {
         // Initialize ChatBox
         const chatBoxContainer = this.container.querySelector('#chatBoxContainer');
-        this.chatBox = new ChatBox(chatBoxContainer, this.username);
+        this.chatBox = new ChatBox(chatBoxContainer);
     }
 
     addEventListeners() {
@@ -86,6 +88,7 @@ export default class MainView {
         const settings = this.container.querySelector('#settingsBtn');
         
 		logoutBtn.addEventListener('click', () => {
+			this.chatBox.disconnect();
             window.app.logout();
         });
 
@@ -117,11 +120,8 @@ export default class MainView {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `${window.app.state.token}`
+                    'Authorization': `${window.app.getToken()}`,
                 },
-                body: JSON.stringify({
-                    username: this.username,
-                })
             });
 
             const data = await response.json();
