@@ -25,6 +25,8 @@ class GameManager:
 		return (game)
 
 	def get_player_current_game(self, user):
+		self.logger.info(f"currentGame {user.current_game_id}")
+		self.logger.info(self.games)
 		if (user.is_playing and self.games and self.games[user.current_game_id]):
 			return (self.games[user.current_game_id])
 		return None
@@ -107,39 +109,34 @@ class GameConsumer(AsyncWebsocketConsumer):
 
 		if (self.game.is_full()):
 			self.logger.info(f"Game {self.game.game_id} is full and ready to start with {self.game.player_left.user.username} and {self.game.player_right.user.username}")
+			await self.send_initial_game_state(self.game)
 
 	async def receive(self, text_data):
-		logging.getLogger('game').info(text_data)
-		try:
-			data = json.loads(text_data)
-			print(f"Received message: {data}")
+		pass
+		#logging.getLogger('game').info(text_data)
+		#try:
+		#	data = json.loads(text_data)
+		#	print(f"Received message: {data}")
 
-			if data["type"] in ["keydown", "keyup"]:
-				self.game.handle_key_event(
-					self.channel_name,
-					data["key"],
-					data["type"] == "keydown"
-				)
+		#	if data["type"] in ["keydown", "keyup"]:
+			#		self.game.handle_key_event(
+			#			self.channel_name,
+			#			data["key"],
+			#			data["type"] == "keydown"
+			#		)
 
-				await self.send(json.dumps({
-					"type": "input_received",
-					"data": {
-						"key": data["key"],
-						"type": data["type"]
-					}
-				}))
+		#		await self.send(json.dumps({
+		#			"type": "input_received",
+		#			"data": {
+		#				"key": data["key"],
+		#				"type": data["type"]
+		#			}
+		#		}))
 
-			elif data["type"] == "error":
-				print(f"Error message received: {data['message']}")
-				await self.send(json.dumps({
-					"type": "handle_error",
-    	"message": "You have been disconnected. A new connection was made from another device."
-				}))
-
-		except json.JSONDecodeError:
-			print("Error decoding JSON message")
-		except Exception as e:
-			print(f"Error handling message: {e}")
+		#except json.JSONDecodeError:
+			#	print("Error decoding JSON message")
+			#except Exception as e:
+				#	print(f"Error handling message: {e}")
 
 	async def handle_error(self, event):
 		self.logger.info(f"Errorr received  {event}")
@@ -152,18 +149,36 @@ class GameConsumer(AsyncWebsocketConsumer):
 	async def chat_message(self, event):
 		await self.send(text_data=json.dumps({"message":event["text"]}))
 
+	async def send_initial_game_state(self, instance):
+		init_response = {
+			"type": "init",
+			"data": {
+				"positions": {
+						"player_left": vars(instance.game.player_left.position),
+						"player_right": vars(instance.game.player_right.position),
+						"ball": vars(instance.game.ball.position),
+						"borders": {
+							"top": vars(instance.game.bounds.top),
+							"bottom": vars(instance.game.bounds.bottom),
+							"left": vars(instance.game.bounds.left),
+							"right": vars(instance.game.bounds.right),
+						}
+					},
+					"player": {
+						"left": {
+							"name": instance.player_left.user.username,
+							"rank": instance.player_left.user.elo,
+							"score": instance.game.player_left.score
+						},
+						"right": {
+							"name": instance.player_right.user.username,
+							"rank": instance.player_right.user.elo,
+							"score": instance.game.player_right.score
+						}
+					}
+				}
+			}
+		await self.channel_layer.group_send(str(instance.game_id), init_response)
 
-
-
-	#async def send_initial_game_state(self):
-	#	init_response = {
-	#		"type": "init_response",
-	#		"data": {
-	#			"room_id": self.game_id,
-	#			"side": self.player_side,
-	#			"game_started": self.game.is_full(),
-	#			"positions": self.game.get_positions(),
-	#			"player": self.game.get_player_data(),
-	#		}
-	#	}
-	#	await self.send(text_data=json.dumps(init_response))
+	async def init(self, event):
+		await self.send(text_data=json.dumps(event))

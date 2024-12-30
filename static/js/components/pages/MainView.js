@@ -95,6 +95,7 @@ export default class MainView {
 		this.startSearchGameTimer();
 
 		this.ws.onmessage = (event) => {
+			console.log(event);
 			this.stopTimerAndDismissModal();
 		};
 		//window.app.router.navigateTo("/game");
