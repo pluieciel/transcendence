@@ -8,6 +8,7 @@ import requests
 import jwt
 import datetime
 import re
+from django.core.cache import cache
 
 SECRET_KEY = os.environ.get('JWT_SECRET_KEY')
 logger = logging.getLogger(__name__)
@@ -31,10 +32,24 @@ async def jwt_to_user(token):
     except jwt.InvalidTokenError:
         return False
 
-
-
 class SignupConsumer(AsyncHttpConsumer):
     async def handle(self, body):
+        # Rate limiting logic
+        key = self.scope['client'][0]  # Use the client's IP address as the key
+        rate_limit = 20  # Allow 5 requests
+        time_window = 60  # Time window in seconds
+        current_usage = cache.get(key, 0)
+        print(json.loads(body.decode()), flush=True)
+        print("current usage: " + str(current_usage), flush=True)
+        if current_usage >= rate_limit:
+            response_data = {
+                'success': False,
+                'message': 'Too many requests. Please try again later.'
+            }
+            return await self.send_response(429, json.dumps(response_data).encode(),
+                headers=[(b"Content-Type", b"application/json")])
+        cache.set(key, current_usage + 1, timeout=time_window)
+
         try:
             data = json.loads(body.decode())
             username = data.get('username')
@@ -91,6 +106,92 @@ class SignupConsumer(AsyncHttpConsumer):
             password=password
         )
         return user
+
+class LoginConsumer(AsyncHttpConsumer):
+    async def handle(self, body):
+        # Rate limiting logic
+        key = self.scope['client'][0]  # Use the client's IP address as the key
+        rate_limit = 20  # Allow 5 requests
+        time_window = 60  # Time window in seconds
+        current_usage = cache.get(key, 0)
+        if current_usage >= rate_limit:
+            response_data = {
+                'success': False,
+                'message': 'Too many requests. Please try again later.'
+            }
+            return await self.send_response(429, json.dumps(response_data).encode(),
+                headers=[(b"Content-Type", b"application/json")])
+        cache.set(key, current_usage + 1, timeout=time_window)
+
+        try:
+            data = json.loads(body.decode())
+            username = data.get('username')
+            password = data.get('password')
+
+            #print(f"Login attempt: {username}", flush=True)
+
+            # Validate input
+            if not username or not password:
+                response_data = {
+                    'success': False,
+                    'message': 'Username and password are required'
+                }
+                return await self.send_response(400, json.dumps(response_data).encode(),
+                    headers=[(b"Content-Type", b"application/json")])
+
+            if not await self.get_user_exists(username):
+                response_data = {
+                    'success': False,
+                    'message': 'Username doesn\'t exist'
+                }
+                return await self.send_response(400, json.dumps(response_data).encode(),
+                    headers=[(b"Content-Type", b"application/json")])
+
+            # Authenticate user
+            user = await self.authenticate_user(username, password)
+            if not user:
+                response_data = {
+                    'success': False,
+                    'message': 'Invalid credentials'
+                }
+                return await self.send_response(401, json.dumps(response_data).encode(),
+                    headers=[(b"Content-Type", b"application/json")])
+
+            # Generate JWT
+            token = jwt.encode({
+                'id': user.id,
+                'username': user.username,
+                'exp': datetime.datetime.now(datetime.UTC) + datetime.timedelta(hours=1)
+            }, SECRET_KEY, algorithm='HS256')
+
+            # Login successful
+            response_data = {
+                'success': True,
+                'message': 'Login successful',
+                'token': token,
+            }
+
+            return await self.send_response(200, json.dumps(response_data).encode(),
+                headers=[(b"Content-Type", b"application/json")])
+
+        except Exception as e:
+            print(f"Login error: {str(e)}", flush=True)
+            response_data = {
+                'success': False,
+                'message': str(e)
+            }
+            return await self.send_response(500, json.dumps(response_data).encode(),
+                headers=[(b"Content-Type", b"application/json")])
+
+    @database_sync_to_async
+    def authenticate_user(self, username, password):
+        user = authenticate(username=username, password=password)
+        return user
+
+    @database_sync_to_async
+    def get_user_exists(self, username):
+        User = get_user_model()
+        return User.objects.filter(username=username).exists()
 
 class HandleOAuthConsumer(AsyncHttpConsumer):
     async def handle(self, body):
@@ -165,78 +266,6 @@ class HandleOAuthConsumer(AsyncHttpConsumer):
         User = get_user_model()
         user = User.objects.create_user_oauth(username=username, token=token)
         return user
-    @database_sync_to_async
-    def get_user_exists(self, username):
-        User = get_user_model()
-        return User.objects.filter(username=username).exists()
-
-class LoginConsumer(AsyncHttpConsumer):
-    async def handle(self, body):
-        try:
-            data = json.loads(body.decode())
-            username = data.get('username')
-            password = data.get('password')
-
-            #print(f"Login attempt: {username}", flush=True)
-
-            # Validate input
-            if not username or not password:
-                response_data = {
-                    'success': False,
-                    'message': 'Username and password are required'
-                }
-                return await self.send_response(400, json.dumps(response_data).encode(),
-                    headers=[(b"Content-Type", b"application/json")])
-
-            if not await self.get_user_exists(username):
-                response_data = {
-                    'success': False,
-                    'message': 'Username doesn\'t exist'
-                }
-                return await self.send_response(400, json.dumps(response_data).encode(),
-                    headers=[(b"Content-Type", b"application/json")])
-
-            # Authenticate user
-            user = await self.authenticate_user(username, password)
-            if not user:
-                response_data = {
-                    'success': False,
-                    'message': 'Invalid credentials'
-                }
-                return await self.send_response(401, json.dumps(response_data).encode(),
-                    headers=[(b"Content-Type", b"application/json")])
-
-            # Generate JWT
-            token = jwt.encode({
-                'id': user.id,
-                'username': user.username,
-                'exp': datetime.datetime.now(datetime.UTC) + datetime.timedelta(hours=1)
-            }, SECRET_KEY, algorithm='HS256')
-
-            # Login successful
-            response_data = {
-                'success': True,
-                'message': 'Login successful',
-                'token': token,
-            }
-
-            return await self.send_response(200, json.dumps(response_data).encode(),
-                headers=[(b"Content-Type", b"application/json")])
-
-        except Exception as e:
-            print(f"Login error: {str(e)}", flush=True)
-            response_data = {
-                'success': False,
-                'message': str(e)
-            }
-            return await self.send_response(500, json.dumps(response_data).encode(),
-                headers=[(b"Content-Type", b"application/json")])
-
-    @database_sync_to_async
-    def authenticate_user(self, username, password):
-        user = authenticate(username=username, password=password)
-        return user
-
     @database_sync_to_async
     def get_user_exists(self, username):
         User = get_user_model()
