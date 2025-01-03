@@ -46,6 +46,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     current_game_id = models.IntegerField(default=0)
     tourn_win = models.IntegerField(default=0)
     tourn_joined = models.IntegerField(default=0)
+    friends = models.ManyToManyField('self', symmetrical=False, related_name='friend_set', blank=True)
 
     objects = CustomUserManager()
 

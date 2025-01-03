@@ -87,6 +87,13 @@
     background-color: #42b983;
 }
 
+.offline-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #b94242;
+}
+
 .user-item {
     border-radius: 4px;
     transition: background-color 0.3s;
