@@ -35,6 +35,16 @@ export default class SignUp {
                                     class="form-control"
                                 >
                             </div>
+
+                            <div class="mb-3">
+                                Avatar:
+                                <input 
+                                    type="file" 
+                                    id="avatar" 
+                                    accept="image/*"
+                                >
+                            </div>
+
                             <div id="passwordError" class="alert alert-danger d-none"></div>
                             <button type="submit" class="btn btn-primary w-100">Sign Up</button>
                             <button type="button" class="btn btn-primary w-100 SignUp42 OAuth">Sign Up with 42</button>
@@ -63,32 +73,31 @@ export default class SignUp {
             const password = this.container.querySelector('#password').value;
             const confirmPassword = this.container.querySelector('#confirmPassword').value;
             const errorDiv = this.container.querySelector('#passwordError');
-
+            
 			if (!password || !confirmPassword || !username) {
-				errorDiv.textContent = 'Please fill all fields';
+                errorDiv.textContent = 'Please fill all fields';
 				errorDiv.classList.remove('d-none');
 				return;
 			}
-
+            
             if (password !== confirmPassword) {
                 errorDiv.textContent = 'Passwords do not match';
                 errorDiv.classList.remove('d-none');
                 return;
             }
-
+            const formData = new FormData();
+            const avatar = this.container.querySelector('#avatar').files[0];
             const hashedPassword = CryptoJS.SHA256(password).toString();
+            formData.append('username', username);
+            formData.append('password', hashedPassword);
+            formData.append('avatar', avatar);
+            
 
             try {
                 // This is an async operation - waits for server response
                 const response = await fetch('/api/signup/', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        username: username,
-                        password: hashedPassword
-                    })
+                    body: formData
                 });
             
                 const data = await response.json();

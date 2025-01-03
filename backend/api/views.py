@@ -8,6 +8,7 @@ import requests
 import jwt
 import datetime
 import re
+from django.core.files.base import ContentFile
 from django.core.cache import cache
 
 SECRET_KEY = os.environ.get('JWT_SECRET_KEY')
@@ -51,9 +52,10 @@ class SignupConsumer(AsyncHttpConsumer):
         cache.set(key, current_usage + 1, timeout=time_window)
 
         try:
-            data = json.loads(body.decode())
+            data = await self.parse_multipart_form_data(body)
             username = data.get('username')
             password = data.get('password')
+            avatar = data.get('avatar')
 
             # Validate input
             if not username or not password:
@@ -74,7 +76,7 @@ class SignupConsumer(AsyncHttpConsumer):
                     headers=[(b"Content-Type", b"application/json")])
 
             # Create new user
-            await self.create_user(username, password)
+            await self.create_user(username, password, avatar)
 
             response_data = {
                 'success': True,
@@ -99,13 +101,50 @@ class SignupConsumer(AsyncHttpConsumer):
         return User.objects.filter(username=username).exists()
 
     @database_sync_to_async
-    def create_user(self, username, password):
+    def create_user(self, username, password, avatar):
         User = get_user_model()
         user = User.objects.create_user(
             username=username,
-            password=password
+            password=password,
+            avatar=avatar
         )
         return user
+    
+    async def parse_multipart_form_data(self, body):
+        """Parse multipart form data and return a dictionary."""
+        from django.http import QueryDict
+        #from django.utils.datastructures import MultiValueDict
+
+        # Create a QueryDict to hold the parsed data
+        data = QueryDict(mutable=True)
+
+        # Split the body into parts
+        boundary = body.split(b'\r\n')[0]
+        parts = body.split(boundary)[1:-1]  # Ignore the first and last parts (which are empty)
+
+        for part in parts:
+            if b'Content-Disposition' in part:
+                # Split the part into headers and content
+                headers, content = part.split(b'\r\n\r\n', 1)
+                headers = headers.decode('utf-8')
+                content = content.rstrip(b'\r\n')  # Remove trailing newlines
+
+                # Extract the name from the headers
+                name = None
+                filename = None
+                for line in headers.splitlines():
+                    if 'name="' in line:
+                        name = line.split('name="')[1].split('"')[0]
+                    if 'filename="' in line:
+                        filename = line.split('filename="')[1].split('"')[0]
+
+                # If it's a file, save it to the QueryDict
+                if filename:
+                    data[name] = ContentFile(content, name=filename)
+                else:
+                    data[name] = content.decode('utf-8')
+
+        return data
 
 class LoginConsumer(AsyncHttpConsumer):
     async def handle(self, body):
@@ -379,6 +418,55 @@ class ProfileConsumer2(AsyncHttpConsumer):
     def get_user(self, user_id):
         User = get_user_model()
         return User.objects.get(id=user_id)
+    
+    @database_sync_to_async
+    def get_user_by_name(self, username):
+        User = get_user_model()
+        return User.objects.filter(username=username).first()
+    
+class AvatarConsumer(AsyncHttpConsumer):
+    async def handle(self, body):
+        try:
+            #print(self.scope, flush=True)
+            headers = dict((key.decode('utf-8'), value.decode('utf-8')) for key, value in self.scope['headers'])
+            #print(headers, flush=True)
+            auth_header = headers.get('authorization', None)
+            if not auth_header:
+                response_data = {
+                    'success': False,
+                    'message': 'Authorization header missing'
+                }
+                return await self.send_response(401, json.dumps(response_data).encode(),
+                    headers=[(b"Content-Type", b"application/json")])
+            user = await jwt_to_user(auth_header)
+            if not user:
+                response_data = {
+                    'success': False,
+                    'message': 'Invalid token or User not found'
+                }
+                return await self.send_response(401, json.dumps(response_data).encode(),
+                    headers=[(b"Content-Type", b"application/json")])
+            
+            path = self.scope['path']
+            match = re.search(r'/api/get/avatar/(\w+)', path)
+            user_name = match.group(1)
+            user = await self.get_user_by_name(user_name)
+            host = next((value.decode('utf-8') for key, value in self.scope['headers'] if key == b'origin'), 'localhost:9000')
+            response_data = {
+                'username': user.username,
+                'success': True,
+                'avatar' : f"{host}{user.avatar.url}" if user.avatar else None,
+            }
+            return await self.send_response(200, json.dumps(response_data).encode(),
+                headers=[(b"Content-Type", b"application/json")])
+
+        except Exception as e:
+            response_data = {
+                'success': False,
+                'message': str(e)
+            }
+            return await self.send_response(500, json.dumps(response_data).encode(),
+                headers=[(b"Content-Type", b"application/json")])
     
     @database_sync_to_async
     def get_user_by_name(self, username):

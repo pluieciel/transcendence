@@ -55,6 +55,7 @@ export default class MainView {
 		</div>
 		<div class="profile">
 			<h2>Profile</h2>
+			<div id="p-avatar"></div>
 			<h3 id="p-name">${this.username}</h3>
 			<h3 id="p-elo">Loading...</h3>
 			<h3 id="p-winrate">Loading...</h3>
@@ -118,6 +119,7 @@ export default class MainView {
 		var elo_div = document.getElementById("p-elo");
 		var winrate_div = document.getElementById("p-winrate");
 		var tourn_div = document.getElementById("p-tourn");
+		var avatar_div = document.getElementById("p-avatar");
 		try {
             const response = await fetch('/api/get/profile', {
                 method: 'POST',
@@ -127,7 +129,16 @@ export default class MainView {
                 },
             });
 
+			const response_avatar = await fetch(`/api/get/avatar/${this.username}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `${window.app.getToken()}`,
+                },
+            });
+
             const data = await response.json();
+			const avatarurl = await response_avatar.json();
         
             if (data.success) {
 				elo_div.innerHTML = "Elo: " + data['elo'];
@@ -138,6 +149,9 @@ export default class MainView {
 				winrate_div.innerHTML = "Failed to load winrate";
 				tourn_div.innerHTML = "Failed to load tournaments";
             }
+			if (avatarurl.success) {
+				avatar_div.innerHTML = `<img src=${avatarurl['avatar']} alt="User Avatar" width="200" height="200"></img>`
+			}
         } catch (error) {
 			elo_div.innerHTML = "Failed to load elo";
 			winrate_div.innerHTML = "Failed to load winrate";
