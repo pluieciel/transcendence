@@ -7,7 +7,7 @@ export default class LoginView {
 		this.render();
 		this.addEventListeners();
 		this.showLogin();
-		this.createDefaultUsers();
+		//this.createDefaultUsers();
 	}
 
 	render() {

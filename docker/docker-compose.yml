@@ -62,6 +62,7 @@ services:
             - nginx_logs:/var/log/nginx
             - nginx_certs:/etc/nginx/certs
             - django_static_data:/var/www/django/static
+            - django_data:/var/www/django/media
         networks:
             - transcendence
         restart: unless-stopped

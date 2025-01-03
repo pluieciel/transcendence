@@ -3,11 +3,11 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, Permis
 from django.db import models
 
 class CustomUserManager(BaseUserManager):
-    def create_user(self, username, password=None):
+    def create_user(self, username, password=None, avatar=None):
         if not username:
             raise ValueError('Users must have a username')
 
-        user = self.model(username=username)
+        user = self.model(username=username, avatar=avatar)
         user.set_password(password)
         user.save(using=self._db)
         return user
@@ -47,6 +47,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     tourn_win = models.IntegerField(default=0)
     tourn_joined = models.IntegerField(default=0)
     friends = models.ManyToManyField('self', symmetrical=False, related_name='friend_set', blank=True)
+    avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
 
     objects = CustomUserManager()
 

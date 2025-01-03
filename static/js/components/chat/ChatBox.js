@@ -19,9 +19,12 @@ export default class ChatBox {
         this.focususer = undefined;
         this.showingOnlineUsers = 0;
         
+        this.hasNewMessages = false;
         this.render();
         this.initWebSocket();
         this.addEventListeners();
+        this.newMessageIndicator = this.container.querySelector('#newMessageIndicator');
+        this.offcanvas = this.container.querySelector('#offcanvas');
     }
 
     render() {
@@ -32,6 +35,7 @@ export default class ChatBox {
                     data-bs-toggle="offcanvas" 
                     data-bs-target="#offcanvas">
                 <i class="fas fa-comment"></i>
+                <span id="newMessageIndicator" class="new-message-dot" style="display: none;"></span>
             </button>
             
             <!-- Chat box -->
@@ -175,7 +179,8 @@ export default class ChatBox {
                 <div class="user-item d-flex align-items-center p-2 justify-content-between">
                     <span class="d-flex align-items-center">
                         <span class="online-indicator me-2"></span>
-                        <span class="user-name">${user}</span>
+                        <div id="avatar_${user}"></div>
+                        <span class="user-name ms-2">${user}</span>
                     </span>
                     ${user !== this.username ? `
                         <span class="d-flex align-items-center">
@@ -218,10 +223,23 @@ export default class ChatBox {
                 </div>
             `}).join('');
             container.innerHTML = "<div class=\"text-white\">Online Users</div>" + container.innerHTML;
-    
+
             this.onlineusers.map(async (user) => {
+                const avatar_div = this.container.querySelector(`#avatar_${user}`);
+                if (avatar_div) {
+                    const response = await fetch(`/api/get/avatar/${user}`,{
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `${window.app.getToken()}`,
+                        },
+                    });
+                    const data = await response.json();
+                    if (data.avatar) {
+                        avatar_div.innerHTML = `<img src="${data.avatar}" width="30" height="30"></img>`;
+                    }
+                }
                 const elo_div = this.container.querySelector(`#elo_${user}`);
-                //console.log(elo_div);
                 const wr_div = this.container.querySelector(`#wr_${user}`);
                 const tn_div = this.container.querySelector(`#tn_${user}`);
                 if (elo_div) {
@@ -241,14 +259,14 @@ export default class ChatBox {
                     }
                 }
             });
-    
+
             setTimeout(() => {
                 const donotdisbutton = this.container.querySelector('#Donotdisturb');
                 const tooltip = bootstrap.Tooltip.getInstance(donotdisbutton);
                 if (tooltip) tooltip.dispose();
                 new bootstrap.Tooltip(donotdisbutton); // Initialize the tooltip
             }, 50);
-    
+
             const popoverTriggerList = this.container.querySelectorAll('[data-bs-toggle="popover"]');
             const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl));
         } else if (this.showingOnlineUsers === 1){
@@ -258,7 +276,8 @@ export default class ChatBox {
                     <div class="user-item d-flex align-items-center p-2 justify-content-between">
                         <span class="d-flex align-items-center">
                             <span class="${this.onlineusers.includes(user)?'online-indicator':'offline-indicator'} me-2"></span>
-                            <span class="user-name">${user}</span>
+                            <div id="avatar_${user}"></div>
+                            <span class="user-name ms-2">${user}</span>
                         </span>
                         ${this.friends.includes(user) ? '':
                         `<span class="d-flex align-items-center">  
@@ -268,7 +287,24 @@ export default class ChatBox {
                         </span>`} 
                     </div>
                 `}).join('');
-                container.innerHTML = "<div class=\"text-white\">All Users</div>" + container.innerHTML;
+            container.innerHTML = "<div class=\"text-white\">All Users</div>" + container.innerHTML;
+
+            this.allusers.map(async (user) => {
+                const avatar_div = this.container.querySelector(`#avatar_${user}`);
+                if (avatar_div) {
+                    const response = await fetch(`/api/get/avatar/${user}`,{
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `${window.app.getToken()}`,
+                        },
+                    });
+                    const data = await response.json();
+                    if (data.avatar) {
+                        avatar_div.innerHTML = `<img src="${data.avatar}" width="30" height="30"></img>`;
+                    }
+                }
+            });
         } else if (this.showingOnlineUsers === 2){
             // show friend list
             container.innerHTML = this.friends.map(user => {
@@ -276,7 +312,8 @@ export default class ChatBox {
                     <div class="user-item d-flex align-items-center p-2 justify-content-between">
                         <span class="d-flex align-items-center">
                             <span class="${this.onlineusers.includes(user)?'online-indicator':'offline-indicator'} me-2"></span>
-                            <span class="user-name">${user}</span>
+                            <div id="avatar_${user}"></div>
+                            <span class="user-name ms-2">${user}</span>
                         </span>
 
                         <span class="d-flex align-items-center">
@@ -309,30 +346,44 @@ export default class ChatBox {
                         
                     </div>
                 `}).join('');
-                container.innerHTML = "<div class=\"text-white\">Friends</div>" + container.innerHTML;
+            container.innerHTML = "<div class=\"text-white\">Friends</div>" + container.innerHTML;
 
-                this.friends.map(async (user) => {
-                    const elo_div = this.container.querySelector(`#elof_${user}`);
-                    //console.log(elo_div);
-                    const wr_div = this.container.querySelector(`#wrf_${user}`);
-                    const tn_div = this.container.querySelector(`#tnf_${user}`);
-                    if (elo_div) {
-                        const response = await fetch(`/api/get/profile/${user}`,{
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Authorization': `${window.app.getToken()}`,
-                            },
-                        });
-                        const data = await response.json();
-                        //console.log(data);
-                        if (data.elo) {
-                            elo_div.innerHTML = `Elo: ${data.elo}`;
-                            wr_div.innerHTML = `Winrate: ${data.winrate}%`;
-                            tn_div.innerHTML = `Tournaments won: ${data['tourn']}`;
-                        }
+            this.friends.map(async (user) => {
+                const avatar_div = this.container.querySelector(`#avatar_${user}`);
+                if (avatar_div) {
+                    const response = await fetch(`/api/get/avatar/${user}`,{
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `${window.app.getToken()}`,
+                        },
+                    });
+                    const data = await response.json();
+                    if (data.avatar) {
+                        avatar_div.innerHTML = `<img src="${data.avatar}" width="30" height="30"></img>`;
                     }
-                });
+                }
+                const elo_div = this.container.querySelector(`#elof_${user}`);
+                //console.log(elo_div);
+                const wr_div = this.container.querySelector(`#wrf_${user}`);
+                const tn_div = this.container.querySelector(`#tnf_${user}`);
+                if (elo_div) {
+                    const response = await fetch(`/api/get/profile/${user}`,{
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `${window.app.getToken()}`,
+                        },
+                    });
+                    const data = await response.json();
+                    //console.log(data);
+                    if (data.elo) {
+                        elo_div.innerHTML = `Elo: ${data.elo}`;
+                        wr_div.innerHTML = `Winrate: ${data.winrate}%`;
+                        tn_div.innerHTML = `Tournaments won: ${data['tourn']}`;
+                    }
+                }
+            });
         }
     }
 
@@ -362,6 +413,11 @@ export default class ChatBox {
     }
 	
     createMessageHTML(msg) {
+        if ((msg.message_type === 'chat' || msg.message_type === 'system_invite')
+            && !this.offcanvas.classList.contains('show')) {
+            this.hasNewMessages = true;
+            this.updateNewMessageIndicator();
+        }
         return `
             <div class="chat-message ${msg.sender === this.username ? 'right' : msg.message_type === 'chat' ? 'left' : 'admin'}">
                 <div class="message-content ${msg.message_type !== 'chat' ? msg.message_type === 'system' ? 'admin-message' : 'invite-message' : ''}">
@@ -655,5 +711,15 @@ export default class ChatBox {
 
     disconnect() {
         this.chatSocket.close();
+    }
+
+    updateNewMessageIndicator() {
+        if (this.hasNewMessages) {
+            this.newMessageIndicator.style.display = 'inline-block'; // Show the red dot
+        }
+    }
+    clearNewMessages() {
+        this.hasNewMessages = false;
+        this.newMessageIndicator.style.display = 'none'; // Hide the red dot
     }
 }
