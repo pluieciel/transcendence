@@ -150,7 +150,7 @@ export default class MainView {
 				tourn_div.innerHTML = "Failed to load tournaments";
             }
 			if (avatarurl.success) {
-				avatar_div.innerHTML = `<img src=${avatarurl['avatar']} alt="User Avatar" width="200" height="200"></img>`
+				avatar_div.innerHTML = `<img src=${avatarurl['avatar']} alt="User Avatar" width="60" height="60"></img>`
 			}
         } catch (error) {
 			elo_div.innerHTML = "Failed to load elo";

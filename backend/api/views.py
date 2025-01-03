@@ -10,6 +10,8 @@ import datetime
 import re
 from django.core.files.base import ContentFile
 from django.core.cache import cache
+from PIL import Image
+import io
 
 SECRET_KEY = os.environ.get('JWT_SECRET_KEY')
 logger = logging.getLogger(__name__)
@@ -56,7 +58,7 @@ class SignupConsumer(AsyncHttpConsumer):
             username = data.get('username')
             password = data.get('password')
             avatar = data.get('avatar')
-
+                
             # Validate input
             if not username or not password:
                 response_data = {
@@ -75,6 +77,18 @@ class SignupConsumer(AsyncHttpConsumer):
                 return await self.send_response(400, json.dumps(response_data).encode(),
                     headers=[(b"Content-Type", b"application/json")])
 
+            if avatar:
+                # Read raw bytes from ContentFile
+                image_bytes = avatar.file.read()
+                # Open and resize image
+                image = Image.open(io.BytesIO(image_bytes))
+                resized_image = image.resize((60, 60), Image.Resampling.LANCZOS)
+                # Save resized image to bytes
+                img_byte_arr = io.BytesIO()
+                resized_image.save(img_byte_arr, format=image.format or 'PNG')
+                img_byte_arr.seek(0)
+                # Update avatar with resized image
+                avatar.file = img_byte_arr
             # Create new user
             await self.create_user(username, password, avatar)
 
@@ -451,11 +465,14 @@ class AvatarConsumer(AsyncHttpConsumer):
             match = re.search(r'/api/get/avatar/(\w+)', path)
             user_name = match.group(1)
             user = await self.get_user_by_name(user_name)
-            host = next((value.decode('utf-8') for key, value in self.scope['headers'] if key == b'origin'), 'localhost:9000')
+            host = 'https://' + next((value.decode('utf-8') for key, value in self.scope['headers'] if key == b'x-forwarded-host'), 'localhost:9000')
+            if host == 'localhost:9000':
+                host = next((value.decode('utf-8') for key, value in self.scope['headers'] if key == b'origin'), 'localhost:9000')
+            #print(self.scope, flush=True)
             response_data = {
                 'username': user.username,
                 'success': True,
-                'avatar' : f"{host}{user.avatar.url}" if user.avatar else None,
+                'avatar' : f"{host}{user.avatar.url}" if user.avatar else f"{host}/default_avatar.png",
             }
             return await self.send_response(200, json.dumps(response_data).encode(),
                 headers=[(b"Content-Type", b"application/json")])

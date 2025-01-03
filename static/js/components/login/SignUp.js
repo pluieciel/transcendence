@@ -63,7 +63,8 @@ export default class SignUp {
 		const scope = 'public';
 		const state = 'this_is_a_very_long_random_string_i_am_unguessable';
 		const authorizeUrl = `https://api.intra.42.fr/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&state=${state}`;
-
+        const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2 MB
+        
 		form42.addEventListener("click", () => {
 			window.location.href = authorizeUrl;
         });
@@ -86,11 +87,27 @@ export default class SignUp {
                 return;
             }
             const formData = new FormData();
-            const avatar = this.container.querySelector('#avatar').files[0];
+            const originalFile = this.container.querySelector('#avatar').files[0];
             const hashedPassword = CryptoJS.SHA256(password).toString();
             formData.append('username', username);
             formData.append('password', hashedPassword);
-            formData.append('avatar', avatar);
+            if (originalFile) {
+                if (originalFile.size > MAX_FILE_SIZE) {
+                    errorDiv.textContent = 'File size exceeds the 2MB limit';
+                    errorDiv.classList.remove('d-none');
+                    return;
+                }
+                // Get file extension
+                const extension = originalFile.name.split('.').pop();
+                // Create new filename with timestamp
+                const newFilename = `${username}.${extension}`;
+                // Create new File object with custom name
+                const modifiedFile = new File([originalFile], newFilename, {
+                    type: originalFile.type,
+                    lastModified: originalFile.lastModified
+                });
+                formData.append('avatar', modifiedFile);
+            }
             
 
             try {
