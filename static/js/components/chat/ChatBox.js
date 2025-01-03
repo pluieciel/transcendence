@@ -19,9 +19,11 @@ export default class ChatBox {
         this.focususer = undefined;
         this.showingOnlineUsers = 0;
         
+        this.hasNewMessages = false;
         this.render();
         this.initWebSocket();
         this.addEventListeners();
+        this.newMessageIndicator = this.container.querySelector('#newMessageIndicator');
     }
 
     render() {
@@ -32,6 +34,7 @@ export default class ChatBox {
                     data-bs-toggle="offcanvas" 
                     data-bs-target="#offcanvas">
                 <i class="fas fa-comment"></i>
+                <span id="newMessageIndicator" class="new-message-dot" style="display: none;"></span>
             </button>
             
             <!-- Chat box -->
@@ -362,6 +365,10 @@ export default class ChatBox {
     }
 	
     createMessageHTML(msg) {
+        if (msg.message_type === 'chat' || msg.message_type === 'system_invite') {
+            this.hasNewMessages = true;
+            this.updateNewMessageIndicator();
+        }
         return `
             <div class="chat-message ${msg.sender === this.username ? 'right' : msg.message_type === 'chat' ? 'left' : 'admin'}">
                 <div class="message-content ${msg.message_type !== 'chat' ? msg.message_type === 'system' ? 'admin-message' : 'invite-message' : ''}">
@@ -655,5 +662,15 @@ export default class ChatBox {
 
     disconnect() {
         this.chatSocket.close();
+    }
+
+    updateNewMessageIndicator() {
+        if (this.hasNewMessages) {
+            this.newMessageIndicator.style.display = 'inline-block'; // Show the red dot
+        }
+    }
+    clearNewMessages() {
+        this.hasNewMessages = false;
+        this.newMessageIndicator.style.display = 'none'; // Hide the red dot
     }
 }

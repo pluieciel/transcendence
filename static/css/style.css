@@ -270,3 +270,15 @@
 .OAuth {
 	margin-top: 10px;
 }
+
+.new-message-dot {
+    display: inline-block;
+    width: 10px; /* Size of the dot */
+    height: 10px; /* Size of the dot */
+    background-color: red; /* Color of the dot */
+    border-radius: 50%; /* Make it circular */
+    position: absolute; /* Position it absolutely */
+    top: 2px; /* Adjust as needed */
+    left: 2px; /* Adjust as needed */
+    border: 2px solid white; /* Optional: add a white border for better visibility */
+}

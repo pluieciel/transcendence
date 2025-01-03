@@ -80,6 +80,9 @@ export default class MainView {
         // Initialize ChatBox
         const chatBoxContainer = this.container.querySelector('#chatBoxContainer');
         this.chatBox = new ChatBox(chatBoxContainer);
+		chatBoxContainer.addEventListener('click', () => {
+			this.chatBox.clearNewMessages(); // Clear the new message indicator when the chat is opened
+		});
     }
 
     addEventListeners() {
