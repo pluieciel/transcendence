@@ -39,8 +39,8 @@ class SignupConsumer(AsyncHttpConsumer):
         rate_limit = 20  # Allow 5 requests
         time_window = 60  # Time window in seconds
         current_usage = cache.get(key, 0)
-        print(json.loads(body.decode()), flush=True)
-        print("current usage: " + str(current_usage), flush=True)
+        #print(json.loads(body.decode()), flush=True)
+        #print("current usage: " + str(current_usage), flush=True)
         if current_usage >= rate_limit:
             response_data = {
                 'success': False,

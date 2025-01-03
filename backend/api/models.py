@@ -47,6 +47,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     tourn_win = models.IntegerField(default=0)
     tourn_joined = models.IntegerField(default=0)
     friends = models.ManyToManyField('self', symmetrical=False, related_name='friend_set', blank=True)
+    avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
 
     objects = CustomUserManager()
 

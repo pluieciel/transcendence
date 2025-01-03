@@ -24,6 +24,7 @@ export default class ChatBox {
         this.initWebSocket();
         this.addEventListeners();
         this.newMessageIndicator = this.container.querySelector('#newMessageIndicator');
+        this.offcanvas = this.container.querySelector('#offcanvas');
     }
 
     render() {
@@ -365,7 +366,8 @@ export default class ChatBox {
     }
 	
     createMessageHTML(msg) {
-        if (msg.message_type === 'chat' || msg.message_type === 'system_invite') {
+        if ((msg.message_type === 'chat' || msg.message_type === 'system_invite')
+            && !this.offcanvas.classList.contains('show')) {
             this.hasNewMessages = true;
             this.updateNewMessageIndicator();
         }
