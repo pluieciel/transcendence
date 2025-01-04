@@ -137,7 +137,7 @@ export default class MainView {
         
             if (data.success) {
 				elo_div.innerHTML = "Elo: " + data['elo'];
-				winrate_div.innerHTML = "Winrate: " + data['winrate'] + "%";
+				winrate_div.innerHTML = "Winrate: " + data['winrate'];
 				tourn_div.innerHTML = "Tournaments won: " + data['tourn'];
 			} else {
 				elo_div.innerHTML = "Failed to load elo";

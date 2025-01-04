@@ -24,7 +24,7 @@ export default class MainView {
 		<div class="containerPrivate">
 			<h3>Profile info i guess</h3>
 			<button id="changeUsernameBtn">Change your username</button>
-			<input type="text" id="newUsername" placeholder="Enter new username">
+			<input type="text" id="newUsername">
 			<button id="changePpBtn">Change your profile picture</button>
 			<button id="changeThemeBtn">Switch theme</button>
 		</div>

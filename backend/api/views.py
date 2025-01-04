@@ -122,11 +122,16 @@ class HandleOAuthConsumer(AsyncHttpConsumer):
                         'username': user_data['login'] + "42"
                     }
                 user = await self.get_user(user_data['login'] + "42")
+                
+                load_dotenv()
                 token = jwt.encode({
                     'user_id': user.id,
                     'exp': datetime.datetime.now(datetime.UTC) + datetime.timedelta(hours=1)
                 }, os.getenv("SECRET_KEY"), algorithm='HS256')
+                
                 response_data['token'] = token
+                response_data['theme'] = user.theme or "light"
+                
                 return await self.send_response(response_data['status'], json.dumps(response_data).encode(),
                     headers=[(b"Content-Type", b"application/json")])
             else:
@@ -156,7 +161,7 @@ class HandleOAuthConsumer(AsyncHttpConsumer):
     @database_sync_to_async
     def get_user(self, username):
         User = get_user_model()
-        return User.objects.filter(username=username).first()
+        return User.objects.get(username=username)
 
 class LoginConsumer(AsyncHttpConsumer):
     async def handle(self, body):
@@ -204,7 +209,7 @@ class LoginConsumer(AsyncHttpConsumer):
                 'token': token,
                 'user': {
                     'username': user.username,
-                	'theme': user.theme,
+                    'theme': user.theme,
                     'id': user.id
                 },
             }
@@ -254,9 +259,9 @@ class ProfileConsumer(AsyncHttpConsumer):
 
             tot_games = (user.wins + user.looses)
             if tot_games == 0:
-                winrate = 0
+                winrate = "No games found"
             else:
-                winrate = (user.wins / tot_games) * 100
+                winrate = (user.wins / tot_games) * 100 + "%"
 
             response_data = {
                 'success': True,

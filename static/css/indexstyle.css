@@ -1,12 +1,3 @@
-/* :root {
-    --primary-color: #121212;
-    --secondary-color: #fff;
-    --accent-color: #353535;
-	--hover-color: #666;
-	--header-color: #0a0a0a;
-	--button-box-color: rgba(255, 255, 255, 0.5);
-} */
-
 :root {
     --primary-color: #FAEBD7;
     --secondary-color: #353535;
@@ -158,6 +149,8 @@ a {
 }
 
 .containerPrivate > button {
+	/* width: 250px;
+	height: 45px; */
 	padding: 10px 20px;
 	font-size: 16px;
 	border: 2px solid var(--primary-color);
@@ -200,7 +193,8 @@ a {
 }
 
 #newUsername {
-	padding: 10px 20px;
+	text-align: center;
+	padding: 8px 0px;
 	font-size: 16px;
 	border: 2px solid var(--primary-color);
 	background-color: var(--primary-color);

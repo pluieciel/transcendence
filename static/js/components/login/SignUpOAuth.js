@@ -54,7 +54,7 @@ class SignUpAuthView {
             const data = await response.json();
 
             if (data['success'])
-				window.app.login42(data['username'], data['token']);
+				window.app.login42(data['username'], data['token'], data['theme']);
 			else
                 this.showError(data.message || 'Sign up || Log in failed.');
         } catch (error) {

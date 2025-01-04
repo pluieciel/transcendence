@@ -58,12 +58,14 @@ class App {
         sessionStorage.setItem('token', this.state.token);
         this.router.navigateTo('/index');
     }
-
-	login42(username, token) {
+	
+	login42(username, token, theme) {
 		this.state.isLoggedIn = true;
         this.state.username = username;
         this.state.token = token;
-        sessionStorage.setItem('isLoggedIn', 'true');
+		this.state.theme = theme;		
+		this.applyTheme();
+		sessionStorage.setItem('isLoggedIn', 'true');
         sessionStorage.setItem('username', this.state.username);
         sessionStorage.setItem('token', this.state.token);
         this.router.navigateTo('/index');
