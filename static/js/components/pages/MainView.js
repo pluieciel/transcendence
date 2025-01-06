@@ -83,12 +83,15 @@ export default class MainView {
 		</div>
 	</div>
 
-	<canvas id="gameCanvas">
+	<div>
 		<div id="nameLeft"></div>
 		<div id="scoreLeft"></div>
 		<div id="nameRight"></div>
 		<div id="scoreRight"></div>
-	</canvas>
+		<div id="overlay"></div>
+		<canvas id="gameCanvas">
+		</canvas>
+	</div>
 
         `;
 		this.timerElement = document.getElementById("timer");
@@ -233,7 +236,16 @@ export default class MainView {
 				},
 			});
 
+			const response_avatar = await fetch(`/api/get/avatar/${this.username}`, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: `${window.app.getToken()}`,
+				},
+			});
+
 			const data = await response.json();
+			const avatarurl = await response_avatar.json();
 
 			if (data.success) {
 				elo_div.innerHTML = "Elo: " + data["elo"];
@@ -243,6 +255,9 @@ export default class MainView {
 				elo_div.innerHTML = "Failed to load elo";
 				winrate_div.innerHTML = "Failed to load winrate";
 				tourn_div.innerHTML = "Failed to load tournaments";
+			}
+			if (avatarurl.success) {
+				avatar_div.innerHTML = `<img src=${avatarurl["avatar"]} alt="User Avatar" width="60" height="60"></img>`;
 			}
 		} catch (error) {
 			elo_div.innerHTML = "Failed to load elo";

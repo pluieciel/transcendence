@@ -3,6 +3,7 @@ import time
 import logging
 import json
 from .game_logic import GameInstance, GameBounds
+from .bot import Bot
 
 class User:
 	def __init__(self, user, channel, state):
@@ -11,7 +12,7 @@ class User:
 		self.state = state
 
 class GameBackend:
-	def __init__(self, room_id):
+	def __init__(self, room_id, bot):
 		self.game_id = room_id
 		self.game = GameInstance(self.broadcast_state)
 		self.game_mode = "Vanilla"
@@ -19,6 +20,11 @@ class GameBackend:
 		self.player_left = None
 		self.player_right = None
 		self.logger = logging.getLogger('game')
+		self.is_bot_game = bot > 0
+		if (self.is_bot_game):
+			self.player_right = Bot(bot, self.game)
+
+
 
 	def handle_key_event(self, websocket, key, is_down):
 		if websocket == self.player_left.channel:
@@ -35,7 +41,14 @@ class GameBackend:
 		if self.is_full() and not self.game.is_running:
 			self.player_left.state = "Playing"
 			self.player_right.state = "Playing"
+			if (self.is_bot_game):
+				self.logger.info("started game with a bot")
+				self.player_right.start_bot()
+			else:
+				self.logger.info("started game with a bot")
 			self.game.start()
+		else:
+			self.logger.warning("start game caleld but game is not full")
 
 	def stop_game(self):
 		self.game.stop()
@@ -69,20 +82,22 @@ class GameBackend:
 			raise Exception("Error : assign player when two player were in a game")
 
 	def set_player_init(self, channel):
-		try:
 			if (self.player_left.channel == channel):
+				self.logger.info(f"is bot game {self.is_bot_game}")
 				self.player_left.state = "Ready"
 				self.check_ready_game()
+			elif self.is_bot_game:
+				self.logger.info(f"ici bot game {self.is_bot_game}")
+				self.check_ready_game()
 			elif (self.player_right.channel == channel):
+				self.logger.info(f"is bot game {self.is_bot_game}")
 				self.player_right.state = "Ready"
 				self.check_ready_game()
 			else:
 				self.logger.warning("Received player init but couldnt match channel")
-		except Exception as e:
-			self.logger.warning(f"Error occured set player_init : {e}")
 
 	def check_ready_game(self):
-		if (self.player_left and self.player_left.state == "Ready" and self.player_right and self.player_right.state == "Ready"):
+		if (self.player_left and self.player_left.state == "Ready" and self.is_bot_game or (self.player_right and self.player_right.state == "Ready")):
 			self.logger.info("Both player ready, starting")
 			self.start_game()
 		else:

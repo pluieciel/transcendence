@@ -17,11 +17,11 @@ class GameManager:
 		self.games = {}
 		self.logger = logging.getLogger('game')
 
-	def get_game(self, user):
+	def get_game(self, user, bot):
 		self.logger.info(f"Getting game for user {user.username}")
 		game = self.check_available_game()
 		if (game is None):
-			game = self.create_game()
+			game = self.create_game(bot)
 		return (game)
 
 	def get_player_current_game(self, user):
@@ -42,11 +42,11 @@ class GameManager:
 					self.logger.info("game id " + str(game_id) + " was full")
 		return None
 
-	def create_game(self):
+	def create_game(self, bot):
 		if len(self.games) == 0:
 			random_id = random.randint(1, 2000)
 			self.logger.info(f"No game were available, created one with id {random_id}")
-			self.games[random_id] = GameBackend(random_id)
+			self.games[random_id] = GameBackend(random_id, bot)
 			return self.games[random_id]
 
 		elif (len(self.games) < 1950):
@@ -54,7 +54,7 @@ class GameManager:
 				random_id = random_number = random.randint(1, 2000)
 				if random_id not in self.games:
 					self.logger.info("No game were available, created one with id " + str(random_id))
-					self.games[random_id] = GameBackend(random_id)
+					self.games[random_id] = GameBackend(random_id, bot)
 					return self.games[random_id]
 					break
 		else:
@@ -95,12 +95,12 @@ class GameConsumer(AsyncWebsocketConsumer):
 			self.logger.info(channel_name)
 			logging.info(self.game.game_id)
 			await self.channel_layer.send(channel_name, {
-			    "type": "chat.message",
-			    "text": "Hello there!",
+				"type": "chat.message",
+				"text": "Hello there!",
 			})
 			await self.channel_layer.group_discard(str(self.game.game_id), channel_name)
 		else:
-			self.game = game_manager.get_game(user)
+			self.game = game_manager.get_game(user, 1)
 		self.game.channel_layer = self.channel_layer
 		self.game.assign_player(user, self.channel_name)
 		user.is_playing = True
@@ -111,7 +111,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 		await self.channel_layer.group_add(str(self.game.game_id), self.channel_name)
 
 		if (self.game.is_full()):
-			self.logger.info(f"Game {self.game.game_id} is full and ready to start with {self.game.player_left.user.username} and {self.game.player_right.user.username}")
+		#	self.logger.info(f"Game {self.game.game_id} is full and ready to start with {self.game.player_left.user.username} and {self.game.player_right.user.username}")
 			await self.send_initial_game_state(self.game)
 
 	async def receive(self, text_data):
@@ -181,7 +181,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 				}
 			}
 
-		    # Send the response to the group (or WebSocket connection)
+			# Send the response to the group (or WebSocket connection)
 		await self.channel_layer.group_send(str(instance.game_id), init_response)
 
 	async def init(self, event):

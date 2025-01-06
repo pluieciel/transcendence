@@ -31,7 +31,6 @@ export class UIManager {
 		scoreRight.innerHTML = "0";
 		scoreRight.style.top = 50 + "px";
 		scoreRight.style.left = 1200 + "px";
-		document.body.appendChild(scoreRight);
 		this.playerRightScore = scoreRight;
 
 		var scoreLeft = document.querySelector("#scoreLeft");
@@ -45,7 +44,6 @@ export class UIManager {
 		scoreLeft.innerHTML = "0";
 		scoreLeft.style.top = 50 + "px";
 		scoreLeft.style.right = 1200 + "px";
-		document.body.appendChild(scoreLeft);
 		this.playerLeftScore = scoreLeft;
 
 		var nameRight = document.querySelector("#nameRight");
@@ -59,7 +57,6 @@ export class UIManager {
 		nameRight.innerHTML = "0";
 		nameRight.style.top = 170 + "px";
 		nameRight.style.left = 1100 + "px";
-		document.body.appendChild(nameRight);
 		this.playerRightName = nameRight;
 
 		var nameLeft = document.querySelector("#nameLeft");
@@ -73,12 +70,11 @@ export class UIManager {
 		nameLeft.innerHTML = "Test [1201]";
 		nameLeft.style.top = 170 + "px";
 		nameLeft.style.right = 1100 + "px";
-		document.body.appendChild(nameLeft);
 		this.playerLeftName = nameLeft;
 	}
 
 	createOverlay() {
-		const overlay = document.createElement("div");
+		const overlay = document.querySelector("#overlay");
 		overlay.style.position = "fixed";
 		overlay.style.top = "0";
 		overlay.style.left = "0";
@@ -93,7 +89,6 @@ export class UIManager {
 		overlay.style.fontFamily = "Arial, sans-serif";
 		overlay.style.zIndex = "1000"; // Make sure it's above other elements
 		overlay.innerText = "Waiting for game start...";
-		document.body.appendChild(overlay);
 		this.overlay = overlay;
 	}
 
