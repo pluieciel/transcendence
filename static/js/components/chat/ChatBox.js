@@ -8,17 +8,23 @@ export default class ChatBox {
         this.publicMessages = [];
         this.privateMessages = {};
         this.newMessage = '';
-        this.activeTab = 'public';
+        this.activeTab = 'online';
         this.users = [];
         this.blocked = [];
         this.onlineusers = [];
+        this.allusers = [];
+        this.friends = [];
         this.waiting_users = [];
         this.waiting = true;
         this.focususer = undefined;
+        this.showingOnlineUsers = 0;
         
+        this.hasNewMessages = false;
         this.render();
         this.initWebSocket();
         this.addEventListeners();
+        this.newMessageIndicator = this.container.querySelector('#newMessageIndicator');
+        this.offcanvas = this.container.querySelector('#offcanvas');
     }
 
     render() {
@@ -29,6 +35,7 @@ export default class ChatBox {
                     data-bs-toggle="offcanvas" 
                     data-bs-target="#offcanvas">
                 <i class="fas fa-comment"></i>
+                <span id="newMessageIndicator" class="new-message-dot" style="display: none;"></span>
             </button>
             
             <!-- Chat box -->
@@ -132,7 +139,13 @@ export default class ChatBox {
         this.chatSocket.onmessage = (e) => {
             const data = JSON.parse(e.data);
             //console.log(data);
-            if (data.message_type === "system" && data.recipient === 'update_online_users') {
+            if (data.message_type === "system" && data.message === 'all_user_list') {
+                this.allusers = data.usernames.sort((a, b) => a.localeCompare(b));
+                this.updateOnlineUsersList();
+            } else if (data.type == "friend_list") {
+                this.friends = data.usernames.sort((a, b) => a.localeCompare(b));
+                this.updateOnlineUsersList();
+            } else if (data.message_type === "system" && data.recipient === 'update_online_users') {
                 const dict = JSON.parse(data.message)
                 //console.log(data);
                 this.onlineusers = dict.online_users.filter(user => user !== this.username).sort((a, b) => a.localeCompare(b));
@@ -160,86 +173,218 @@ export default class ChatBox {
 
     updateOnlineUsersList() {
         const container = this.container.querySelector('#onlineUsers');
-        container.innerHTML = this.onlineusers.map(user => {
-        return `
-            <div class="user-item d-flex align-items-center p-2 justify-content-between">
-                <span class="d-flex align-items-center">
-                    <span class="online-indicator me-2"></span>
-                    <span class="user-name">${user}</span>
-                </span>
-                ${user !== this.username ? `
+        if (this.showingOnlineUsers === 0) {
+            container.innerHTML = this.onlineusers.map(user => {
+            return `
+                <div class="user-item d-flex align-items-center p-2 justify-content-between">
                     <span class="d-flex align-items-center">
-                        ${this.waiting_users.includes(user) ? `
-                            <button class="btn btn-primary square-btn me-1" data-action="invite" data-user="${user}"
-                                data-bs-toggle="modal" data-bs-target="#sendInvitation">
+                        <span class="online-indicator me-2"></span>
+                        <div id="avatar_${user}"></div>
+                        <span class="user-name ms-2">${user}</span>
+                    </span>
+                    ${user !== this.username ? `
+                        <span class="d-flex align-items-center">
+                            ${this.waiting_users.includes(user) ? `
+                                <button class="btn btn-primary square-btn me-1" data-action="invite" data-user="${user}"
+                                    data-bs-toggle="modal" data-bs-target="#sendInvitation">
+                                    <i class="fa-solid fa-gamepad"></i>
+                                </button>
+                            ` : ''}
+                            
+                            <div class="dropdown">
+                                <button class="btn btn-primary square-btn me-1" data-action="profile" data-user="${user}"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-user"></i>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li class="dropdown-item" id='elo_${user}'>Loading...</li>
+                                    <li class="dropdown-item" id='wr_${user}'>Loading...</li>
+                                    <li class="dropdown-item" id='tn_${user}'>Loading...</li>
+                                </ul>
+                            </div>
+                            <button class="btn btn-primary square-btn me-1" data-action="chat" data-user="${user}">
+                                <i class="fas fa-comments"></i>
+                            </button>
+                            <button class="btn btn-primary square-btn ${this.blocked.includes(user) ? 'square-btn-red' : ''}" 
+                                    data-action="block" 
+                                    data-user="${user}">
+                                <i class="fas fa-ban"></i>
+                            </button>
+                        </span>
+                    ` : `
+                        <span class="d-flex align-items-center">
+                            <button id="Donotdisturb" class="btn btn-primary square-btn me-1 ${this.waiting? '' : 'square-btn-red'}"
+                                data-action="waiting"
+                                data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Do not disturb">
                                 <i class="fa-solid fa-gamepad"></i>
                             </button>
-                        ` : ''}
-                        </button>
-                        <div class="dropdown">
-                            <button class="btn btn-primary square-btn me-1" data-action="profile" data-user="${user}"
-                                data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-user"></i>
-                            </button>
-                            <ul class="dropdown-menu">
-                                <li class="dropdown-item" id='elo_${user}'>Loading...</li>
-                                <li class="dropdown-item" id='wr_${user}'>Loading...</li>
-                                <li class="dropdown-item" id='tn_${user}'>Loading...</li>
-                            </ul>
-                        </div>
-                        <button class="btn btn-primary square-btn me-1" data-action="chat" data-user="${user}">
-                            <i class="fas fa-comments"></i>
-                        </button>
-                        <button class="btn btn-primary square-btn ${this.blocked.includes(user) ? 'square-btn-red' : ''}" 
-                                data-action="block" 
-                                data-user="${user}">
-                            <i class="fas fa-ban"></i>
-                        </button>
-                    </span>
-                ` : `
-                    <span class="d-flex align-items-center">
-                        <button id="Donotdisturb" class="btn btn-primary square-btn me-1 ${this.waiting? '' : 'square-btn-red'}"
-                            data-action="waiting"
-                            data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Do not disturb">
-                            <i class="fa-solid fa-gamepad"></i>
-                        </button>
-                    </span>
-                `}
-            </div>
-        `}).join('');
+                        </span>
+                    `}
+                </div>
+            `}).join('');
+            container.innerHTML = "<div class=\"text-white\">Online Users</div>" + container.innerHTML;
 
-        this.onlineusers.map(async (user) => {
-            const elo_div = this.container.querySelector(`#elo_${user}`);
-            //console.log(elo_div);
-            const wr_div = this.container.querySelector(`#wr_${user}`);
-            const tn_div = this.container.querySelector(`#tn_${user}`);
-            if (elo_div) {
-                const response = await fetch(`/api/get/profile/${user}`,{
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `${window.app.getToken()}`,
-                    },
-                });
-                const data = await response.json();
-                //console.log(data);
-                if (data.elo) {
-                    elo_div.innerHTML = `Elo: ${data.elo}`;
-                    wr_div.innerHTML = `Winrate: ${data.winrate}%`;
-                    tn_div.innerHTML = `Tournaments won: ${data['tourn']}`;
+            this.onlineusers.map(async (user) => {
+                const avatar_div = this.container.querySelector(`#avatar_${user}`);
+                if (avatar_div) {
+                    const response = await fetch(`/api/get/avatar/${user}`,{
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `${window.app.getToken()}`,
+                        },
+                    });
+                    const data = await response.json();
+                    if (data.avatar) {
+                        avatar_div.innerHTML = `<img src="${data.avatar}" width="30" height="30"></img>`;
+                    }
                 }
-            }
-        });
+                const elo_div = this.container.querySelector(`#elo_${user}`);
+                const wr_div = this.container.querySelector(`#wr_${user}`);
+                const tn_div = this.container.querySelector(`#tn_${user}`);
+                if (elo_div) {
+                    const response = await fetch(`/api/get/profile/${user}`,{
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `${window.app.getToken()}`,
+                        },
+                    });
+                    const data = await response.json();
+                    //console.log(data);
+                    if (data.elo) {
+                        elo_div.innerHTML = `Elo: ${data.elo}`;
+                        wr_div.innerHTML = `Winrate: ${data.winrate}%`;
+                        tn_div.innerHTML = `Tournaments won: ${data['tourn']}`;
+                    }
+                }
+            });
 
-        const donotdisbutton = this.container.querySelector('#Donotdisturb');
-        const tooltip = bootstrap.Tooltip.getInstance(donotdisbutton);
-        if (tooltip) tooltip.dispose();
-        setTimeout(() => {
-            new bootstrap.Tooltip(donotdisbutton); // Initialize the tooltip
-        }, 200);
+            setTimeout(() => {
+                const donotdisbutton = this.container.querySelector('#Donotdisturb');
+                const tooltip = bootstrap.Tooltip.getInstance(donotdisbutton);
+                if (tooltip) tooltip.dispose();
+                new bootstrap.Tooltip(donotdisbutton); // Initialize the tooltip
+            }, 50);
 
-        const popoverTriggerList = this.container.querySelectorAll('[data-bs-toggle="popover"]');
-        const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl));
+            const popoverTriggerList = this.container.querySelectorAll('[data-bs-toggle="popover"]');
+            const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl));
+        } else if (this.showingOnlineUsers === 1){
+            // show all user list
+            container.innerHTML = this.allusers.map(user => {
+                return `
+                    <div class="user-item d-flex align-items-center p-2 justify-content-between">
+                        <span class="d-flex align-items-center">
+                            <span class="${this.onlineusers.includes(user)?'online-indicator':'offline-indicator'} me-2"></span>
+                            <div id="avatar_${user}"></div>
+                            <span class="user-name ms-2">${user}</span>
+                        </span>
+                        ${this.friends.includes(user) ? '':
+                        `<span class="d-flex align-items-center">  
+                            <button class="btn btn-primary square-btn me-1" data-action="addfriend" data-user="${user}">
+                                <i class="fa-solid fa-plus"></i>
+                            </button>
+                        </span>`} 
+                    </div>
+                `}).join('');
+            container.innerHTML = "<div class=\"text-white\">All Users</div>" + container.innerHTML;
+
+            this.allusers.map(async (user) => {
+                const avatar_div = this.container.querySelector(`#avatar_${user}`);
+                if (avatar_div) {
+                    const response = await fetch(`/api/get/avatar/${user}`,{
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `${window.app.getToken()}`,
+                        },
+                    });
+                    const data = await response.json();
+                    if (data.avatar) {
+                        avatar_div.innerHTML = `<img src="${data.avatar}" width="30" height="30"></img>`;
+                    }
+                }
+            });
+        } else if (this.showingOnlineUsers === 2){
+            // show friend list
+            container.innerHTML = this.friends.map(user => {
+                return `
+                    <div class="user-item d-flex align-items-center p-2 justify-content-between">
+                        <span class="d-flex align-items-center">
+                            <span class="${this.onlineusers.includes(user)?'online-indicator':'offline-indicator'} me-2"></span>
+                            <div id="avatar_${user}"></div>
+                            <span class="user-name ms-2">${user}</span>
+                        </span>
+
+                        <span class="d-flex align-items-center">
+                            ${this.waiting_users.includes(user) ? `
+                                <button class="btn btn-primary square-btn me-1" data-action="invite" data-user="${user}"
+                                    data-bs-toggle="modal" data-bs-target="#sendInvitation">
+                                    <i class="fa-solid fa-gamepad"></i>
+                                </button>
+                            ` : ''}
+                            <div class="dropdown">
+                                <button class="btn btn-primary square-btn me-1" data-action="profile" data-user="${user}"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-user"></i>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li class="dropdown-item" id='elof_${user}'>Loading...</li>
+                                    <li class="dropdown-item" id='wrf_${user}'>Loading...</li>
+                                    <li class="dropdown-item" id='tnf_${user}'>Loading...</li>
+                                </ul>
+                            </div>
+                            ${this.waiting_users.includes(user) ? `
+                            <button class="btn btn-primary square-btn me-1" data-action="chat" data-user="${user}">
+                                <i class="fas fa-comments"></i>
+                            </button>
+                            ` : ''}
+                            <button class="btn btn-primary square-btn me-1 square-btn-red" data-action="removefriend" data-user="${user}">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </span>
+                        
+                    </div>
+                `}).join('');
+            container.innerHTML = "<div class=\"text-white\">Friends</div>" + container.innerHTML;
+
+            this.friends.map(async (user) => {
+                const avatar_div = this.container.querySelector(`#avatar_${user}`);
+                if (avatar_div) {
+                    const response = await fetch(`/api/get/avatar/${user}`,{
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `${window.app.getToken()}`,
+                        },
+                    });
+                    const data = await response.json();
+                    if (data.avatar) {
+                        avatar_div.innerHTML = `<img src="${data.avatar}" width="30" height="30"></img>`;
+                    }
+                }
+                const elo_div = this.container.querySelector(`#elof_${user}`);
+                //console.log(elo_div);
+                const wr_div = this.container.querySelector(`#wrf_${user}`);
+                const tn_div = this.container.querySelector(`#tnf_${user}`);
+                if (elo_div) {
+                    const response = await fetch(`/api/get/profile/${user}`,{
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `${window.app.getToken()}`,
+                        },
+                    });
+                    const data = await response.json();
+                    //console.log(data);
+                    if (data.elo) {
+                        elo_div.innerHTML = `Elo: ${data.elo}`;
+                        wr_div.innerHTML = `Winrate: ${data.winrate}%`;
+                        tn_div.innerHTML = `Tournaments won: ${data['tourn']}`;
+                    }
+                }
+            });
+        }
     }
 
     updatePublicChat() {
@@ -268,6 +413,11 @@ export default class ChatBox {
     }
 	
     createMessageHTML(msg) {
+        if ((msg.message_type === 'chat' || msg.message_type === 'system_invite')
+            && !this.offcanvas.classList.contains('show')) {
+            this.hasNewMessages = true;
+            this.updateNewMessageIndicator();
+        }
         return `
             <div class="chat-message ${msg.sender === this.username ? 'right' : msg.message_type === 'chat' ? 'left' : 'admin'}">
                 <div class="message-content ${msg.message_type !== 'chat' ? msg.message_type === 'system' ? 'admin-message' : 'invite-message' : ''}">
@@ -367,14 +517,17 @@ export default class ChatBox {
 
             // Show/hide content
             const tab = tabLink.dataset.tab;
-            this.activeTab = tab;
             
             this.container.querySelector('#onlineUsers').classList.add('d-none');
             this.container.querySelector('#publicChat').classList.add('d-none');
             this.container.querySelectorAll('[id^="chat-"]').forEach(el => {if (el) el.classList.add('d-none')});
-
+            
             if (tab === 'online') {
                 this.container.querySelector('#onlineUsers').classList.remove('d-none');
+                if (this.activeTab === 'online') {
+                    this.showingOnlineUsers = (this.showingOnlineUsers + 1) % 3;
+                }
+                this.updateOnlineUsersList();
             } else if (tab === 'public') {
                 this.container.querySelector('#publicChat').classList.remove('d-none');
             } else {
@@ -382,6 +535,7 @@ export default class ChatBox {
                 const userChat = this.container.querySelector(`#chat-${user}`);
                 if (userChat) userChat.classList.remove('d-none');
             }
+            this.activeTab = tab;
         });
 
         // User actions (chat/block)
@@ -431,9 +585,32 @@ export default class ChatBox {
                         </label>
                 </div>
             `;
-            } else if (action === 'profile') {
-                //window.app.router.navigateTo(`/profile/${user}`);
-
+            } else if (action === 'addfriend') {
+                const messageData = {
+                    message: "addfriend",
+                    sender: this.username,
+                    recipient: "admin",
+                    message_type: "system",
+                    friend: user,
+                    time: new Date().toLocaleTimeString()
+                };
+                this.chatSocket.send(JSON.stringify(messageData));
+                setTimeout(() => {
+                    this.updateOnlineUsersList();
+                }, 200);
+            } else if (action === 'removefriend') {
+                const messageData = {
+                    message: "removefriend",
+                    sender: this.username,
+                    recipient: "admin",
+                    message_type: "system",
+                    friend: user,
+                    time: new Date().toLocaleTimeString()
+                };
+                this.chatSocket.send(JSON.stringify(messageData));
+                setTimeout(() => {
+                    this.updateOnlineUsersList();
+                }, 200);
             }
         });
 
@@ -534,5 +711,15 @@ export default class ChatBox {
 
     disconnect() {
         this.chatSocket.close();
+    }
+
+    updateNewMessageIndicator() {
+        if (this.hasNewMessages) {
+            this.newMessageIndicator.style.display = 'inline-block'; // Show the red dot
+        }
+    }
+    clearNewMessages() {
+        this.hasNewMessages = false;
+        this.newMessageIndicator.style.display = 'none'; // Hide the red dot
     }
 }

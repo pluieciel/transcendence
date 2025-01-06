@@ -1,3 +1,6 @@
 docker/secrets
 *.pyc
-.idea
+*.idea
+todo
+avatars
+staticfiles
