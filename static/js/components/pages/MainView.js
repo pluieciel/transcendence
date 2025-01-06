@@ -27,45 +27,47 @@ export default class MainView {
 			<button id="logoutBtn">Log out</button>
 	</header>
 
-	<div class="welcome">
-        <p>Welcome to Pong! Get ready to play!</p>
-    </div>
-	<div class ="content">
-		<div class="credits">
-			<h2>Credits</h2>
-			<p>
-				Welcome to <strong>ft_transcendence</strong>,<br>
-				the final project of the 42 common core curriculum!<br>
-				This project is our version of the classic <b>Pong</b> game<br><br>
-				Ressources used:<br>
-				The whole project is running in docker <i class="fab fa-docker"></i><br>
-				We're using nginx as our webserv <i class="fas fa-server"></i><br>
-				Javascript <i class="fab fa-js"></i> is used for the Frontend<br>
-				PostgreSQL for the Database <i class="fas fa-database"></i><br><br>
-				Created by:<br>
-				<a href="https://github.com/jlefonde" target="_blank" rel="noopener noreferrer">Joris Lefondeur</a><br>
-				<a href="https://github.com/pluieciel" target="_blank" rel="noopener noreferrer">Yue Zhao</a><br>
-				<a href="https://github.com/siul008" target="_blank" rel="noopener noreferrer">Julien Nunes</a><br>
-				<a href="https://github.com/neutrou" target="_blank" rel="noopener noreferrer">Victor Algranti</a><br><br>
-				We hope you enjoy exploring our project!
-			</p>
-			
-		</div>
-				<div class="game-buttons">
-				<h2>PLAY!</h2>
-				<button id="playAI">AI</button>
-				<button id="rankedMatch">Ranked</button>
-				<button id="quickMatch" class="nav-link" data-view="game" data-bs-toggle="modal" data-bs-target="#matchSearch">Quick Match</button>
-				<button id="joinTournament">Join Tournament</button>
-				<button id="createTournament">Create Tournament</button>
-		</div>
-		<div class="profile">
-			<h2>Profile</h2>
-			<div id="p-avatar"></div>
-			<h3 id="p-name">${this.username}</h3>
-			<h3 id="p-elo">Loading...</h3>
-			<h3 id="p-winrate">Loading...</h3>
-			<h3 id="p-tourn">Loading...</h3>
+	<div id="mainPage">
+		<div class="welcome">
+	        <p>Welcome to Pong! Get ready to play!</p>
+	    </div>
+		<div class ="content">
+			<div class="credits">
+				<h2>Credits</h2>
+				<p>
+					Welcome to <strong>ft_transcendence</strong>,<br>
+					the final project of the 42 common core curriculum!<br>
+					This project is our version of the classic <b>Pong</b> game<br><br>
+					Ressources used:<br>
+					The whole project is running in docker <i class="fab fa-docker"></i><br>
+					We're using nginx as our webserv <i class="fas fa-server"></i><br>
+					Javascript <i class="fab fa-js"></i> is used for the Frontend<br>
+					PostgreSQL for the Database <i class="fas fa-database"></i><br><br>
+					Created by:<br>
+					<a href="https://github.com/jlefonde" target="_blank" rel="noopener noreferrer">Joris Lefondeur</a><br>
+					<a href="https://github.com/pluieciel" target="_blank" rel="noopener noreferrer">Yue Zhao</a><br>
+					<a href="https://github.com/siul008" target="_blank" rel="noopener noreferrer">Julien Nunes</a><br>
+					<a href="https://github.com/neutrou" target="_blank" rel="noopener noreferrer">Victor Algranti</a><br><br>
+					We hope you enjoy exploring our project!
+				</p>
+
+			</div>
+					<div class="game-buttons">
+					<h2>PLAY!</h2>
+					<button id="playAI">AI</button>
+					<button id="rankedMatch">Ranked</button>
+					<button id="quickMatch" class="nav-link" data-view="game" data-bs-toggle="modal" data-bs-target="#matchSearch">Quick Match</button>
+					<button id="joinTournament">Join Tournament</button>
+					<button id="createTournament">Create Tournament</button>
+			</div>
+			<div class="profile">
+				<h2>Profile</h2>
+				<div id="p-avatar"></div>
+				<h3 id="p-name">${this.username}</h3>
+				<h3 id="p-elo">Loading...</h3>
+				<h3 id="p-winrate">Loading...</h3>
+				<h3 id="p-tourn">Loading...</h3>
+			</div>
 		</div>
 	</div>
 	<!-- ChatBox container -->
@@ -182,11 +184,11 @@ export default class MainView {
 		// Add any additional logic to initialize the leaderboard view
 	}
 
-    initComponents() {
-        // Initialize ChatBox
-        const chatBoxContainer = this.container.querySelector('#chatBoxContainer');
-        this.chatBox = new ChatBox(chatBoxContainer);
-    }
+	initComponents() {
+		// Initialize ChatBox
+		const chatBoxContainer = this.container.querySelector("#chatBoxContainer");
+		this.chatBox = new ChatBox(chatBoxContainer);
+	}
 
 	addEventListeners() {
 		// Logout button
@@ -231,18 +233,18 @@ export default class MainView {
 				},
 			});
 
-            const data = await response.json();
-        
-            if (data.success) {
-				elo_div.innerHTML = "Elo: " + data['elo'];
-				winrate_div.innerHTML = "Winrate: " + data['winrate'] + "%";
-				tourn_div.innerHTML = "Tournaments won: " + data['tourn'];
+			const data = await response.json();
+
+			if (data.success) {
+				elo_div.innerHTML = "Elo: " + data["elo"];
+				winrate_div.innerHTML = "Winrate: " + data["winrate"] + "%";
+				tourn_div.innerHTML = "Tournaments won: " + data["tourn"];
 			} else {
 				elo_div.innerHTML = "Failed to load elo";
 				winrate_div.innerHTML = "Failed to load winrate";
 				tourn_div.innerHTML = "Failed to load tournaments";
-            }
-        } catch (error) {
+			}
+		} catch (error) {
 			elo_div.innerHTML = "Failed to load elo";
 			winrate_div.innerHTML = "Failed to load winrate";
 			tourn_div.innerHTML = "Failed to load tournaments";
