@@ -121,7 +121,6 @@ export default class SignUp {
             
                 // This code runs only after getting response from server
                 if (data.success) {
-                    console.log(data.message);
                     window.app.router.navigateTo('/login');
                 } else {
                     errorDiv.textContent = data.message || 'Signup failed';

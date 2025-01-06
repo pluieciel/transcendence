@@ -246,6 +246,104 @@ class LoginConsumer(AsyncHttpConsumer):
         User = get_user_model()
         return User.objects.filter(username=username).exists()
 
+class UpdateConsumer(AsyncHttpConsumer):
+    async def handle(self, body):
+        # Rate limiting logic
+        key = self.scope['client'][0]  # Use the client's IP address as the key
+        rate_limit = 20  # Allow 5 requests
+        time_window = 60  # Time window in seconds
+        current_usage = cache.get(key, 0)
+        #print(json.loads(body.decode()), flush=True)
+        #print("current usage: " + str(current_usage), flush=True)
+        if current_usage >= rate_limit:
+            response_data = {
+                'success': False,
+                'message': 'Too many requests. Please try again later.'
+            }
+            return await self.send_response(429, json.dumps(response_data).encode(),
+                headers=[(b"Content-Type", b"application/json")])
+        cache.set(key, current_usage + 1, timeout=time_window)
+
+        try:
+            headers = dict((key.decode('utf-8'), value.decode('utf-8')) for key, value in self.scope['headers'])
+            #print(headers, flush=True)
+            auth_header = headers.get('authorization', None)
+            if not auth_header:
+                response_data = {
+                    'success': False,
+                    'message': 'Authorization header missing'
+                }
+                return await self.send_response(401, json.dumps(response_data).encode(),
+                    headers=[(b"Content-Type", b"application/json")])
+            user = await jwt_to_user(auth_header)
+            if not user:
+                response_data = {
+                    'success': False,
+                    'message': 'Invalid token or User not found'
+                }
+                return await self.send_response(401, json.dumps(response_data).encode(),
+                    headers=[(b"Content-Type", b"application/json")])
+
+            data = await self.parse_multipart_form_data(body)
+            password = data.get('password')
+            nickname = data.get('nickname')
+            avatar = data.get('avatar')
+
+            if avatar:
+                image_bytes = avatar.file.read()
+                image = Image.open(io.BytesIO(image_bytes))
+                resized_image = image.resize((60, 60), Image.Resampling.LANCZOS)
+                img_byte_arr = io.BytesIO()
+                resized_image.save(img_byte_arr, format=image.format or 'PNG')
+                img_byte_arr.seek(0)
+                avatar.file = img_byte_arr
+                await self.update_avatar(user, avatar)
+
+            response_data = {
+                'success': True,
+                'message': 'Update successful'
+            }
+
+            return await self.send_response(201,
+                json.dumps(response_data).encode(),
+                headers=[(b"Content-Type", b"application/json")])
+
+        except Exception as e:
+            response_data = {
+                'success': False,
+                'message': str(e)
+            }
+            return await self.send_response(500, json.dumps(response_data).encode(),
+                headers=[(b"Content-Type", b"application/json")])
+
+    @database_sync_to_async
+    def update_avatar(self, user, avatar):
+        user.avatar.save(avatar.name, ContentFile(avatar.file.read()), save=True)
+    
+    async def parse_multipart_form_data(self, body):
+        """Parse multipart form data and return a dictionary."""
+        from django.http import QueryDict
+        data = QueryDict(mutable=True)
+        boundary = body.split(b'\r\n')[0]
+        parts = body.split(boundary)[1:-1]  # Ignore the first and last parts (which are empty)
+        for part in parts:
+            if b'Content-Disposition' in part:
+                headers, content = part.split(b'\r\n\r\n', 1)
+                headers = headers.decode('utf-8')
+                content = content.rstrip(b'\r\n')  # Remove trailing newlines
+                name = None
+                filename = None
+                for line in headers.splitlines():
+                    if 'name="' in line:
+                        name = line.split('name="')[1].split('"')[0]
+                    if 'filename="' in line:
+                        filename = line.split('filename="')[1].split('"')[0]
+                if filename:
+                    data[name] = ContentFile(content, name=filename)
+                else:
+                    data[name] = content.decode('utf-8')
+        return data
+
 class HandleOAuthConsumer(AsyncHttpConsumer):
     async def handle(self, body):
         try:
