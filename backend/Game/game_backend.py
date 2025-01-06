@@ -1,6 +1,7 @@
 import asyncio
 import time
 import logging
+import json
 from .game_logic import GameInstance, GameBounds
 
 class User:
@@ -20,18 +21,20 @@ class GameBackend:
 		self.logger = logging.getLogger('game')
 
 	def handle_key_event(self, websocket, key, is_down):
-		print(f"Handling key event: {key} {is_down}")
 		if websocket == self.player_left.channel:
+			self.logger.info(f"Left player pressed {key}")
 			self.game.player_left.keys[key] = is_down
 		elif websocket == self.player_right.channel:
+			self.logger.info(f"Right player pressed {key}")
 			self.game.player_right.keys[key] = is_down
 
 	def is_full(self):
 		return (self.player_left is not None and self.player_right is not None)
 
-	def start_game(self, channel_layer):
+	def start_game(self):
 		if self.is_full() and not self.game.is_running:
-			self.channel_layer = channel_layer
+			self.player_left.state = "Playing"
+			self.player_right.state = "Playing"
 			self.game.start()
 
 	def stop_game(self):
@@ -65,14 +68,33 @@ class GameBackend:
 		else:
 			raise Exception("Error : assign player when two player were in a game")
 
-	async def broadcast_state(self):
-		if not self.channel_layer:
-			return
+	def set_player_init(self, channel):
+		try:
+			if (self.player_left.channel == channel):
+				self.player_left.state = "Ready"
+				self.check_ready_game()
+			elif (self.player_right.channel == channel):
+				self.player_right.state = "Ready"
+				self.check_ready_game()
+			else:
+				self.logger.warning("Received player init but couldnt match channel")
+		except Exception as e:
+			self.logger.warning(f"Error occured set player_init : {e}")
 
+	def check_ready_game(self):
+		if (self.player_left and self.player_left.state == "Ready" and self.player_right and self.player_right.state == "Ready"):
+			self.logger.info("Both player ready, starting")
+			self.start_game()
+		else:
+			self.logger.info("Not starting, both player not ready yet")
+
+
+
+	async def broadcast_state(self):
 		events = []
-		if self.scored:
+		if self.game.scored:
 			events.append({"type": "score", "position": vars(self.game.scorePos)})
-			self.scored = False
+			self.game.scored = False
 
 		state = {
 			"type": "game.update",
@@ -104,4 +126,4 @@ class GameBackend:
 				"events": events
 			}
 		}
-		await self.channel_layer.group_send(self.room_id, state)
+		await self.channel_layer.group_send(str(self.game_id), state)

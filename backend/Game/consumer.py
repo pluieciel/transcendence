@@ -98,14 +98,16 @@ class GameConsumer(AsyncWebsocketConsumer):
 			    "type": "chat.message",
 			    "text": "Hello there!",
 			})
-			##await self.channel_layer.group_discard(str(self.game.game_id), channel_name)
+			await self.channel_layer.group_discard(str(self.game.game_id), channel_name)
 		else:
 			self.game = game_manager.get_game(user)
+		self.game.channel_layer = self.channel_layer
 		self.game.assign_player(user, self.channel_name)
 		user.is_playing = True
 		user.current_game_id = self.game.game_id
 		await self.save_user(user)
 		await self.accept()
+
 		await self.channel_layer.group_add(str(self.game.game_id), self.channel_name)
 
 		if (self.game.is_full()):
@@ -113,31 +115,23 @@ class GameConsumer(AsyncWebsocketConsumer):
 			await self.send_initial_game_state(self.game)
 
 	async def receive(self, text_data):
-		pass
-		#logging.getLogger('game').info(text_data)
-		#try:
-		#	data = json.loads(text_data)
-		#	print(f"Received message: {data}")
+		logging.getLogger('game').info(text_data)
+		try:
+			data = json.loads(text_data)
+			if data["type"] in ["keydown", "keyup"]:
+				self.game.handle_key_event(
+					self.channel_name,
+					data["key"],
+					data["type"] == "keydown"
+				)
+			elif data["type"] == "init_confirm":
+				logging.getLogger('game').info("init confirmed")
+				self.game.set_player_init(self.channel_name)
 
-		#	if data["type"] in ["keydown", "keyup"]:
-			#		self.game.handle_key_event(
-			#			self.channel_name,
-			#			data["key"],
-			#			data["type"] == "keydown"
-			#		)
-
-		#		await self.send(json.dumps({
-		#			"type": "input_received",
-		#			"data": {
-		#				"key": data["key"],
-		#				"type": data["type"]
-		#			}
-		#		}))
-
-		#except json.JSONDecodeError:
-			#	print("Error decoding JSON message")
-			#except Exception as e:
-				#	print(f"Error handling message: {e}")
+		except json.JSONDecodeError:
+			print("Error decoding JSON message")
+		except Exception as e:
+			print(f"Error handling message: {e}")
 
 	async def handle_error(self, event):
 		self.logger.info(f"Errorr received  {event}")
@@ -145,10 +139,16 @@ class GameConsumer(AsyncWebsocketConsumer):
 
 
 	async def disconnect(self, close_code):
-		pass
+		self.logger.info(f"WebSocket disconnected with code: {close_code}")
 
 	async def chat_message(self, event):
 		await self.send(text_data=json.dumps({"message":event["text"]}))
+
+	async def game_update(self, event):
+		await self.send(text_data=json.dumps({
+			"type": "game_update",
+			"data":event["data"]
+		}))
 
 	async def send_initial_game_state(self, instance):
 		self.logger.info(instance.game.player_left.position)

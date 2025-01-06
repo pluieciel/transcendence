@@ -26,8 +26,6 @@ export class Game {
 		this.particleSystem = null;
 		this.lastTime = 0;
 
-		this.username = sessionStorage.getItem("username");
-
 		window.addEventListener("keydown", (event) => {
 			if (event.code === "Space") {
 				this.emitParticles();
@@ -67,6 +65,7 @@ export class Game {
 
 		this.particleSystem = new ParticleSystem(this.sceneManager.getScene());
 		this.handleInit(data, side);
+		this.sendInitDone();
 	}
 
 	emitParticles(position = new THREE.Vector3(0, 0, 0)) {
@@ -95,10 +94,8 @@ export class Game {
 		);
 	}
 
-	handleInit(data, side) {
-		console.log(data);
+	handleInit(data) {
 		const positions = data.positions;
-		console.log(positions);
 		this.sceneManager.paddles[0].position.set(positions.player_left.x, positions.player_left.y, positions.player_left.z);
 		this.sceneManager.paddles[1].position.set(positions.player_right.x, positions.player_right.y, positions.player_right.z);
 
@@ -109,33 +106,33 @@ export class Game {
 		this.sceneManager.leftBorder.position.set(positions.borders.left.x, positions.borders.left.y, positions.borders.left.z);
 		this.sceneManager.rightBorder.position.set(positions.borders.right.x, positions.borders.right.y, positions.borders.right.z);
 
-		this.playerSide = side;
-		if (this.playerSide == "left") {
-			this.uiManager.updateNameLeft(this.username + " [" + data.player.left.rank + "]");
-			this.uiManager.updateNameRight("Opponent" + " [" + data.player.left.rank + "]");
-		} else {
-			this.uiManager.updateNameRight(this.username + " [" + data.player.right.rank + "]");
-			this.uiManager.updateNameLeft("Opponent" + " [" + data.player.left.rank + "]");
-		}
+		this.uiManager.updateNameLeft(data.player.left.name + " [" + data.player.left.rank + "]");
+		this.uiManager.updateNameRight(data.player.right.name + " [" + data.player.left.rank + "]");
 
 		this.uiManager.updateScoreLeft(data.player.left.score);
 		this.uiManager.updateScoreRight(data.player.right.score);
 
 		this.sceneManager.showObjects();
 
-		if (data.game_started) {
-			this.uiManager.setOverlayVisibility(false);
-			this.gameStarted = true;
-		} else {
-			this.uiManager.setOverlayVisibility(true);
-			this.uiManager.setOverText("Waiting for game start...");
+		this.uiManager.setOverlayVisibility(true);
+		this.uiManager.setOverText("Waiting for game start...");
+	}
+
+	sendInitDone() {
+		if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+			console.log(`Init sucessfull`); // Debug log
+			this.ws.send(
+				JSON.stringify({
+					type: "init_confirm",
+				}),
+			);
 		}
 	}
 
 	handleGameUpdate(data) {
 		if (data.player) {
-			const leftPos = data.player.left.position;
-			const rightPos = data.player.right.position;
+			const leftPos = data.positions.player_left;
+			const rightPos = data.positions.player_right;
 
 			if (this.sceneManager.paddles[0]) {
 				this.sceneManager.paddles[0].position.set(leftPos.x, leftPos.y, leftPos.z);
@@ -148,11 +145,12 @@ export class Game {
 			this.uiManager.updateScoreRight(data.player.right.score);
 		}
 
-		if (data.ball && this.sceneManager.ball) {
-			this.sceneManager.ball.position.set(data.ball.position.x, data.ball.position.y, data.ball.position.z);
-			console.log(data.ball.visibility == true ? "Visible" : "Not");
-			console.log(data.ball.visibility == false ? "Invisible" : "Not");
-			this.sceneManager.ball.visible = data.ball.visibility;
+		if (data.positions.ball && this.sceneManager.ball) {
+			this.sceneManager.ball.position.set(data.positions.ball.x, data.positions.ball.y, data.positions.ball.z);
+			//	console.log(data.ball.visibility == true ? "Visible" : "Not");
+			//console.log(data.ball.visibility == false ? "Invisible" : "Not");
+			this.sceneManager.ball.visible = true;
+			//this.sceneManager.ball.visible = data.ball.visibility;
 		}
 
 		if (!this.gameStarted) {
