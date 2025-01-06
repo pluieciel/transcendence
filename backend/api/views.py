@@ -466,7 +466,7 @@ class AvatarConsumer(AsyncHttpConsumer):
             user_name = match.group(1)
             user = await self.get_user_by_name(user_name)
             host = 'https://' + next((value.decode('utf-8') for key, value in self.scope['headers'] if key == b'x-forwarded-host'), 'localhost:9000')
-            if host == 'localhost:9000':
+            if host == 'https://localhost:9000':
                 host = next((value.decode('utf-8') for key, value in self.scope['headers'] if key == b'origin'), 'localhost:9000')
             #print(self.scope, flush=True)
             response_data = {
