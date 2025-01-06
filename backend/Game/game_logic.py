@@ -201,7 +201,10 @@ class GameInstance:
 					self.player_right.update(delta_time)
 					self.ball.update(delta_time)
 					self.check_collisions()
-					await self.broadcast_function()
+					try:
+						await self.broadcast_function()
+					except Exception as e:
+						logging.getLogger('game').info(f"Error Broadcast : {e}")
 
 				await asyncio.sleep(1/60)  # 60 FPS
 

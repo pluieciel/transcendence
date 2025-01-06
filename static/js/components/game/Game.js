@@ -6,11 +6,12 @@ import { ParticleSystem } from "./ParticleSystem.js";
 import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
 
 export class Game {
-	constructor(canvas) {
+	constructor(canvas, ws) {
 		this.renderer = new Renderer(canvas);
 		this.sceneManager = new SceneManager();
 		this.inputManager = new InputManager();
 		this.uiManager = this.sceneManager.UIManager;
+		this.ws = ws;
 
 		this.ball = null;
 		this.initialized = false;
@@ -25,8 +26,6 @@ export class Game {
 		this.particleSystem = null;
 		this.lastTime = 0;
 
-		this.username = sessionStorage.getItem("username");
-
 		window.addEventListener("keydown", (event) => {
 			if (event.code === "Space") {
 				this.emitParticles();
@@ -37,54 +36,36 @@ export class Game {
 	handleUnrecognizedToken() {}
 
 	setupWebSocket() {
-		const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-		const host = window.location.host;
-		const token = window.app.state.token;
+		//const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+		//const host = window.location.host;
+		//const token = window.app.getToken();
+		//if (!token) this.handleUnrecognizedToken();
+		//const wsUrl = `${protocol}//${host}/ws/game/?token=${token}`;
 
-		if (!token) this.handleUnrecognizedToken();
-		const wsUrl = `${protocol}//${host}/ws/game/?token=${token}`;
-
-		this.ws = new WebSocket(wsUrl);
+		//this.ws = new WebSocket(wsUrl);
 		this.inputManager.ws = this.ws;
-
-		this.ws.onopen = () => {
-			console.log("Connected to server");
-		};
-
-		this.ws.onclose = () => {
-			console.log("Disconnected from server");
-			this.uiManager.setOverlayVisibility(true);
-			this.uiManager.setOverText("Disconnected from server");
-			setTimeout(() => this.setupWebSocket(), 1000);
-		};
-
-		this.ws.onerror = (error) => {
-			console.error("WebSocket error:", error);
-		};
 
 		this.ws.onmessage = (event) => {
 			const message = JSON.parse(event.data);
-			if (message.type === "init_response") {
-				this.handleInitResponse(message.data);
-			} else if (message.type === "game_update") {
+			this.uiManager.setOverText(message.message);
+			if (message.type === "game_update") {
 				this.handleGameUpdate(message.data);
 			}
 		};
 	}
 
-	initialize() {
+	initialize(data, side) {
 		this.sceneManager.setupLights();
 		this.sceneManager.createObjects();
 		this.sceneManager.hideObjects();
 		this.ball = this.sceneManager.ball;
 		this.sceneManager.hideBall();
 		this.sceneInitialized = this.validateSceneInitialization();
-		if (this.sceneInitialized && this.ws.readyState === WebSocket.OPEN) {
-			this.sendInitMessage();
-		}
 		this.animate();
 
 		this.particleSystem = new ParticleSystem(this.sceneManager.getScene());
+		this.handleInit(data, side);
+		this.sendInitDone();
 	}
 
 	emitParticles(position = new THREE.Vector3(0, 0, 0)) {
@@ -113,9 +94,8 @@ export class Game {
 		);
 	}
 
-	handleInitResponse(data) {
+	handleInit(data) {
 		const positions = data.positions;
-
 		this.sceneManager.paddles[0].position.set(positions.player_left.x, positions.player_left.y, positions.player_left.z);
 		this.sceneManager.paddles[1].position.set(positions.player_right.x, positions.player_right.y, positions.player_right.z);
 
@@ -126,33 +106,33 @@ export class Game {
 		this.sceneManager.leftBorder.position.set(positions.borders.left.x, positions.borders.left.y, positions.borders.left.z);
 		this.sceneManager.rightBorder.position.set(positions.borders.right.x, positions.borders.right.y, positions.borders.right.z);
 
-		this.playerSide = data.side;
-		if (this.playerSide == "left") {
-			this.uiManager.updateNameLeft(this.username + " [" + data.player.left.rank + "]");
-			this.uiManager.updateNameRight("Opponent" + " [" + data.player.left.rank + "]");
-		} else {
-			this.uiManager.updateNameRight(this.username + " [" + data.player.right.rank + "]");
-			this.uiManager.updateNameLeft("Opponent" + " [" + data.player.left.rank + "]");
-		}
+		this.uiManager.updateNameLeft(data.player.left.name + " [" + data.player.left.rank + "]");
+		this.uiManager.updateNameRight(data.player.right.name + " [" + data.player.left.rank + "]");
 
 		this.uiManager.updateScoreLeft(data.player.left.score);
 		this.uiManager.updateScoreRight(data.player.right.score);
 
 		this.sceneManager.showObjects();
 
-		if (data.game_started) {
-			this.uiManager.setOverlayVisibility(false);
-			this.gameStarted = true;
-		} else {
-			this.uiManager.setOverlayVisibility(true);
-			this.uiManager.setOverText("Waiting for opponent...");
+		this.uiManager.setOverlayVisibility(true);
+		this.uiManager.setOverText("Waiting for game start...");
+	}
+
+	sendInitDone() {
+		if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+			console.log(`Init sucessfull`); // Debug log
+			this.ws.send(
+				JSON.stringify({
+					type: "init_confirm",
+				}),
+			);
 		}
 	}
 
 	handleGameUpdate(data) {
 		if (data.player) {
-			const leftPos = data.player.left.position;
-			const rightPos = data.player.right.position;
+			const leftPos = data.positions.player_left;
+			const rightPos = data.positions.player_right;
 
 			if (this.sceneManager.paddles[0]) {
 				this.sceneManager.paddles[0].position.set(leftPos.x, leftPos.y, leftPos.z);
@@ -165,11 +145,12 @@ export class Game {
 			this.uiManager.updateScoreRight(data.player.right.score);
 		}
 
-		if (data.ball && this.sceneManager.ball) {
-			this.sceneManager.ball.position.set(data.ball.position.x, data.ball.position.y, data.ball.position.z);
-			console.log(data.ball.visibility == true ? "Visible" : "Not");
-			console.log(data.ball.visibility == false ? "Invisible" : "Not");
-			this.sceneManager.ball.visible = data.ball.visibility;
+		if (data.positions.ball && this.sceneManager.ball) {
+			this.sceneManager.ball.position.set(data.positions.ball.x, data.positions.ball.y, data.positions.ball.z);
+			//	console.log(data.ball.visibility == true ? "Visible" : "Not");
+			//console.log(data.ball.visibility == false ? "Invisible" : "Not");
+			this.sceneManager.ball.visible = true;
+			//this.sceneManager.ball.visible = data.ball.visibility;
 		}
 
 		if (!this.gameStarted) {

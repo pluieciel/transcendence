@@ -20,61 +20,61 @@ export class UIManager {
 			userSelect: "none",
 		};
 
-		var scoreLeft = document.createElement("div");
-		scoreLeft.style.position = "absolute";
-		scoreLeft.style.color = "white";
-		scoreLeft.style.outlineColor = "0x0000";
-		scoreLeft.style.width = 100;
-		scoreLeft.style.height = 100;
-		scoreLeft.style.fontSize = "100px";
-		scoreLeft.style.userSelect = "none";
-		scoreLeft.innerHTML = "0";
-		scoreLeft.style.top = 50 + "px";
-		scoreLeft.style.left = 1200 + "px";
-		document.body.appendChild(scoreLeft);
-		this.playerLeftScore = scoreLeft;
-
-		var scoreRight = document.createElement("div");
+		var scoreRight = document.querySelector("#scoreRight");
 		scoreRight.style.position = "absolute";
 		scoreRight.style.color = "white";
-		scoreRight.style.outlineColor = "0xffffff";
+		scoreRight.style.outlineColor = "0x0000";
 		scoreRight.style.width = 100;
 		scoreRight.style.height = 100;
-		scoreRight.style.userSelect = "none";
 		scoreRight.style.fontSize = "100px";
+		scoreRight.style.userSelect = "none";
 		scoreRight.innerHTML = "0";
 		scoreRight.style.top = 50 + "px";
-		scoreRight.style.right = 1200 + "px";
+		scoreRight.style.left = 1200 + "px";
 		document.body.appendChild(scoreRight);
 		this.playerRightScore = scoreRight;
 
-		var nameLeft = document.createElement("div");
-		nameLeft.style.position = "absolute";
-		nameLeft.style.color = "white";
-		nameLeft.style.outlineColor = "0xffffff";
-		nameLeft.style.width = 100;
-		nameLeft.style.height = 100;
-		nameLeft.style.fontSize = "50px";
-		nameLeft.style.userSelect = "none";
-		nameLeft.innerHTML = "0";
-		nameLeft.style.top = 170 + "px";
-		nameLeft.style.left = 1100 + "px";
-		document.body.appendChild(nameLeft);
-		this.playerLeftName = nameLeft;
+		var scoreLeft = document.querySelector("#scoreLeft");
+		scoreLeft.style.position = "absolute";
+		scoreLeft.style.color = "white";
+		scoreLeft.style.outlineColor = "0xffffff";
+		scoreLeft.style.width = 100;
+		scoreLeft.style.height = 100;
+		scoreLeft.style.userSelect = "none";
+		scoreLeft.style.fontSize = "100px";
+		scoreLeft.innerHTML = "0";
+		scoreLeft.style.top = 50 + "px";
+		scoreLeft.style.right = 1200 + "px";
+		document.body.appendChild(scoreLeft);
+		this.playerLeftScore = scoreLeft;
 
-		var nameRight = document.createElement("div");
+		var nameRight = document.querySelector("#nameRight");
 		nameRight.style.position = "absolute";
 		nameRight.style.color = "white";
 		nameRight.style.outlineColor = "0xffffff";
 		nameRight.style.width = 100;
-		nameRight.style.userSelect = "none";
 		nameRight.style.height = 100;
 		nameRight.style.fontSize = "50px";
-		nameRight.innerHTML = "Test [1201]";
+		nameRight.style.userSelect = "none";
+		nameRight.innerHTML = "0";
 		nameRight.style.top = 170 + "px";
-		nameRight.style.right = 1100 + "px";
+		nameRight.style.left = 1100 + "px";
 		document.body.appendChild(nameRight);
 		this.playerRightName = nameRight;
+
+		var nameLeft = document.querySelector("#nameLeft");
+		nameLeft.style.position = "absolute";
+		nameLeft.style.color = "white";
+		nameLeft.style.outlineColor = "0xffffff";
+		nameLeft.style.width = 100;
+		nameLeft.style.userSelect = "none";
+		nameLeft.style.height = 100;
+		nameLeft.style.fontSize = "50px";
+		nameLeft.innerHTML = "Test [1201]";
+		nameLeft.style.top = 170 + "px";
+		nameLeft.style.right = 1100 + "px";
+		document.body.appendChild(nameLeft);
+		this.playerLeftName = nameLeft;
 	}
 
 	createOverlay() {
@@ -92,7 +92,7 @@ export class UIManager {
 		overlay.style.fontSize = "48px";
 		overlay.style.fontFamily = "Arial, sans-serif";
 		overlay.style.zIndex = "1000"; // Make sure it's above other elements
-		overlay.innerText = "Waiting for server...";
+		overlay.innerText = "Waiting for game start...";
 		document.body.appendChild(overlay);
 		this.overlay = overlay;
 	}
