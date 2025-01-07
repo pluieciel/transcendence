@@ -5,8 +5,6 @@ export default class MainView {
 	constructor(container) {
 		this.container = container;
 		const decodedPayload = jwt_decode(window.app.getToken());
-		//console.log(appState.token);
-		//console.log(decodedPayload);
 
 		//Search game timer
 		this.countdownTime = 0;
@@ -83,12 +81,15 @@ export default class MainView {
 		</div>
 	</div>
 
-	<canvas id="gameCanvas">
+	<div>
 		<div id="nameLeft"></div>
 		<div id="scoreLeft"></div>
 		<div id="nameRight"></div>
 		<div id="scoreRight"></div>
-	</canvas>
+		<div id="overlay"></div>
+		<canvas id="gameCanvas">
+		</canvas>
+	</div>
 
         `;
 		this.timerElement = document.getElementById("timer");
@@ -110,14 +111,10 @@ export default class MainView {
 			setTimeout(() => {
 				this.stopTimerAndDismissModal();
 			}, 1000);
+
 			const events = JSON.parse(event.data);
 			if (events.message_type === "init") {
-				setTimeout(() => {
-					const canvas = this.container.querySelector("#gameCanvas");
-					const game = new Game(canvas, this.ws);
-					game.initialize(events.data);
-					this.container.querySelector("#mainPage").style.display = "none";
-				}, 1000);
+				this.displayGame(events);
 			}
 		};
 
@@ -132,6 +129,46 @@ export default class MainView {
 		this.ws.onerror = (error) => {
 			console.error("WebSocket error:", error);
 		};
+	}
+
+	playBot(difficulty) {
+		const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+		const host = window.location.host;
+		const token = window.app.getToken();
+
+		//if (!token) this.handleUnrecognizedToken();
+		const wsUrl = `${protocol}//${host}/ws/game/?token=${token}&bot=` + difficulty;
+
+		this.ws = new WebSocket(wsUrl);
+
+		this.ws.onmessage = (event) => {
+			const events = JSON.parse(event.data);
+			if (events.message_type === "init") {
+				this.displayGame(events);
+			}
+		};
+
+		this.ws.onopen = () => {
+			console.log("Connected to server");
+		};
+
+		this.ws.onclose = () => {
+			console.log("Disconnected from server");
+		};
+
+		this.ws.onerror = (error) => {
+			console.error("WebSocket error:", error);
+		};
+	}
+
+	displayGame(events) {
+		setTimeout(() => {
+			const canvas = this.container.querySelector("#gameCanvas");
+			const game = new Game(canvas, this.ws);
+			console.log("Game initialization");
+			game.initialize(events.data);
+			this.container.querySelector("#mainPage").style.display = "none";
+		}, 1000);
 	}
 
 	stopTimerAndDismissModal() {
@@ -194,6 +231,8 @@ export default class MainView {
 		// Logout button
 		const logoutBtn = this.container.querySelector("#logoutBtn");
 		const settings = this.container.querySelector("#settingsBtn");
+		const quickMatch = this.container.querySelector("#quickMatch");
+		const playAI = this.container.querySelector("#playAI");
 
 		logoutBtn.addEventListener("click", () => {
 			this.chatBox.disconnect();
@@ -204,18 +243,12 @@ export default class MainView {
 			window.app.router.navigateTo("/settings");
 		});
 
-		// Navigation links
-		const navLinks = this.container.querySelectorAll(".nav-link");
-		navLinks.forEach((link) => {
-			link.addEventListener("click", (e) => {
-				e.preventDefault();
-				const view = e.target.dataset.view;
-				if (view === "game") {
-					this.searchGame();
-				} else if (view === "leaderboard") {
-					this.showLeaderboard();
-				}
-			});
+		quickMatch.addEventListener("click", () => {
+			this.searchGame();
+		});
+
+		playAI.addEventListener("click", () => {
+			this.playBot(1); //TODO Choose difficulty
 		});
 	}
 
@@ -233,7 +266,16 @@ export default class MainView {
 				},
 			});
 
+			const response_avatar = await fetch(`/api/get/avatar/${this.username}`, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: `${window.app.getToken()}`,
+				},
+			});
+
 			const data = await response.json();
+			const avatarurl = await response_avatar.json();
 
 			if (data.success) {
 				elo_div.innerHTML = "Elo: " + data["elo"];
@@ -243,6 +285,9 @@ export default class MainView {
 				elo_div.innerHTML = "Failed to load elo";
 				winrate_div.innerHTML = "Failed to load winrate";
 				tourn_div.innerHTML = "Failed to load tournaments";
+			}
+			if (avatarurl.success) {
+				avatar_div.innerHTML = `<img src=${avatarurl["avatar"]} alt="User Avatar" width="60" height="60"></img>`;
 			}
 		} catch (error) {
 			elo_div.innerHTML = "Failed to load elo";
