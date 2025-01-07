@@ -769,6 +769,11 @@ export default class ChatBox {
                 formData.append('avatar', modifiedFile);
             }
             
+            if (!formData.has('password') && !formData.has('nickname') && !formData.has('avatar')) {
+                errorDiv.textContent = 'Nothing to update';
+                errorDiv.classList.remove('d-none');
+                return;
+            }
 
             try {
                 const response = await fetch('/api/update/', {
@@ -783,7 +788,8 @@ export default class ChatBox {
             
                 // This code runs only after getting response from server
                 if (data.success) {
-                    window.app.router.navigateTo('/login');
+                    errorDiv.textContent = data.message;
+                    errorDiv.classList.remove('d-none');
                 } else {
                     errorDiv.textContent = data.message || 'Signup failed';
                     errorDiv.classList.remove('d-none');

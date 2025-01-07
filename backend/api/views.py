@@ -299,6 +299,12 @@ class UpdateConsumer(AsyncHttpConsumer):
                 avatar.file = img_byte_arr
                 await self.update_avatar(user, avatar)
 
+            if password:
+                await self.update_password(user, password)
+
+            if nickname:
+                await self.update_nickname(user, nickname)
+
             response_data = {
                 'success': True,
                 'message': 'Update successful'
@@ -319,6 +325,16 @@ class UpdateConsumer(AsyncHttpConsumer):
     @database_sync_to_async
     def update_avatar(self, user, avatar):
         user.avatar.save(avatar.name, ContentFile(avatar.file.read()), save=True)
+
+    @database_sync_to_async
+    def update_password(self, user, pw):
+        user.set_password(pw)
+        user.save()
+
+    @database_sync_to_async
+    def update_nickname(self, user, nn):
+        user.nickname = nn
+        user.save()
     
     async def parse_multipart_form_data(self, body):
         """Parse multipart form data and return a dictionary."""
