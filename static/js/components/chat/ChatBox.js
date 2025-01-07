@@ -116,6 +116,57 @@ export default class ChatBox {
                     </div>
                 </div>
             </div>
+
+            <!-- Modal for usersetting -->
+            <div class="modal fade" id="usersetting" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="staticBackdropLabel">Update User Info</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="updateForm">
+                                <span>Change password</span>
+                                <div class="mb-3">
+                                    <input 
+                                        type="password" 
+                                        id="password" 
+                                        placeholder="Enter password"
+                                        class="form-control">
+                                </div>
+                                <div class="mb-3">
+                                    <input 
+                                        type="password" 
+                                        id="confirmPassword" 
+                                        placeholder="Confirm password"
+                                        class="form-control">
+                                </div>
+                                <span>Change display nickname</span>
+                                <div class="mb-3">
+                                    <input 
+                                        type="nickname" 
+                                        id="nickname" 
+                                        placeholder="Enter nickname"
+                                        class="form-control">
+                                </div>
+                                <div class="mb-3">
+                                    Change Avatar:
+                                    <input 
+                                        type="file" 
+                                        id="avatar" 
+                                        accept="image/*">
+                                </div>
+                                <div id="passwordError" class="alert alert-danger d-none"></div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary" id="sendUpdateForm">Submit</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         `;
 
         // Initialize Bootstrap offcanvas
@@ -213,6 +264,10 @@ export default class ChatBox {
                         </span>
                     ` : `
                         <span class="d-flex align-items-center">
+                            <button class="btn btn-primary square-btn me-1" data-action="setting"
+                                data-bs-toggle="modal" data-bs-target="#usersetting">
+                                <i class="fa-solid fa-gear"></i>
+                            </button>
                             <button id="Donotdisturb" class="btn btn-primary square-btn me-1 ${this.waiting? '' : 'square-btn-red'}"
                                 data-action="waiting"
                                 data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Do not disturb">
@@ -491,7 +546,7 @@ export default class ChatBox {
                 message: message,
                 message_type: "chat",
                 sender: this.username,
-                recipient: this.activeTab === 'public' ? 'public' : this.activeTab.replace('user-', ''),
+                recipient: (this.activeTab === 'public' || this.activeTab === "online") ? 'public' : this.activeTab.replace('user-', ''),
                 time: new Date().toLocaleTimeString()
             };
 
@@ -674,6 +729,75 @@ export default class ChatBox {
                     time: new Date().toLocaleTimeString()
                 };
                 this.chatSocket.send(JSON.stringify(messageData));
+            }
+        });
+
+        // submit user info update
+        const updateSubmitButton = this.container.querySelector('#sendUpdateForm');
+        updateSubmitButton.addEventListener('click', async (e) => {
+            const infoForm = this.container.querySelector('#updateForm');
+            const password = infoForm.querySelector('#password').value;
+            const confirmPassword = infoForm.querySelector('#confirmPassword').value;
+            const nickname = infoForm.querySelector('#nickname').value;
+            const errorDiv = this.container.querySelector('#passwordError');
+            
+            if (password !== confirmPassword) {
+                errorDiv.textContent = 'Passwords do not match';
+                errorDiv.classList.remove('d-none');
+                return;
+            }
+            const formData = new FormData();
+            const originalFile = this.container.querySelector('#avatar').files[0];
+            const hashedPassword = CryptoJS.SHA256(password).toString();
+            if (password !== "")
+                formData.append('password', hashedPassword);
+            if (nickname !== "")
+                formData.append('nickname', nickname);
+            if (originalFile) {
+                const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2 MB
+                if (originalFile.size > MAX_FILE_SIZE) {
+                    errorDiv.textContent = 'File size exceeds the 2MB limit';
+                    errorDiv.classList.remove('d-none');
+                    return;
+                }
+                const extension = originalFile.name.split('.').pop();
+                const newFilename = `${this.username}.${extension}`;
+                const modifiedFile = new File([originalFile], newFilename, {
+                    type: originalFile.type,
+                    lastModified: originalFile.lastModified
+                });
+                formData.append('avatar', modifiedFile);
+            }
+            
+            if (!formData.has('password') && !formData.has('nickname') && !formData.has('avatar')) {
+                errorDiv.textContent = 'Nothing to update';
+                errorDiv.classList.remove('d-none');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/update/', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `${window.app.getToken()}`,
+                    },
+                    body: formData
+                });
+            
+                const data = await response.json();
+            
+                // This code runs only after getting response from server
+                if (data.success) {
+                    errorDiv.textContent = data.message;
+                    errorDiv.classList.remove('d-none');
+                } else {
+                    errorDiv.textContent = data.message || 'Signup failed';
+                    errorDiv.classList.remove('d-none');
+                }
+            } catch (error) {
+                // Handles any errors during the async operation
+                errorDiv.textContent = 'An error occurred';
+                errorDiv.classList.remove('d-none');
             }
         });
     }
