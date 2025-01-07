@@ -241,7 +241,9 @@ export default class ChatBox {
                                     <i class="fa-solid fa-gamepad"></i>
                                 </button>
                             ` : ''}
-                            
+                            <button class="btn btn-primary square-btn me-1" data-action="watchgame" data-user="${user}">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
                             <div class="dropdown">
                                 <button class="btn btn-primary square-btn me-1" data-action="profile" data-user="${user}"
                                     data-bs-toggle="dropdown" aria-expanded="false">
@@ -334,7 +336,7 @@ export default class ChatBox {
                             <div id="avatar_${user}"></div>
                             <span class="user-name ms-2">${user}</span>
                         </span>
-                        ${this.friends.includes(user) ? '':
+                        ${(this.friends.includes(user) || user === this.username) ? '':
                         `<span class="d-flex align-items-center">  
                             <button class="btn btn-primary square-btn me-1" data-action="addfriend" data-user="${user}">
                                 <i class="fa-solid fa-plus"></i>
@@ -666,6 +668,8 @@ export default class ChatBox {
                 setTimeout(() => {
                     this.updateOnlineUsersList();
                 }, 200);
+            } else if (action === "watchgame") {
+                // add watch game
             }
         });
 
