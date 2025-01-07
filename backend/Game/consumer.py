@@ -19,7 +19,9 @@ class GameManager:
 
 	def get_game(self, user, bot):
 		self.logger.info(f"Getting game for user {user.username}")
-		game = self.check_available_game()
+		game = None
+		if (bot == 0):
+			game = self.check_available_game()
 		if (game is None):
 			game = self.create_game(bot)
 		return (game)
@@ -75,6 +77,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 
 		query_string = self.scope["query_string"].decode()
 		query_params = parse_qs(query_string)
+		self.logger.info(query_params)
 		token = query_params.get("token", [None])[0]
 		if not token:
 			return
@@ -86,6 +89,8 @@ class GameConsumer(AsyncWebsocketConsumer):
 				"message": "User not found or invalid token."
 			}))
 			return
+
+		bot = int(query_params.get("bot", [0])[0])
 
 		self.logger.info("Searching for a game for " + user.username)
 		self.game = game_manager.get_player_current_game(user)
@@ -100,7 +105,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 			})
 			await self.channel_layer.group_discard(str(self.game.game_id), channel_name)
 		else:
-			self.game = game_manager.get_game(user, 1)
+			self.game = game_manager.get_game(user, bot)
 		self.game.channel_layer = self.channel_layer
 		self.game.assign_player(user, self.channel_name)
 		user.is_playing = True
@@ -111,7 +116,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 		await self.channel_layer.group_add(str(self.game.game_id), self.channel_name)
 
 		if (self.game.is_full()):
-		#	self.logger.info(f"Game {self.game.game_id} is full and ready to start with {self.game.player_left.user.username} and {self.game.player_right.user.username}")
+			self.logger.info("Game is ready to start,game is full")
 			await self.send_initial_game_state(self.game)
 
 	async def receive(self, text_data):

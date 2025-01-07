@@ -20,9 +20,10 @@ class GameBackend:
 		self.player_left = None
 		self.player_right = None
 		self.logger = logging.getLogger('game')
-		self.is_bot_game = bot > 0
+		self.is_bot_game = bot and bot > 0
 		if (self.is_bot_game):
 			self.player_right = Bot(bot, self.game)
+		self.logger.info(f"{self.is_bot_game} and {bot}")
 
 
 
@@ -35,6 +36,8 @@ class GameBackend:
 			self.game.player_right.keys[key] = is_down
 
 	def is_full(self):
+		self.logger.info(self.player_left is not None and self.player_right is not None)
+		self.logger.info(self.player_right)
 		return (self.player_left is not None and self.player_right is not None)
 
 	def start_game(self):
