@@ -12,6 +12,9 @@ from django.core.files.base import ContentFile
 from django.core.cache import cache
 from PIL import Image
 import io
+import qrcode
+import qrcode.image.svg
+import hmac
 
 SECRET_KEY = os.environ.get('JWT_SECRET_KEY')
 logger = logging.getLogger(__name__)
@@ -58,7 +61,7 @@ class SignupConsumer(AsyncHttpConsumer):
             username = data.get('username')
             password = data.get('password')
             avatar = data.get('avatar')
-                
+
             # Validate input
             if not username or not password:
                 response_data = {
@@ -123,7 +126,7 @@ class SignupConsumer(AsyncHttpConsumer):
             avatar=avatar
         )
         return user
-    
+
     async def parse_multipart_form_data(self, body):
         """Parse multipart form data and return a dictionary."""
         from django.http import QueryDict
@@ -209,6 +212,11 @@ class LoginConsumer(AsyncHttpConsumer):
                 }
                 return await self.send_response(401, json.dumps(response_data).encode(),
                     headers=[(b"Content-Type", b"application/json")])
+
+            if user.totp_secret is not None:
+                logger.fatal(user.totp_secret)
+            else:
+                logger.fatal('NONE')
 
             # Generate JWT
             token = jwt.encode({
@@ -397,7 +405,7 @@ class ProfileConsumer2(AsyncHttpConsumer):
                 }
                 return await self.send_response(401, json.dumps(response_data).encode(),
                     headers=[(b"Content-Type", b"application/json")])
-            
+
             path = self.scope['path']
             #print(f"Request path: {path}", flush=True)
             match = re.search(r'/api/get/profile/(\w+)', path)
@@ -432,12 +440,12 @@ class ProfileConsumer2(AsyncHttpConsumer):
     def get_user(self, user_id):
         User = get_user_model()
         return User.objects.get(id=user_id)
-    
+
     @database_sync_to_async
     def get_user_by_name(self, username):
         User = get_user_model()
         return User.objects.filter(username=username).first()
-    
+
 class AvatarConsumer(AsyncHttpConsumer):
     async def handle(self, body):
         try:
@@ -460,7 +468,7 @@ class AvatarConsumer(AsyncHttpConsumer):
                 }
                 return await self.send_response(401, json.dumps(response_data).encode(),
                     headers=[(b"Content-Type", b"application/json")])
-            
+
             path = self.scope['path']
             match = re.search(r'/api/get/avatar/(\w+)', path)
             user_name = match.group(1)
@@ -484,7 +492,7 @@ class AvatarConsumer(AsyncHttpConsumer):
             }
             return await self.send_response(500, json.dumps(response_data).encode(),
                 headers=[(b"Content-Type", b"application/json")])
-    
+
     @database_sync_to_async
     def get_user_by_name(self, username):
         User = get_user_model()

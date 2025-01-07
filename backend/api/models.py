@@ -11,14 +11,14 @@ class CustomUserManager(BaseUserManager):
         user.set_password(password)
         user.save(using=self._db)
         return user
-    
+
     def	create_user_oauth(self, username, token):
         if not username:
             raise ValueError('Users must have a username')
         user = self.model(username=username, oauthlog=True)
         user.save(using=self._db)
         return user
-        
+
 
     def create_superuser(self, username, password=None):
         user = self.create_user(
@@ -48,6 +48,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     tourn_joined = models.IntegerField(default=0)
     friends = models.ManyToManyField('self', symmetrical=False, related_name='friend_set', blank=True)
     avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
+    totp_secret = models.CharField(max_length=32, unique=True, null=True)
 
     objects = CustomUserManager()
 
