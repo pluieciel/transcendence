@@ -14,16 +14,23 @@ from api.views import jwt_to_user
 
 class GameManager:
 	def __init__(self):
+		self.game_history = None
 		self.games = {}
 		self.logger = logging.getLogger('game')
 
-	def get_game(self, user, bot):
+	def _get_game_history_model(self):
+		if self.game_history is None:
+			from api.models import GameHistory
+			self.game_history = GameHistory
+
+	async def get_game(self, user, bot):
+		self._get_game_history_model()
 		self.logger.info(f"Getting game for user {user.username}")
 		game = None
 		if (bot == 0):
-			game = self.check_available_game()
+			game = await self.check_available_game()
 		if (game is None):
-			game = self.create_game(bot)
+			game = await self.create_game(user, bot)
 		return (game)
 
 	def get_player_current_game(self, user):
@@ -34,33 +41,40 @@ class GameManager:
 		#	return (self.games[user.current_game_id])
 		return None
 
-	def check_available_game(self):
-		if (self.games):
-			for game_id, game in self.games.items():
-				if (game.is_full() is False):
-					self.logger.info("A game is available " + str(game_id))
-					return self.games[game_id]
-				else:
-					self.logger.info("game id " + str(game_id) + " was full")
+	async def check_available_game(self):
+		games = await self.get_waiting_game()
+		if (await self.is_game_exists(games)):
+			return self.games[await self.get_first_game_id(games)]
 		return None
 
-	def create_game(self, bot):
-		if len(self.games) == 0:
-			random_id = random.randint(1, 2000)
-			self.logger.info(f"No game were available, created one with id {random_id}")
-			self.games[random_id] = GameBackend(random_id, bot)
-			return self.games[random_id]
-
-		elif (len(self.games) < 1950):
-			while True:
-				random_id = random_number = random.randint(1, 2000)
-				if random_id not in self.games:
-					self.logger.info("No game were available, created one with id " + str(random_id))
-					self.games[random_id] = GameBackend(random_id, bot)
-					return self.games[random_id]
-					break
+	async def create_game(self, user, bot):
+		game_history_model = self._get_game_history_model()
+		if (bot == 0):
+			game_id = await self.create_game_history(user)
 		else:
-			self.logger.info("Cannot create game, maximum number of concurrent games reached")
+			game_id = await self.create_game_history(user, game_category='AI')
+		self.games[game_id] = GameBackend(game_id, bot)
+		return self.games[game_id]
+
+	@database_sync_to_async
+	def get_waiting_game(self, game_category='Quick Match'):
+		return self.game_history.objects.filter(game_state='waiting', game_category=game_category)
+
+	@database_sync_to_async
+	def create_game_history(self, player_a, player_b=None, game_category='Quick Match', game_mode='Vanilla'):
+		return self.game_history.objects.create(player_a=player_a, player_b=player_b, game_category=game_category, game_mode=game_mode).id
+
+	@database_sync_to_async
+	def save_game_history(self, game_history):
+		game_history.save()
+
+	@database_sync_to_async
+	def is_game_exists(self, games):
+		return games.exists()
+
+	@database_sync_to_async
+	def get_first_game_id(self, games):
+		return games.first().id
 
 game_manager = GameManager()
 
@@ -105,7 +119,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 			})
 			await self.channel_layer.group_discard(str(self.game.game_id), channel_name)
 		else:
-			self.game = game_manager.get_game(user, bot)
+			self.game = await game_manager.get_game(user, bot)
 		self.game.channel_layer = self.channel_layer
 		self.game.assign_player(user, self.channel_name)
 		user.is_playing = True

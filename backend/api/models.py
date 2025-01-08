@@ -14,14 +14,14 @@ class CustomUserManager(BaseUserManager):
         user.set_password(password)
         user.save(using=self._db)
         return user
-    
+
     def	create_user_oauth(self, username, token):
         if not username:
             raise ValueError('Users must have a username')
         user = self.model(username=username, oauthlog=True)
         user.save(using=self._db)
         return user
-        
+
 
     def create_superuser(self, username, password=None):
         user = self.create_user(
@@ -46,6 +46,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     looses = models.IntegerField(default=0)
     language = models.CharField(max_length=4, unique=False, default="en")
     is_playing = models.BooleanField(default=False)
+    is_bot = models.BooleanField(default=False)
     current_game_id = models.IntegerField(default=0)
     tourn_win = models.IntegerField(default=0)
     tourn_joined = models.IntegerField(default=0)
@@ -94,11 +95,11 @@ def is_valid_invite(sender, recipient):
         return False
 
 class GameHistory(models.Model):
-    is_finished = models.BooleanField(default=False)
     game_mode = models.CharField(max_length=32)
     game_category = models.CharField(max_length=32)
+    game_state = models.CharField(max_length=32, default='waiting') # waiting, playing, finished
     score_a = models.IntegerField(default=0)
     score_b = models.IntegerField(default=0)
-    player_a = models.ForeignKey(CustomUser)
-    player_b = models.ForeignKey(CustomUser)
+    player_a = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, related_name='player_a')
+    player_b = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, related_name='player_b')
     created_at = models.DateTimeField(auto_now_add=True)
