@@ -1,6 +1,9 @@
 # models.py
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
+from django.utils import timezone
+from datetime import timedelta
+from channels.db import database_sync_to_async
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, username, password=None, avatar=None):
@@ -49,6 +52,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     friends = models.ManyToManyField('self', symmetrical=False, related_name='friend_set', blank=True)
     avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
     nickname = models.CharField(max_length=30, null=True)
+    invites = models.ManyToManyField('self', symmetrical=False, related_name='invite_set', blank=True)
 
     objects = CustomUserManager()
 
@@ -63,3 +67,28 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     def has_module_perms(self, app_label):
         return True
+
+class GameInvite(models.Model):
+    sender = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='invite_sender')
+    recipient = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='invite_recipient')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.sender.username} invited {self.recipient.username}"
+
+def cleanup_invites():
+    GameInvite.objects.filter(created_at__lt=timezone.now() - timedelta(minutes=5)).delete()
+
+@database_sync_to_async
+def register_invite(sender, recipient):
+    cleanup_invites()
+    GameInvite.objects.create(sender=sender, recipient=recipient)
+
+@database_sync_to_async
+def is_valid_invite(sender, recipient):
+    cleanup_invites()
+    if GameInvite.objects.filter(sender=sender, recipient=recipient).exists():
+        GameInvite.objects.filter(sender=sender, recipient=recipient).delete()
+        return True
+    else:
+        return False
