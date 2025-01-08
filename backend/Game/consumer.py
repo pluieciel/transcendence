@@ -13,6 +13,7 @@ from urllib.parse import parse_qs
 from api.views import jwt_to_user
 from channels.layers import get_channel_layer
 from datetime import datetime
+from time import sleep
 
 class GameManager:
 	def __init__(self):
@@ -68,7 +69,12 @@ class GameManager:
 
 	@database_sync_to_async
 	def get_invite_game(self, player_a, player_b, game_category='Invite'):
-		return self.game_history.objects.filter(player_a=player_a, player_b=player_b, game_state='waiting', game_category=game_category).first()
+		game = self.game_history.objects.filter(player_a=player_a, player_b=player_b, game_state='waiting', game_category=game_category)
+		while not game.exists():
+			self.logger.info("Waiting for the game to be created")
+			sleep(0.5)
+			game = self.game_history.objects.filter(player_a=player_a, player_b=player_b, game_state='waiting', game_category=game_category)
+		return game.first()
 	
 	@database_sync_to_async
 	def create_game_history(self, player_a, player_b=None, game_category='Quick Match', game_mode='Vanilla'):
@@ -110,6 +116,8 @@ class GameConsumer(AsyncWebsocketConsumer):
 		user.save()
 
 	async def connect(self):
+		from api.models import is_valid_invite
+		self.is_valid_invite = is_valid_invite
 		self.game = None
 		self.logger = logging.getLogger('game')
 		self.logger.info(f"Websocket connection made with channel name {self.channel_name}")
@@ -149,7 +157,12 @@ class GameConsumer(AsyncWebsocketConsumer):
 						}
 					)
 				return # one of the players is in another game, no new game created
+			if not await self.is_valid_invite(await self.get_user(sender), self.user):
+				self.logger.info(f"Invalid invitation from {sender} to {self.user.username}")
+				return # invalid invitation
+			self.logger.info("BEFORE CREATE GAMEBD")
 			game_db = await game_manager.create_game_history(user, player_b=await self.get_user(sender), game_category='Invite')
+			self.logger.info("AFTER CREATE GAMEBD")
 			self.game = GameBackend(game_db.id, 0)
 			game_manager.games[game_db.id] = self.game
 			self.game.channel_layer = self.channel_layer
@@ -178,6 +191,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 				self.logger.info("Game is ready to start,game is full")
 				await game_manager.set_game_state(await game_manager.get_game_by_id(self.game.game_id), 'playing')
 				await self.send_initial_game_state(self.game)
+			return
 		
 		else: # quick match or bot
 			bot = int(query_params.get("bot", [0])[0])
