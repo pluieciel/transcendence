@@ -1,6 +1,7 @@
 export default class ChatBox {
     constructor(container) {
-        const decodedPayload = jwt_decode(window.app.getToken());
+        this.token = window.app.getToken();
+        const decodedPayload = jwt_decode(this.token);
         //console.log(decodedPayload);
         this.container = container;
         this.username = decodedPayload.username;
@@ -174,10 +175,9 @@ export default class ChatBox {
     }
 
     initWebSocket() {
-        const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
-        const wsUrl = `${protocol}${window.location.host}/ws/chat/?username=${this.username}`;
-        
-        this.chatSocket = new WebSocket(wsUrl);
+        this.protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+        this.host = window.location.host;
+        this.chatSocket = new WebSocket(`${this.protocol}${this.host}/ws/chat/?token=${this.token}`);
         
         this.chatSocket.onopen = () => {
             console.log("WebSocket connection established");
@@ -214,6 +214,7 @@ export default class ChatBox {
                 }
             } else if (data.message_type === "system_accept") {
                 console.log(data);
+                // TODO: add start game logic
             } else {
                 this.handlePrivateMessage(data);
             }
@@ -288,7 +289,7 @@ export default class ChatBox {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'Authorization': `${window.app.getToken()}`,
+                            'Authorization': `${this.token}`,
                         },
                     });
                     const data = await response.json();
@@ -304,7 +305,7 @@ export default class ChatBox {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'Authorization': `${window.app.getToken()}`,
+                            'Authorization': `${this.token}`,
                         },
                     });
                     const data = await response.json();
@@ -353,7 +354,7 @@ export default class ChatBox {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'Authorization': `${window.app.getToken()}`,
+                            'Authorization': `${this.token}`,
                         },
                     });
                     const data = await response.json();
@@ -412,7 +413,7 @@ export default class ChatBox {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'Authorization': `${window.app.getToken()}`,
+                            'Authorization': `${this.token}`,
                         },
                     });
                     const data = await response.json();
@@ -429,7 +430,7 @@ export default class ChatBox {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'Authorization': `${window.app.getToken()}`,
+                            'Authorization': `${this.token}`,
                         },
                     });
                     const data = await response.json();
@@ -733,6 +734,9 @@ export default class ChatBox {
                     time: new Date().toLocaleTimeString()
                 };
                 this.chatSocket.send(JSON.stringify(messageData));
+                // TODO: add start game logic
+		        window.app.gamews = new WebSocket(`${this.protocol}${this.host}/ws/game/invite?token=${this.token}&sender=${user}`);
+                console.log(`${this.protocol}${this.host}/ws/game/invite?token=${this.token}&sender=${user}`);
             }
         });
 
@@ -783,7 +787,7 @@ export default class ChatBox {
                 const response = await fetch('/api/update/', {
                     method: 'POST',
                     headers: {
-                        'Authorization': `${window.app.getToken()}`,
+                        'Authorization': `${this.token}`,
                     },
                     body: formData
                 });
