@@ -1,4 +1,6 @@
 # views.py
+import time
+
 from channels.generic.http import AsyncHttpConsumer
 from django.contrib.auth import get_user_model, authenticate
 from channels.db import database_sync_to_async
@@ -15,7 +17,9 @@ import io
 import qrcode
 import qrcode.image.svg
 import hmac
-import pyotp
+import hashlib
+import base64
+import secrets
 
 SECRET_KEY = os.environ.get('JWT_SECRET_KEY')
 logger = logging.getLogger(__name__)
@@ -38,6 +42,19 @@ async def jwt_to_user(token):
         return False
     except jwt.InvalidTokenError:
         return False
+
+def generate_totp(secret, offset):
+    time_counter = int((time.time() + offset) // 30)
+    time_bytes = time_counter.to_bytes(8, 'big')
+
+    hmac_res = hmac.digest(base64.b32decode(secret), time_bytes, hashlib.sha1)
+    hmac_off = hmac_res[19] & 0xf
+    bin_code = ((hmac_res[hmac_off] & 0x7f) << 24
+        | (hmac_res[hmac_off + 1] & 0xff) << 16
+        | (hmac_res[hmac_off + 2] & 0xff) << 8
+        | (hmac_res[hmac_off + 3] & 0xff))
+
+    return bin_code % pow(10, 6)
 
 class SignupConsumer(AsyncHttpConsumer):
     async def handle(self, body):
@@ -214,13 +231,22 @@ class LoginConsumer(AsyncHttpConsumer):
                 return await self.send_response(401, json.dumps(response_data).encode(),
                     headers=[(b"Content-Type", b"application/json")])
 
-            topt_secret = pyotp.random_base32()
+            topt_secret = 'QHYGNOTF5OT7BHMC2EKJBHDY5QDFTTMQ'
 
             qr = qrcode.QRCode(image_factory=qrcode.image.svg.SvgPathImage)
             data = "otpauth://totp/ft_transcendence?secret=" + topt_secret
             qr.add_data(data)
             qr.make(fit=True)
             img = qr.make_image()
+
+            topts = [
+                generate_totp(topt_secret, -30),
+                generate_totp(topt_secret, 0),
+                generate_totp(topt_secret, 30),
+            ]
+
+            for topt in topts:
+                logger.fatal(topt)
 
             if user.totp_secret is not None:
                 logger.fatal(user.totp_secret)
