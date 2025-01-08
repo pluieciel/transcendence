@@ -89,7 +89,6 @@ def register_invite(sender, recipient):
 def is_valid_invite(sender, recipient):
     cleanup_invites()
     if GameInvite.objects.filter(sender=sender, recipient=recipient).exists():
-        GameInvite.objects.filter(sender=sender, recipient=recipient).delete()
         return True
     else:
         return False
