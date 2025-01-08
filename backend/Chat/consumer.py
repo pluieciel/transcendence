@@ -22,13 +22,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
         self.is_valid_invite = is_valid_invite
 
     async def connect(self):
-        #print("Query string:", self.scope.get("query_string", b""))
-
         query_string = self.scope["query_string"].decode()
-        #print("Decoded query string:", query_string)
-
         query_params = parse_qs(query_string)
-        #print("Parsed params:", query_params)
         self.token = query_params.get("token", [None])[0]
         try:
             payload = jwt.decode(self.token, SECRET_KEY, algorithms=['HS256'])
@@ -40,7 +35,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
             return
 
         self.room_group_name = f"user_{self.username}"
-        #print(self.username)
         
         if self.username is None:
             await self.close()
