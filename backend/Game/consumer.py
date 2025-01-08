@@ -110,6 +110,8 @@ class GameConsumer(AsyncWebsocketConsumer):
 		user.save()
 
 	async def connect(self):
+		from api.models import is_valid_invite
+		self.is_valid_invite = is_valid_invite
 		self.game = None
 		self.logger = logging.getLogger('game')
 		self.logger.info(f"Websocket connection made with channel name {self.channel_name}")
@@ -149,6 +151,8 @@ class GameConsumer(AsyncWebsocketConsumer):
 						}
 					)
 				return # one of the players is in another game, no new game created
+			if not await self.is_valid_invite(await self.get_user(sender), self.user):
+				return # invalid invitation
 			game_db = await game_manager.create_game_history(user, player_b=await self.get_user(sender), game_category='Invite')
 			self.game = GameBackend(game_db.id, 0)
 			game_manager.games[game_db.id] = self.game
@@ -178,6 +182,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 				self.logger.info("Game is ready to start,game is full")
 				await game_manager.set_game_state(await game_manager.get_game_by_id(self.game.game_id), 'playing')
 				await self.send_initial_game_state(self.game)
+			return
 		
 		else: # quick match or bot
 			bot = int(query_params.get("bot", [0])[0])
