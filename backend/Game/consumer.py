@@ -131,7 +131,8 @@ class GameConsumer(AsyncWebsocketConsumer):
 				"message": "User not found or invalid token."
 			}))
 			return
-		
+		game_manager._get_game_history_model()
+
 		if sender: # invitation: WS msg from B, A invite B, sender is A
 			#print(f"groupname: user_{user.username}", flush=True)
 			if user.is_playing or (await self.get_user(sender)).is_playing:
