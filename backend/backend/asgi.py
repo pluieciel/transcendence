@@ -13,7 +13,6 @@ from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack
 from Chat.routing import websocket_urlpatterns as chat_websocket_patterns
 from Game.routing import websocket_urlpatterns as game_websocket_patterns
-from Game.routing import websocket_urlpatterns2 as game_websocket_patterns_invite
 from django.urls import path, re_path
 from api.views import SignupConsumer, LoginConsumer, UpdateConsumer, ProfileConsumer, ProfileConsumer2, HandleOAuthConsumer, AvatarConsumer
 from django.contrib import admin
@@ -25,7 +24,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "backend.settings")
 websocket_patterns = [
     path('ws/chat/', URLRouter(chat_websocket_patterns)),
     path('ws/game/', URLRouter(game_websocket_patterns)),
-    path('ws/game/invite', URLRouter(game_websocket_patterns_invite)),
+    path('ws/game/invite', URLRouter(game_websocket_patterns)),
 ]
 
 http_patterns = [
