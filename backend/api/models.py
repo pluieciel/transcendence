@@ -92,3 +92,13 @@ def is_valid_invite(sender, recipient):
         return True
     else:
         return False
+
+class GameHistory(models.Model):
+    is_finished = models.BooleanField(default=False)
+    game_mode = models.CharField(max_length=32)
+    game_category = models.CharField(max_length=32)
+    score_a = models.IntegerField(default=0)
+    score_b = models.IntegerField(default=0)
+    player_a = models.ForeignKey(CustomUser)
+    player_b = models.ForeignKey(CustomUser)
+    created_at = models.DateTimeField(auto_now_add=True)
