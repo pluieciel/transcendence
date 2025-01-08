@@ -30,7 +30,7 @@ up:
 	@$(DOCKER_COMPOSE_CMD) -f $(DOCKER_COMPOSE_YML) -p $(NAME) up -d
 
 down:
-	@$(DOCKER_COMPOSE_CMD) -f $(DOCKER_COMPOSE_YML) -p $(NAME) down --volumes --rmi all
+	@$(DOCKER_COMPOSE_CMD) -f $(DOCKER_COMPOSE_YML) -p $(NAME) down --volumes --rmi all --remove-orphans
 
 stop:
 	@$(DOCKER_COMPOSE_CMD) -f $(DOCKER_COMPOSE_YML) -p $(NAME) stop
