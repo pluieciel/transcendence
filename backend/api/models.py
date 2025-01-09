@@ -47,7 +47,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     language = models.CharField(max_length=4, unique=False, default="en")
     is_playing = models.BooleanField(default=False)
     is_bot = models.BooleanField(default=False)
-    current_game_id = models.IntegerField(default=0)
+    current_game_id = models.IntegerField(default=-1)
     tourn_win = models.IntegerField(default=0)
     tourn_joined = models.IntegerField(default=0)
     friends = models.ManyToManyField('self', symmetrical=False, related_name='friend_set', blank=True)
@@ -89,14 +89,13 @@ def register_invite(sender, recipient):
 def is_valid_invite(sender, recipient):
     cleanup_invites()
     if GameInvite.objects.filter(sender=sender, recipient=recipient).exists():
-        GameInvite.objects.filter(sender=sender, recipient=recipient).delete()
         return True
     else:
         return False
 
 class GameHistory(models.Model):
     game_mode = models.CharField(max_length=32)
-    game_category = models.CharField(max_length=32)
+    game_category = models.CharField(max_length=32) # Quick Match, Invite, Tournament?
     game_state = models.CharField(max_length=32, default='waiting') # waiting, playing, finished
     score_a = models.IntegerField(default=0)
     score_b = models.IntegerField(default=0)

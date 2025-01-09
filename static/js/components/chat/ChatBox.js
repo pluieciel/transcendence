@@ -1,3 +1,5 @@
+import { Game } from "../game/Game.js";
+
 export default class ChatBox {
     constructor(container) {
         this.token = window.app.getToken();
@@ -215,6 +217,20 @@ export default class ChatBox {
             } else if (data.message_type === "system_accept") {
                 console.log(data);
                 // TODO: add start game logic
+                window.app.gamews = new WebSocket(`${this.protocol}${this.host}/ws/game/invite?token=${this.token}&recipient=${data.sender}`);
+                console.log(`${this.protocol}${this.host}/ws/game/invite?token=${this.token}&recipient=${data.sender}`);
+                window.app.gamews.onmessage = (event) => {
+                    const events = JSON.parse(event.data);
+                    if (events.message_type === "init") {
+                        setTimeout(() => {
+                            const canvas = document.querySelector("#gameCanvas");
+                            const game = new Game(canvas, window.app.gamews);
+                            console.log("Game initialization");
+                            game.initialize(events.data);
+                            document.querySelector("#mainPage").style.display = "none";
+                        }, 1000);
+                    }
+                };
             } else {
                 this.handlePrivateMessage(data);
             }
@@ -737,6 +753,18 @@ export default class ChatBox {
                 // TODO: add start game logic
 		        window.app.gamews = new WebSocket(`${this.protocol}${this.host}/ws/game/invite?token=${this.token}&sender=${user}`);
                 console.log(`${this.protocol}${this.host}/ws/game/invite?token=${this.token}&sender=${user}`);
+                window.app.gamews.onmessage = (event) => {
+                    const events = JSON.parse(event.data);
+                    if (events.message_type === "init") {
+                        setTimeout(() => {
+                            const canvas = document.querySelector("#gameCanvas");
+                            const game = new Game(canvas, window.app.gamews);
+                            console.log("Game initialization");
+                            game.initialize(events.data);
+                            document.querySelector("#mainPage").style.display = "none";
+                        }, 1000);
+                    }
+                };
             }
         });
 
