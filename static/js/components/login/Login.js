@@ -24,6 +24,26 @@ export default class Login {
                     </div>
                 </div>
             </div>
+            <div class="modal fade" id="2fa" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="staticBackdropLabel">Update User Info</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="updateForm">
+                                <div class="mb-3">
+                                    <input id="2fa-input" placeholder="2fa code" class="form-control">
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary" id="sendUpdateForm">Submit</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         `;
     }
 
@@ -67,7 +87,11 @@ export default class Login {
             
                 // This code runs only after getting response from server
                 if (data.success) {
-                   window.app.login(data);
+                    if (data.two_fa) {
+                        ;
+                    } else {
+                        window.app.login(data);
+                    }
                 } else {
                     errorDiv.textContent = data.message || 'Login failed';
                     errorDiv.classList.remove('d-none');

@@ -275,7 +275,7 @@ class LoginConsumer(AsyncHttpConsumer):
             response_data = {
                 'success': True,
                 'message': 'Login successful',
-                '2fa': user.totp_secret is not None,
+                'two_fa': user.totp_secret is not None,
                 'token': token,
                 'img': img.to_string(encoding='unicode'),
             }
@@ -306,6 +306,38 @@ class LoginConsumer(AsyncHttpConsumer):
     def update_totp_secret(self, user, totp_secret):
         user.totp_secret = totp_secret
         user.save()
+
+class TwoFAConsumer(AsyncHttpConsumer):
+    async def handle(self, body):
+        try:
+            data = json.loads(body.decode())
+            totp = data.get('totp')
+
+            headers = dict((key.decode('utf-8'), value.decode('utf-8')) for key, value in self.scope['headers'])
+            # print(headers, flush=True)
+            auth_header = headers.get('authorization', None)
+            if not auth_header:
+                response_data = {
+                    'success': False,
+                    'message': 'Authorization header missing'
+                }
+                return await self.send_response(401, json.dumps(response_data).encode(),
+                                                headers=[(b"Content-Type", b"application/json")])
+            user = await jwt_to_user(auth_header)
+            if not user:
+                response_data = {
+                    'success': False,
+                    'message': 'Invalid token or User not found'
+                }
+                return await self.send_response(401, json.dumps(response_data).encode(),
+                                                headers=[(b"Content-Type", b"application/json")])
+        except Exception as e:
+            response_data = {
+                'success': False,
+                'message': str(e)
+            }
+            return await self.send_response(500, json.dumps(response_data).encode(),
+                headers=[(b"Content-Type", b"application/json")])
 
 class UpdateConsumer(AsyncHttpConsumer):
     async def handle(self, body):
