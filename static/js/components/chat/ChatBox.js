@@ -1,6 +1,9 @@
+import { Game } from "../game/Game.js";
+
 export default class ChatBox {
     constructor(container) {
-        const decodedPayload = jwt_decode(window.app.getToken());
+        this.token = window.app.getToken();
+        const decodedPayload = jwt_decode(this.token);
         //console.log(decodedPayload);
         this.container = container;
         this.username = decodedPayload.username;
@@ -174,10 +177,9 @@ export default class ChatBox {
     }
 
     initWebSocket() {
-        const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
-        const wsUrl = `${protocol}${window.location.host}/ws/chat/?username=${this.username}`;
-        
-        this.chatSocket = new WebSocket(wsUrl);
+        this.protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+        this.host = window.location.host;
+        this.chatSocket = new WebSocket(`${this.protocol}${this.host}/ws/chat/?token=${this.token}`);
         
         this.chatSocket.onopen = () => {
             console.log("WebSocket connection established");
@@ -214,6 +216,21 @@ export default class ChatBox {
                 }
             } else if (data.message_type === "system_accept") {
                 console.log(data);
+                // TODO: add start game logic
+                window.app.gamews = new WebSocket(`${this.protocol}${this.host}/ws/game/invite?token=${this.token}&recipient=${data.sender}`);
+                console.log(`${this.protocol}${this.host}/ws/game/invite?token=${this.token}&recipient=${data.sender}`);
+                window.app.gamews.onmessage = (event) => {
+                    const events = JSON.parse(event.data);
+                    if (events.message_type === "init") {
+                        setTimeout(() => {
+                            const canvas = document.querySelector("#gameCanvas");
+                            const game = new Game(canvas, window.app.gamews);
+                            console.log("Game initialization");
+                            game.initialize(events.data);
+                            document.querySelector("#mainPage").style.display = "none";
+                        }, 1000);
+                    }
+                };
             } else {
                 this.handlePrivateMessage(data);
             }
@@ -241,7 +258,9 @@ export default class ChatBox {
                                     <i class="fa-solid fa-gamepad"></i>
                                 </button>
                             ` : ''}
-                            
+                            <button class="btn btn-primary square-btn me-1" data-action="watchgame" data-user="${user}">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
                             <div class="dropdown">
                                 <button class="btn btn-primary square-btn me-1" data-action="profile" data-user="${user}"
                                     data-bs-toggle="dropdown" aria-expanded="false">
@@ -286,7 +305,7 @@ export default class ChatBox {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'Authorization': `${window.app.getToken()}`,
+                            'Authorization': `${this.token}`,
                         },
                     });
                     const data = await response.json();
@@ -302,7 +321,7 @@ export default class ChatBox {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'Authorization': `${window.app.getToken()}`,
+                            'Authorization': `${this.token}`,
                         },
                     });
                     const data = await response.json();
@@ -334,7 +353,7 @@ export default class ChatBox {
                             <div id="avatar_${user}"></div>
                             <span class="user-name ms-2">${user}</span>
                         </span>
-                        ${this.friends.includes(user) ? '':
+                        ${(this.friends.includes(user) || user === this.username) ? '':
                         `<span class="d-flex align-items-center">  
                             <button class="btn btn-primary square-btn me-1" data-action="addfriend" data-user="${user}">
                                 <i class="fa-solid fa-plus"></i>
@@ -351,7 +370,7 @@ export default class ChatBox {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'Authorization': `${window.app.getToken()}`,
+                            'Authorization': `${this.token}`,
                         },
                     });
                     const data = await response.json();
@@ -410,7 +429,7 @@ export default class ChatBox {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'Authorization': `${window.app.getToken()}`,
+                            'Authorization': `${this.token}`,
                         },
                     });
                     const data = await response.json();
@@ -427,7 +446,7 @@ export default class ChatBox {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'Authorization': `${window.app.getToken()}`,
+                            'Authorization': `${this.token}`,
                         },
                     });
                     const data = await response.json();
@@ -666,6 +685,8 @@ export default class ChatBox {
                 setTimeout(() => {
                     this.updateOnlineUsersList();
                 }, 200);
+            } else if (action === "watchgame") {
+                // add watch game
             }
         });
 
@@ -729,6 +750,31 @@ export default class ChatBox {
                     time: new Date().toLocaleTimeString()
                 };
                 this.chatSocket.send(JSON.stringify(messageData));
+                // TODO: add start game logic
+		        window.app.gamews = new WebSocket(`${this.protocol}${this.host}/ws/game/invite?token=${this.token}&sender=${user}`);
+                console.log(`${this.protocol}${this.host}/ws/game/invite?token=${this.token}&sender=${user}`);
+                window.app.gamews.onmessage = (event) => {
+                    const events = JSON.parse(event.data);
+                    if (events.message_type === "init") {
+                        setTimeout(() => {
+                            const canvas = document.querySelector("#gameCanvas");
+                            const game = new Game(canvas, window.app.gamews);
+                            console.log("Game initialization");
+                            game.initialize(events.data);
+                            document.querySelector("#mainPage").style.display = "none";
+                        }, 1000);
+                    }
+                };
+                window.app.gamews.onopen = function(event) {
+                    console.log("WebSocket invite connection established");
+                    window.app.ingame = true;
+                    sessionStorage.setItem('ingame', 'true');
+                };
+                window.app.gamews.onclose = function(event) {
+                    console.log("WebSocket invite connection closed", event.code, event.reason);
+                    window.app.ingame = false;
+                    sessionStorage.setItem('ingame', 'false');
+                };
             }
         });
 
@@ -779,7 +825,7 @@ export default class ChatBox {
                 const response = await fetch('/api/update/', {
                     method: 'POST',
                     headers: {
-                        'Authorization': `${window.app.getToken()}`,
+                        'Authorization': `${this.token}`,
                     },
                     body: formData
                 });

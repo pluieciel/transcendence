@@ -24,6 +24,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "backend.settings")
 websocket_patterns = [
     path('ws/chat/', URLRouter(chat_websocket_patterns)),
     path('ws/game/', URLRouter(game_websocket_patterns)),
+    path('ws/game/invite', URLRouter(game_websocket_patterns)),
 ]
 
 http_patterns = [

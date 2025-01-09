@@ -180,14 +180,14 @@ class GameInstance:
 
 
 	def start(self):
-			self.is_running = True
-			self.ball.start(random.choice([LEFT_SIDE_DIR, RIGHT_SIDE_DIR]), DEFAULT_BALL_POS)
-			self.loop_task = asyncio.create_task(self.game_loop())
+		self.is_running = True
+		self.ball.start(random.choice([LEFT_SIDE_DIR, RIGHT_SIDE_DIR]), DEFAULT_BALL_POS)
+		self.loop_task = asyncio.create_task(self.game_loop())
 
 	def stop(self):
-				self.is_running = False
-				if self.loop_task:
-					self.loop_task.cancel()
+		self.is_running = False
+		if self.loop_task:
+			self.loop_task.cancel()
 
 	async def game_loop(self):
 		try:
@@ -204,7 +204,8 @@ class GameInstance:
 					try:
 						await self.broadcast_function()
 					except Exception as e:
-						logging.getLogger('game').info(f"Error Broadcast : {e}")
+						#logging.getLogger('game').info(f"Error Broadcast : {e}")
+						pass
 
 				await asyncio.sleep(1/60)  # 60 FPS
 

@@ -1,6 +1,9 @@
 # models.py
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
+from django.utils import timezone
+from datetime import timedelta
+from channels.db import database_sync_to_async
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, username, password=None, avatar=None):
@@ -43,13 +46,15 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     looses = models.IntegerField(default=0)
     language = models.CharField(max_length=4, unique=False, default="en")
     is_playing = models.BooleanField(default=False)
-    current_game_id = models.IntegerField(default=0)
+    is_bot = models.BooleanField(default=False)
+    current_game_id = models.IntegerField(default=-1)
     tourn_win = models.IntegerField(default=0)
     tourn_joined = models.IntegerField(default=0)
     friends = models.ManyToManyField('self', symmetrical=False, related_name='friend_set', blank=True)
     avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
     nickname = models.CharField(max_length=30, null=True)
     totp_secret = models.CharField(max_length=32, unique=True, null=True)
+    invites = models.ManyToManyField('self', symmetrical=False, related_name='invite_set', blank=True)
 
     objects = CustomUserManager()
 
@@ -64,3 +69,37 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     def has_module_perms(self, app_label):
         return True
+
+class GameInvite(models.Model):
+    sender = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='invite_sender')
+    recipient = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='invite_recipient')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.sender.username} invited {self.recipient.username}"
+
+def cleanup_invites():
+    GameInvite.objects.filter(created_at__lt=timezone.now() - timedelta(minutes=5)).delete()
+
+@database_sync_to_async
+def register_invite(sender, recipient):
+    cleanup_invites()
+    GameInvite.objects.create(sender=sender, recipient=recipient)
+
+@database_sync_to_async
+def is_valid_invite(sender, recipient):
+    cleanup_invites()
+    if GameInvite.objects.filter(sender=sender, recipient=recipient).exists():
+        return True
+    else:
+        return False
+
+class GameHistory(models.Model):
+    game_mode = models.CharField(max_length=32)
+    game_category = models.CharField(max_length=32) # Quick Match, Invite, Tournament?
+    game_state = models.CharField(max_length=32, default='waiting') # waiting, playing, finished
+    score_a = models.IntegerField(default=0)
+    score_b = models.IntegerField(default=0)
+    player_a = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, related_name='player_a')
+    player_b = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, related_name='player_b')
+    created_at = models.DateTimeField(auto_now_add=True)

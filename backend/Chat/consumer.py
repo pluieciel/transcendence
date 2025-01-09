@@ -5,29 +5,36 @@ from channels.layers import get_channel_layer
 from datetime import datetime
 from django.contrib.auth import get_user_model, authenticate
 from channels.db import database_sync_to_async
+import jwt
+import os
+
+SECRET_KEY = os.environ.get('JWT_SECRET_KEY')
 
 class ChatConsumer(AsyncWebsocketConsumer):
     online_users = set()
     waiting_users = set()
     def __init__(self, *args, **kwargs):
+        from api.models import register_invite, is_valid_invite
         super().__init__(*args, **kwargs)
         self.username = None
         self.room_group_name = None
+        self.register_invite = register_invite
+        self.is_valid_invite = is_valid_invite
 
     async def connect(self):
-        #print("Query string:", self.scope.get("query_string", b""))
-
         query_string = self.scope["query_string"].decode()
-        #print("Decoded query string:", query_string)
-
         query_params = parse_qs(query_string)
-        #print("Parsed params:", query_params)
+        self.token = query_params.get("token", [None])[0]
+        try:
+            payload = jwt.decode(self.token, SECRET_KEY, algorithms=['HS256'])
+            self.username = payload.get('username')
 
-        self.username = query_params.get("username", [None])[0]
-        #print("Username:", self.username, "$")
+        except jwt.ExpiredSignatureError:
+            return
+        except jwt.InvalidTokenError:
+            return
 
         self.room_group_name = f"user_{self.username}"
-        #print(self.username)
         
         if self.username is None:
             await self.close()
@@ -185,12 +192,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
                         "type": "send_message",
                         "message": message,
                         "message_type": "chat",
-                        "sender": sender,
+                        "sender": self.username,
                         "recipient": recipient,
                         "time": time
                     }
                 )
         elif message_type == "system" and message == "invite_user":
+            # register invite
+            await self.register_invite(await self.get_user(sender), await self.get_user(recipient))
+
             recipient_group = f"user_{recipient}"
             await self.channel_layer.group_send(
                 recipient_group,
@@ -198,7 +208,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     "type": "send_message",
                     "message": "invites you to play a game",
                     "message_type": "system_invite",
-                    "sender": sender,
+                    "sender": self.username,
                     "recipient": recipient,
                     "game_mode": game_mode,
                     "time": time
@@ -206,19 +216,22 @@ class ChatConsumer(AsyncWebsocketConsumer):
             )
 
         elif message_type == "system_accept" and message == "accept_invite":
-            sender_group = f"user_{sender}"
-            recipient_group = f"user_{recipient}"
-            await self.channel_layer.group_send(
-                recipient_group, {
-                    "type": "send_message",
-                    "message": "accepted your invite",
-                    "message_type": "system_accept",
-                    "sender": sender,
-                    "game_mode": game_mode,
-                    "recipient": recipient,
-                    "time": time
-                }
-            )
+            #print("accept invite received", flush=True)
+            if await self.is_valid_invite(await self.get_user(recipient), await self.get_user(sender)):
+                #print("accept invite valid", flush=True)
+                sender_group = f"user_{sender}"
+                recipient_group = f"user_{recipient}"
+                await self.channel_layer.group_send(
+                    recipient_group, {
+                        "type": "send_message",
+                        "message": "accepted your invite",
+                        "message_type": "system_accept",
+                        "sender": self.username,
+                        "game_mode": game_mode,
+                        "recipient": recipient,
+                        "time": time
+                    }
+                )
         
         elif message_type == "system" and message == "addfriend":
             user = await self.get_user(sender)

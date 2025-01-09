@@ -80,6 +80,14 @@ class SignupConsumer(AsyncHttpConsumer):
             avatar = data.get('avatar')
 
             # Validate input
+            if not (self.is_valid_username(username)):
+                response_data = {
+                    'success': False,
+                    'message': 'Username invalid'
+                }
+                return await self.send_response(400, json.dumps(response_data).encode(),
+                    headers=[(b"Content-Type", b"application/json")])
+
             if not username or not password:
                 response_data = {
                     'success': False,
@@ -128,6 +136,10 @@ class SignupConsumer(AsyncHttpConsumer):
             }
             return await self.send_response(500, json.dumps(response_data).encode(),
                 headers=[(b"Content-Type", b"application/json")])
+    
+    def is_valid_username(self, username):
+        regex = r'^[a-zA-Z0-9]+$'
+        return bool(re.match(regex, username))
 
     @database_sync_to_async
     def get_user_exists(self, username):
