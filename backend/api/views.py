@@ -1,6 +1,6 @@
 # views.py
 import time
-
+from secrets import token_bytes
 from channels.generic.http import AsyncHttpConsumer
 from django.contrib.auth import get_user_model, authenticate
 from channels.db import database_sync_to_async
@@ -19,7 +19,6 @@ import qrcode.image.svg
 import hmac
 import hashlib
 import base64
-import secrets
 
 SECRET_KEY = os.environ.get('JWT_SECRET_KEY')
 logger = logging.getLogger(__name__)
@@ -43,8 +42,8 @@ async def jwt_to_user(token):
     except jwt.InvalidTokenError:
         return False
 
-def generate_totp(secret, offset):
-    time_counter = int((time.time() + offset) // 30)
+def generate_totp(secret, current_timestamp, offset):
+    time_counter = int(current_timestamp // 30) + offset
     time_bytes = time_counter.to_bytes(8, 'big')
 
     hmac_res = hmac.digest(base64.b32decode(secret), time_bytes, hashlib.sha1)
@@ -231,27 +230,30 @@ class LoginConsumer(AsyncHttpConsumer):
                 return await self.send_response(401, json.dumps(response_data).encode(),
                     headers=[(b"Content-Type", b"application/json")])
 
-            topt_secret = 'QHYGNOTF5OT7BHMC2EKJBHDY5QDFTTMQ'
+            #topt_secret = base64.b32encode(token_bytes(32)).decode()
+            topt_secret = 'GIVE4DKY4SICXN6OVFLP3DUYC7DMKP6PKICGESS7KFCUUDKOWZTQ===='
+            await self.update_topt_secret(user, '123456')
 
             qr = qrcode.QRCode(image_factory=qrcode.image.svg.SvgPathImage)
-            data = "otpauth://totp/ft_transcendence?secret=" + topt_secret
+            data = "otpauth://totp/ft_transcendence?secret=" + topt_secret + "&issuer=42"
             qr.add_data(data)
             qr.make(fit=True)
             img = qr.make_image()
 
+            current_timestamp = time.time()
             topts = [
-                generate_totp(topt_secret, -30),
-                generate_totp(topt_secret, 0),
-                generate_totp(topt_secret, 30),
+                generate_totp(topt_secret, current_timestamp,-1),
+                generate_totp(topt_secret, current_timestamp,0),
+                generate_totp(topt_secret, current_timestamp,1),
             ]
 
             for topt in topts:
-                logger.fatal(topt)
+                print(topt, flush=True)
 
-            if user.totp_secret is not None:
-                logger.fatal(user.totp_secret)
+            if user.totp_secret:
+                print(user.totp_secret, flush=True)
             else:
-                logger.fatal('NONE')
+                print('WHY', flush=True)
 
             # Generate JWT
             token = jwt.encode({
@@ -289,6 +291,11 @@ class LoginConsumer(AsyncHttpConsumer):
     def get_user_exists(self, username):
         User = get_user_model()
         return User.objects.filter(username=username).exists()
+
+    @database_sync_to_async
+    def update_topt_secret(self, user, topt_secret):
+        user.topt_secret = topt_secret
+        user.save()
 
 class UpdateConsumer(AsyncHttpConsumer):
     async def handle(self, body):
