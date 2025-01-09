@@ -765,6 +765,16 @@ export default class ChatBox {
                         }, 1000);
                     }
                 };
+                window.app.gamews.onopen = function(event) {
+                    console.log("WebSocket invite connection established");
+                    window.app.ingame = true;
+                    sessionStorage.setItem('ingame', 'true');
+                };
+                window.app.gamews.onclose = function(event) {
+                    console.log("WebSocket invite connection closed", event.code, event.reason);
+                    window.app.ingame = false;
+                    sessionStorage.setItem('ingame', 'false');
+                };
             }
         });
 

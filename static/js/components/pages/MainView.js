@@ -15,6 +15,26 @@ export default class MainView {
 		this.setProfileFields();
 		this.initComponents();
 		this.addEventListeners();
+		if (window.app.ingame) {
+			console.log("Reconnecting to game");
+			const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+			const host = window.location.host;
+			const token = window.app.getToken();
+			const wsUrl = `${protocol}//${host}/ws/game/?token=${token}&reconnect=true`;
+			window.app.gamews = new WebSocket(wsUrl);
+			window.app.gamews.onmessage = (event) => {
+				const events = JSON.parse(event.data);
+				if (events.message_type === "init") {
+					this.displayGame(events);
+				}
+			};
+	
+			window.app.gamews.onclose = () => {
+				console.log("Disconnected from server");
+				window.app.ingame = false;
+				sessionStorage.setItem('ingame', 'false');
+			};
+		}
 	}
 
 	render() {
@@ -103,10 +123,10 @@ export default class MainView {
 		//if (!token) this.handleUnrecognizedToken();
 		const wsUrl = `${protocol}//${host}/ws/game/?token=${token}`;
 
-		this.ws = new WebSocket(wsUrl);
+		window.app.gamews = new WebSocket(wsUrl);
 		this.startSearchGameTimer();
 
-		this.ws.onmessage = (event) => {
+		window.app.gamews.onmessage = (event) => {
 			console.log(event.data);
 			setTimeout(() => {
 				this.stopTimerAndDismissModal();
@@ -118,15 +138,19 @@ export default class MainView {
 			}
 		};
 
-		this.ws.onopen = () => {
+		window.app.gamews.onopen = () => {
 			console.log("Connected to server");
+			window.app.ingame = true;
+            sessionStorage.setItem('ingame', 'true');
 		};
 
-		this.ws.onclose = () => {
+		window.app.gamews.onclose = () => {
 			console.log("Disconnected from server");
+			window.app.ingame = false;
+            sessionStorage.setItem('ingame', 'false');
 		};
 
-		this.ws.onerror = (error) => {
+		window.app.gamews.onerror = (error) => {
 			console.error("WebSocket error:", error);
 		};
 	}
@@ -139,24 +163,28 @@ export default class MainView {
 		//if (!token) this.handleUnrecognizedToken();
 		const wsUrl = `${protocol}//${host}/ws/game/?token=${token}&bot=` + difficulty;
 
-		this.ws = new WebSocket(wsUrl);
+		window.app.gamews = new WebSocket(wsUrl);
 
-		this.ws.onmessage = (event) => {
+		window.app.gamews.onmessage = (event) => {
 			const events = JSON.parse(event.data);
 			if (events.message_type === "init") {
 				this.displayGame(events);
 			}
 		};
 
-		this.ws.onopen = () => {
+		window.app.gamews.onopen = () => {
 			console.log("Connected to server");
+			window.app.ingame = true;
+            sessionStorage.setItem('ingame', 'true');
 		};
 
-		this.ws.onclose = () => {
+		window.app.gamews.onclose = () => {
 			console.log("Disconnected from server");
+			window.app.ingame = false;
+            sessionStorage.setItem('ingame', 'false');
 		};
 
-		this.ws.onerror = (error) => {
+		window.app.gamews.onerror = (error) => {
 			console.error("WebSocket error:", error);
 		};
 	}
@@ -164,7 +192,7 @@ export default class MainView {
 	displayGame(events) {
 		setTimeout(() => {
 			const canvas = this.container.querySelector("#gameCanvas");
-			const game = new Game(canvas, this.ws);
+			const game = new Game(canvas, window.app.gamews);
 			console.log("Game initialization");
 			game.initialize(events.data);
 			this.container.querySelector("#mainPage").style.display = "none";

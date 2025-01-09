@@ -204,7 +204,8 @@ class GameInstance:
 					try:
 						await self.broadcast_function()
 					except Exception as e:
-						logging.getLogger('game').info(f"Error Broadcast : {e}")
+						#logging.getLogger('game').info(f"Error Broadcast : {e}")
+						pass
 
 				await asyncio.sleep(1/60)  # 60 FPS
 

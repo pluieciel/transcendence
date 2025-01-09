@@ -43,7 +43,7 @@ class GameManager:
 		#if (user.is_playing and self.games and self.games[user.current_game_id]):
 		#	return (self.games[user.current_game_id])
 		if user.current_game_id != -1:
-			return self.games[user.current_game_id]
+			return self.games.get(user.current_game_id, None)
 		return None
 
 	async def check_available_game(self):
@@ -70,7 +70,7 @@ class GameManager:
 	@database_sync_to_async
 	def get_invite_game(self, player_a, player_b, game_category='Invite'):
 		game = self.game_history.objects.filter(player_a=player_a, player_b=player_b, game_state='waiting', game_category=game_category)
-		while not game.exists():
+		if not game.exists():
 			self.logger.info("Waiting for the game to be created")
 			sleep(0.5)
 			game = self.game_history.objects.filter(player_a=player_a, player_b=player_b, game_state='waiting', game_category=game_category)
@@ -128,6 +128,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 		token = query_params.get("token", [None])[0]
 		sender = query_params.get("sender", [None])[0]
 		recipient = query_params.get("recipient", [None])[0]
+		reconnect = query_params.get("reconnect", [None])[0]
 		if not token:
 			return
 		user = await jwt_to_user(token)
@@ -140,8 +141,18 @@ class GameConsumer(AsyncWebsocketConsumer):
 			}))
 			return
 		game_manager._get_game_history_model()
-
-		if sender: # invitation: WS msg from B, A invite B, sender is A
+		if reconnect: # reconnect to game
+			self.logger.info("Reconnecting to game")
+			self.game = game_manager.get_player_current_game(user)
+			if self.game:
+				self.game.channel_layer = self.channel_layer
+				self.game.assign_player(user, self.channel_name)
+				await self.accept()
+				await self.channel_layer.group_add(str(self.game.game_id), self.channel_name)
+				await self.send_initial_game_state(self.game)
+			return
+		
+		elif sender: # invitation: WS msg from B, A invite B, sender is A
 			#print(f"groupname: user_{user.username}", flush=True)
 			if user.is_playing or (await self.get_user(sender)).is_playing:
 				for group in [f"user_{user.username}", f"user_{sender}"]:
