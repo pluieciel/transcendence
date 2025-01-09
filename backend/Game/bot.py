@@ -76,29 +76,29 @@ class Bot:
 
 
 		if abs(current_y - target_y) < deadzone:
-			self.logger.info("Bot stopping")
+			#self.logger.info("Bot stopping")
 			self.game.player_right.keys["ArrowUp"] = False
 			self.game.player_right.keys["ArrowDown"] = False
 			return
 
 		# Move up
 		if current_y < target_y - deadzone:
-			self.logger.info("Bot going up")
+			#self.logger.info("Bot going up")
 			self.game.player_right.keys["ArrowUp"] = True
 			self.game.player_right.keys["ArrowDown"] = False
 		# Move down
 		elif current_y > target_y + deadzone:
-			self.logger.info("Bot going down")
+			#self.logger.info("Bot going down")
 			self.game.player_right.keys["ArrowUp"] = False
 			self.game.player_right.keys["ArrowDown"] = True
 		# Stop moving when within deadzone
 		else:
-			self.logger.info("Bot stopping")
+			#self.logger.info("Bot stopping")
 			self.game.player_right.keys["ArrowUp"] = False
 			self.game.player_right.keys["ArrowDown"] = False
 
 	def update_vision(self):
-		self.logger.info("Bot Updated Vision")
+		#self.logger.info("Bot Updated Vision")
 		self.ball_position = self.game.ball.position
 		self.ball_velocity = self.game.ball.velocity
 		# Calculate new target position
@@ -123,19 +123,20 @@ class Bot:
 
 	async def update_view(self):
 		try:
-			self.logger.info("Loop starting")
+			#self.logger.info("Loop starting")
 			while self.is_running:
-				self.logger.info("Loop")
+				#self.logger.info("Loop")
 				current_time = time.time()
 
 				if current_time - self.last_vision_update >= self.vision_update_rate:
 					self.update_vision()
 					self.last_vision_update = current_time
 				else:
-					self.logger.info(f"current time : {current_time} last update : {self.last_vision_update}")
+					#self.logger.info(f"current time : {current_time} last update : {self.last_vision_update}")
+					pass
 
 				self.update_movement()
-				self.logger.info("Loop end")
+				#self.logger.info("Loop end")
 				await asyncio.sleep(1/60)
 
 		except asyncio.CancelledError:
