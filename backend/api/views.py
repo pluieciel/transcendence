@@ -230,30 +230,27 @@ class LoginConsumer(AsyncHttpConsumer):
                 return await self.send_response(401, json.dumps(response_data).encode(),
                     headers=[(b"Content-Type", b"application/json")])
 
-            #topt_secret = base64.b32encode(token_bytes(32)).decode()
-            topt_secret = 'GIVE4DKY4SICXN6OVFLP3DUYC7DMKP6PKICGESS7KFCUUDKOWZTQ===='
-            await self.update_topt_secret(user, '123456')
+            totp_secret = base64.b32encode(token_bytes(20)).decode()
+            # TODO: remove
+            totp_secret = 'YWECAGY4WS6L7LK275GANJTT5Q3KZBUF'
+            await self.update_totp_secret(user, totp_secret)
 
             qr = qrcode.QRCode(image_factory=qrcode.image.svg.SvgPathImage)
-            data = "otpauth://totp/ft_transcendence?secret=" + topt_secret + "&issuer=42"
+            data = "otpauth://totp/ft_transcendence?secret=" + totp_secret + "&issuer=42"
             qr.add_data(data)
             qr.make(fit=True)
             img = qr.make_image()
 
-            current_timestamp = time.time()
-            topts = [
-                generate_totp(topt_secret, current_timestamp,-1),
-                generate_totp(topt_secret, current_timestamp,0),
-                generate_totp(topt_secret, current_timestamp,1),
-            ]
-
-            for topt in topts:
-                print(topt, flush=True)
-
             if user.totp_secret:
-                print(user.totp_secret, flush=True)
-            else:
-                print('WHY', flush=True)
+                current_timestamp = time.time()
+                totps = [
+                    generate_totp(totp_secret, current_timestamp, -1),
+                    generate_totp(totp_secret, current_timestamp, 0),
+                    generate_totp(totp_secret, current_timestamp, 1),
+                ]
+
+                for totp in totps:
+                    print(totp, flush=True)
 
             # Generate JWT
             token = jwt.encode({
@@ -266,6 +263,7 @@ class LoginConsumer(AsyncHttpConsumer):
             response_data = {
                 'success': True,
                 'message': 'Login successful',
+                '2fa': user.totp_secret is not None,
                 'token': token,
                 'img': img.to_string(encoding='unicode'),
             }
@@ -293,8 +291,8 @@ class LoginConsumer(AsyncHttpConsumer):
         return User.objects.filter(username=username).exists()
 
     @database_sync_to_async
-    def update_topt_secret(self, user, topt_secret):
-        user.topt_secret = topt_secret
+    def update_totp_secret(self, user, totp_secret):
+        user.totp_secret = totp_secret
         user.save()
 
 class UpdateConsumer(AsyncHttpConsumer):
