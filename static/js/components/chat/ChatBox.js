@@ -195,6 +195,11 @@ export default class ChatBox {
             if (data.message_type === "system" && data.message === 'all_user_list') {
                 this.allusers = data.usernames.sort((a, b) => a.localeCompare(b));
                 this.updateOnlineUsersList();
+            } else if (data.message_type === "system" && data.message === 'update_tournament_waiting_list') {
+                //console.log(data.tournament_wait_list);
+                window.app.tournament.waitingList = data.tournament_wait_list;
+                window.app.tournament.tournamentState = data.tournament_state;
+                window.app.tournament.updateContent();
             } else if (data.type == "friend_list") {
                 this.friends = data.usernames.sort((a, b) => a.localeCompare(b));
                 this.updateOnlineUsersList();
@@ -204,6 +209,9 @@ export default class ChatBox {
                 this.onlineusers = dict.online_users.filter(user => user !== this.username).sort((a, b) => a.localeCompare(b));
                 this.onlineusers.unshift(this.username);
                 this.waiting_users = dict.waiting_users;
+                window.app.tournament.waitingList = dict.tournament_wait_list;
+                window.app.tournament.tournamentState = dict.tournament_state;
+                window.app.tournament.updateContent();
                 this.updateOnlineUsersList();
             } else if (data.message_type === "system" && data.recipient === 'update_waiting_users') {
                 this.waiting_users = JSON.parse(data.message);
@@ -301,16 +309,9 @@ export default class ChatBox {
             this.onlineusers.map(async (user) => {
                 const avatar_div = this.container.querySelector(`#avatar_${user}`);
                 if (avatar_div) {
-                    const response = await fetch(`/api/get/avatar/${user}`,{
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `${this.token}`,
-                        },
-                    });
-                    const data = await response.json();
-                    if (data.avatar) {
-                        avatar_div.innerHTML = `<img src="${data.avatar}" width="30" height="30"></img>`;
+                    const avatarUrl = await window.app.getAvatar(user);
+                    if (avatarUrl) {
+                        avatar_div.innerHTML = `<img src="${avatarUrl}" width="30" height="30"></img>`;
                     }
                 }
                 const elo_div = this.container.querySelector(`#elo_${user}`);
@@ -338,7 +339,7 @@ export default class ChatBox {
                 const donotdisbutton = this.container.querySelector('#Donotdisturb');
                 const tooltip = bootstrap.Tooltip.getInstance(donotdisbutton);
                 if (tooltip) tooltip.dispose();
-                new bootstrap.Tooltip(donotdisbutton); // Initialize the tooltip
+                if (donotdisbutton) new bootstrap.Tooltip(donotdisbutton); // Initialize the tooltip
             }, 50);
 
             const popoverTriggerList = this.container.querySelectorAll('[data-bs-toggle="popover"]');
@@ -425,16 +426,9 @@ export default class ChatBox {
             this.friends.map(async (user) => {
                 const avatar_div = this.container.querySelector(`#avatar_${user}`);
                 if (avatar_div) {
-                    const response = await fetch(`/api/get/avatar/${user}`,{
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `${this.token}`,
-                        },
-                    });
-                    const data = await response.json();
-                    if (data.avatar) {
-                        avatar_div.innerHTML = `<img src="${data.avatar}" width="30" height="30"></img>`;
+                    const avatarUrl = await window.app.getAvatar(user);
+                    if (avatarUrl) {
+                        avatar_div.innerHTML = `<img src="${avatarUrl}" width="30" height="30"></img>`;
                     }
                 }
                 const elo_div = this.container.querySelector(`#elof_${user}`);

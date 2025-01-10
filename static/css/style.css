@@ -25,6 +25,12 @@
 	border-color: #42b983;
 }
 
+.btn-primary:disabled {
+	background-color: #42b983;
+	border-color: #42b983;
+	opacity: 0.5;
+}
+
 .btn-primary:hover {
 	background-color: #3aa876;
 	border-color: #3aa876;
