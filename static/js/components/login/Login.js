@@ -24,23 +24,23 @@ export default class Login {
                     </div>
                 </div>
             </div>
-            <div class="modal fade" id="2fa" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal fade" id="totpModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
                             <h1 class="modal-title fs-5" id="staticBackdropLabel">Two-Factor Authentication</h1>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
-                        <div class="modal-body">
-                            <form id="2faForm">
-                                <div class="mb-3">
-                                    <input id="2faInput" class="form-control" maxlength="6">
-                                </div>
-                            </form>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-primary" id="send2faForm">Submit</button>
-                        </div>
+                        <form id="totpForm">
+	                        <div class="modal-body">
+	                                <div class="mb-3">
+	                                    <input id="totpInput" class="form-control" maxlength="6">
+	                                </div>
+	                        </div>
+	                        <div class="modal-footer">
+	                            <button type="submit" class="btn btn-primary" id="totpSubmit">Submit</button>
+	                        </div>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -61,13 +61,12 @@ export default class Login {
 	}
 
 	add2FAEventListeners() {
-        const two_fa = document.getElementById('send2faForm');
-        two_fa.addEventListener('click', async (e) => {
+        const submit = this.container.querySelector('#totpForm');
+        submit.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const totp = document.getElementById('2faInput').value;
+            const totp = this.container.querySelector('#totpInput').value;
             try {
             	const username = this.container.querySelector('#username').value;
-				console.log(username);
 				const response = await fetch('/api/login/2fa/', {
 					method: 'POST',
 				    headers: {
@@ -80,7 +79,7 @@ export default class Login {
 				});
 				const data = await response.json();
 				if (data.success) {
-					modal.toggle();
+					new bootstrap.Modal(this.container.querySelector('#totpModal')).hide();
 					window.app.login(data);
 				} else {
 
@@ -121,8 +120,7 @@ export default class Login {
                 // This code runs only after getting response from server
                 if (data.success) {
                     if (data.two_fa) {
-						const modal = new bootstrap.Modal(document.getElementById('2fa'));
-                        modal.toggle();
+						new bootstrap.Modal(this.container.querySelector('#totpModal')).show();
                     } else {
                         window.app.login(data);
                     }

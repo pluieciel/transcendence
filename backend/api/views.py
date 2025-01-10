@@ -242,6 +242,7 @@ class LoginConsumer(AsyncHttpConsumer):
                 return await self.send_response(401, json.dumps(response_data).encode(),
                     headers=[(b"Content-Type", b"application/json")])
 
+            # TODO: move to settings
             totp_secret = base64.b32encode(token_bytes(20)).decode()
             # TODO: remove
             totp_secret = 'YWECAGY4WS6L7LK275GANJTT5Q3KZBUF'
@@ -312,13 +313,9 @@ class TwoFAConsumer(AsyncHttpConsumer):
             user = await self.get_user(username)
 
             current_timestamp = time.time()
-            totps = [
-                generate_totp(user.totp_secret, current_timestamp, -1),
-                generate_totp(user.totp_secret, current_timestamp, 0),
-                generate_totp(user.totp_secret, current_timestamp, 1),
-            ]
 
-            for totp in totps:
+            for offset in [-1, 0, 1]:
+                totp = generate_totp(user.totp_secret, current_timestamp, offset)
                 if totp == int(totp_input):
                     token = jwt.encode({
                         'id': user.id,
@@ -331,7 +328,8 @@ class TwoFAConsumer(AsyncHttpConsumer):
                         'token': token
                     }
                     return await self.send_response(200, json.dumps(response_data).encode(),
-                        headers=[(b"Content-Type", b"application/json")])
+                                                    headers=[(b"Content-Type", b"application/json")])
+
             response_data = {
                 'success': False,
                 'message': 'Invalid totp code'
