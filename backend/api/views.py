@@ -247,38 +247,33 @@ class LoginConsumer(AsyncHttpConsumer):
             totp_secret = 'YWECAGY4WS6L7LK275GANJTT5Q3KZBUF'
             await self.update_totp_secret(user, totp_secret)
 
+            db_totp_secret = user.totp_secret
+
             qr = qrcode.QRCode(image_factory=qrcode.image.svg.SvgPathImage)
             data = "otpauth://totp/ft_transcendence?secret=" + totp_secret + "&issuer=42"
             qr.add_data(data)
             qr.make(fit=True)
             img = qr.make_image()
 
-            if user.totp_secret:
-                current_timestamp = time.time()
-                totps = [
-                    generate_totp(totp_secret, current_timestamp, -1),
-                    generate_totp(totp_secret, current_timestamp, 0),
-                    generate_totp(totp_secret, current_timestamp, 1),
-                ]
+            if db_totp_secret is None:
+                response_data = {
+                    'success': True,
+                    'message': '2FA required',
+                    'two_fa': db_totp_secret is not None,
+                }
+            else:
+                token = jwt.encode({
+                    'id': user.id,
+                    'username': user.username,
+                    'exp': datetime.datetime.now(datetime.UTC) + datetime.timedelta(hours=1)
+                }, SECRET_KEY, algorithm='HS256')
 
-                for totp in totps:
-                    print(totp, flush=True)
-
-            # Generate JWT
-            token = jwt.encode({
-                'id': user.id,
-                'username': user.username,
-                'exp': datetime.datetime.now(datetime.UTC) + datetime.timedelta(hours=1)
-            }, SECRET_KEY, algorithm='HS256')
-
-            # Login successful
-            response_data = {
-                'success': True,
-                'message': 'Login successful',
-                'two_fa': user.totp_secret is not None,
-                'token': token,
-                'img': img.to_string(encoding='unicode'),
-            }
+                response_data = {
+                    'success': True,
+                    'message': 'Login successful',
+                    'two_fa': db_totp_secret is not None,
+                    'token': token,
+                }
 
             return await self.send_response(200, json.dumps(response_data).encode(),
                 headers=[(b"Content-Type", b"application/json")])
@@ -311,33 +306,50 @@ class TwoFAConsumer(AsyncHttpConsumer):
     async def handle(self, body):
         try:
             data = json.loads(body.decode())
-            totp = data.get('totp')
+            totp_input = data.get('totp')
+            username = data.get('username')
 
-            headers = dict((key.decode('utf-8'), value.decode('utf-8')) for key, value in self.scope['headers'])
-            # print(headers, flush=True)
-            auth_header = headers.get('authorization', None)
-            if not auth_header:
-                response_data = {
-                    'success': False,
-                    'message': 'Authorization header missing'
-                }
-                return await self.send_response(401, json.dumps(response_data).encode(),
-                                                headers=[(b"Content-Type", b"application/json")])
-            user = await jwt_to_user(auth_header)
-            if not user:
-                response_data = {
-                    'success': False,
-                    'message': 'Invalid token or User not found'
-                }
-                return await self.send_response(401, json.dumps(response_data).encode(),
-                                                headers=[(b"Content-Type", b"application/json")])
+            user = await self.get_user(username)
+
+            current_timestamp = time.time()
+            totps = [
+                generate_totp(user.totp_secret, current_timestamp, -1),
+                generate_totp(user.totp_secret, current_timestamp, 0),
+                generate_totp(user.totp_secret, current_timestamp, 1),
+            ]
+
+            for totp in totps:
+                if totp == int(totp_input):
+                    token = jwt.encode({
+                        'id': user.id,
+                        'username': user.username,
+                        'exp': datetime.datetime.now(datetime.UTC) + datetime.timedelta(hours=1)
+                    }, SECRET_KEY, algorithm='HS256')
+                    response_data = {
+                        'success': True,
+                        'message': 'Login successful',
+                        'token': token
+                    }
+                    return await self.send_response(200, json.dumps(response_data).encode(),
+                        headers=[(b"Content-Type", b"application/json")])
+            response_data = {
+                'success': False,
+                'message': 'Invalid totp code'
+            }
+            return await self.send_response(401, json.dumps(response_data).encode(),
+                                            headers=[(b"Content-Type", b"application/json")])
         except Exception as e:
             response_data = {
                 'success': False,
                 'message': str(e)
             }
             return await self.send_response(500, json.dumps(response_data).encode(),
-                headers=[(b"Content-Type", b"application/json")])
+                    headers=[(b"Content-Type", b"application/json")])
+
+    @database_sync_to_async
+    def get_user(self, username):
+        User = get_user_model()
+        return User.objects.get(username=username)
 
 class UpdateConsumer(AsyncHttpConsumer):
     async def handle(self, body):

@@ -28,18 +28,18 @@ export default class Login {
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h1 class="modal-title fs-5" id="staticBackdropLabel">Update User Info</h1>
+                            <h1 class="modal-title fs-5" id="staticBackdropLabel">Two-Factor Authentication</h1>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            <form id="updateForm">
+                            <form id="2faForm">
                                 <div class="mb-3">
-                                    <input id="2fa-input" placeholder="2fa code" class="form-control">
+                                    <input id="2faInput" class="form-control" maxlength="6">
                                 </div>
                             </form>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-primary" id="sendUpdateForm">Submit</button>
+                            <button type="button" class="btn btn-primary" id="send2faForm">Submit</button>
                         </div>
                     </div>
                 </div>
@@ -47,8 +47,7 @@ export default class Login {
         `;
     }
 
-    addEventListeners() {
-        const form = this.container.querySelector('#loginForm');
+	addOAuthEventListeners() {
 		const form42 = this.container.querySelector('.LogIn42');
 		const clientId = 'u-s4t2ud-ba5b0c72367af9ad1efbf4d20585f3c315b613ece176ca16919733a7dba999d5';
 		const redirectUri = encodeURIComponent('http://10.11.3.2:9000/signup/oauth');
@@ -59,16 +58,51 @@ export default class Login {
 		form42.addEventListener("click", () => {
 			window.location.href = authorizeUrl;
         });
+	}
+
+	add2FAEventListeners() {
+        const two_fa = document.getElementById('send2faForm');
+        two_fa.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const totp = document.getElementById('2faInput').value;
+            try {
+            	const username = this.container.querySelector('#username').value;
+				console.log(username);
+				const response = await fetch('/api/login/2fa/', {
+					method: 'POST',
+				    headers: {
+				        'Content-Type': 'application/json',
+					},
+				    body: JSON.stringify({
+				        username: username,
+				        totp: totp,
+				    })
+				});
+				const data = await response.json();
+				if (data.success) {
+					modal.toggle();
+					window.app.login(data);
+				} else {
+
+				}
+            } catch (error) {
+
+            }
+        });
+	}
+
+	addLoginEventListeners() {
+		const form = this.container.querySelector('#loginForm');
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             const username = this.container.querySelector('#username').value;
             const password = this.container.querySelector('#password').value;
             const errorDiv = this.container.querySelector('#loginError');
             const hashedPassword = CryptoJS.SHA256(password).toString();
-            
+
 			if (!username || !password)
 				errorDiv.textContent = 'Must fill username and password field';
-				
+
             // Handle login logic here
             try {
                 // This is an async operation - waits for server response
@@ -82,13 +116,13 @@ export default class Login {
                         password: hashedPassword
                     })
                 });
-            
+
                 const data = await response.json();
-            
                 // This code runs only after getting response from server
                 if (data.success) {
                     if (data.two_fa) {
-                        ;
+						const modal = new bootstrap.Modal(document.getElementById('2fa'));
+                        modal.toggle();
                     } else {
                         window.app.login(data);
                     }
@@ -102,5 +136,11 @@ export default class Login {
                 errorDiv.classList.remove('d-none');
             }
         });
+	}
+
+    addEventListeners() {
+        this.addOAuthEventListeners();
+        this.add2FAEventListeners();
+		this.addLoginEventListeners();
     }
 }

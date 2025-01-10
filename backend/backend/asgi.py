@@ -14,7 +14,7 @@ from channels.auth import AuthMiddlewareStack
 from Chat.routing import websocket_urlpatterns as chat_websocket_patterns
 from Game.routing import websocket_urlpatterns as game_websocket_patterns
 from django.urls import path, re_path
-from api.views import SignupConsumer, LoginConsumer, UpdateConsumer, ProfileConsumer, ProfileConsumer2, HandleOAuthConsumer, AvatarConsumer
+from api.views import SignupConsumer, LoginConsumer, UpdateConsumer, ProfileConsumer, ProfileConsumer2, HandleOAuthConsumer, AvatarConsumer, TwoFAConsumer
 from django.contrib import admin
 from django.conf.urls.static import static
 from django.conf import settings
@@ -30,6 +30,7 @@ websocket_patterns = [
 http_patterns = [
     path('api/signup/', SignupConsumer.as_asgi()),
     path('api/login/', LoginConsumer.as_asgi()),
+    path('api/login/2fa/', TwoFAConsumer.as_asgi()),
     path('api/update/', UpdateConsumer.as_asgi()),
     re_path(r'^api/get/profile/.*$', ProfileConsumer2.as_asgi()),
     re_path(r'^api/get/avatar/.*$', AvatarConsumer.as_asgi()),
