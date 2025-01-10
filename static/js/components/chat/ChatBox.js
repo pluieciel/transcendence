@@ -195,10 +195,9 @@ export default class ChatBox {
             if (data.message_type === "system" && data.message === 'all_user_list') {
                 this.allusers = data.usernames.sort((a, b) => a.localeCompare(b));
                 this.updateOnlineUsersList();
-            } else if (data.message_type === "system" && data.message === 'update_tournament_waiting_list') {
-                //console.log(data.tournament_wait_list);
-                window.app.tournament.waitingList = data.tournament_wait_list;
-                window.app.tournament.tournamentState = data.tournament_state;
+            } else if (data.message_type === "system" && data.message === 'update_tournament_info') {
+                //console.log(data.tournament_info);
+                window.app.tournament.info = JSON.parse(data.tournament_info);
                 window.app.tournament.updateContent();
             } else if (data.type == "friend_list") {
                 this.friends = data.usernames.sort((a, b) => a.localeCompare(b));
@@ -209,8 +208,7 @@ export default class ChatBox {
                 this.onlineusers = dict.online_users.filter(user => user !== this.username).sort((a, b) => a.localeCompare(b));
                 this.onlineusers.unshift(this.username);
                 this.waiting_users = dict.waiting_users;
-                window.app.tournament.waitingList = dict.tournament_wait_list;
-                window.app.tournament.tournamentState = dict.tournament_state;
+                window.app.tournament.info = dict.tournament_info;
                 window.app.tournament.updateContent();
                 this.updateOnlineUsersList();
             } else if (data.message_type === "system" && data.recipient === 'update_waiting_users') {
