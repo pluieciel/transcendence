@@ -14,6 +14,8 @@ export class SceneManager {
 		this.bottomBorder = null;
 		this.rightBorder = null;
 		this.leftBorder = null;
+		this.trajectoryLine = null;
+		this.trajVisible = false;
 		//this.loadModel();
 		this.model = null;
 	}
@@ -51,6 +53,28 @@ export class SceneManager {
 			},
 		);
 		}*/
+
+	updateTrajectory(trajectoryPoints) {
+		// Remove existing trajectory line if it exists
+		if (this.trajectoryLine) {
+			this.scene.remove(this.trajectoryLine);
+		}
+
+		if (!trajectoryPoints || trajectoryPoints.length < 2) return;
+
+		// Create geometry for the line
+		const points = trajectoryPoints.map((point) => new THREE.Vector3(point.x, point.y, point.z));
+
+		const geometry = new THREE.BufferGeometry().setFromPoints(points);
+		const material = new THREE.LineBasicMaterial({
+			color: 0x329da8,
+			opacity: 1,
+		});
+
+		this.trajectoryLine = new THREE.Line(geometry, material);
+		this.scene.add(this.trajectoryLine);
+		this.trajectoryLine.visible = this.trajVisible;
+	}
 
 	hideObjects() {
 		// Hide all game objects

@@ -28,7 +28,8 @@ export class Game {
 
 		window.addEventListener("keydown", (event) => {
 			if (event.code === "Space") {
-				this.emitParticles();
+				//this.emitParticles();
+				this.sceneManager.trajVisible = !this.sceneManager.trajVisible;
 			}
 		});
 	}
@@ -143,6 +144,10 @@ export class Game {
 
 			this.uiManager.updateScoreLeft(data.player.left.score);
 			this.uiManager.updateScoreRight(data.player.right.score);
+		}
+
+		if (data.trajectory) {
+			this.sceneManager.updateTrajectory(data.trajectory);
 		}
 
 		if (data.positions.ball && this.sceneManager.ball) {

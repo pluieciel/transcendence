@@ -21,7 +21,7 @@ class Ball:
 		self.velocity = Vector2D()
 		self.baseSpeed = 30
 		self.speed = self.baseSpeed
-		self.maxSpeedMult = 0.8
+		self.maxSpeedMult = 0.7
 		self.maxSpeed = self.calculate_max_safe_speed(self.maxSpeedMult)
 		self.radius = 0.5
 		self.bounds = GameBounds()
@@ -29,7 +29,6 @@ class Ball:
 		self.visible = False
 		self.is_moving = False
 		self.acceleration = 1.2
-
 
 	def calculate_max_safe_speed(self, maxSpeedMult):
 		bounds = GameBounds()
@@ -41,7 +40,37 @@ class Ball:
 		ball_travel_distance = math.sqrt(court_width**2 + court_height**2)
 		max_safe_speed = ball_travel_distance / paddle_travel_time
 
-		return max_safe_speed * self.maxSpeedMult
+		return (max_safe_speed * self.maxSpeedMult)
+
+	def predict_trajectory(self):
+		if not self.is_moving:
+			return []
+
+		points = []
+		sim_pos = Vector2D(self.position.x, self.position.y, self.position.z)
+		sim_vel = Vector2D(self.velocity.x, self.velocity.y, self.velocity.z)
+
+		for _ in range(200):  # Limit the number of points to prevent infinite loops
+			# Add current position to points
+			points.append(Vector2D(sim_pos.x, sim_pos.y, sim_pos.z))
+
+			# Simulate next position
+			next_x = sim_pos.x + sim_vel.x * 0.016  # 0.016 is roughly 1 frame at 60fps
+			next_y = sim_pos.y + sim_vel.y * 0.016
+
+			# Check for wall collisions
+			if next_y >= self.bounds.top.y - self.radius or next_y <= self.bounds.bottom.y + self.radius:
+				sim_vel.y *= -1
+
+			# Update simulated position
+			sim_pos.x = next_x
+			sim_pos.y = next_y
+
+			# Stop if we reach the side boundaries
+			if sim_pos.x <= self.bounds.left.x or sim_pos.x >= self.bounds.right.x:
+				break
+
+		return points
 
 	def start(self, startDir, ballPos):
 		direction = startDir
@@ -76,7 +105,6 @@ class Ball:
 		self.velocity.y = -self.speed * math.sin(bounce_angle)
 
 		self.speed += self.acceleration
-		print(self.speed)
 		if (self.speed >= self.maxSpeed):
 			self.speed = self.maxSpeed
 
@@ -86,16 +114,16 @@ class Ball:
 			if self.countdown <= 0:
 				self.start_movement()
 
-		if self.is_moving:
-			self.position.x += self.velocity.x * delta_time
-			self.position.y += self.velocity.y * delta_time
+		#if self.is_moving:
+		#	self.position.x += self.velocity.x * delta_time
+		#	self.position.y += self.velocity.y * delta_time
 
 class Player:
 	def __init__(self, position, score, keys, game_bounds):
 		self.position = position
 		self.score = score
 		self.keys = keys
-		self.paddle_speed = 24
+		self.paddle_speed = 35
 		self.paddle_height = 4.0
 		self.paddle_thickness = 0.8
 		self.game_bounds = game_bounds
@@ -136,26 +164,75 @@ class GameInstance:
 		self.scorePos = Vector2D(0,0,0)
 		self.broadcast_function = broadcast_fun
 
+	#def check_collisions(self):
+	#	ball = self.ball
+	#	ball_pos = ball.position
+	#	paddle_hit = False
+
+	#	if ball_pos.y >= self.bounds.top.y - ball.radius:
+		#		ball.bounce_wall(True)
+	#	elif ball_pos.y <= self.bounds.bottom.y + ball.radius:
+		#		ball.bounce_wall(False)
+
+	#	if (ball_pos.x + ball.radius >= self.player_right.position.x - self.player_right.paddle_thickness/2 and
+	#		ball_pos.x - ball.radius <= self.player_right.position.x + self.player_right.paddle_thickness/2):
+		#		if abs(ball_pos.y - self.player_right.position.y) <= self.player_right.paddle_height/2 + ball.radius:
+			#			ball.bounce_paddle(self.player_right.position.x, self.player_right.position.y)
+			#			paddle_hit = True
+
+	#	elif (ball_pos.x - ball.radius <= self.player_left.position.x + self.player_left.paddle_thickness/2 and
+	#		  ball_pos.x + ball.radius >= self.player_left.position.x - self.player_left.paddle_thickness/2):
+		#		if abs(ball_pos.y - self.player_left.position.y) <= self.player_left.paddle_height/2 + ball.radius:
+			#			ball.bounce_paddle(self.player_left.position.x, self.player_left.position.y)
+			#			paddle_hit = True
+
+	#	if not paddle_hit:
+		#		if ball_pos.x >= self.bounds.right.x:
+			#			self.on_score("LEFT")
+	#		elif ball_pos.x <= self.bounds.left.x:
+		#			self.on_score("RIGHT")
+
 	def check_collisions(self):
 		ball = self.ball
 		ball_pos = ball.position
 		paddle_hit = False
 
+		# Wall collisions
 		if ball_pos.y >= self.bounds.top.y - ball.radius:
 			ball.bounce_wall(True)
 		elif ball_pos.y <= self.bounds.bottom.y + ball.radius:
 			ball.bounce_wall(False)
 
-		if (ball_pos.x + ball.radius >= self.player_right.position.x - self.player_right.paddle_thickness/2 and
-			ball_pos.x - ball.radius <= self.player_right.position.x + self.player_right.paddle_thickness/2):
-			if abs(ball_pos.y - self.player_right.position.y) <= self.player_right.paddle_height/2 + ball.radius:
-				ball.bounce_paddle(self.player_right.position.x, self.player_right.position.y)
+		# Right paddle collision
+		right_paddle = self.player_right
+		if (ball_pos.x <= right_paddle.position.x + right_paddle.paddle_thickness/2 + ball.radius and
+			ball_pos.x >= right_paddle.position.x - right_paddle.paddle_thickness/2 - ball.radius):
+
+			# Vertical collision check
+			if (abs(ball_pos.y - right_paddle.position.y) <=
+				right_paddle.paddle_height/2 + ball.radius):
+
+				# Prevent ball from getting stuck inside paddle
+				if ball.velocity.x > 0:
+					ball.position.x = right_paddle.position.x - right_paddle.paddle_thickness/2 - ball.radius
+
+				ball.bounce_paddle(right_paddle.position.x, right_paddle.position.y)
 				paddle_hit = True
 
-		elif (ball_pos.x - ball.radius <= self.player_left.position.x + self.player_left.paddle_thickness/2 and
-			  ball_pos.x + ball.radius >= self.player_left.position.x - self.player_left.paddle_thickness/2):
-			if abs(ball_pos.y - self.player_left.position.y) <= self.player_left.paddle_height/2 + ball.radius:
-				ball.bounce_paddle(self.player_left.position.x, self.player_left.position.y)
+		# Left paddle collision
+		left_paddle = self.player_left
+		if (ball_pos.x >= left_paddle.position.x - left_paddle.paddle_thickness/2 - ball.radius and
+			ball_pos.x <= left_paddle.position.x + left_paddle.paddle_thickness/2 + ball.radius):
+
+			# Vertical collision check
+			if (abs(ball_pos.y - left_paddle.position.y) <=
+				left_paddle.paddle_height/2 + ball.radius):
+
+				# Prevent ball from getting stuck inside paddle
+				if ball.velocity.x < 0:
+					ball.position.x = left_paddle.position.x + left_paddle.paddle_thickness/2 + ball.radius
+
+				ball.bounce_paddle(left_paddle.position.x, left_paddle.position.y)
 				paddle_hit = True
 
 		if not paddle_hit:
@@ -200,7 +277,19 @@ class GameInstance:
 					self.player_left.update(delta_time)
 					self.player_right.update(delta_time)
 					self.ball.update(delta_time)
-					self.check_collisions()
+
+					remaining_time = delta_time
+					step_size = 1/240
+					while remaining_time > 0:
+						current_step = min(step_size, remaining_time)
+
+						if self.ball.is_moving:
+							self.ball.position.x += self.ball.velocity.x * current_step
+							self.ball.position.y += self.ball.velocity.y * current_step
+
+						self.check_collisions()
+
+						remaining_time -= current_step
 					try:
 						await self.broadcast_function()
 					except Exception as e:

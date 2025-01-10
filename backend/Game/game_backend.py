@@ -114,6 +114,9 @@ class GameBackend:
 			events.append({"type": "score", "position": vars(self.game.scorePos)})
 			self.game.scored = False
 
+		trajectory_points = self.game.ball.predict_trajectory()
+		trajectory_data = [vars(point) for point in trajectory_points]
+
 		state = {
 			"type": "game.update",
 			"data": {
@@ -128,6 +131,7 @@ class GameBackend:
 						"right": vars(self.game.bounds.right),
 					}
 				},
+				"trajectory": trajectory_data,
 				"player": {
 					"left": {
 						"name": self.player_left.user.username,

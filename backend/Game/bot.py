@@ -3,6 +3,7 @@ import time
 import random
 import math
 import logging
+from .game_logic import Vector2D
 
 class Bot:
 	def __init__(self, difficulty, game):
@@ -23,6 +24,7 @@ class Bot:
 		self.vision_update_rate = 1.0 / self.difficulty  # Update vision once per second
 		self.ball_position = None
 		self.ball_velocity = None
+		self.ball_radius = None
 		self.paddle_position = None
 		self.paddle_height = None
 		self.target_y = None  # Store the target position
@@ -33,88 +35,68 @@ class Bot:
 			self.logger.info("Ball position or velocity not available yet")
 			return None
 
-		if not hasattr(self.ball_position, 'x') or not hasattr(self.ball_velocity, 'x'):
-			self.logger.info("Ball position or velocity missing coordinates")
-			return None
-
-		sim_pos_x = self.ball_position.x
-		sim_pos_y = self.ball_position.y
-		sim_vel_x = self.ball_velocity.x
-		sim_vel_y = self.ball_velocity.y
-
-		if not self.paddle_position or not hasattr(self.paddle_position, 'x'):
+		if not self.paddle_position:
 			self.logger.info("Paddle position not available yet")
 			return None
 
-		if (self.paddle_position.x < 0 and sim_vel_x > 0) or \
-		   (self.paddle_position.x > 0 and sim_vel_x < 0):
-			return None
+		# Only calculate if ball is moving towards the bot (right side)
+		if self.ball_velocity.x <= 0:
+			return self.paddle_position.y  # Return current paddle position if ball moving away
 
-		while ((self.paddle_position.x < 0 and sim_pos_x > self.paddle_position.x) or
-			   (self.paddle_position.x > 0 and sim_pos_x < self.paddle_position.x)):
+		# Simple linear interpolation to predict Y position
+		distance_to_paddle = self.paddle_position.x - self.ball_position.x
+		time_to_reach = distance_to_paddle / self.ball_velocity.x
+		predicted_y = self.ball_position.y + (self.ball_velocity.y * time_to_reach)
 
-			sim_pos_x += sim_vel_x * 0.016
-			sim_pos_y += sim_vel_y * 0.016
+		# Bound the prediction within the court limits
+		court_top = self.game.bounds.top.y
+		court_bottom = self.game.bounds.bottom.y
+		predicted_y = min(max(predicted_y, court_bottom + self.paddle_height/2),
+					 court_top - self.paddle_height/2)
 
-			# Check for top/bottom bounces
-			if sim_pos_y >= self.game.bounds.top.y or sim_pos_y <= self.game.bounds.bottom.y:
-				sim_vel_y *= -1
-
-		return sim_pos_y
+		return predicted_y
 
 	def move_paddle(self, target_y):
 		if not target_y or not self.paddle_position:
 			return
 
-		# Add some randomness based on difficulty
-		error_margin = (1.0 - self.difficulty/10) * self.paddle_height
-		target_y += random.uniform(-error_margin, error_margin)
+		dead_zone = 0.5  # Adjust this value as needed
+		distance = target_y - self.paddle_position.y
 
-		# Calculate deadzone (area where paddle should stop)
-		deadzone = 2  # Adjustable deadzone size
-		current_y = self.paddle_position.y
-
-
-		if abs(current_y - target_y) < deadzone:
-			self.logger.info("Bot stopping")
+		if abs(distance) > dead_zone:
+			if distance > 0:  # Need to move up
+				self.game.player_right.keys["ArrowUp"] = True
+				self.game.player_right.keys["ArrowDown"] = False
+			else:  # Need to move down
+				self.game.player_right.keys["ArrowUp"] = False
+				self.game.player_right.keys["ArrowDown"] = True
+		else:  # Within dead zone - stop moving
 			self.game.player_right.keys["ArrowUp"] = False
 			self.game.player_right.keys["ArrowDown"] = False
-			return
 
-		# Move up
-		if current_y < target_y - deadzone:
-			self.logger.info("Bot going up")
-			self.game.player_right.keys["ArrowUp"] = True
-			self.game.player_right.keys["ArrowDown"] = False
-		# Move down
-		elif current_y > target_y + deadzone:
-			self.logger.info("Bot going down")
-			self.game.player_right.keys["ArrowUp"] = False
-			self.game.player_right.keys["ArrowDown"] = True
-		# Stop moving when within deadzone
-		else:
-			self.logger.info("Bot stopping")
-			self.game.player_right.keys["ArrowUp"] = False
-			self.game.player_right.keys["ArrowDown"] = False
 
 	def update_vision(self):
 		self.logger.info("Bot Updated Vision")
-		self.ball_position = self.game.ball.position
-		self.ball_velocity = self.game.ball.velocity
-		# Calculate new target position
-		landing_y = self.calculate_ball_landing_position()
-		if landing_y is not None:
-			self.target_y = landing_y
-		else:
-			# Return to center if ball is moving away
-			self.target_y = self.game.bounds.bottom.y + \
-						  (self.game.bounds.top.y - self.game.bounds.bottom.y) / 2
+		self.ball_position = Vector2D(
+		self.game.ball.position.x,
+		self.game.ball.position.y,
+		self.game.ball.position.z
+	)
+		self.ball_velocity = Vector2D(
+		self.game.ball.velocity.x,
+		self.game.ball.velocity.y,
+		self.game.ball.velocity.z
+	)
 
-	def update_movement(self):
+
+		self.ball_radius = self.game.ball.radius
 		self.paddle_position = self.game.player_right.position
 		self.paddle_height = self.game.player_right.paddle_height
-		if self.target_y is not None:
-			self.move_paddle(self.target_y)
+
+	def update_movement(self):
+		target_y = self.calculate_ball_landing_position()
+		if target_y is not None:
+			self.move_paddle(target_y)
 
 	def start_bot(self):
 		self.is_running = True
@@ -123,19 +105,15 @@ class Bot:
 
 	async def update_view(self):
 		try:
-			self.logger.info("Loop starting")
 			while self.is_running:
-				self.logger.info("Loop")
 				current_time = time.time()
 
 				if current_time - self.last_vision_update >= self.vision_update_rate:
+					#self.logger.info(f"{self.vision_update_rate} compared to {current_time - self.last_vision_update}")
 					self.update_vision()
 					self.last_vision_update = current_time
-				else:
-					self.logger.info(f"current time : {current_time} last update : {self.last_vision_update}")
 
 				self.update_movement()
-				self.logger.info("Loop end")
 				await asyncio.sleep(1/60)
 
 		except asyncio.CancelledError:
