@@ -76,7 +76,7 @@ class Bot:
 
 
 	def update_vision(self):
-		self.logger.info("Bot Updated Vision")
+		#self.logger.info("Bot Updated Vision")
 		self.ball_position = Vector2D(
 		self.game.ball.position.x,
 		self.game.ball.position.y,

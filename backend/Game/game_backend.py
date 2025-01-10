@@ -75,10 +75,10 @@ class GameBackend:
 
 
 	def assign_player(self, user, channel):
-		if not self.player_left:
+		if not self.player_left or self.player_left.user.id == user.id:
 			self.player_left = User(user, channel, "Connected")
 			self.logger.info(f"Creating user for player left {self.player_left.user.username}")
-		elif not self.player_right:
+		elif not self.player_right or self.player_right.user.id == user.id:
 			self.player_right = User(user, channel, "Connected")
 			self.logger.info(f"Creating user for player right {self.player_right.user.username}")
 		else:

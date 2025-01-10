@@ -23,7 +23,8 @@ class App {
             isLoggedIn: sessionStorage.getItem('isLoggedIn') === 'true',
             token: sessionStorage.getItem('token') || '',
         };
-        
+        this.ingame = sessionStorage.getItem('ingame') === 'true';
+        console.log("ingame", this.ingame);
 		window.app = this;
         this.router = new Router(this.routes);
 
@@ -32,7 +33,7 @@ class App {
     login(data) {
         this.#state.isLoggedIn = true;
         this.#state.token = data.token;
-        //console.log(this.state.token);
+        console.log("sessionStorageingame", sessionStorage.getItem('ingame'));
         sessionStorage.setItem('isLoggedIn', 'true');
         sessionStorage.setItem('token', this.#state.token);
         this.router.navigateTo('/index');
@@ -41,6 +42,7 @@ class App {
     logout() {
         this.#state.isLoggedIn = false;
         this.#state.token = '';
+        this.ingame = false;
         sessionStorage.clear();
         this.router.navigateTo('/');
     }
@@ -56,5 +58,6 @@ class App {
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', () => {
+    console.log("DOMContentLoaded");
     window.app = new App();
 });
