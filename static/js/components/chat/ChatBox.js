@@ -794,7 +794,7 @@ export default class ChatBox {
             if (nickname !== "")
                 formData.append('nickname', nickname);
             if (originalFile) {
-                const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2 MB
+                const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1 MB
                 if (originalFile.size > MAX_FILE_SIZE) {
                     errorDiv.textContent = 'File size exceeds the 2MB limit';
                     errorDiv.classList.remove('d-none');
@@ -807,6 +807,7 @@ export default class ChatBox {
                     lastModified: originalFile.lastModified
                 });
                 formData.append('avatar', modifiedFile);
+                delete window.app.avatarCache[this.username]; // delete cache to force update
             }
             
             if (!formData.has('password') && !formData.has('nickname') && !formData.has('avatar')) {
