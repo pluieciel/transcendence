@@ -22,7 +22,6 @@ export default class Tournament {
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body" id="tournamentWaitingList">
-                            ...
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-primary" id="joinTournamentButton">Join</button>
@@ -42,9 +41,7 @@ export default class Tournament {
                             <div class="row" id="fourToTwo"></div>
                             <div class="row" id="eightToFour"></div>
                         </div>
-                        <div class="modal-footer">
-                            
-                        </div>
+                        <div class="modal-footer"></div>
                     </div>
                 </div>
             </div>
@@ -96,17 +93,17 @@ export default class Tournament {
             this.renderOneRound(this.info.round3, twoToOne);
 
             const winner = Object.values(this.info.round3)?.[0]?.winner;
-            (async () => {return this.renderOnePlayer(winner, winner)})()
-            .then(html => {top.innerHTML = html;});
+            this.renderOnePlayer(winner, winner).then(html => {top.innerHTML = html;});
         }
     }
 
     addEventListeners() {
         const joinTournamentButton = this.container.querySelector("#joinTournamentButton");
+        const quitTournamentButton = this.container.querySelector("#quitTournamentButton");
         joinTournamentButton.addEventListener("click", () => {
             if (!this.info.wait_list.includes(this.username)) {
-                this.container.querySelector("#joinTournamentButton").disabled = true;
-                this.container.querySelector("#quitTournamentButton").disabled = false;
+                joinTournamentButton.disabled = true;
+                quitTournamentButton.disabled = false;
                 this.info.wait_list.push(this.username);
                 const messageData = {
                     message: "update_tournament_info",
@@ -119,11 +116,10 @@ export default class Tournament {
                 window.app.chatBox.chatSocket.send(JSON.stringify(messageData));
             }
         });
-        const quitTournamentButton = this.container.querySelector("#quitTournamentButton");
         quitTournamentButton.addEventListener("click", () => {
             if (this.info.wait_list.includes(this.username)) {
-                this.container.querySelector("#joinTournamentButton").disabled = false;
-                this.container.querySelector("#quitTournamentButton").disabled = true;
+                joinTournamentButton.disabled = false;
+                quitTournamentButton.disabled = true;
                 this.info.wait_list = this.info.wait_list.filter(user => user !== this.username);
                 const messageData = {
                     message: "update_tournament_info",
