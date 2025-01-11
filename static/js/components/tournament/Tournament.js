@@ -37,39 +37,10 @@ export default class Tournament {
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            <div class="row" id="top">
-                                <!-- Top -->
-                                <div class="col border p-2">
-                                    <div class="user-item d-flex align-items-center p-2"></div>
-                                </div>
-                            </div>
-                            <div class="row" id="twoToOne">
-                                <!-- 2 to 1 -->
-                                <div class="col border p-2">
-                                    <div class="user-item d-flex align-items-center p-2"></div>
-                                </div>
-                                <div class="col border p-2">
-                                    <div class="user-item d-flex align-items-center p-2"></div>
-                                </div>
-                            </div>
-                            <div class="row" id="fourToTwo">
-                                <!-- 4 to 2 -->
-                                <div class="col border p-2">
-                                    <div class="user-item d-flex align-items-center p-2"></div>
-                                </div>
-                                <div class="col border p-2">
-                                    <div class="user-item d-flex align-items-center p-2"></div>
-                                </div>
-                                <div class="col border p-2">
-                                    <div class="user-item d-flex align-items-center p-2"></div>
-                                </div>
-                                <div class="col border p-2">
-                                    <div class="user-item d-flex align-items-center p-2"></div>
-                                </div>
-                            </div>
-                            <div class="row" id="eightToFour">
-                                <!-- 8 to 4 -->
-                            </div>
+                            <div class="row" id="top"></div>
+                            <div class="row" id="twoToOne"></div>
+                            <div class="row" id="fourToTwo"></div>
+                            <div class="row" id="eightToFour"></div>
                         </div>
                         <div class="modal-footer">
                             
@@ -120,106 +91,13 @@ export default class Tournament {
             const twoToOne = this.container.querySelector("#twoToOne");
             const top = this.container.querySelector("#top");
 
-            const games1 = Object.values(this.info.round1);
-            const htmlPromises1 = games1.map(async game => {
-                const avatar1 = await window.app.getAvatar(game.p1);
-                const avatar2 = await window.app.getAvatar(game.p2);
-                return `
-                    <div class="col border p-2">
-                        <div class="user-item d-flex align-items-center p-2 ${game.winner === game.p1 ? 'bg-success-subtle' : game.winner === game.p2 ? 'bg-danger-subtle' : ''}">
-                            <span class="d-flex align-items-center">
-                                <img src="${avatar1}" width="30" height="30"></img>
-                                <span class="user-name ms-2">${game.p1}</span>
-                            </span>
-                        </div>
-                    </div>
-                    <div class="col border p-2">
-                        <div class="user-item d-flex align-items-center p-2 ${game.winner === game.p2 ? 'bg-success-subtle' : game.winner === game.p1 ? 'bg-danger-subtle' : ''}">
-                            <span class="d-flex align-items-center">
-                                <img src="${avatar2}" width="30" height="30"></img>
-                                <span class="user-name ms-2">${game.p2}</span>
-                            </span>
-                        </div>
-                    </div>`;
-            });
-            Promise.all(htmlPromises1).then(htmlParts => {
-                eightToFour.innerHTML = htmlParts.join('');
-            });
+            this.renderOneRound(this.info.round1, eightToFour);
+            this.renderOneRound(this.info.round2, fourToTwo);
+            this.renderOneRound(this.info.round3, twoToOne);
 
-            const games2 = Object.values(this.info.round2);
-            if (games2.length !== 0) {
-                const htmlPromises2 = games2.map(async game => {
-                    const avatar1 = await window.app.getAvatar(game.p1);
-                    const avatar2 = await window.app.getAvatar(game.p2);
-                    return `
-                        <div class="col border p-2">
-                            <div class="user-item d-flex align-items-center p-2 ${game.winner === game.p1 ? 'bg-success-subtle' : game.winner === game.p2 ? 'bg-danger-subtle' : ''}">
-                                <span class="d-flex align-items-center">
-                                    <img src="${avatar1}" width="30" height="30"></img>
-                                    <span class="user-name ms-2">${game.p1}</span>
-                                </span>
-                            </div>
-                        </div>
-                        <div class="col border p-2">
-                            <div class="user-item d-flex align-items-center p-2 ${game.winner === game.p2 ? 'bg-success-subtle' : game.winner === game.p1 ? 'bg-danger-subtle' : ''}">
-                                <span class="d-flex align-items-center">
-                                    <img src="${avatar2}" width="30" height="30"></img>
-                                    <span class="user-name ms-2">${game.p2}</span>
-                                </span>
-                            </div>
-                        </div>`;
-                });
-                Promise.all(htmlPromises2).then(htmlParts => {
-                    fourToTwo.innerHTML = htmlParts.join('');
-                });
-            }
-
-            const games3 = Object.values(this.info.round3);
-            if (games3.length !== 0) {
-                const htmlPromises3 = games3.map(async game => {
-                    const avatar1 = await window.app.getAvatar(game.p1);
-                    const avatar2 = await window.app.getAvatar(game.p2);
-                    return `
-                        <div class="col border p-2">
-                            <div class="user-item d-flex align-items-center p-2 ${game.winner === game.p1 ? 'bg-success-subtle' : game.winner === game.p2 ? 'bg-danger-subtle' : ''}">
-                                <span class="d-flex align-items-center">
-                                    <img src="${avatar1}" width="30" height="30"></img>
-                                    <span class="user-name ms-2">${game.p1}</span>
-                                </span>
-                            </div>
-                        </div>
-                        <div class="col border p-2">
-                            <div class="user-item d-flex align-items-center p-2 ${game.winner === game.p2 ? 'bg-success-subtle' : game.winner === game.p1 ? 'bg-danger-subtle' : ''}">
-                                <span class="d-flex align-items-center">
-                                    <img src="${avatar2}" width="30" height="30"></img>
-                                    <span class="user-name ms-2">${game.p2}</span>
-                                </span>
-                            </div>
-                        </div>`;
-                });
-                Promise.all(htmlPromises3).then(htmlParts => {
-                    twoToOne.innerHTML = htmlParts.join('');
-                });
-            }
-
-            const games4 = Object.values(this.info.round3);
-            if (games4.game1.winner) {
-                const htmlPromises4 = games4.map(async game => {
-                    const avatar = await window.app.getAvatar(game.winner);
-                    return `
-                        <div class="col border p-2">
-                            <div class="user-item d-flex align-items-center p-2 ${game.winner?'bg-success-subtle':''}">
-                                <span class="d-flex align-items-center">
-                                    ${game.winner?`<img src="${avatar}" width="30" height="30"></img>`:''}
-                                    <span class="user-name ms-2">${game.winner}</span>
-                                </span>
-                            </div>
-                        </div>`;
-                });
-                Promise.all(htmlPromises4).then(htmlParts => {
-                    top.innerHTML = htmlParts.join('');
-                });
-            }
+            const winner = Object.values(this.info.round3)?.[0]?.winner;
+            (async () => {return this.renderOnePlayer(winner, winner)})()
+            .then(html => {top.innerHTML = html;});
         }
     }
 
@@ -258,5 +136,38 @@ export default class Tournament {
                 window.app.chatBox.chatSocket.send(JSON.stringify(messageData));
             }
         });
+    }
+
+    renderOneRound(round, container) {
+        const games = Object.values(round);
+        Promise.all(games.map(async game => {
+            const promise1 = this.renderOnePlayer(game.p1, game.winner);
+            const promise2 = this.renderOnePlayer(game.p2, game.winner);
+            return Promise.all([promise1, promise2]).then(htmlParts => {
+                return htmlParts.join('');
+            });
+        })).then(results => {
+            container.innerHTML = results.join('');
+        });
+    }
+
+    async renderOnePlayer(player, winner) {
+        if (player) {
+            const avatar = await window.app.getAvatar(player);
+            return `
+                <div class="col border p-2">
+                    <div class="user-item d-flex align-items-center p-2 ${winner === player ? 'bg-success-subtle' : winner ? 'bg-danger-subtle' : ''}">
+                        <span class="d-flex align-items-center">
+                            <img src="${avatar}" width="30" height="30"></img>
+                            <span class="user-name ms-2">${player}</span>
+                        </span>
+                    </div>
+                </div>`;
+        } else {
+            return `
+                <div class="col border p-2">
+                    <div class="user-item d-flex align-items-center p-2"></div>
+                </div>`;
+        }
     }
 }

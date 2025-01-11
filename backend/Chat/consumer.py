@@ -13,15 +13,18 @@ SECRET_KEY = os.environ.get('JWT_SECRET_KEY')
 class ChatConsumer(AsyncWebsocketConsumer):
     online_users = set()
     waiting_users = set()
-    tournament_info = {"state": "Waiting", "wait_list": []}
-    # tournament_info = {"state": "Playing8to4", "wait_list": [],
-    #                    "round1": {"game1":{"p1":"2","p2":"1","winner":"1","state":"finished"},
-    #                             "game2":{"p1":"3","p2":"6","winner":"3","state":"finished"},
-    #                             "game3":{"p1":"4","p2":"7","winner":"4","state":"unfinished"},
-    #                             "game4":{"p1":"5","p2":"8","winner":"5","state":"finished"},},
-    #                    "round2": {"game1":{"p1":"1","p2":"3","winner":"","state":"finished"},
-    #                             "game2":{"p1":"4","p2":"5","winner":"4","state":"finished"},},
-    #                    "round3": {}}
+    # tournament_info = {"state": "Waiting", "wait_list": [],
+    #                    "round1": {"game1":{}, "game2":{}, "game3":{}, "game4":{}},
+    #                    "round2": {"game1":{}, "game2":{}},
+    #                    "round3": {"game1":{}},}
+    tournament_info = {"state": "Playing8to4", "wait_list": [],
+                       "round1": {"game1":{"p1":"8"},
+                                  "game2":{"p1":"5", "p2":"2", "winner":"2"},
+                                  "game3":{"p1":"7", "p2":"3", "winner":"3"},
+                                  "game4":{"p1":"6", "p2":"4", "winner":"6"}},
+                       "round2": {"game1":{"p2":"2"},
+                                  "game2":{"p1":"3", "p2":"6", "winner":""}},
+                       "round3": {"game1":{}}}
     def __init__(self, *args, **kwargs):
         from api.models import register_invite, is_valid_invite
         super().__init__(*args, **kwargs)
