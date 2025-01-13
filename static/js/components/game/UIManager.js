@@ -96,7 +96,8 @@ export class UIManager {
 		this.overlay.style.display = visible ? "flex" : "none";
 	}
 	setOverText(text) {
-		this.overlay.innerHTML = text;
+		this.overlay.innerHTML = '<button id="returnButton" style="display: none;">Return to Main Menu</button>' + text;
+		//this.overlay.innerText = text;
 	}
 
 	setTextsVisibility(visible) {
