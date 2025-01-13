@@ -31,7 +31,8 @@ class GameManager:
 			game = self.games[game_id]
 			del self.games[game_id]
 
-	async def reset_player_game(self, user):
+	@database_sync_to_async
+	def reset_player_game(self, user):
 		self.logger.info(f"Starting reset for user {user.username}")
 		user.isplaying = False
 		user.current_game_id = -1

@@ -18,6 +18,8 @@ export class Game {
 		this.gameStarted = false;
 		this.sceneInitialized = false;
 
+		this.onGameEnd = null;
+
 		this.uiManager.setOverlayVisibility(true);
 		this.uiManager.setOverText("Waiting for server...");
 
@@ -108,7 +110,7 @@ export class Game {
 		this.sceneManager.rightBorder.position.set(positions.borders.right.x, positions.borders.right.y, positions.borders.right.z);
 
 		this.uiManager.updateNameLeft(data.player.left.name + " [" + data.player.left.rank + "]");
-		this.uiManager.updateNameRight(data.player.right.name + " [" + data.player.left.rank + "]");
+		this.uiManager.updateNameRight(data.player.right.name + " [" + data.player.right.rank + "]");
 
 		this.uiManager.updateScoreLeft(data.player.left.score);
 		this.uiManager.updateScoreRight(data.player.right.score);
@@ -169,7 +171,9 @@ export class Game {
 					game_end = true;
 					this.uiManager.setOverText(event.winner + " wins");
 					this.uiManager.setOverlayVisibility(true);
-					//this.sceneManager.hideBall();
+					this.ws.close(1000);
+					console.log("Websocket closed");
+					this.handleGameEnd();
 				}
 			});
 		}
@@ -177,6 +181,15 @@ export class Game {
 		if (!this.gameStarted && game_end == false) {
 			this.gameStarted = true;
 			this.uiManager.setOverlayVisibility(false);
+		}
+	}
+
+	handleGameEnd() {
+		// Your existing game end logic
+
+		// Call the callback if it exists
+		if (this.onGameEnd) {
+			this.onGameEnd();
 		}
 	}
 

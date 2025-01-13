@@ -251,6 +251,7 @@ class GameInstance:
 		return False
 
 	async def on_game_end(self, winner):
+		self.logger.info("Game ended")
 		self.stop()
 		self.winner = winner
 		self.ended = True
@@ -292,7 +293,7 @@ class GameInstance:
 
 						remaining_time -= current_step
 					try:
-						if (self.is_running)
+						if (self.is_running):
 							await self.broadcast_function()
 					except Exception as e:
 						logging.getLogger('game').info(f"Error Broadcast : {e}")

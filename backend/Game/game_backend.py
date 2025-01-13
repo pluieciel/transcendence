@@ -129,7 +129,7 @@ class GameBackend:
 
 			self.manager.remove_game(self.game_id)
 			await self.manager.set_game_state(await self.manager.get_game_by_id(self.game_id), 'finished', self.game.player_left.score, self.game.player_right.score)
-			#TODO Add to history
+
 		except Exception as e:
 			self.logger.error(f"Error in on_game_end: {str(e)}")
 			import traceback
@@ -208,9 +208,7 @@ class GameBackend:
 				"events": events
 			}
 		}
-		self.logger.info("Before sending broadcast")
 		try:
 			await self.channel_layer.group_send(str(self.game_id), state)
-			self.logger.info("After sending broadcast")
-		except Exception as e
+		except Exception as e:
 			self.logger.info(f"Error {e}")
