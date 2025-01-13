@@ -151,48 +151,26 @@ class GameBounds:
 		self.right = Vector2D(20, -3, -15)
 
 class GameInstance:
-	def __init__(self, broadcast_fun):
+	def __init__(self, broadcast_fun, game_end_fun):
 		self.bounds = GameBounds()
 		self.player_left = Player(Vector2D(self.bounds.left.x + 2, -3, -15), 0,{"ArrowUp": False, "ArrowDown": False}, self.bounds)
 		self.player_right = Player(Vector2D(self.bounds.right.x - 2, -3, -15), 0,{"ArrowUp": False, "ArrowDown": False}, self.bounds)
 		self.ball = Ball()
 		self.paused = False
+		self.ended = False
+		self.winner = None
 		self.is_running = False
 		self.last_update_time = time.time()
 		self.loop_task = None
 		self.scored = False
 		self.scorePos = Vector2D(0,0,0)
+		self.maxScore = 2
+		self.maxScoreLimit = 50
 		self.broadcast_function = broadcast_fun
+		self.game_end_fun = game_end_fun
+		self.logger = logging.getLogger('game')
 
-	#def check_collisions(self):
-	#	ball = self.ball
-	#	ball_pos = ball.position
-	#	paddle_hit = False
-
-	#	if ball_pos.y >= self.bounds.top.y - ball.radius:
-		#		ball.bounce_wall(True)
-	#	elif ball_pos.y <= self.bounds.bottom.y + ball.radius:
-		#		ball.bounce_wall(False)
-
-	#	if (ball_pos.x + ball.radius >= self.player_right.position.x - self.player_right.paddle_thickness/2 and
-	#		ball_pos.x - ball.radius <= self.player_right.position.x + self.player_right.paddle_thickness/2):
-		#		if abs(ball_pos.y - self.player_right.position.y) <= self.player_right.paddle_height/2 + ball.radius:
-			#			ball.bounce_paddle(self.player_right.position.x, self.player_right.position.y)
-			#			paddle_hit = True
-
-	#	elif (ball_pos.x - ball.radius <= self.player_left.position.x + self.player_left.paddle_thickness/2 and
-	#		  ball_pos.x + ball.radius >= self.player_left.position.x - self.player_left.paddle_thickness/2):
-		#		if abs(ball_pos.y - self.player_left.position.y) <= self.player_left.paddle_height/2 + ball.radius:
-			#			ball.bounce_paddle(self.player_left.position.x, self.player_left.position.y)
-			#			paddle_hit = True
-
-	#	if not paddle_hit:
-		#		if ball_pos.x >= self.bounds.right.x:
-			#			self.on_score("LEFT")
-	#		elif ball_pos.x <= self.bounds.left.x:
-		#			self.on_score("RIGHT")
-
-	def check_collisions(self):
+	async def check_collisions(self):
 		ball = self.ball
 		ball_pos = ball.position
 		paddle_hit = False
@@ -237,11 +215,11 @@ class GameInstance:
 
 		if not paddle_hit:
 			if ball_pos.x >= self.bounds.right.x:
-				self.on_score("LEFT")
+				await self.on_score("LEFT")
 			elif ball_pos.x <= self.bounds.left.x:
-				self.on_score("RIGHT")
+				await self.on_score("RIGHT")
 
-	def on_score(self, winner):
+	async def on_score(self, winner):
 		if winner == "LEFT":
 			self.player_left.score += 1
 			self.scorePos = Vector2D(self.bounds.right.x, self.ball.position.y, self.ball.position.z)
@@ -254,17 +232,40 @@ class GameInstance:
 		self.ball.is_moving = False
 		self.ball.countdown = 1
 		self.scored = True
+		if (self.check_winner(winner)):
+			await self.on_game_end(winner)
 
+	def check_winner(self, winner):
+		score_left = self.player_left.score
+		score_right = self.player_right.score
+
+		if (winner == "LEFT"):
+			if ((score_left >= self.maxScore and score_right <= (score_left - 2))
+				or score_left >= self.maxScoreLimit):
+				return True
+
+		elif (winner == "RIGHT"):
+			if ((score_right >= self.maxScore and score_left <= (score_right - 2))
+				or score_right >= self.maxScoreLimit):
+				return True
+		return False
+
+	async def on_game_end(self, winner):
+		self.stop()
+		self.winner = winner
+		self.ended = True
+		await self.game_end_fun()
 
 	def start(self):
 		self.is_running = True
 		self.ball.start(random.choice([LEFT_SIDE_DIR, RIGHT_SIDE_DIR]), DEFAULT_BALL_POS)
 		self.loop_task = asyncio.create_task(self.game_loop())
 
+
 	def stop(self):
 		self.is_running = False
-		if self.loop_task:
-			self.loop_task.cancel()
+		#if self.loop_task:
+			#self.loop_task.cancel()
 
 	async def game_loop(self):
 		try:
@@ -287,15 +288,15 @@ class GameInstance:
 							self.ball.position.x += self.ball.velocity.x * current_step
 							self.ball.position.y += self.ball.velocity.y * current_step
 
-						self.check_collisions()
+						await self.check_collisions()
 
 						remaining_time -= current_step
 					try:
-						await self.broadcast_function()
+						if (self.is_running)
+							await self.broadcast_function()
 					except Exception as e:
-						#logging.getLogger('game').info(f"Error Broadcast : {e}")
+						logging.getLogger('game').info(f"Error Broadcast : {e}")
 						pass
-
 				await asyncio.sleep(1/60)  # 60 FPS
 
 		except asyncio.CancelledError:

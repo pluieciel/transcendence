@@ -26,6 +26,17 @@ class GameManager:
 			from api.models import GameHistory
 			self.game_history = GameHistory
 
+	def remove_game(self, game_id):
+		if game_id in self.games:
+			game = self.games[game_id]
+			del self.games[game_id]
+
+	async def reset_player_game(self, user):
+		self.logger.info(f"Starting reset for user {user.username}")
+		user.isplaying = False
+		user.current_game_id = -1
+		user.save()
+
 	async def get_game(self, user, bot):
 		self._get_game_history_model()
 		self.logger.info(f"Getting game for user {user.username}")
@@ -60,7 +71,7 @@ class GameManager:
 			game_id = (await self.create_game_history(user)).id
 		else:
 			game_id = (await self.create_game_history(user, game_category='AI')).id
-		self.games[game_id] = GameBackend(game_id, bot)
+		self.games[game_id] = GameBackend(game_id, bot, self, True) #TODO Ranked Mode
 		return self.games[game_id]
 
 	@database_sync_to_async
@@ -75,7 +86,7 @@ class GameManager:
 			sleep(0.5)
 			game = self.game_history.objects.filter(player_a=player_a, player_b=player_b, game_state='waiting', game_category=game_category)
 		return game.first()
-	
+
 	@database_sync_to_async
 	def create_game_history(self, player_a, player_b=None, game_category='Quick Match', game_mode='Vanilla'):
 		return self.game_history.objects.create(player_a=player_a, player_b=player_b, game_category=game_category, game_mode=game_mode)
@@ -93,7 +104,9 @@ class GameManager:
 		return games.first()
 
 	@database_sync_to_async
-	def set_game_state(self, game, game_state):
+	def set_game_state(self, game, game_state, score_a = 0, score_b = 0):
+		game.score_a = score_a
+		game.score_b = score_b
 		game.game_state = game_state
 		game.save()
 
@@ -105,7 +118,6 @@ class GameManager:
 	@database_sync_to_async
 	def get_game_by_id(self, game_id):
 		return self.game_history.objects.get(id=game_id)
-
 
 game_manager = GameManager()
 
@@ -129,9 +141,11 @@ class GameConsumer(AsyncWebsocketConsumer):
 		sender = query_params.get("sender", [None])[0]
 		recipient = query_params.get("recipient", [None])[0]
 		reconnect = query_params.get("reconnect", [None])[0]
+		self.logger.info(f"Token : {token}")
 		if not token:
 			return
 		user = await jwt_to_user(token)
+		self.logger.info(f"User : {user}")
 		self.user = user
 
 		if not user:
@@ -151,7 +165,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 				await self.channel_layer.group_add(str(self.game.game_id), self.channel_name)
 				await self.send_initial_game_state(self.game)
 			return
-		
+
 		elif sender: # invitation: WS msg from B, A invite B, sender is A
 			#print(f"groupname: user_{user.username}", flush=True)
 			if user.is_playing or (await self.get_user(sender)).is_playing:
@@ -174,7 +188,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 			self.logger.info("BEFORE CREATE GAMEBD")
 			game_db = await game_manager.create_game_history(user, player_b=await self.get_user(sender), game_category='Invite')
 			self.logger.info("AFTER CREATE GAMEBD")
-			self.game = GameBackend(game_db.id, 0)
+			self.game = GameBackend(game_db.id, 0, game_manager, True) #TODO Ranked mode
 			game_manager.games[game_db.id] = self.game
 			self.game.channel_layer = self.channel_layer
 			self.game.assign_player(user, self.channel_name)
@@ -203,7 +217,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 				await game_manager.set_game_state(await game_manager.get_game_by_id(self.game.game_id), 'playing')
 				await self.send_initial_game_state(self.game)
 			return
-		
+
 		else: # quick match or bot
 			bot = int(query_params.get("bot", [0])[0])
 
@@ -262,19 +276,21 @@ class GameConsumer(AsyncWebsocketConsumer):
 
 
 	async def disconnect(self, close_code):
-		game_manager.register_current_game(self.user, -1) # reset current_game_id to -1 (means no game)
-		self.user.is_playing = False # reset is_playing to False
-		await self.save_user(self.user)
+		await game_manager.reset_player_game(self.user)
 		self.logger.info(f"WebSocket disconnected with code: {close_code}")
 
 	async def chat_message(self, event):
 		await self.send(text_data=json.dumps({"message":event["text"]}))
 
 	async def game_update(self, event):
-		await self.send(text_data=json.dumps({
-			"type": "game_update",
-			"data":event["data"]
-		}))
+		try:
+			self.logger.info("Sending game updates")
+			await self.send(text_data=json.dumps({
+				"type": "game_update",
+				"data":event["data"]
+			}))
+		except Exception as e:
+			self.logger.info(f"Crashed in update {e}")
 
 	async def send_initial_game_state(self, instance):
 		self.logger.info(instance.game.player_left.position)

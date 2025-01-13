@@ -3,6 +3,7 @@ import time
 import logging
 import json
 from .game_logic import GameInstance, GameBounds
+from channels.db import database_sync_to_async
 from .bot import Bot
 
 class User:
@@ -12,20 +13,21 @@ class User:
 		self.state = state
 
 class GameBackend:
-	def __init__(self, room_id, bot):
+	def __init__(self, room_id, bot, manager, ranked):
 		self.game_id = room_id
-		self.game = GameInstance(self.broadcast_state)
+		self.game = GameInstance(self.broadcast_state, self.on_game_end)
 		self.game_mode = "Vanilla"
+		self.is_ranked = ranked
 		self.channel_layer = None
+		self.manager = manager
 		self.player_left = None
 		self.player_right = None
 		self.logger = logging.getLogger('game')
+		self.elo_k_factor = 40
 		self.is_bot_game = bot and bot > 0
 		if (self.is_bot_game):
 			self.player_right = Bot(bot, self.game)
 		self.logger.info(f"{self.is_bot_game} and {bot}")
-
-
 
 	def handle_key_event(self, websocket, key, is_down):
 		if websocket == self.player_left.channel:
@@ -90,7 +92,6 @@ class GameBackend:
 				self.player_left.state = "Ready"
 				self.check_ready_game()
 			elif self.is_bot_game:
-				self.logger.info(f"ici bot game {self.is_bot_game}")
 				self.check_ready_game()
 			elif (self.player_right.channel == channel):
 				self.logger.info(f"is bot game {self.is_bot_game}")
@@ -106,13 +107,72 @@ class GameBackend:
 		else:
 			self.logger.info("Not starting, both player not ready yet")
 
+	async def on_game_end(self):
+		try:
+			if (self.is_ranked):
+				await self.update_elo(self.game.winner)
 
+			if self.game.winner == "LEFT":
+				self.game.winner = self.player_left.user.username
+			elif self.game.winner == "RIGHT":
+				self.game.winner = self.player_right.user.username
+
+			await self.broadcast_state()
+
+			if self.player_left:
+				self.logger.info(f"Resetting left player: {self.player_left.user.username}")
+				await self.manager.reset_player_game(self.player_left.user)
+
+			if self.player_right and not self.is_bot_game:
+				self.logger.info(f"Resetting right player: {self.player_right.user.username}")
+				await self.manager.reset_player_game(self.player_right.user)
+
+			self.manager.remove_game(self.game_id)
+			await self.manager.set_game_state(await self.manager.get_game_by_id(self.game_id), 'finished', self.game.player_left.score, self.game.player_right.score)
+			#TODO Add to history
+		except Exception as e:
+			self.logger.error(f"Error in on_game_end: {str(e)}")
+			import traceback
+			self.logger.error(traceback.format_exc())
+
+
+	@database_sync_to_async
+	def update_user_elo(self, user, elo):
+		user.elo = elo
+		user.save()
+
+	async def update_elo(self, winner):
+		elo_pleft = self.player_left.user.elo
+		elo_pright = self.player_right.user.elo
+
+		expected_score_pleft = 1 / (1 + 10 ** ((elo_pright - elo_pleft) / 400))
+		expected_score_pright = 1 - expected_score_pleft
+
+		if (winner == "LEFT"):
+			actual_score_pleft = 1
+			actual_score_pright = 0
+		elif (winner == "RIGHT"):
+			actual_score_pleft = 0
+			actual_score_pright = 1
+		else:
+			self.logger.error("update elo but winner is neither left or right")
+			return 0
+
+		new_elo_pleft = elo_pleft + self.elo_k_factor * (actual_score_pleft - expected_score_pleft)
+		new_elo_pright = elo_pright + self.elo_k_factor * (actual_score_pright - expected_score_pright)
+
+		await self.update_user_elo(self.player_left.user, new_elo_pleft)
+		if not self.is_bot_game:
+			await self.update_user_elo(self.player_right.user, new_elo_pright)
 
 	async def broadcast_state(self):
 		events = []
 		if self.game.scored:
 			events.append({"type": "score", "position": vars(self.game.scorePos)})
 			self.game.scored = False
+		if self.game.ended:
+			self.logger.info(f"Appending winner info with {self.game.winner}")
+			events.append({"type": "game_end", "winner": self.game.winner})
 
 		trajectory_points = self.game.ball.predict_trajectory()
 		trajectory_data = [vars(point) for point in trajectory_points]
@@ -148,4 +208,9 @@ class GameBackend:
 				"events": events
 			}
 		}
-		await self.channel_layer.group_send(str(self.game_id), state)
+		self.logger.info("Before sending broadcast")
+		try:
+			await self.channel_layer.group_send(str(self.game_id), state)
+			self.logger.info("After sending broadcast")
+		except Exception as e
+			self.logger.info(f"Error {e}")

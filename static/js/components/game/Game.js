@@ -131,6 +131,7 @@ export class Game {
 	}
 
 	handleGameUpdate(data) {
+		let game_end = false;
 		if (data.player) {
 			const leftPos = data.positions.player_left;
 			const rightPos = data.positions.player_right;
@@ -152,18 +153,11 @@ export class Game {
 
 		if (data.positions.ball && this.sceneManager.ball) {
 			this.sceneManager.ball.position.set(data.positions.ball.x, data.positions.ball.y, data.positions.ball.z);
-			//	console.log(data.ball.visibility == true ? "Visible" : "Not");
-			//console.log(data.ball.visibility == false ? "Invisible" : "Not");
 			this.sceneManager.ball.visible = true;
-			//this.sceneManager.ball.visible = data.ball.visibility;
-		}
-
-		if (!this.gameStarted) {
-			this.gameStarted = true;
-			this.uiManager.setOverlayVisibility(false);
 		}
 
 		if (data.events && data.events.length > 0) {
+			console.log(data.events);
 			data.events.forEach((event) => {
 				if (event.type === "score" && event.position) {
 					const scorePosition = new THREE.Vector3(event.position.x, event.position.y, event.position.z);
@@ -171,7 +165,18 @@ export class Game {
 					//this.sceneManager.hideBall();
 					console.log("Spawning particles at:", scorePosition);
 				}
+				if (event.type === "game_end" && event.winner) {
+					game_end = true;
+					this.uiManager.setOverText(event.winner + " wins");
+					this.uiManager.setOverlayVisibility(true);
+					//this.sceneManager.hideBall();
+				}
 			});
+		}
+
+		if (!this.gameStarted && game_end == false) {
+			this.gameStarted = true;
+			this.uiManager.setOverlayVisibility(false);
 		}
 	}
 
