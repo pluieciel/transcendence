@@ -327,7 +327,7 @@ export default class MainView {
 				},
 			});
 			const data = await response.json();
-			
+
 			const avatarUrl = await window.app.getAvatar(this.username);
 
 			if (data.success) {
