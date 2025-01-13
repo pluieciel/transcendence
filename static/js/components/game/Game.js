@@ -18,6 +18,8 @@ export class Game {
 		this.gameStarted = false;
 		this.sceneInitialized = false;
 
+		this.onGameEnd = null;
+
 		this.uiManager.setOverlayVisibility(true);
 		this.uiManager.setOverText("Waiting for server...");
 
@@ -28,7 +30,8 @@ export class Game {
 
 		window.addEventListener("keydown", (event) => {
 			if (event.code === "Space") {
-				this.emitParticles();
+				//this.emitParticles();
+				this.sceneManager.trajVisible = !this.sceneManager.trajVisible;
 			}
 		});
 	}
@@ -107,7 +110,7 @@ export class Game {
 		this.sceneManager.rightBorder.position.set(positions.borders.right.x, positions.borders.right.y, positions.borders.right.z);
 
 		this.uiManager.updateNameLeft(data.player.left.name + " [" + data.player.left.rank + "]");
-		this.uiManager.updateNameRight(data.player.right.name + " [" + data.player.left.rank + "]");
+		this.uiManager.updateNameRight(data.player.right.name + " [" + data.player.right.rank + "]");
 
 		this.uiManager.updateScoreLeft(data.player.left.score);
 		this.uiManager.updateScoreRight(data.player.right.score);
@@ -130,6 +133,7 @@ export class Game {
 	}
 
 	handleGameUpdate(data) {
+		let game_end = false;
 		if (data.player) {
 			const leftPos = data.positions.player_left;
 			const rightPos = data.positions.player_right;
@@ -145,20 +149,17 @@ export class Game {
 			this.uiManager.updateScoreRight(data.player.right.score);
 		}
 
-		if (data.positions.ball && this.sceneManager.ball) {
-			this.sceneManager.ball.position.set(data.positions.ball.x, data.positions.ball.y, data.positions.ball.z);
-			//	console.log(data.ball.visibility == true ? "Visible" : "Not");
-			//console.log(data.ball.visibility == false ? "Invisible" : "Not");
-			this.sceneManager.ball.visible = true;
-			//this.sceneManager.ball.visible = data.ball.visibility;
+		if (data.trajectory) {
+			this.sceneManager.updateTrajectory(data.trajectory);
 		}
 
-		if (!this.gameStarted) {
-			this.gameStarted = true;
-			this.uiManager.setOverlayVisibility(false);
+		if (data.positions.ball && this.sceneManager.ball) {
+			this.sceneManager.ball.position.set(data.positions.ball.x, data.positions.ball.y, data.positions.ball.z);
+			this.sceneManager.ball.visible = true;
 		}
 
 		if (data.events && data.events.length > 0) {
+			console.log(data.events);
 			data.events.forEach((event) => {
 				if (event.type === "score" && event.position) {
 					const scorePosition = new THREE.Vector3(event.position.x, event.position.y, event.position.z);
@@ -166,7 +167,29 @@ export class Game {
 					//this.sceneManager.hideBall();
 					console.log("Spawning particles at:", scorePosition);
 				}
+				if (event.type === "game_end" && event.winner) {
+					game_end = true;
+					this.uiManager.setOverText(event.winner + " wins");
+					this.uiManager.setOverlayVisibility(true);
+					this.ws.close(1000);
+					console.log("Websocket closed");
+					this.handleGameEnd();
+				}
 			});
+		}
+
+		if (!this.gameStarted && game_end == false) {
+			this.gameStarted = true;
+			this.uiManager.setOverlayVisibility(false);
+		}
+	}
+
+	handleGameEnd() {
+		// Your existing game end logic
+
+		// Call the callback if it exists
+		if (this.onGameEnd) {
+			this.onGameEnd();
 		}
 	}
 

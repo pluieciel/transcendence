@@ -29,11 +29,11 @@ export default class MainView {
 					this.displayGame(events);
 				}
 			};
-	
+
 			window.app.gamews.onclose = () => {
 				console.log("Disconnected from server");
 				window.app.ingame = false;
-				sessionStorage.setItem('ingame', 'false');
+				sessionStorage.setItem("ingame", "false");
 			};
 		}
 	}
@@ -105,14 +105,16 @@ export default class MainView {
 		</div>
 	</div>
 
-	<!-- Game container -->
-	<div>
+	<div id=gameDiv style="display :none:">
 		<div id="nameLeft"></div>
 		<div id="scoreLeft"></div>
 		<div id="nameRight"></div>
 		<div id="scoreRight"></div>
-		<div id="overlay"></div>
-		<canvas id="gameCanvas">
+		<div id="overlay">
+		    <button id="returnButton" style="display: none;">Return to Main Menu</button>
+		</div>
+        <canvas id="gameCanvas"></canvas>
+        </div>
 		</canvas>
 	</div>
 
@@ -146,13 +148,13 @@ export default class MainView {
 		window.app.gamews.onopen = () => {
 			console.log("Connected to server");
 			window.app.ingame = true;
-            sessionStorage.setItem('ingame', 'true');
+			sessionStorage.setItem("ingame", "true");
 		};
 
 		window.app.gamews.onclose = () => {
 			console.log("Disconnected from server");
 			window.app.ingame = false;
-            sessionStorage.setItem('ingame', 'false');
+			sessionStorage.setItem("ingame", "false");
 		};
 
 		window.app.gamews.onerror = (error) => {
@@ -180,13 +182,13 @@ export default class MainView {
 		window.app.gamews.onopen = () => {
 			console.log("Connected to server");
 			window.app.ingame = true;
-            sessionStorage.setItem('ingame', 'true');
+			sessionStorage.setItem("ingame", "true");
 		};
 
 		window.app.gamews.onclose = () => {
 			console.log("Disconnected from server");
 			window.app.ingame = false;
-            sessionStorage.setItem('ingame', 'false');
+			sessionStorage.setItem("ingame", "false");
 		};
 
 		window.app.gamews.onerror = (error) => {
@@ -198,7 +200,29 @@ export default class MainView {
 		setTimeout(() => {
 			const canvas = this.container.querySelector("#gameCanvas");
 			const game = new Game(canvas, window.app.gamews);
+			const gameDiv = this.container.querySelector("#gameDiv");
+			gameDiv.style.display = "block";
 			console.log("Game initialization");
+
+			// Pass onGameEnd callback to Game
+			game.onGameEnd = () => {
+				const returnButton = this.container.querySelector("#returnButton");
+				returnButton.style.display = "block";
+
+				returnButton.onclick = () => {
+					canvas.style.display = "none";
+					returnButton.style.display = "none";
+					this.container.querySelector("#mainPage").style.display = "block";
+					this.container.querySelector("#overlay").style.display = "none";
+					gameDiv.style.display = "none";
+					if (window.app.gamews) {
+						window.app.gamews.close();
+					}
+					window.app.ingame = false;
+					sessionStorage.setItem("ingame", "false");
+				};
+			};
+
 			game.initialize(events.data);
 			this.container.querySelector("#mainPage").style.display = "none";
 		}, 1000);
