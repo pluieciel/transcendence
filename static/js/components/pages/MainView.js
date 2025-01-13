@@ -1,4 +1,5 @@
 import ChatBox from "../chat/ChatBox.js";
+import Tournament from "../tournament/Tournament.js";
 import { Game } from "../game/Game.js";
 
 export default class MainView {
@@ -75,8 +76,7 @@ export default class MainView {
 					<button id="playAI">AI</button>
 					<button id="rankedMatch">Ranked</button>
 					<button id="quickMatch" class="nav-link" data-view="game" data-bs-toggle="modal" data-bs-target="#matchSearch">Quick Match</button>
-					<button id="joinTournament">Join Tournament</button>
-					<button id="createTournament">Create Tournament</button>
+					<button id="tournamentButton" data-bs-toggle="modal" data-bs-target="#tournamentModal">Tournament</button>
 			</div>
 			<div class="profile">
 				<h2>Profile</h2>
@@ -91,6 +91,10 @@ export default class MainView {
 	<!-- ChatBox container -->
 	<div id="chatBoxContainer"></div>
 
+	<!-- Tournament container -->
+	<div id="tournamentContainer"></div>
+
+	<!-- Quick Match Timer container -->
 	<div class="modal fade" id="matchSearch" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
 		<div class="modal-dialog modal-dialog-centered">
 			<div class="modal-content modal-content-game d-flex flex-column align-items-center justify-content-center text-center">
@@ -275,9 +279,13 @@ export default class MainView {
 	}
 
 	initComponents() {
+		// Initialize Tournament
+		const tournamentContainer = this.container.querySelector("#tournamentContainer");
+		window.app.tournament = new Tournament(tournamentContainer);
+
 		// Initialize ChatBox
 		const chatBoxContainer = this.container.querySelector("#chatBoxContainer");
-		this.chatBox = new ChatBox(chatBoxContainer);
+		window.app.chatBox = new ChatBox(chatBoxContainer);
 	}
 
 	addEventListeners() {
@@ -288,7 +296,7 @@ export default class MainView {
 		const playAI = this.container.querySelector("#playAI");
 
 		logoutBtn.addEventListener("click", () => {
-			this.chatBox.disconnect();
+			window.app.chatBox.disconnect();
 			window.app.logout();
 		});
 
@@ -318,17 +326,9 @@ export default class MainView {
 					Authorization: `${window.app.getToken()}`,
 				},
 			});
-
-			const response_avatar = await fetch(`/api/get/avatar/${this.username}`, {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-					Authorization: `${window.app.getToken()}`,
-				},
-			});
-
 			const data = await response.json();
-			const avatarurl = await response_avatar.json();
+			
+			const avatarUrl = await window.app.getAvatar(this.username);
 
 			if (data.success) {
 				elo_div.innerHTML = "Elo: " + data["elo"];
@@ -339,8 +339,8 @@ export default class MainView {
 				winrate_div.innerHTML = "Failed to load winrate";
 				tourn_div.innerHTML = "Failed to load tournaments";
 			}
-			if (avatarurl.success) {
-				avatar_div.innerHTML = `<img src=${avatarurl["avatar"]} alt="User Avatar" width="60" height="60"></img>`;
+			if (avatarUrl) {
+				avatar_div.innerHTML = `<img src=${avatarUrl} alt="User Avatar" width="60" height="60"></img>`;
 			}
 		} catch (error) {
 			elo_div.innerHTML = "Failed to load elo";

@@ -1,5 +1,5 @@
-import ChatBox from './chat/ChatBox.js';
-import { gameinit } from './game/Main.js';
+import ChatBox from '../chat/ChatBox.js';
+import { gameinit } from '../game/Main.js';
 
 export default class GameView {
     constructor(container) {

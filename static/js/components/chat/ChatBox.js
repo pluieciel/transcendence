@@ -195,6 +195,11 @@ export default class ChatBox {
             if (data.message_type === "system" && data.message === 'all_user_list') {
                 this.allusers = data.usernames.sort((a, b) => a.localeCompare(b));
                 this.updateOnlineUsersList();
+            } else if (data.message_type === "system" && data.message === 'update_tournament_info') {
+                //console.log(data.tournament_info);
+                window.app.tournament.info = JSON.parse(data.tournament_info);
+                window.app.tournament.updateContent();
+                window.app.tournament.updateGame();
             } else if (data.type == "friend_list") {
                 this.friends = data.usernames.sort((a, b) => a.localeCompare(b));
                 this.updateOnlineUsersList();
@@ -204,6 +209,8 @@ export default class ChatBox {
                 this.onlineusers = dict.online_users.filter(user => user !== this.username).sort((a, b) => a.localeCompare(b));
                 this.onlineusers.unshift(this.username);
                 this.waiting_users = dict.waiting_users;
+                window.app.tournament.info = dict.tournament_info;
+                window.app.tournament.updateContent();
                 this.updateOnlineUsersList();
             } else if (data.message_type === "system" && data.recipient === 'update_waiting_users') {
                 this.waiting_users = JSON.parse(data.message);
@@ -301,16 +308,9 @@ export default class ChatBox {
             this.onlineusers.map(async (user) => {
                 const avatar_div = this.container.querySelector(`#avatar_${user}`);
                 if (avatar_div) {
-                    const response = await fetch(`/api/get/avatar/${user}`,{
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `${this.token}`,
-                        },
-                    });
-                    const data = await response.json();
-                    if (data.avatar) {
-                        avatar_div.innerHTML = `<img src="${data.avatar}" width="30" height="30"></img>`;
+                    const avatarUrl = await window.app.getAvatar(user);
+                    if (avatarUrl) {
+                        avatar_div.innerHTML = `<img src="${avatarUrl}" width="30" height="30"></img>`;
                     }
                 }
                 const elo_div = this.container.querySelector(`#elo_${user}`);
@@ -338,7 +338,7 @@ export default class ChatBox {
                 const donotdisbutton = this.container.querySelector('#Donotdisturb');
                 const tooltip = bootstrap.Tooltip.getInstance(donotdisbutton);
                 if (tooltip) tooltip.dispose();
-                new bootstrap.Tooltip(donotdisbutton); // Initialize the tooltip
+                if (donotdisbutton) new bootstrap.Tooltip(donotdisbutton); // Initialize the tooltip
             }, 50);
 
             const popoverTriggerList = this.container.querySelectorAll('[data-bs-toggle="popover"]');
@@ -425,16 +425,9 @@ export default class ChatBox {
             this.friends.map(async (user) => {
                 const avatar_div = this.container.querySelector(`#avatar_${user}`);
                 if (avatar_div) {
-                    const response = await fetch(`/api/get/avatar/${user}`,{
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `${this.token}`,
-                        },
-                    });
-                    const data = await response.json();
-                    if (data.avatar) {
-                        avatar_div.innerHTML = `<img src="${data.avatar}" width="30" height="30"></img>`;
+                    const avatarUrl = await window.app.getAvatar(user);
+                    if (avatarUrl) {
+                        avatar_div.innerHTML = `<img src="${avatarUrl}" width="30" height="30"></img>`;
                     }
                 }
                 const elo_div = this.container.querySelector(`#elof_${user}`);
@@ -800,9 +793,9 @@ export default class ChatBox {
             if (nickname !== "")
                 formData.append('nickname', nickname);
             if (originalFile) {
-                const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2 MB
+                const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1 MB
                 if (originalFile.size > MAX_FILE_SIZE) {
-                    errorDiv.textContent = 'File size exceeds the 2MB limit';
+                    errorDiv.textContent = 'File size exceeds the 1MB limit';
                     errorDiv.classList.remove('d-none');
                     return;
                 }
@@ -813,6 +806,7 @@ export default class ChatBox {
                     lastModified: originalFile.lastModified
                 });
                 formData.append('avatar', modifiedFile);
+                delete window.app.avatarCache[this.username]; // delete cache to force update
             }
             
             if (!formData.has('password') && !formData.has('nickname') && !formData.has('avatar')) {
