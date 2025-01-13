@@ -199,6 +199,7 @@ export default class ChatBox {
                 //console.log(data.tournament_info);
                 window.app.tournament.info = JSON.parse(data.tournament_info);
                 window.app.tournament.updateContent();
+                window.app.tournament.updateGame();
             } else if (data.type == "friend_list") {
                 this.friends = data.usernames.sort((a, b) => a.localeCompare(b));
                 this.updateOnlineUsersList();
@@ -794,7 +795,7 @@ export default class ChatBox {
             if (originalFile) {
                 const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1 MB
                 if (originalFile.size > MAX_FILE_SIZE) {
-                    errorDiv.textContent = 'File size exceeds the 2MB limit';
+                    errorDiv.textContent = 'File size exceeds the 1MB limit';
                     errorDiv.classList.remove('d-none');
                     return;
                 }

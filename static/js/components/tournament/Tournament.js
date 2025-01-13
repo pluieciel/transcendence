@@ -1,10 +1,14 @@
+import { Game } from "../game/Game.js";
+
 export default class Tournament {
     constructor(container) {
         this.container = container;
         this.token = window.app.getToken();
         const decodedPayload = jwt_decode(this.token);
         this.username = decodedPayload.username;
-        this.info = {"state": "Waiting", "wait_list": []};
+        this.protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+        this.host = window.location.host;
+        this.info = {"state": "Waiting", "wait_list": [], "round1": {}, "round2": {}, "round3": {}};
         this.render();
         this.addEventListeners();
         this.updateContent();
@@ -18,7 +22,7 @@ export default class Tournament {
                         <div class="modal-header">
                             <h1 class="modal-title fs-5" id="staticBackdropLabel">Tournament Waiting List</h1>
                             <h1 id="tournamentWaitingListCount" class="ms-2 fs-5">0</h1>
-                            <h1 class="fs-5">/8</h1>
+                            <h1 class="fs-5">/4</h1>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body" id="tournamentWaitingList">
@@ -39,7 +43,7 @@ export default class Tournament {
                             <div class="row" id="top"></div>
                             <div class="row" id="twoToOne"></div>
                             <div class="row" id="fourToTwo"></div>
-                            <div class="row" id="eightToFour"></div>
+                            <!--div class="row" id="eightToFour"></div-->
                         </div>
                         <div class="modal-footer"></div>
                     </div>
@@ -55,7 +59,7 @@ export default class Tournament {
             this.container.querySelector("#tournamentPlaying").style.display = "none";
             const tournamentWaitingListCount = this.container.querySelector("#tournamentWaitingListCount");
             tournamentWaitingListCount.innerHTML = this.info.wait_list.length;
-            if (this.info.wait_list.length === 8) {
+            if (this.info.wait_list.length === 4) {
                 this.updateContent();
             }
 
@@ -83,16 +87,16 @@ export default class Tournament {
             this.container.querySelector("#tournamentWaiting").style.display = "none";
             this.container.querySelector("#tournamentPlaying").style.display = "block";
 
-            const eightToFour = this.container.querySelector("#eightToFour");
+            //const eightToFour = this.container.querySelector("#eightToFour");
             const fourToTwo = this.container.querySelector("#fourToTwo");
             const twoToOne = this.container.querySelector("#twoToOne");
             const top = this.container.querySelector("#top");
 
-            this.renderOneRound(this.info.round1, eightToFour);
-            this.renderOneRound(this.info.round2, fourToTwo);
-            this.renderOneRound(this.info.round3, twoToOne);
+            //this.renderOneRound(this.info.round1, eightToFour);
+            this.renderOneRound(this.info.round1, fourToTwo);
+            this.renderOneRound(this.info.round2, twoToOne);
 
-            const winner = Object.values(this.info.round3)?.[0]?.winner;
+            const winner = Object.values(this.info.round2)?.[0]?.winner;
             this.renderOnePlayer(winner, winner).then(html => {top.innerHTML = html;});
         }
     }
@@ -164,6 +168,30 @@ export default class Tournament {
                 <div class="col border p-2">
                     <div class="user-item d-flex align-items-center p-2"></div>
                 </div>`;
+        }
+    }
+
+    updateGame() {
+        if (this.info.state === "Playing4to2") {
+            Object.entries(this.info.round1).forEach(([key, value]) => {
+                if (value.state === "prepare" && (value.p1 === this.username || value.p2 === this.username)) {
+                    //start game for this user
+                    window.app.gamews = new WebSocket(`${this.protocol}${this.host}/ws/game/?token=${this.token}&round=1&p1=${value.p1}&p2=${value.p2}`);
+                    console.log(`${this.protocol}${this.host}/ws/game/?token=${this.token}&round=1&p1=${value.p1}&p2=${value.p2}`);
+                    window.app.gamews.onmessage = (event) => {
+                        const events = JSON.parse(event.data);
+                        if (events.message_type === "init") {
+                            setTimeout(() => {
+                                const canvas = document.querySelector("#gameCanvas");
+                                const game = new Game(canvas, window.app.gamews);
+                                console.log("Game initialization");
+                                game.initialize(events.data);
+                                document.querySelector("#mainPage").style.display = "none";
+                            }, 1000);
+                        }
+                    };
+                }
+            });
         }
     }
 }

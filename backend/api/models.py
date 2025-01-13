@@ -102,3 +102,4 @@ class GameHistory(models.Model):
     player_a = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, related_name='player_a')
     player_b = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, related_name='player_b')
     created_at = models.DateTimeField(auto_now_add=True)
+    tournament_count = models.IntegerField(default=0)

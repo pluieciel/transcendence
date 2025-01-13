@@ -20,6 +20,7 @@ class GameManager:
 		self.game_history = None
 		self.games = {}
 		self.logger = logging.getLogger('game')
+		self.tournament_count = 0
 
 	def _get_game_history_model(self):
 		if self.game_history is None:
@@ -62,6 +63,21 @@ class GameManager:
 			game_id = (await self.create_game_history(user, game_category='AI')).id
 		self.games[game_id] = GameBackend(game_id, bot)
 		return self.games[game_id]
+	
+	async def create_tournament_empty_games(self, tournament_info):
+		self.tournament_count += 1
+		self._get_game_history_model()
+		p1 = tournament_info["round1"][f"game1"]["p1"]
+		p2 = tournament_info["round1"][f"game1"]["p2"]
+		p3 = tournament_info["round1"][f"game2"]["p1"]
+		p4 = tournament_info["round1"][f"game2"]["p2"]
+		game_id1 = (await self.create_game_history(await self.get_user(p1), await self.get_user(p2), game_category='Tournament', tournament_count=self.tournament_count)).id
+		game_id2 = (await self.create_game_history(await self.get_user(p3), await self.get_user(p4), game_category='Tournament', tournament_count=self.tournament_count)).id
+		game_id3 = (await self.create_game_history(None, None, game_category='Tournament', tournament_count=self.tournament_count)).id
+		self.games[game_id1] = GameBackend(game_id1, 0)
+		self.games[game_id2] = GameBackend(game_id2, 0)
+		self.games[game_id3] = GameBackend(game_id3, 0)
+		print(f"3games created {game_id1}, {game_id2}, {game_id3}, players: {p1}, {p2}, {p3}, {p4}", flush=True)
 
 	@database_sync_to_async
 	def get_waiting_game(self, game_category='Quick Match'):
@@ -77,8 +93,13 @@ class GameManager:
 		return game.first()
 	
 	@database_sync_to_async
-	def create_game_history(self, player_a, player_b=None, game_category='Quick Match', game_mode='Vanilla'):
-		return self.game_history.objects.create(player_a=player_a, player_b=player_b, game_category=game_category, game_mode=game_mode)
+	def get_tournament_game(self, p1, p2, game_category='Tournament'):
+		game = self.game_history.objects.filter(player_a=p1, player_b=p2, game_state='waiting', game_category=game_category)
+		return game.first()
+
+	@database_sync_to_async
+	def create_game_history(self, player_a, player_b=None, game_category='Quick Match', game_mode='Vanilla', game_state='waiting', tournament_count=0):
+		return self.game_history.objects.create(player_a=player_a, player_b=player_b, game_category=game_category, game_mode=game_mode, game_state=game_state, tournament_count=tournament_count)
 
 	@database_sync_to_async
 	def save_game_history(self, game_history):
@@ -105,7 +126,12 @@ class GameManager:
 	@database_sync_to_async
 	def get_game_by_id(self, game_id):
 		return self.game_history.objects.get(id=game_id)
-
+	
+	@database_sync_to_async
+	def get_user(self, username):
+		User = get_user_model()
+		user = User.objects.get(username=username)
+		return user
 
 game_manager = GameManager()
 
@@ -126,9 +152,14 @@ class GameConsumer(AsyncWebsocketConsumer):
 		query_params = parse_qs(query_string)
 		self.logger.info(query_params)
 		token = query_params.get("token", [None])[0]
+		#for reconnect
+		reconnect = query_params.get("reconnect", [None])[0]
+		#for invitation
 		sender = query_params.get("sender", [None])[0]
 		recipient = query_params.get("recipient", [None])[0]
-		reconnect = query_params.get("reconnect", [None])[0]
+		#for tournament
+		round = query_params.get("round", [None])[0]
+		
 		if not token:
 			return
 		user = await jwt_to_user(token)
@@ -141,6 +172,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 			}))
 			return
 		game_manager._get_game_history_model()
+
 		if reconnect: # reconnect to game
 			self.logger.info("Reconnecting to game")
 			self.game = game_manager.get_player_current_game(user)
@@ -184,6 +216,20 @@ class GameConsumer(AsyncWebsocketConsumer):
 			await self.accept()
 
 			await self.channel_layer.group_add(str(self.game.game_id), self.channel_name)
+
+			# game created, send message to inviter
+			inviter_group = f"user_{sender}"
+			await self.channel_layer.group_send(
+				inviter_group, {
+					"type": "send_message",
+					"message": "accepted your invite",
+					"message_type": "system_accept",
+					"sender": user.username,
+					"game_mode": "TO ADD",
+					"recipient": sender,
+					"time": datetime.now().strftime("%H:%M:%S")
+				}
+			)
 			return
 
 		elif recipient: # invitation: WS msg from A, A invite B, recipient is B
@@ -203,7 +249,27 @@ class GameConsumer(AsyncWebsocketConsumer):
 				await game_manager.set_game_state(await game_manager.get_game_by_id(self.game.game_id), 'playing')
 				await self.send_initial_game_state(self.game)
 			return
-		
+
+		elif round: # tournament
+			if round == "1":
+				p1 = query_params.get("p1", [None])[0]
+				p2 = query_params.get("p2", [None])[0]
+				game_db = await game_manager.get_tournament_game(await self.get_user(p1), await self.get_user(p2))
+				self.game = game_manager.games[game_db.id]
+				self.game.channel_layer = self.channel_layer
+				self.game.assign_player(user, self.channel_name)
+				user.is_playing = True
+				user.current_game_id = self.game.game_id
+				await self.save_user(user)
+				await self.accept()
+				await self.channel_layer.group_add(str(self.game.game_id), self.channel_name)
+				if (self.game.is_full()):
+					self.logger.info("Tournament Game is ready to start,game is full")
+					await game_manager.set_game_state(await game_manager.get_game_by_id(self.game.game_id), 'playing')
+					await self.send_initial_game_state(self.game)
+			return
+
+
 		else: # quick match or bot
 			bot = int(query_params.get("bot", [0])[0])
 
@@ -311,6 +377,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 		await self.channel_layer.group_send(str(instance.game_id), init_response)
 
 	async def init(self, event):
+		print(event, flush=True)
 		await self.send(text_data=json.dumps({
 			"message_type": "init",
 			"data": event["data"]}))
@@ -320,3 +387,24 @@ class GameConsumer(AsyncWebsocketConsumer):
 		User = get_user_model()
 		user = User.objects.get(username=username)
 		return user
+	
+	async def send_message(self, event):
+		message = event["message"]
+		sender = event["sender"]
+		recipient = event["recipient"]
+		time = event["time"]
+		message_type = event["message_type"]
+		game_mode = event.get("game_mode", None)
+		usernames = event.get("usernames", None)
+		tournament_info = event.get("tournament_info", None)
+
+		await self.send(text_data=json.dumps({
+			"message": message,
+			"message_type": message_type,
+			"sender": sender,
+			"recipient": recipient,
+			"game_mode": game_mode,
+			"usernames" : usernames,
+			"time": time,
+			"tournament_info": tournament_info,
+		}))
