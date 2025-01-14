@@ -42,19 +42,6 @@ async def jwt_to_user(token):
     except jwt.InvalidTokenError:
         return False
 
-def generate_totp(secret, current_timestamp, offset):
-    time_counter = int(current_timestamp // 30) + offset
-    time_bytes = time_counter.to_bytes(8, 'big')
-
-    hmac_res = hmac.digest(base64.b32decode(secret), time_bytes, hashlib.sha1)
-    hmac_off = hmac_res[19] & 0xf
-    bin_code = ((hmac_res[hmac_off] & 0x7f) << 24
-        | (hmac_res[hmac_off + 1] & 0xff) << 16
-        | (hmac_res[hmac_off + 2] & 0xff) << 8
-        | (hmac_res[hmac_off + 3] & 0xff))
-
-    return bin_code % pow(10, 6)
-
 class SignupConsumer(AsyncHttpConsumer):
     async def handle(self, body):
         # Rate limiting logic
@@ -257,12 +244,6 @@ class LoginConsumer(AsyncHttpConsumer):
             img = qr.make_image()
 
             if db_totp_secret is None:
-                response_data = {
-                    'success': True,
-                    'message': '2FA required',
-                    'two_fa': db_totp_secret is not None,
-                }
-            else:
                 token = jwt.encode({
                     'id': user.id,
                     'username': user.username,
@@ -274,6 +255,12 @@ class LoginConsumer(AsyncHttpConsumer):
                     'message': 'Login successful',
                     'two_fa': db_totp_secret is not None,
                     'token': token,
+                }
+            else:
+                response_data = {
+                    'success': True,
+                    'message': '2FA required',
+                    'two_fa': db_totp_secret is not None,
                 }
 
             return await self.send_response(200, json.dumps(response_data).encode(),
@@ -312,14 +299,8 @@ class TwoFAConsumer(AsyncHttpConsumer):
 
             user = await self.get_user(username)
 
-            current_timestamp = time.time()
-
-            # TODO: remove
-            for offset in [-2, -1, 0, 1, 2]:
-                print(f'{offset}: {generate_totp(user.totp_secret, current_timestamp, offset)}', flush=True)
-
-            for offset in [-1, 0, 1]:
-                totp = generate_totp(user.totp_secret, current_timestamp, offset)
+            for offset in [-2, -1, 0, 1]:
+                totp = self.generate_totp(user.totp_secret, offset)
                 if totp == int(totp_input):
                     token = jwt.encode({
                         'id': user.id,
@@ -353,6 +334,19 @@ class TwoFAConsumer(AsyncHttpConsumer):
     def get_user(self, username):
         User = get_user_model()
         return User.objects.get(username=username)
+
+    def generate_totp(self, secret, offset):
+        time_counter = int(time.time() // 30) + offset
+        time_bytes = time_counter.to_bytes(8, 'big')
+
+        hmac_res = hmac.digest(base64.b32decode(secret), time_bytes, hashlib.sha1)
+        hmac_off = hmac_res[19] & 0xf
+        bin_code = ((hmac_res[hmac_off] & 0x7f) << 24
+                    | (hmac_res[hmac_off + 1] & 0xff) << 16
+                    | (hmac_res[hmac_off + 2] & 0xff) << 8
+                    | (hmac_res[hmac_off + 3] & 0xff))
+
+        return bin_code % 1000000
 
 class UpdateConsumer(AsyncHttpConsumer):
     async def handle(self, body):

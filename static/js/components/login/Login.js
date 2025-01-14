@@ -34,8 +34,9 @@ export default class Login {
                         <form id="totpForm">
 	                        <div class="modal-body">
 	                                <div class="mb-3">
-	                                    <input id="totpInput" class="form-control" maxlength="6">
+	                                    <input id="totpInput" class="form-control" maxlength="6" required>
 	                                </div>
+	                                <div id="totpError" class="alert alert-danger d-none"></div>
 	                        </div>
 	                        <div class="modal-footer">
 	                            <button type="submit" class="btn btn-primary" id="totpSubmit">Submit</button>
@@ -62,6 +63,8 @@ export default class Login {
 
 	add2FAEventListeners() {
         const submit = this.container.querySelector('#totpForm');
+        const errorDiv = this.container.querySelector('#totpError');
+
         submit.addEventListener('submit', async (e) => {
             e.preventDefault();
             const totp = this.container.querySelector('#totpInput').value;
@@ -84,10 +87,12 @@ export default class Login {
 						modal.hide();
 					window.app.login(data);
 				} else {
-
+					errorDiv.textContent = data.message || 'Login failed';
+                    errorDiv.classList.remove('d-none');
 				}
             } catch (error) {
-
+				errorDiv.textContent = 'An error occurred:' + error;
+                errorDiv.classList.remove('d-none');
             }
         });
 	}
