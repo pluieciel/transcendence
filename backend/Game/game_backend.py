@@ -55,7 +55,7 @@ class GameBackend:
 				self.logger.info("started game with a bot")
 				self.player_right.start_bot()
 			else:
-				self.logger.info("started game with a bot")
+				self.logger.info("started game with a player")
 			self.game.start()
 		else:
 			self.logger.warning("start game caleld but game is not full")
@@ -144,13 +144,15 @@ class GameBackend:
 				next_game_place = game_history_db.tournament_round2_place
 				new_game_history_db = await self.manager.get_game_by_id(next_game_id)
 				if next_game_place == 1:
-					await self.manager.set_game_state(new_game_history_db, 'waiting', player_a=winner, player_b=new_game_history_db.player_b)
+					player_b = new_game_history_db.player_b
+					await self.manager.set_game_state(new_game_history_db, 'waiting', player_a=winner, player_b=player_b)
 				else:
-					await self.manager.set_game_state(new_game_history_db, 'waiting', player_a=new_game_history_db.player_a, player_b=winner)
+					player_a = new_game_history_db.player_a
+					await self.manager.set_game_state(new_game_history_db, 'waiting', player_a=player_a, player_b=winner)
 
 				await database_sync_to_async(new_game_history_db.refresh_from_db)()
 				if new_game_history_db.player_a and new_game_history_db.player_b:
-					self.chat_consumer.tournament_info["round2"] = {f"game{next_game_place}" : {"p1" : new_game_history_db.player_a.username, "p2" : new_game_history_db.player_b.username, "state" : "prepare"}}
+					self.chat_consumer.tournament_info["round2"] = {"game1" : {"p1" : new_game_history_db.player_a.username, "p2" : new_game_history_db.player_b.username, "state" : "prepare"}}
 					self.chat_consumer.tournament_info["state"] = "Playing2to1"
 					redis_client = redis.Redis(host='redis', port=6379, db=0)
 					groups = [g.decode('utf-8') for g in redis_client.smembers('active_groups')]

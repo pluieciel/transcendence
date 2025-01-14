@@ -75,6 +75,7 @@ class Ball:
 
 	def start(self, startDir, ballPos):
 		direction = startDir
+		print(f"direction:{direction}", flush=True)
 		angle = random.uniform(-5, 5)
 		angle_rad = math.radians(angle)
 
@@ -83,6 +84,8 @@ class Ball:
 		self.velocity.y = self.speed * math.sin(angle_rad)
 		self.position = ballPos
 
+		print(f"Ball started at {ballPos.x}, {ballPos.y}, {ballPos.z}", flush=True)
+		print(f"Ball velocity at {self.velocity.x}, {self.velocity.y}, {self.velocity.z}", flush=True)
 		#print(f"Ball started at {self.position.x}, {self.position.y}, {self.position.z}", flush=True)
 		#print(f"Ball velocity at {self.velocity.x}, {self.velocity.y}, {self.velocity.z}", flush=True)
 
@@ -283,12 +286,15 @@ class GameInstance:
 
 					remaining_time = delta_time
 					step_size = 1/240
+					accumulated_step = 0
 					while remaining_time > 0:
 						current_step = min(step_size, remaining_time)
+						accumulated_step += current_step
 
-						if self.ball.is_moving:
-							self.ball.position.x += self.ball.velocity.x * current_step
-							self.ball.position.y += self.ball.velocity.y * current_step
+						if self.ball.is_moving and accumulated_step >= 0.016:
+							self.ball.position.x += self.ball.velocity.x * accumulated_step
+							self.ball.position.y += self.ball.velocity.y * accumulated_step
+							accumulated_step = 0
 
 						await (self.check_collisions())
 

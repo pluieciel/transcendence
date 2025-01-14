@@ -233,6 +233,25 @@ export default class ChatBox {
                             const canvas = document.querySelector("#gameCanvas");
                             const game = new Game(canvas, window.app.gamews);
                             console.log("Game initialization");
+
+                            game.onGameEnd = () => {
+                                const returnButton = document.querySelector("#returnButton");
+                                returnButton.style.display = "block";
+
+                                returnButton.onclick = () => {
+                                    canvas.style.display = "none";
+                                    returnButton.style.display = "none";
+                                    document.querySelector("#mainPage").style.display = "block";
+                                    document.querySelector("#overlay").style.display = "none";
+                                    gameDiv.style.display = "none";
+                                    if (window.app.gamews) {
+                                        window.app.gamews.close();
+                                    }
+                                    window.app.ingame = false;
+                                    sessionStorage.setItem("ingame", "false");
+                                };
+                            };
+
                             game.initialize(events.data);
                             document.querySelector("#mainPage").style.display = "none";
                         }, 1000);
@@ -753,6 +772,25 @@ export default class ChatBox {
                             const canvas = document.querySelector("#gameCanvas");
                             const game = new Game(canvas, window.app.gamews);
                             console.log("Game initialization");
+
+                            game.onGameEnd = () => {
+                                const returnButton = document.querySelector("#returnButton");
+                                returnButton.style.display = "block";
+
+                                returnButton.onclick = () => {
+                                    canvas.style.display = "none";
+                                    returnButton.style.display = "none";
+                                    document.querySelector("#mainPage").style.display = "block";
+                                    document.querySelector("#overlay").style.display = "none";
+                                    gameDiv.style.display = "none";
+                                    if (window.app.gamews) {
+                                        window.app.gamews.close();
+                                    }
+                                    window.app.ingame = false;
+                                    sessionStorage.setItem("ingame", "false");
+                                };
+                            };
+
                             game.initialize(events.data);
                             document.querySelector("#mainPage").style.display = "none";
                         }, 1000);
