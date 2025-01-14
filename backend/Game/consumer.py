@@ -76,9 +76,9 @@ class GameManager:
 		p2 = tournament_info["round1"][f"game1"]["p2"]
 		p3 = tournament_info["round1"][f"game2"]["p1"]
 		p4 = tournament_info["round1"][f"game2"]["p2"]
-		game_id1 = (await self.create_game_history(await self.get_user(p1), await self.get_user(p2), game_category='Tournament', tournament_count=self.tournament_count)).id
-		game_id2 = (await self.create_game_history(await self.get_user(p3), await self.get_user(p4), game_category='Tournament', tournament_count=self.tournament_count)).id
-		game_id3 = (await self.create_game_history(None, None, game_category='Tournament', tournament_count=self.tournament_count)).id
+		game_id3 = (await self.create_game_history(None, None, game_category='Tournament2', tournament_count=self.tournament_count)).id
+		game_id1 = (await self.create_game_history(await self.get_user(p1), await self.get_user(p2), game_category='Tournament1', tournament_count=self.tournament_count, tournament_round2_game_id=game_id3, tournament_round2_place=1)).id
+		game_id2 = (await self.create_game_history(await self.get_user(p3), await self.get_user(p4), game_category='Tournament1', tournament_count=self.tournament_count, tournament_round2_game_id=game_id3, tournament_round2_place=2)).id
 		self.games[game_id1] = GameBackend(game_id1, 0, self, True)
 		self.games[game_id2] = GameBackend(game_id2, 0, self, True)
 		self.games[game_id3] = GameBackend(game_id3, 0, self, True)
@@ -103,8 +103,8 @@ class GameManager:
 		return game.first()
 
 	@database_sync_to_async
-	def create_game_history(self, player_a, player_b=None, game_category='Quick Match', game_mode='Vanilla', game_state='waiting', tournament_count=0):
-		return self.game_history.objects.create(player_a=player_a, player_b=player_b, game_category=game_category, game_mode=game_mode, game_state=game_state, tournament_count=tournament_count)
+	def create_game_history(self, player_a, player_b=None, game_category='Quick Match', game_mode='Vanilla', game_state='waiting', tournament_count=0, tournament_round2_game_id=-1, tournament_round2_place=-1):
+		return self.game_history.objects.create(player_a=player_a, player_b=player_b, game_category=game_category, game_mode=game_mode, game_state=game_state, tournament_count=tournament_count, tournament_round2_game_id=tournament_round2_game_id, tournament_round2_place=tournament_round2_place)
 
 	@database_sync_to_async
 	def save_game_history(self, game_history):
@@ -119,10 +119,12 @@ class GameManager:
 		return games.first()
 
 	@database_sync_to_async
-	def set_game_state(self, game, game_state, score_a = 0, score_b = 0):
+	def set_game_state(self, game, game_state, score_a = 0, score_b = 0, player_a = None, player_b = None):
 		game.score_a = score_a
 		game.score_b = score_b
 		game.game_state = game_state
+		game.player_a = player_a
+		game.player_b = player_b
 		game.save()
 
 	@database_sync_to_async

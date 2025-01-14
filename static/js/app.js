@@ -1,4 +1,4 @@
-import LoginView from './components/LoginView.js';
+import LoginView from './components/pages/LoginView.js';
 import MainView from './components/pages/MainView.js';
 import SettingsView from './components/pages/SettingsView.js';
 import SignUpAuthView from './components/login/SignUpOAuth.js';

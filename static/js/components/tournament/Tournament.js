@@ -176,6 +176,7 @@ export default class Tournament {
             Object.entries(this.info.round1).forEach(([key, value]) => {
                 if (value.state === "prepare" && (value.p1 === this.username || value.p2 === this.username)) {
                     //start game for this user
+                    this.round2_place = key === "game1" ? 1 : 2;
                     window.app.gamews = new WebSocket(`${this.protocol}${this.host}/ws/game/?token=${this.token}&round=1&p1=${value.p1}&p2=${value.p2}`);
                     console.log(`${this.protocol}${this.host}/ws/game/?token=${this.token}&round=1&p1=${value.p1}&p2=${value.p2}`);
                     window.app.gamews.onmessage = (event) => {
@@ -192,6 +193,8 @@ export default class Tournament {
                     };
                 }
             });
+        } else if (this.info.state === "Playing2to1") {
+            //TODO
         }
     }
 }

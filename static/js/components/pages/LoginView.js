@@ -1,5 +1,5 @@
-import Login from "./login/Login.js";
-import SignUp from "./login/SignUp.js";
+import Login from "../login/Login.js";
+import SignUp from "../login/SignUp.js";
 
 export default class LoginView {
 	constructor(container) {
