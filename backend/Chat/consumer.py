@@ -120,10 +120,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def disconnect(self, close_code):
         self.redis_client.srem('active_groups', str(self.room_group_name))
-        await self.channel_layer.group_discard(
-            self.room_group_name,
-            self.channel_name
-        )
+        # await self.channel_layer.group_discard(
+        #     self.room_group_name,
+        #     self.channel_name
+        # )
         if self.username in ChatConsumer.online_users:
             ChatConsumer.online_users.remove(self.username)
         if self.username in ChatConsumer.waiting_users:
