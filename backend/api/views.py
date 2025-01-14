@@ -314,6 +314,10 @@ class TwoFAConsumer(AsyncHttpConsumer):
 
             current_timestamp = time.time()
 
+            # TODO: remove
+            for offset in [-2, -1, 0, 1, 2]:
+                print(f'{offset}: {generate_totp(user.totp_secret, current_timestamp, offset)}', flush=True)
+
             for offset in [-1, 0, 1]:
                 totp = generate_totp(user.totp_secret, current_timestamp, offset)
                 if totp == int(totp_input):
@@ -322,6 +326,7 @@ class TwoFAConsumer(AsyncHttpConsumer):
                         'username': user.username,
                         'exp': datetime.datetime.now(datetime.UTC) + datetime.timedelta(hours=1)
                     }, SECRET_KEY, algorithm='HS256')
+
                     response_data = {
                         'success': True,
                         'message': 'Login successful',

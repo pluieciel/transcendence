@@ -79,7 +79,9 @@ export default class Login {
 				});
 				const data = await response.json();
 				if (data.success) {
-					new bootstrap.Modal(this.container.querySelector('#totpModal')).hide();
+					const modal = bootstrap.Modal.getInstance(this.container.querySelector('#totpModal'));
+					if (modal)
+						modal.hide();
 					window.app.login(data);
 				} else {
 
@@ -115,7 +117,6 @@ export default class Login {
                         password: hashedPassword
                     })
                 });
-
                 const data = await response.json();
                 // This code runs only after getting response from server
                 if (data.success) {
