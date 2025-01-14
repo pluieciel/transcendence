@@ -3,6 +3,7 @@ import time
 import random
 import math
 import logging
+import threading
 
 RIGHT_SIDE_DIR = 1
 LEFT_SIDE_DIR = -1
@@ -81,6 +82,9 @@ class Ball:
 		self.velocity.x = direction * self.speed * math.cos(angle_rad)
 		self.velocity.y = self.speed * math.sin(angle_rad)
 		self.position = ballPos
+
+		#print(f"Ball started at {self.position.x}, {self.position.y}, {self.position.z}", flush=True)
+		#print(f"Ball velocity at {self.velocity.x}, {self.velocity.y}, {self.velocity.z}", flush=True)
 
 	def bounce_wall(self, is_top):
 		self.velocity.y *= -1
@@ -262,11 +266,8 @@ class GameInstance:
 		self.ball.start(random.choice([LEFT_SIDE_DIR, RIGHT_SIDE_DIR]), DEFAULT_BALL_POS)
 		self.loop_task = asyncio.create_task(self.game_loop())
 
-
 	def stop(self):
 		self.is_running = False
-		#if self.loop_task:
-			#self.loop_task.cancel()
 
 	async def game_loop(self):
 		try:
@@ -289,16 +290,16 @@ class GameInstance:
 							self.ball.position.x += self.ball.velocity.x * current_step
 							self.ball.position.y += self.ball.velocity.y * current_step
 
-						await self.check_collisions()
+						await (self.check_collisions())
 
 						remaining_time -= current_step
 					try:
 						if (self.is_running):
-							await self.broadcast_function()
+							await (self.broadcast_function())
 					except Exception as e:
 						logging.getLogger('game').info(f"Error Broadcast : {e}")
 						pass
-				await asyncio.sleep(1/60)  # 60 FPS
+				await asyncio.sleep(max(0, 1/60 - (time.time() - current_time)))  # 60 FPS
 
 		except asyncio.CancelledError:
 			print(f"Game stopped")

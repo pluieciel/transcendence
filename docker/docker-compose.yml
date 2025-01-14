@@ -32,6 +32,31 @@ services:
         depends_on:
             postgres:
                 condition: service_healthy
+            redis:
+                condition: service_healthy
+        environment:
+            POSTGRES_PASSWORD_FILE: /run/secrets/postgres-passwd
+            DJANGO_SUPERUSER_PASSWORD_FILE: /run/secrets/django-passwd
+            JWT_SECRET_KEY_FILE: /run/secrets/jwt-secret-key
+        env_file: .env
+        secrets:
+            - postgres-passwd
+            - django-passwd
+            - jwt-secret-key
+        volumes:
+            - django_data:/usr/src/app
+        networks:
+            - transcendence
+        restart: unless-stopped
+    django2:
+        build: ${PWD}/docker/django2
+        image: django2
+        container_name: django2
+        depends_on:
+            postgres:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
         environment:
             POSTGRES_PASSWORD_FILE: /run/secrets/postgres-passwd
             DJANGO_SUPERUSER_PASSWORD_FILE: /run/secrets/django-passwd
@@ -66,6 +91,19 @@ services:
         networks:
             - transcendence
         restart: unless-stopped
+    redis:
+        image: redis:alpine
+        container_name: redis
+        expose:
+            - 6379
+        networks:
+            - transcendence
+        restart: unless-stopped
+        healthcheck:
+            test: ["CMD", "redis-cli", "ping"]
+            interval: 5s
+            timeout: 3s
+            retries: 3
 #    elasticsearch:
 #        build: ${PWD}/docker/elasticsearch
 #        image: elasticsearch

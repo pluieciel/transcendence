@@ -86,9 +86,9 @@ class GameManager:
 		game_id1 = (await self.create_game_history(await self.get_user(p1), await self.get_user(p2), game_category='Tournament', tournament_count=self.tournament_count)).id
 		game_id2 = (await self.create_game_history(await self.get_user(p3), await self.get_user(p4), game_category='Tournament', tournament_count=self.tournament_count)).id
 		game_id3 = (await self.create_game_history(None, None, game_category='Tournament', tournament_count=self.tournament_count)).id
-		self.games[game_id1] = GameBackend(game_id1, 0)
-		self.games[game_id2] = GameBackend(game_id2, 0)
-		self.games[game_id3] = GameBackend(game_id3, 0)
+		self.games[game_id1] = GameBackend(game_id1, 0, self, True)
+		self.games[game_id2] = GameBackend(game_id2, 0, self, True)
+		self.games[game_id3] = GameBackend(game_id3, 0, self, True)
 		print(f"3games created {game_id1}, {game_id2}, {game_id3}, players: {p1}, {p2}, {p3}, {p4}", flush=True)
 
 	@database_sync_to_async
