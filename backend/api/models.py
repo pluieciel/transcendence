@@ -5,6 +5,8 @@ from django.utils import timezone
 from datetime import timedelta
 from channels.db import database_sync_to_async
 
+######################## USER ###########################
+
 class CustomUserManager(BaseUserManager):
     def create_user(self, username, password=None, avatar=None):
         if not username:
@@ -68,6 +70,9 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     def has_module_perms(self, app_label):
         return True
+    
+    
+######################## GAME INVITE ###########################
 
 class GameInvite(models.Model):
     sender = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='invite_sender')
@@ -92,6 +97,9 @@ def is_valid_invite(sender, recipient):
         return True
     else:
         return False
+
+
+##################### GAME HISTORY ###########################
 
 class GameHistory(models.Model):
     game_mode = models.CharField(max_length=32)

@@ -1,4 +1,4 @@
-import { Game } from "Game.js";
+import { Game } from "./Game.js";
 
 export default class GameComponent {
 	constructor(container) {
@@ -7,7 +7,6 @@ export default class GameComponent {
 		//Search game timer
 		this.countdownTime = 0;
 		this.timerInterval = null;
-
 		this.render();
 		this.addEventListeners();
 		this.timerElement = document.getElementById("timer");
@@ -36,11 +35,15 @@ export default class GameComponent {
 		        <canvas id="gameCanvas"></canvas>
 			</div>
 			`;
+
+			const button = document.getElementById("quickMatch");
+			button.setAttribute("data-bs-toggle", "modal");
+    		button.setAttribute("data-bs-target", "#matchSearch");
 	}
 
 	addEventListeners() {
-		const quickMatch = this.container.querySelector("#quickMatch");
-		const playAI = this.container.querySelector("#playAI");
+		const quickMatch = document.getElementById("quickMatch");
+		const playAI = document.getElementById("playAI");
 
 		quickMatch.addEventListener("click", () => {
 			this.searchGame();

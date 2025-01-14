@@ -13,9 +13,11 @@ export default class MainView {
 		this.timerInterval = null;
 
 		this.username = decodedPayload.username;
+	
+
 		this.render();
-		this.setProfileFields();
 		this.initComponents();
+		this.setProfileFields();
 		this.addEventListeners();
 		if (window.app.ingame) {
 			console.log("Reconnecting to game");
@@ -45,10 +47,7 @@ export default class MainView {
         <h1>PONG</h1>
 			<button id="settingsBtn">Settings</button>
 			<button id="logoutBtn">Log out</button>
-	</header>
-
-	<div id="mainPage">
-		<div class="welcome">
+	</header>k">
 	        <p>Welcome to Pong! Get ready to play!</p>
 	    </div>
 		<div class ="content">
@@ -76,7 +75,7 @@ export default class MainView {
 					<h2>PLAY!</h2>
 					<button id="playAI">AI</button>
 					<button id="rankedMatch">Ranked</button>
-					<button id="quickMatch" class="nav-link" data-view="game" data-bs-toggle="modal" data-bs-target="#matchSearch">Quick Match</button>
+					<button id="quickMatch" class="nav-link" data-view="game">Quick Match</button>
 					<button id="tournamentButton" data-bs-toggle="modal" data-bs-target="#tournamentModal">Tournament</button>
 			</div>
 			<div class="profile">
@@ -116,7 +115,13 @@ export default class MainView {
 		const chatBoxContainer = this.container.querySelector("#chatBoxContainer");
 		window.app.chatBox = new ChatBox(chatBoxContainer);
 
-		GameComponent(this.container.querySelector("#gameContainer"));
+		new GameComponent(this.container.querySelector("#gameContainer"));
+
+		const quickMatchButton = this.container.querySelector("#quickMatch");
+		if (quickMatchButton) {
+			quickMatchButton.setAttribute("data-bs-toggle", "modal");
+			quickMatchButton.setAttribute("data-bs-target", "#matchSearch");
+    }
 	}
 
 	addEventListeners() {
