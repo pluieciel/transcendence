@@ -1,11 +1,10 @@
 from typing_extensions import List
 import channels
 from channels.generic.websocket import AsyncWebsocketConsumer
-from .game_logic import GameInstance  # Add this import
 from .game_backend import GameBackend
 from channels.layers import get_channel_layer
 from channels.db import database_sync_to_async
-from django.contrib.auth import get_user_model, authenticate
+from django.contrib.auth import get_user_model
 import json
 import logging
 import random
@@ -14,6 +13,7 @@ from api.views import jwt_to_user
 from channels.layers import get_channel_layer
 from datetime import datetime
 from time import sleep
+from api.user_db_utils import user_update_game
 
 class GameManager:
 	def __init__(self):
@@ -31,13 +31,6 @@ class GameManager:
 		if game_id in self.games:
 			game = self.games[game_id]
 			del self.games[game_id]
-
-	@database_sync_to_async
-	def reset_player_game(self, user):
-		self.logger.info(f"Starting reset for user {user.username}")
-		user.isplaying = False
-		user.current_game_id = -1
-		user.save()
 
 	async def get_game(self, user, bot):
 		self._get_game_history_model()
@@ -133,11 +126,6 @@ class GameManager:
 		game.save()
 
 	@database_sync_to_async
-	def register_current_game(self, user, game_id):
-		user.current_game_id = game_id
-		user.save()
-
-	@database_sync_to_async
 	def get_game_by_id(self, game_id):
 		return self.game_history.objects.get(id=game_id)
 	
@@ -146,13 +134,10 @@ class GameManager:
 		User = get_user_model()
 		user = User.objects.get(username=username)
 		return user
+	
 game_manager = GameManager()
 
 class GameConsumer(AsyncWebsocketConsumer):
-
-	@database_sync_to_async
-	def save_user(self, user):
-		user.save()
 
 	async def connect(self):
 		from api.models import is_valid_invite
@@ -217,16 +202,12 @@ class GameConsumer(AsyncWebsocketConsumer):
 			if not await self.is_valid_invite(await self.get_user(sender), self.user):
 				self.logger.info(f"Invalid invitation from {sender} to {self.user.username}")
 				return # invalid invitation
-			self.logger.info("BEFORE CREATE GAMEBD")
 			game_db = await game_manager.create_game_history(user, player_b=await self.get_user(sender), game_category='Invite')
-			self.logger.info("AFTER CREATE GAMEBD")
 			self.game = GameBackend(game_db.id, 0, game_manager, True) #TODO Ranked mode
 			game_manager.games[game_db.id] = self.game
 			self.game.channel_layer = self.channel_layer
 			self.game.assign_player(user, self.channel_name)
-			user.is_playing = True
-			user.current_game_id = self.game.game_id
-			await self.save_user(user)
+			await user_update_game(self.user, isplaying=True, game_id=self.game.game_id)
 			await self.accept()
 
 			await self.channel_layer.group_add(str(self.game.game_id), self.channel_name)
@@ -251,9 +232,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 			self.game = game_manager.games[game_db.id]
 			self.game.channel_layer = self.channel_layer
 			self.game.assign_player(user, self.channel_name)
-			user.is_playing = True
-			user.current_game_id = self.game.game_id
-			await self.save_user(user)
+			await user_update_game(self.user, isplaying=True, game_id=self.game.game_id)
 			await self.accept()
 
 			await self.channel_layer.group_add(str(self.game.game_id), self.channel_name)
@@ -272,9 +251,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 				self.game = game_manager.games[game_db.id]
 				self.game.channel_layer = self.channel_layer
 				self.game.assign_player(user, self.channel_name)
-				user.is_playing = True
-				user.current_game_id = self.game.game_id
-				await self.save_user(user)
+				await user_update_game(self.user, isplaying=True, game_id=self.game.game_id)
 				await self.accept()
 				await self.channel_layer.group_add(str(self.game.game_id), self.channel_name)
 				if (self.game.is_full()):
@@ -305,9 +282,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 				self.game = await game_manager.get_game(user, bot)
 			self.game.channel_layer = self.channel_layer
 			self.game.assign_player(user, self.channel_name)
-			user.is_playing = True
-			user.current_game_id = self.game.game_id
-			await self.save_user(user)
+			await user_update_game(self.user, isplaying=True, game_id=self.game.game_id)
 			await self.accept()
 
 			await self.channel_layer.group_add(str(self.game.game_id), self.channel_name)
@@ -342,7 +317,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 
 
 	async def disconnect(self, close_code):
-		await game_manager.reset_player_game(self.user)
+		await user_update_game(self.user, isplaying=False, game_id=-1)
 		self.logger.info(f"WebSocket disconnected with code: {close_code}")
 
 	async def chat_message(self, event):
