@@ -5,6 +5,7 @@ import json
 from .game_logic import GameInstance, GameBounds
 from channels.db import database_sync_to_async
 from .bot import Bot
+from api.user_db_utils import user_update_game
 
 class User:
 	def __init__(self, user, channel, state):
@@ -121,11 +122,11 @@ class GameBackend:
 
 			if self.player_left:
 				self.logger.info(f"Resetting left player: {self.player_left.user.username}")
-				await self.manager.reset_player_game(self.player_left.user)
+				await user_update_game(self.player_left.user, isplaying=False, game_id=-1)
 
 			if self.player_right and not self.is_bot_game:
 				self.logger.info(f"Resetting right player: {self.player_right.user.username}")
-				await self.manager.reset_player_game(self.player_right.user)
+				await user_update_game(self.player_left.user, isplaying=False, game_id=-1)
 
 			self.manager.remove_game(self.game_id)
 			await self.manager.set_game_state(await self.manager.get_game_by_id(self.game_id), 'finished', self.game.player_left.score, self.game.player_right.score)
