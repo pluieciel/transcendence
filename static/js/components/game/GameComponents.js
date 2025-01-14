@@ -130,22 +130,22 @@ export default class GameComponent {
 
 	displayGame(events) {
 		setTimeout(() => {
-			const canvas = this.container.querySelector("#gameCanvas");
+			const canvas = document.querySelector("#gameCanvas");
 			const game = new Game(canvas, window.app.gamews);
-			const gameDiv = this.container.querySelector("#gameDiv");
+			const gameDiv = document.querySelector("#gameDiv");
 			gameDiv.style.display = "block";
 			console.log("Game initialization");
 
 			// Pass onGameEnd callback to Game
 			game.onGameEnd = () => {
-				const returnButton = this.container.querySelector("#returnButton");
+				const returnButton = document.querySelector("#returnButton");
 				returnButton.style.display = "block";
 
 				returnButton.onclick = () => {
 					canvas.style.display = "none";
 					returnButton.style.display = "none";
-					this.container.querySelector("#mainPage").style.display = "block";
-					this.container.querySelector("#overlay").style.display = "none";
+					document.querySelector("#mainPage").style.display = "block";
+					document.querySelector("#overlay").style.display = "none";
 					gameDiv.style.display = "none";
 					if (window.app.gamews) {
 						window.app.gamews.close();
@@ -156,20 +156,16 @@ export default class GameComponent {
 			};
 
 			game.initialize(events.data);
-			this.container.querySelector("#mainPage").style.display = "none";
+			document.querySelector("#mainPage").style.display = "none";
 		}, 1000);
 	}
 
 	stopTimerAndDismissModal() {
-		clearInterval(this.timerInterval); // Stop the timer
-		this.timerElement.innerText = "0s"; // Reset the timer display
+		clearInterval(this.timerInterval); 
+		this.timerElement.innerText = "0s"; 
 
-		// Hide the modal using Bootstrap
 		const matchSearchModal = bootstrap.Modal.getInstance(document.getElementById("matchSearch"));
-		console.log("Hiding " + matchSearchModal);
-		matchSearchModal.hide(); // Hide the modal
-
-		// Optionally reset other modal states if needed
+		matchSearchModal.hide(); 
 	}
 
 	startSearchGameTimer() {

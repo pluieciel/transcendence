@@ -32,13 +32,6 @@ class GameManager:
 			game = self.games[game_id]
 			del self.games[game_id]
 
-	@database_sync_to_async
-	def reset_player_game(self, user):
-		self.logger.info(f"Starting reset for user {user.username}")
-		user.isplaying = False
-		user.current_game_id = -1
-		user.save()
-
 	async def get_game(self, user, bot):
 		self._get_game_history_model()
 		self.logger.info(f"Getting game for user {user.username}")
@@ -209,9 +202,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 			if not await self.is_valid_invite(await self.get_user(sender), self.user):
 				self.logger.info(f"Invalid invitation from {sender} to {self.user.username}")
 				return # invalid invitation
-			self.logger.info("BEFORE CREATE GAMEBD")
 			game_db = await game_manager.create_game_history(user, player_b=await self.get_user(sender), game_category='Invite')
-			self.logger.info("AFTER CREATE GAMEBD")
 			self.game = GameBackend(game_db.id, 0, game_manager, True) #TODO Ranked mode
 			game_manager.games[game_db.id] = self.game
 			self.game.channel_layer = self.channel_layer

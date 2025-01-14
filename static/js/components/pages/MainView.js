@@ -43,11 +43,14 @@ export default class MainView {
 
 	render() {
 		this.container.innerHTML = `
-    <header>
+<header>
         <h1>PONG</h1>
 			<button id="settingsBtn">Settings</button>
 			<button id="logoutBtn">Log out</button>
-	</header>k">
+	</header>
+
+	<div id="mainPage">
+		<div class="welcome">
 	        <p>Welcome to Pong! Get ready to play!</p>
 	    </div>
 		<div class ="content">
@@ -75,7 +78,7 @@ export default class MainView {
 					<h2>PLAY!</h2>
 					<button id="playAI">AI</button>
 					<button id="rankedMatch">Ranked</button>
-					<button id="quickMatch" class="nav-link" data-view="game">Quick Match</button>
+					<button id="quickMatch" class="nav-link" data-view="game" data-bs-toggle="modal" data-bs-target="#matchSearch">Quick Match</button>
 					<button id="tournamentButton" data-bs-toggle="modal" data-bs-target="#tournamentModal">Tournament</button>
 			</div>
 			<div class="profile">
@@ -98,6 +101,7 @@ export default class MainView {
 	<div id="gameContainer"></div>
 
         `;
+
 	}
 
 	showLeaderboard() {
