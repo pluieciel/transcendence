@@ -53,7 +53,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     friends = models.ManyToManyField('self', symmetrical=False, related_name='friend_set', blank=True)
     avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
     nickname = models.CharField(max_length=30, null=True)
-    totp_secret = models.CharField(max_length=32, unique=True, null=True)
+    totp_secret = models.CharField(max_length=64, unique=True, null=True)
+    is_2fa_enabled = models.BooleanField(default=False)
     invites = models.ManyToManyField('self', symmetrical=False, related_name='invite_set', blank=True)
 
     objects = CustomUserManager()

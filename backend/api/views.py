@@ -19,6 +19,7 @@ import qrcode.image.svg
 import hmac
 import hashlib
 import base64
+import struct
 
 SECRET_KEY = os.environ.get('JWT_SECRET_KEY')
 logger = logging.getLogger(__name__)
@@ -229,21 +230,9 @@ class LoginConsumer(AsyncHttpConsumer):
                 return await self.send_response(401, json.dumps(response_data).encode(),
                     headers=[(b"Content-Type", b"application/json")])
 
-            # TODO: move to settings
-            totp_secret = base64.b32encode(token_bytes(20)).decode()
-            # TODO: remove
-            totp_secret = 'YWECAGY4WS6L7LK275GANJTT5Q3KZBUF'
-            await self.update_totp_secret(user, totp_secret)
+            is_2fa_enabled = user.is_2fa_enabled
 
-            db_totp_secret = user.totp_secret
-
-            qr = qrcode.QRCode(image_factory=qrcode.image.svg.SvgPathImage)
-            data = "otpauth://totp/ft_transcendence?secret=" + totp_secret + "&issuer=42"
-            qr.add_data(data)
-            qr.make(fit=True)
-            img = qr.make_image()
-
-            if db_totp_secret is None:
+            if not is_2fa_enabled:
                 token = jwt.encode({
                     'id': user.id,
                     'username': user.username,
@@ -253,14 +242,13 @@ class LoginConsumer(AsyncHttpConsumer):
                 response_data = {
                     'success': True,
                     'message': 'Login successful',
-                    'two_fa': db_totp_secret is not None,
                     'token': token,
                 }
             else:
                 response_data = {
                     'success': True,
                     'message': '2FA required',
-                    'two_fa': db_totp_secret is not None,
+                    'is_2fa_enabled': is_2fa_enabled,
                 }
 
             return await self.send_response(200, json.dumps(response_data).encode(),
@@ -285,12 +273,7 @@ class LoginConsumer(AsyncHttpConsumer):
         User = get_user_model()
         return User.objects.filter(username=username).exists()
 
-    @database_sync_to_async
-    def update_totp_secret(self, user, totp_secret):
-        user.totp_secret = totp_secret
-        user.save()
-
-class TwoFAConsumer(AsyncHttpConsumer):
+class Login2FAConsumer(AsyncHttpConsumer):
     async def handle(self, body):
         try:
             data = json.loads(body.decode())
@@ -347,6 +330,75 @@ class TwoFAConsumer(AsyncHttpConsumer):
                     | (hmac_res[hmac_off + 3] & 0xff))
 
         return bin_code % 1000000
+
+class Generate2FAConsumer(AsyncHttpConsumer):
+    async def handle(self, body):
+        try:
+            headers = dict((key.decode('utf-8'), value.decode('utf-8')) for key, value in self.scope['headers'])
+            auth_header = headers.get('authorization', None)
+            if not auth_header:
+                response_data = {
+                    'success': False,
+                    'message': 'Authorization header missing'
+                }
+                return await self.send_response(401, json.dumps(response_data).encode(),
+                    headers=[(b"Content-Type", b"application/json")])
+            user = await jwt_to_user(auth_header)
+            if not user:
+                response_data = {
+                    'success': False,
+                    'message': 'Invalid token or User not found'
+                }
+                return await self.send_response(401, json.dumps(response_data).encode(),
+                    headers=[(b"Content-Type", b"application/json")])
+
+            totp_secret = user.totp_secret
+            if totp_secret is None:
+                totp_secret = self.generate_totp_secret()
+                await self.update_totp_secret(user, totp_secret)
+
+            response_data = {
+                'success': True,
+                'qr_code': self.generate_qr_code(totp_secret),
+            }
+            return await self.send_response(200, json.dumps(response_data).encode(),
+                headers=[(b"Content-Type", b"application/json")])
+        except Exception as e:
+            response_data = {
+                'success': False,
+                'message': str(e)
+            }
+            return await self.send_response(500, json.dumps(response_data).encode(),
+                    headers=[(b"Content-Type", b"application/json")])
+
+    @database_sync_to_async
+    def update_totp_secret(self, user, totp_secret):
+        user.totp_secret = totp_secret
+        user.save()
+
+    def generate_qr_code(self, totp_secret):
+        qr_code = qrcode.QRCode(image_factory=qrcode.image.svg.SvgPathImage)
+        data = 'otpauth://totp/ft_transcendence?secret=' + totp_secret + '&issuer=42'
+        qr_code.add_data(data)
+        qr_code.make(fit=True)
+        return qr_code.make_image().to_string(encoding='unicode')
+
+    def generate_totp_secret(self):
+        current_time = int(time.time())
+        time_bytes = current_time.to_bytes(4, 'big')
+        return base64.b32encode(token_bytes(16) + time_bytes).decode()
+
+class Enable2FAConsumer(AsyncHttpConsumer):
+    async def handle(self, body):
+        try:
+            pass
+        except Exception as e:
+            response_data = {
+                'success': False,
+                'message': str(e)
+            }
+            return await self.send_response(500, json.dumps(response_data).encode(),
+                    headers=[(b"Content-Type", b"application/json")])
 
 class UpdateConsumer(AsyncHttpConsumer):
     async def handle(self, body):

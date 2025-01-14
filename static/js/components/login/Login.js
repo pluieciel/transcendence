@@ -125,7 +125,7 @@ export default class Login {
                 const data = await response.json();
                 // This code runs only after getting response from server
                 if (data.success) {
-                    if (data.two_fa) {
+                    if (data.is_2fa_enabled) {
 						new bootstrap.Modal(this.container.querySelector('#totpModal')).show();
                     } else {
                         window.app.login(data);
