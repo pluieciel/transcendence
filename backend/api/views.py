@@ -1,4 +1,7 @@
 # views.py
+import time
+from operator import truediv
+from secrets import token_bytes
 from channels.generic.http import AsyncHttpConsumer
 from django.contrib.auth import get_user_model, authenticate
 from channels.db import database_sync_to_async
@@ -12,6 +15,12 @@ from django.core.files.base import ContentFile
 from django.core.cache import cache
 from PIL import Image
 import io
+import qrcode
+import qrcode.image.svg
+import hmac
+import hashlib
+import base64
+import struct
 
 SECRET_KEY = os.environ.get('JWT_SECRET_KEY')
 logger = logging.getLogger(__name__)
@@ -34,6 +43,26 @@ async def jwt_to_user(token):
         return False
     except jwt.InvalidTokenError:
         return False
+
+def generate_totp(secret, offset):
+    time_counter = int(time.time() // 30) + offset
+    time_bytes = time_counter.to_bytes(8, 'big')
+
+    hmac_res = hmac.digest(base64.b32decode(secret), time_bytes, hashlib.sha1)
+    hmac_off = hmac_res[19] & 0xf
+    bin_code = ((hmac_res[hmac_off] & 0x7f) << 24
+                | (hmac_res[hmac_off + 1] & 0xff) << 16
+                | (hmac_res[hmac_off + 2] & 0xff) << 8
+                | (hmac_res[hmac_off + 3] & 0xff))
+
+    return bin_code % 1000000
+
+def verify_totp(totp_secret, totp_input):
+    for offset in [-2, -1, 0, 1]:
+        totp = generate_totp(totp_secret, offset)
+        if totp == int(totp_input):
+            return True
+    return False
 
 class SignupConsumer(AsyncHttpConsumer):
     async def handle(self, body):
@@ -58,7 +87,7 @@ class SignupConsumer(AsyncHttpConsumer):
             username = data.get('username')
             password = data.get('password')
             avatar = data.get('avatar')
-                
+
             # Validate input
             if not (self.is_valid_username(username)):
                 response_data = {
@@ -135,7 +164,7 @@ class SignupConsumer(AsyncHttpConsumer):
             avatar=avatar
         )
         return user
-    
+
     async def parse_multipart_form_data(self, body):
         """Parse multipart form data and return a dictionary."""
         from django.http import QueryDict
@@ -222,19 +251,26 @@ class LoginConsumer(AsyncHttpConsumer):
                 return await self.send_response(401, json.dumps(response_data).encode(),
                     headers=[(b"Content-Type", b"application/json")])
 
-            # Generate JWT
-            token = jwt.encode({
-                'id': user.id,
-                'username': user.username,
-                'exp': datetime.datetime.now(datetime.UTC) + datetime.timedelta(hours=1)
-            }, SECRET_KEY, algorithm='HS256')
+            is_2fa_enabled = user.is_2fa_enabled
 
-            # Login successful
-            response_data = {
-                'success': True,
-                'message': 'Login successful',
-                'token': token,
-            }
+            if not is_2fa_enabled:
+                token = jwt.encode({
+                    'id': user.id,
+                    'username': user.username,
+                    'exp': datetime.datetime.now(datetime.UTC) + datetime.timedelta(hours=1)
+                }, SECRET_KEY, algorithm='HS256')
+
+                response_data = {
+                    'success': True,
+                    'message': 'Login successful',
+                    'token': token,
+                }
+            else:
+                response_data = {
+                    'success': True,
+                    'message': '2FA required',
+                    'is_2fa_enabled': is_2fa_enabled,
+                }
 
             return await self.send_response(200, json.dumps(response_data).encode(),
                 headers=[(b"Content-Type", b"application/json")])
@@ -257,6 +293,162 @@ class LoginConsumer(AsyncHttpConsumer):
     def get_user_exists(self, username):
         User = get_user_model()
         return User.objects.filter(username=username).exists()
+
+class Login2FAConsumer(AsyncHttpConsumer):
+    async def handle(self, body):
+        try:
+            data = json.loads(body.decode())
+            totp_input = data.get('totp')
+            username = data.get('username')
+
+            user = await self.get_user(username)
+
+            is_totp_valid = verify_totp(user.totp_secret, totp_input)
+
+            if not is_totp_valid:
+                response_data = {
+                    'success': False,
+                    'message': 'Invalid totp code'
+                }
+                return await self.send_response(401, json.dumps(response_data).encode(),
+                    headers=[(b"Content-Type", b"application/json")])
+
+            token = jwt.encode({
+                'id': user.id,
+                'username': user.username,
+                'exp': datetime.datetime.now(datetime.UTC) + datetime.timedelta(hours=1)
+            }, SECRET_KEY, algorithm='HS256')
+
+            response_data = {
+                'success': True,
+                'message': 'Login successful',
+                'token': token
+            }
+            return await self.send_response(200, json.dumps(response_data).encode(),
+                headers=[(b"Content-Type", b"application/json")])
+        except Exception as e:
+            response_data = {
+                'success': False,
+                'message': str(e)
+            }
+            return await self.send_response(500, json.dumps(response_data).encode(),
+                headers=[(b"Content-Type", b"application/json")])
+
+    @database_sync_to_async
+    def get_user(self, username):
+        User = get_user_model()
+        return User.objects.get(username=username)
+
+class Generate2FAConsumer(AsyncHttpConsumer):
+    async def handle(self, body):
+        try:
+            headers = dict((key.decode('utf-8'), value.decode('utf-8')) for key, value in self.scope['headers'])
+            auth_header = headers.get('authorization', None)
+            if not auth_header:
+                response_data = {
+                    'success': False,
+                    'message': 'Authorization header missing'
+                }
+                return await self.send_response(401, json.dumps(response_data).encode(),
+                    headers=[(b"Content-Type", b"application/json")])
+            user = await jwt_to_user(auth_header)
+            if not user:
+                response_data = {
+                    'success': False,
+                    'message': 'Invalid token or User not found'
+                }
+                return await self.send_response(401, json.dumps(response_data).encode(),
+                    headers=[(b"Content-Type", b"application/json")])
+
+            if user.totp_secret is None:
+                totp_secret = self.generate_totp_secret()
+                await self.update_totp_secret(user, totp_secret)
+
+            response_data = {
+                'success': True,
+                'qr_code': self.generate_qr_code(user),
+            }
+            return await self.send_response(200, json.dumps(response_data).encode(),
+                headers=[(b"Content-Type", b"application/json")])
+        except Exception as e:
+            response_data = {
+                'success': False,
+                'message': str(e)
+            }
+            return await self.send_response(500, json.dumps(response_data).encode(),
+                    headers=[(b"Content-Type", b"application/json")])
+
+    @database_sync_to_async
+    def update_totp_secret(self, user, totp_secret):
+        user.totp_secret = totp_secret
+        user.save()
+
+    def generate_qr_code(self, user):
+        qr_code = qrcode.QRCode(image_factory=qrcode.image.svg.SvgPathImage)
+        data = 'otpauth://totp/' + user.username + '?secret=' + user.totp_secret + '&issuer=ft_transcendence'
+        qr_code.add_data(data)
+        qr_code.make(fit=True)
+        return qr_code.make_image().to_string(encoding='unicode')
+
+    def generate_totp_secret(self):
+        current_time = int(time.time())
+        time_bytes = current_time.to_bytes(4, 'big')
+        return base64.b32encode(token_bytes(16) + time_bytes).decode()
+
+class Enable2FAConsumer(AsyncHttpConsumer):
+    async def handle(self, body):
+        try:
+            headers = dict((key.decode('utf-8'), value.decode('utf-8')) for key, value in self.scope['headers'])
+            auth_header = headers.get('authorization', None)
+            if not auth_header:
+                response_data = {
+                    'success': False,
+                    'message': 'Authorization header missing'
+                }
+                return await self.send_response(401, json.dumps(response_data).encode(),
+                    headers=[(b"Content-Type", b"application/json")])
+            user = await jwt_to_user(auth_header)
+            if not user:
+                response_data = {
+                    'success': False,
+                    'message': 'Invalid token or User not found'
+                }
+                return await self.send_response(401, json.dumps(response_data).encode(),
+                    headers=[(b"Content-Type", b"application/json")])
+
+            data = json.loads(body.decode())
+            totp_input = data.get('totp')
+
+            is_totp_valid = verify_totp(user.totp_secret, totp_input)
+
+            if not is_totp_valid:
+                response_data = {
+                    'success': False,
+                    'message': 'Invalid totp code'
+                }
+                return await self.send_response(401, json.dumps(response_data).encode(),
+                    headers=[(b"Content-Type", b"application/json")])
+
+            await self.update_is_2fa_enabled(user, True)
+
+            response_data = {
+                'success': True,
+                'message': '2FA enabled',
+            }
+            return await self.send_response(200, json.dumps(response_data).encode(),
+                headers=[(b"Content-Type", b"application/json")])
+        except Exception as e:
+            response_data = {
+                'success': False,
+                'message': str(e)
+            }
+            return await self.send_response(500, json.dumps(response_data).encode(),
+                    headers=[(b"Content-Type", b"application/json")])
+
+    @database_sync_to_async
+    def update_is_2fa_enabled(self, user, is_2fa_enabled):
+        user.is_2fa_enabled = is_2fa_enabled
+        user.save()
 
 class UpdateConsumer(AsyncHttpConsumer):
     async def handle(self, body):
@@ -347,7 +539,7 @@ class UpdateConsumer(AsyncHttpConsumer):
     def update_nickname(self, user, nn):
         user.nickname = nn
         user.save()
-    
+
     async def parse_multipart_form_data(self, body):
         """Parse multipart form data and return a dictionary."""
         from django.http import QueryDict
@@ -523,7 +715,7 @@ class ProfileConsumer2(AsyncHttpConsumer):
                 }
                 return await self.send_response(401, json.dumps(response_data).encode(),
                     headers=[(b"Content-Type", b"application/json")])
-            
+
             path = self.scope['path']
             #print(f"Request path: {path}", flush=True)
             match = re.search(r'/api/get/profile/(\w+)', path)
@@ -558,12 +750,12 @@ class ProfileConsumer2(AsyncHttpConsumer):
     def get_user(self, user_id):
         User = get_user_model()
         return User.objects.get(id=user_id)
-    
+
     @database_sync_to_async
     def get_user_by_name(self, username):
         User = get_user_model()
         return User.objects.filter(username=username).first()
-    
+
 class AvatarConsumer(AsyncHttpConsumer):
     async def handle(self, body):
         try:
@@ -586,7 +778,7 @@ class AvatarConsumer(AsyncHttpConsumer):
                 }
                 return await self.send_response(401, json.dumps(response_data).encode(),
                     headers=[(b"Content-Type", b"application/json")])
-            
+
             path = self.scope['path']
             match = re.search(r'/api/get/avatar/(\w+)', path)
             user_name = match.group(1)
@@ -610,7 +802,7 @@ class AvatarConsumer(AsyncHttpConsumer):
             }
             return await self.send_response(500, json.dumps(response_data).encode(),
                 headers=[(b"Content-Type", b"application/json")])
-    
+
     @database_sync_to_async
     def get_user_by_name(self, username):
         User = get_user_model()

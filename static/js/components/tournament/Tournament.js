@@ -45,7 +45,10 @@ export default class Tournament {
                             <div class="row" id="fourToTwo"></div>
                             <!--div class="row" id="eightToFour"></div-->
                         </div>
-                        <div class="modal-footer"></div>
+                        <div class="modal-footer">
+                            <div id="tournamentRound1"></div>
+                            <div id="tournamentRound2"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -175,87 +178,110 @@ export default class Tournament {
 		}
 	}
 
-	updateGame() {
-		if (this.info.state === "Playing4to2") {
-			Object.entries(this.info.round1).forEach(([key, value]) => {
-				if (value.state === "prepare" && (value.p1 === this.username || value.p2 === this.username)) {
-					//start game for this user
-					this.round2_place = key === "game1" ? 1 : 2;
-					window.app.gamews = new WebSocket(`${this.protocol}${this.host}/ws/game/?token=${this.token}&round=1&p1=${value.p1}&p2=${value.p2}&game=${key}`);
-					console.log(`${this.protocol}${this.host}/ws/game/?token=${this.token}&round=1&p1=${value.p1}&p2=${value.p2}&game=${key}`);
-					window.app.gamews.onmessage = (event) => {
-						const events = JSON.parse(event.data);
-						if (events.message_type === "init") {
-							setTimeout(() => {
-								const canvas = document.querySelector("#gameCanvas");
-								const game = new Game(canvas, window.app.gamews);
-								console.log("Game initialization");
+    updateGame() {
+        if (this.info.state === "Playing4to2") {
+            Object.entries(this.info.round1).forEach(([key, value]) => {
+                if (value.state === "prepare" && (value.p1 === this.username || value.p2 === this.username)) {
+                    const buttonPlace1 = this.container.querySelector("#tournamentRound1");
+                    buttonPlace1.innerHTML = `
+                        <button type="button" class="btn btn-primary" id="GameButton1" data-bs-dismiss="modal">Ready</button>`;
+                    const gameButton1 = this.container.querySelector("#GameButton1");
+                    gameButton1.onclick = () => {
+                        //start game for this user
+                        this.round2_place = key === "game1" ? 1 : 2;
+                        window.app.gamews = new WebSocket(`${this.protocol}${this.host}/ws/game/?token=${this.token}&round=1&p1=${value.p1}&p2=${value.p2}&game=${key}`);
+                        console.log(`${this.protocol}${this.host}/ws/game/?token=${this.token}&round=1&p1=${value.p1}&p2=${value.p2}`);
+                        window.app.gamews.onmessage = (event) => {
+                            const events = JSON.parse(event.data);
+                            if (events.message_type === "init") {
+                                setTimeout(() => {
+                                    const canvas = document.querySelector("#gameCanvas");
+                                    const game = new Game(canvas, window.app.gamews);
+                                    const gameDiv = document.querySelector("#gameDiv");
+                                    gameDiv.style.display = "block";
+                                    canvas.style.display = "block";
+                                    console.log("Game initialization");
 
-								game.onGameEnd = () => {
-									const returnButton = document.querySelector("#returnButton");
-									returnButton.style.display = "block";
+                                    game.onGameEnd = () => {
+                                        const returnButton = document.querySelector("#returnButton");
+                                        returnButton.style.display = "block";
 
-									returnButton.onclick = () => {
-										canvas.style.display = "none";
-										returnButton.style.display = "none";
-										document.querySelector("#mainPage").style.display = "block";
-										document.querySelector("#overlay").style.display = "none";
-										gameDiv.style.display = "none";
-										if (window.app.gamews) {
-											window.app.gamews.close();
-										}
-										window.app.ingame = false;
-										sessionStorage.setItem("ingame", "false");
-									};
-								};
+                                        returnButton.onclick = () => {
+                                            canvas.style.display = "none";
+                                            returnButton.style.display = "none";
+                                            document.querySelector("#mainPage").style.display = "block";
+                                            document.querySelector("#overlay").style.display = "none";
+                                            gameDiv.style.display = "none";
+                                            if (window.app.gamews) {
+                                                window.app.gamews.close();
+                                            }
+                                            window.app.ingame = false;
+                                            sessionStorage.setItem("ingame", "false");
+                                        };
+                                    };
 
-								game.initialize(events.data);
-								document.querySelector("#mainPage").style.display = "none";
-							}, 1000);
-						}
-					};
-				}
-			});
-		} else if (this.info.state === "Playing2to1") {
-			Object.entries(this.info.round2).forEach(([key, value]) => {
-				if (value.state === "prepare" && (value.p1 === this.username || value.p2 === this.username)) {
-					//start game for this user
-					this.round2_place = key === "game1" ? 1 : 2;
-					window.app.gamews = new WebSocket(`${this.protocol}${this.host}/ws/game/?token=${this.token}&round=2&p1=${value.p1}&p2=${value.p2}`);
-					console.log(`${this.protocol}${this.host}/ws/game/?token=${this.token}&round=2&p1=${value.p1}&p2=${value.p2}`);
-					window.app.gamews.onmessage = (event) => {
-						const events = JSON.parse(event.data);
-						if (events.message_type === "init") {
-							setTimeout(() => {
-								const canvas = document.querySelector("#gameCanvas");
-								const game = new Game(canvas, window.app.gamews);
-								console.log("Game initialization");
+                                    game.initialize(events.data);
+                                    document.querySelector("#mainPage").style.display = "none";
+                                }, 1000);
+                            }
+                        };
+                        buttonPlace1.innerHTML = "";
+                    };
+                }
+            });
+        } else if (this.info.state === "Playing2to1") {
+            this.container.querySelector("#joinTournamentButton").disabled = false;
+            this.container.querySelector("#quitTournamentButton").disabled = true;
+            Object.entries(this.info.round2).forEach(([key, value]) => {
+                if (value.state === "prepare" && (value.p1 === this.username || value.p2 === this.username)) {
+                    this.container.querySelector("#tournamentRound1").innerHTML = "";
+                    const buttonPlace2 = this.container.querySelector("#tournamentRound2");
+                    buttonPlace2.innerHTML = `
+                        <button type="button" class="btn btn-primary" id="GameButton2" data-bs-dismiss="modal">Ready</button>`;
+                    const gameButton2 = this.container.querySelector("#GameButton2");
+                    gameButton2.onclick = () => {
+                        //start game for this user
+                        this.round2_place = key === "game1" ? 1 : 2;
+                        window.app.gamews = new WebSocket(`${this.protocol}${this.host}/ws/game/?token=${this.token}&round=2&p1=${value.p1}&p2=${value.p2}`);
+                        console.log(`${this.protocol}${this.host}/ws/game/?token=${this.token}&round=2&p1=${value.p1}&p2=${value.p2}`);
+                        window.app.gamews.onmessage = (event) => {
+                            const events = JSON.parse(event.data);
+                            if (events.message_type === "init") {
+                                setTimeout(() => {
+                                    const canvas = document.querySelector("#gameCanvas");
+                                    const game = new Game(canvas, window.app.gamews);
+                                    const gameDiv = document.querySelector("#gameDiv");
+                                    gameDiv.style.display = "block";
+                                    canvas.style.display = "block";
+                                    console.log("Game initialization");
 
-								game.onGameEnd = () => {
-									const returnButton = document.querySelector("#returnButton");
-									returnButton.style.display = "block";
+                                    game.onGameEnd = () => {
+                                        const returnButton = document.querySelector("#returnButton");
+                                        returnButton.style.display = "block";
 
-									returnButton.onclick = () => {
-										canvas.style.display = "none";
-										returnButton.style.display = "none";
-										document.querySelector("#mainPage").style.display = "block";
-										document.querySelector("#overlay").style.display = "none";
-										gameDiv.style.display = "none";
-										if (window.app.gamews) {
-											window.app.gamews.close();
-										}
-										window.app.ingame = false;
-										sessionStorage.setItem("ingame", "false");
-									};
-								};
+                                        returnButton.onclick = () => {
+                                            canvas.style.display = "none";
+                                            returnButton.style.display = "none";
+                                            document.querySelector("#mainPage").style.display = "block";
+                                            document.querySelector("#overlay").style.display = "none";
+                                            gameDiv.style.display = "none";
+                                            if (window.app.gamews) {
+                                                window.app.gamews.close();
+                                            }
+                                            window.app.ingame = false;
+                                            sessionStorage.setItem("ingame", "false");
+                                        };
+                                    };
 
-								game.initialize(events.data);
-								document.querySelector("#mainPage").style.display = "none";
-							}, 1000);
-						}
-					};
-				}
-			});
-		}
-	}
+                                    game.initialize(events.data);
+                                    document.querySelector("#mainPage").style.display = "none";
+                                }, 1000);
+                            }
+                        };
+                        buttonPlace2.innerHTML = "";
+                    };
+                }
+            });
+        }
+    }
 }

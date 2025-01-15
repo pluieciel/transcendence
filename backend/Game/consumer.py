@@ -270,7 +270,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 			elif round == "2":
 				p1 = query_params.get("p1", [None])[0]
 				p2 = query_params.get("p2", [None])[0]
-				game_db = await game_manager.get_tournament_game(await self.get_user(p1), await self.get_user(p2))
+				game_db = await game_manager.get_tournament_game(await self.get_user(p1), await self.get_user(p2), game_category='Tournament2')
 				self.game = game_manager.games[game_db.id]
 				self.game.channel_layer = self.channel_layer
 				self.game.assign_player(user, self.channel_name)
@@ -279,7 +279,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 				await self.channel_layer.group_add(str(self.game.game_id), self.channel_name)
 				if (self.game.is_full()):
 					self.logger.info("Tournament R2 Game is ready to start,game is full")
-					game_manager.chat_consumer.tournament_info["round2"][f"{game}"]["state"] = "playing"
+					game_manager.chat_consumer.tournament_info["round2"]["game1"]["state"] = "playing"
 					await game_manager.set_game_state(await game_manager.get_game_by_id(self.game.game_id), 'playing')
 					await self.send_initial_game_state(self.game)
 			return
