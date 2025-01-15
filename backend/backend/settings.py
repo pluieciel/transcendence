@@ -65,11 +65,18 @@ ASGI_APPLICATION = 'backend.asgi.application'
 
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer",
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "capacity": 1000,  # Increase from default
+            "hosts": [("redis", 6379)],
+            "capacity": 10000,
+            "expiry": 20,
+            "group_expiry": 86400,
+            "channel_capacity": {
+                "http.request": 1000,
+                "websocket.send*": 8000,
+            },
         },
-    }
+    },
 }
 
 MIDDLEWARE = [
