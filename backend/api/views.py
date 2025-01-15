@@ -360,14 +360,13 @@ class Generate2FAConsumer(AsyncHttpConsumer):
                 return await self.send_response(401, json.dumps(response_data).encode(),
                     headers=[(b"Content-Type", b"application/json")])
 
-            totp_secret = user.totp_secret
-            if totp_secret is None:
+            if user.totp_secret is None:
                 totp_secret = self.generate_totp_secret()
                 await self.update_totp_secret(user, totp_secret)
 
             response_data = {
                 'success': True,
-                'qr_code': self.generate_qr_code(totp_secret),
+                'qr_code': self.generate_qr_code(user),
             }
             return await self.send_response(200, json.dumps(response_data).encode(),
                 headers=[(b"Content-Type", b"application/json")])
@@ -384,9 +383,9 @@ class Generate2FAConsumer(AsyncHttpConsumer):
         user.totp_secret = totp_secret
         user.save()
 
-    def generate_qr_code(self, totp_secret):
+    def generate_qr_code(self, user):
         qr_code = qrcode.QRCode(image_factory=qrcode.image.svg.SvgPathImage)
-        data = 'otpauth://totp/ft_transcendence?secret=' + totp_secret + '&issuer=42'
+        data = 'otpauth://totp/' + user.username + '?secret=' + user.totp_secret + '&issuer=ft_transcendence'
         qr_code.add_data(data)
         qr_code.make(fit=True)
         return qr_code.make_image().to_string(encoding='unicode')
