@@ -199,7 +199,6 @@ export default class Tournament {
                                     const game = new Game(canvas, window.app.gamews);
                                     const gameDiv = document.querySelector("#gameDiv");
                                     gameDiv.style.display = "block";
-                                    canvas.style.display = "block";
                                     console.log("Game initialization");
 
                                     game.onGameEnd = () => {
@@ -207,7 +206,6 @@ export default class Tournament {
                                         returnButton.style.display = "block";
 
                                         returnButton.onclick = () => {
-                                            canvas.style.display = "none";
                                             returnButton.style.display = "none";
                                             document.querySelector("#mainPage").style.display = "block";
                                             document.querySelector("#overlay").style.display = "none";
@@ -218,12 +216,18 @@ export default class Tournament {
                                             window.app.ingame = false;
                                             sessionStorage.setItem("ingame", "false");
                                         };
+                                        window.app.router.currentComponent.setProfileFields().then();
                                     };
 
                                     game.initialize(events.data);
                                     document.querySelector("#mainPage").style.display = "none";
                                 }, 1000);
                             }
+                        };
+                        window.app.gamews.onopen = () => {
+                            console.log("Connected to server");
+                            window.app.ingame = true;
+                            sessionStorage.setItem("ingame", "true");
                         };
                         buttonPlace1.innerHTML = "";
                     };
@@ -252,7 +256,6 @@ export default class Tournament {
                                     const game = new Game(canvas, window.app.gamews);
                                     const gameDiv = document.querySelector("#gameDiv");
                                     gameDiv.style.display = "block";
-                                    canvas.style.display = "block";
                                     console.log("Game initialization");
 
                                     game.onGameEnd = () => {
@@ -260,7 +263,6 @@ export default class Tournament {
                                         returnButton.style.display = "block";
 
                                         returnButton.onclick = () => {
-                                            canvas.style.display = "none";
                                             returnButton.style.display = "none";
                                             document.querySelector("#mainPage").style.display = "block";
                                             document.querySelector("#overlay").style.display = "none";
@@ -271,12 +273,18 @@ export default class Tournament {
                                             window.app.ingame = false;
                                             sessionStorage.setItem("ingame", "false");
                                         };
+                                        window.app.router.currentComponent.setProfileFields().then();
                                     };
 
                                     game.initialize(events.data);
                                     document.querySelector("#mainPage").style.display = "none";
                                 }, 1000);
                             }
+                        };
+                        window.app.gamews.onopen = () => {
+                            console.log("Connected to server");
+                            window.app.ingame = true;
+                            sessionStorage.setItem("ingame", "true");
                         };
                         buttonPlace2.innerHTML = "";
                     };

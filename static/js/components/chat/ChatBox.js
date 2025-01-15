@@ -233,13 +233,14 @@ export default class ChatBox {
                             const canvas = document.querySelector("#gameCanvas");
                             const game = new Game(canvas, window.app.gamews);
                             console.log("Game initialization");
+                            const gameDiv = document.querySelector("#gameDiv");
+			                gameDiv.style.display = "block";
 
                             game.onGameEnd = () => {
                                 const returnButton = document.querySelector("#returnButton");
                                 returnButton.style.display = "block";
 
                                 returnButton.onclick = () => {
-                                    canvas.style.display = "none";
                                     returnButton.style.display = "none";
                                     document.querySelector("#mainPage").style.display = "block";
                                     document.querySelector("#overlay").style.display = "none";
@@ -250,6 +251,7 @@ export default class ChatBox {
                                     window.app.ingame = false;
                                     sessionStorage.setItem("ingame", "false");
                                 };
+                                window.app.router.currentComponent.setProfileFields().then();
                             };
 
                             game.initialize(events.data);
@@ -772,13 +774,14 @@ export default class ChatBox {
                             const canvas = document.querySelector("#gameCanvas");
                             const game = new Game(canvas, window.app.gamews);
                             console.log("Game initialization");
-
+                            const gameDiv = document.querySelector("#gameDiv");
+                            gameDiv.style.display = "block";
+                            
                             game.onGameEnd = () => {
                                 const returnButton = document.querySelector("#returnButton");
                                 returnButton.style.display = "block";
 
                                 returnButton.onclick = () => {
-                                    canvas.style.display = "none";
                                     returnButton.style.display = "none";
                                     document.querySelector("#mainPage").style.display = "block";
                                     document.querySelector("#overlay").style.display = "none";
@@ -789,6 +792,7 @@ export default class ChatBox {
                                     window.app.ingame = false;
                                     sessionStorage.setItem("ingame", "false");
                                 };
+                                window.app.router.currentComponent.setProfileFields().then();
                             };
 
                             game.initialize(events.data);
