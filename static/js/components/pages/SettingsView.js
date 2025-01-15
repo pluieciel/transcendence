@@ -6,6 +6,7 @@ export default class MainView {
         this.username = decodedPayload.username;
         this.render();
         this.addEventListeners();
+        this.add2FAEventListeners();
     }
 
     render() {
@@ -16,8 +17,8 @@ export default class MainView {
 						<button id="indexBtn">Main page</button>
 						<button id="logoutBtn">Log out</button>
 				</header>
-				<h1>t</h1>
-				<h1>t</h1>
+				<h1>TO REMOVE WAS TOO LAZY TO ADD CSS FOR NOW</h1>
+				<h1>TO REMOVE WAS TOO LAZY TO ADD CSS FOR NOW</h1>
 				<button type="button" class="btn btn-primary" id="enable2FA">Enable 2FA</button>
 				<div class="modal fade" id="totpModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                 <div class="modal-dialog">
@@ -42,7 +43,6 @@ export default class MainView {
                     </div>
                 </div>
             </div>
-			</div>
         `;
     }
 
@@ -51,6 +51,40 @@ export default class MainView {
         mainContent.innerHTML = '<h2>Leaderboard View</h2>';
         // Add any additional logic to initialize the leaderboard view
     }
+
+    add2FAEventListeners() {
+        const submit = this.container.querySelector('#totpForm');
+        const errorDiv = this.container.querySelector('#totpError');
+
+        submit.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const totp = this.container.querySelector('#totpInput').value;
+            try {
+				const response = await fetch('/api/settings/2fa/enable', {
+					method: 'POST',
+				    headers: {
+				        'Content-Type': 'application/json',
+				        'Authorization': `${this.token}`,
+					},
+				    body: JSON.stringify({
+				        totp: totp,
+				    })
+				});
+				const data = await response.json();
+				if (data.success) {
+					const modal = bootstrap.Modal.getInstance(this.container.querySelector('#totpModal'));
+					if (modal)
+						modal.hide();
+				} else {
+					errorDiv.textContent = data.message || 'Login failed';
+                    errorDiv.classList.remove('d-none');
+				}
+            } catch (error) {
+				errorDiv.textContent = 'An error occurred:' + error;
+                errorDiv.classList.remove('d-none');
+            }
+        });
+	}
 
     addEventListeners() {
         // Logout button

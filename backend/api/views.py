@@ -1,5 +1,6 @@
 # views.py
 import time
+from operator import truediv
 from secrets import token_bytes
 from channels.generic.http import AsyncHttpConsumer
 from django.contrib.auth import get_user_model, authenticate
@@ -42,6 +43,26 @@ async def jwt_to_user(token):
         return False
     except jwt.InvalidTokenError:
         return False
+
+def generate_totp(secret, offset):
+    time_counter = int(time.time() // 30) + offset
+    time_bytes = time_counter.to_bytes(8, 'big')
+
+    hmac_res = hmac.digest(base64.b32decode(secret), time_bytes, hashlib.sha1)
+    hmac_off = hmac_res[19] & 0xf
+    bin_code = ((hmac_res[hmac_off] & 0x7f) << 24
+                | (hmac_res[hmac_off + 1] & 0xff) << 16
+                | (hmac_res[hmac_off + 2] & 0xff) << 8
+                | (hmac_res[hmac_off + 3] & 0xff))
+
+    return bin_code % 1000000
+
+def verify_totp(totp_secret, totp_input):
+    for offset in [-2, -1, 0, 1]:
+        totp = generate_totp(totp_secret, offset)
+        if totp == int(totp_input):
+            return True
+    return False
 
 class SignupConsumer(AsyncHttpConsumer):
     async def handle(self, body):
@@ -282,54 +303,41 @@ class Login2FAConsumer(AsyncHttpConsumer):
 
             user = await self.get_user(username)
 
-            for offset in [-2, -1, 0, 1]:
-                totp = self.generate_totp(user.totp_secret, offset)
-                if totp == int(totp_input):
-                    token = jwt.encode({
-                        'id': user.id,
-                        'username': user.username,
-                        'exp': datetime.datetime.now(datetime.UTC) + datetime.timedelta(hours=1)
-                    }, SECRET_KEY, algorithm='HS256')
+            is_totp_valid = verify_totp(user.totp_secret, totp_input)
 
-                    response_data = {
-                        'success': True,
-                        'message': 'Login successful',
-                        'token': token
-                    }
-                    return await self.send_response(200, json.dumps(response_data).encode(),
-                                                    headers=[(b"Content-Type", b"application/json")])
+            if not is_totp_valid:
+                response_data = {
+                    'success': False,
+                    'message': 'Invalid totp code'
+                }
+                return await self.send_response(401, json.dumps(response_data).encode(),
+                    headers=[(b"Content-Type", b"application/json")])
+
+            token = jwt.encode({
+                'id': user.id,
+                'username': user.username,
+                'exp': datetime.datetime.now(datetime.UTC) + datetime.timedelta(hours=1)
+            }, SECRET_KEY, algorithm='HS256')
 
             response_data = {
-                'success': False,
-                'message': 'Invalid totp code'
+                'success': True,
+                'message': 'Login successful',
+                'token': token
             }
-            return await self.send_response(401, json.dumps(response_data).encode(),
-                                            headers=[(b"Content-Type", b"application/json")])
+            return await self.send_response(200, json.dumps(response_data).encode(),
+                headers=[(b"Content-Type", b"application/json")])
         except Exception as e:
             response_data = {
                 'success': False,
                 'message': str(e)
             }
             return await self.send_response(500, json.dumps(response_data).encode(),
-                    headers=[(b"Content-Type", b"application/json")])
+                headers=[(b"Content-Type", b"application/json")])
 
     @database_sync_to_async
     def get_user(self, username):
         User = get_user_model()
         return User.objects.get(username=username)
-
-    def generate_totp(self, secret, offset):
-        time_counter = int(time.time() // 30) + offset
-        time_bytes = time_counter.to_bytes(8, 'big')
-
-        hmac_res = hmac.digest(base64.b32decode(secret), time_bytes, hashlib.sha1)
-        hmac_off = hmac_res[19] & 0xf
-        bin_code = ((hmac_res[hmac_off] & 0x7f) << 24
-                    | (hmac_res[hmac_off + 1] & 0xff) << 16
-                    | (hmac_res[hmac_off + 2] & 0xff) << 8
-                    | (hmac_res[hmac_off + 3] & 0xff))
-
-        return bin_code % 1000000
 
 class Generate2FAConsumer(AsyncHttpConsumer):
     async def handle(self, body):
@@ -391,7 +399,45 @@ class Generate2FAConsumer(AsyncHttpConsumer):
 class Enable2FAConsumer(AsyncHttpConsumer):
     async def handle(self, body):
         try:
-            pass
+            headers = dict((key.decode('utf-8'), value.decode('utf-8')) for key, value in self.scope['headers'])
+            auth_header = headers.get('authorization', None)
+            if not auth_header:
+                response_data = {
+                    'success': False,
+                    'message': 'Authorization header missing'
+                }
+                return await self.send_response(401, json.dumps(response_data).encode(),
+                    headers=[(b"Content-Type", b"application/json")])
+            user = await jwt_to_user(auth_header)
+            if not user:
+                response_data = {
+                    'success': False,
+                    'message': 'Invalid token or User not found'
+                }
+                return await self.send_response(401, json.dumps(response_data).encode(),
+                    headers=[(b"Content-Type", b"application/json")])
+
+            data = json.loads(body.decode())
+            totp_input = data.get('totp')
+
+            is_totp_valid = verify_totp(user.totp_secret, totp_input)
+
+            if not is_totp_valid:
+                response_data = {
+                    'success': False,
+                    'message': 'Invalid totp code'
+                }
+                return await self.send_response(401, json.dumps(response_data).encode(),
+                    headers=[(b"Content-Type", b"application/json")])
+
+            await self.update_is_2fa_enabled(user, True)
+
+            response_data = {
+                'success': True,
+                'message': '2FA enabled',
+            }
+            return await self.send_response(200, json.dumps(response_data).encode(),
+                headers=[(b"Content-Type", b"application/json")])
         except Exception as e:
             response_data = {
                 'success': False,
@@ -399,6 +445,11 @@ class Enable2FAConsumer(AsyncHttpConsumer):
             }
             return await self.send_response(500, json.dumps(response_data).encode(),
                     headers=[(b"Content-Type", b"application/json")])
+
+    @database_sync_to_async
+    def update_is_2fa_enabled(self, user, is_2fa_enabled):
+        user.is_2fa_enabled = is_2fa_enabled
+        user.save()
 
 class UpdateConsumer(AsyncHttpConsumer):
     async def handle(self, body):
