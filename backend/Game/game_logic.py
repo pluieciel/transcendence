@@ -75,19 +75,14 @@ class Ball:
 
 	def start(self, startDir, ballPos):
 		direction = startDir
-		print(f"direction:{direction}", flush=True)
 		angle = random.uniform(-5, 5)
 		angle_rad = math.radians(angle)
 
+		self.velocity = Vector2D()
 		self.speed = self.baseSpeed
 		self.velocity.x = direction * self.speed * math.cos(angle_rad)
 		self.velocity.y = self.speed * math.sin(angle_rad)
-		self.position = ballPos
-
-		print(f"Ball started at {ballPos.x}, {ballPos.y}, {ballPos.z}", flush=True)
-		print(f"Ball velocity at {self.velocity.x}, {self.velocity.y}, {self.velocity.z}", flush=True)
-		#print(f"Ball started at {self.position.x}, {self.position.y}, {self.position.z}", flush=True)
-		#print(f"Ball velocity at {self.velocity.x}, {self.velocity.y}, {self.velocity.z}", flush=True)
+		self.position = Vector2D(ballPos.x, ballPos.y, ballPos.z)
 
 	def bounce_wall(self, is_top):
 		self.velocity.y *= -1
@@ -266,8 +261,8 @@ class GameInstance:
 
 	def start(self):
 		self.is_running = True
-		#self.ball.start(random.choice([LEFT_SIDE_DIR, RIGHT_SIDE_DIR]), DEFAULT_BALL_POS)
-		self.ball.start(1, DEFAULT_BALL_POS)
+		self.logger.info(self)
+		self.ball.start(random.choice([LEFT_SIDE_DIR, RIGHT_SIDE_DIR]), DEFAULT_BALL_POS)
 		self.loop_task = asyncio.create_task(self.game_loop())
 
 	def stop(self):

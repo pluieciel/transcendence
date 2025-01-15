@@ -70,7 +70,7 @@ class GameManager:
 			game_id = (await self.create_game_history(user, game_category='AI')).id
 		self.games[game_id] = GameBackend(game_id, bot, self, True) #TODO Ranked Mode
 		return self.games[game_id]
-	
+
 	async def create_tournament_empty_games(self, tournament_info):
 		self.tournament_count += 1
 		self._get_game_history_model()
@@ -134,13 +134,13 @@ class GameManager:
 	@database_sync_to_async
 	def get_game_by_id(self, game_id):
 		return self.game_history.objects.get(id=game_id)
-	
+
 	@database_sync_to_async
 	def get_user(self, username):
 		User = get_user_model()
 		user = User.objects.get(username=username)
 		return user
-	
+
 game_manager = GameManager()
 
 class GameConsumer(AsyncWebsocketConsumer):
@@ -163,7 +163,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 		recipient = query_params.get("recipient", [None])[0]
 		#for tournament
 		round = query_params.get("round", [None])[0]
-		
+
 		if not token:
 			return
 		user = await jwt_to_user(token)
@@ -254,6 +254,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 				p1 = query_params.get("p1", [None])[0]
 				p2 = query_params.get("p2", [None])[0]
 				game = query_params.get("game", [None])[0]
+				self.logger.info(game)
 				game_db = await game_manager.get_tournament_game(await self.get_user(p1), await self.get_user(p2))
 				self.game = game_manager.games[game_db.id]
 				self.game.channel_layer = self.channel_layer
@@ -373,6 +374,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 						}
 					},
 					"player": {
+						#TODO ADD WIDTH AND SUCH
 						"left": {
 							"name": instance.player_left.user.username,
 							"rank": instance.player_left.user.elo,
@@ -401,7 +403,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 		User = get_user_model()
 		user = User.objects.get(username=username)
 		return user
-	
+
 	async def send_message(self, event):
 		message = event["message"]
 		sender = event["sender"]

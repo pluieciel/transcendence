@@ -1,6 +1,7 @@
 import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
 import { UIManager } from "./UIManager.js";
-//import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { Bonuses } from "./BonusSystem.js";
 
 export class SceneManager {
 	constructor() {
@@ -16,43 +17,7 @@ export class SceneManager {
 		this.leftBorder = null;
 		this.trajectoryLine = null;
 		this.trajVisible = false;
-		//this.loadModel();
-		this.model = null;
 	}
-
-	/*loadModel() {
-		const loader = new GLTFLoader();
-		console.log("Loading");
-		loader.load(
-			"/js/components/game/Lightning.glb",
-
-			// Success callback
-			(gltf) => {
-				const model = gltf.scene;
-				// You can modify the model's position, scale, rotation here
-				model.position.set(0, 0, 0);
-				model.scale.set(0.1, 0.1, 0.1);
-				const material = new THREE.MeshStandardMaterial({ color: 0xf2f0f2 });
-				model.material = material;
-
-				// Add the model to the scene
-				this.model = model;
-				this.scene.add(model);
-
-				console.log("added");
-			},
-
-			// Progress callback (optional)
-			(progress) => {
-				console.log("Loading model...", (progress.loaded / progress.total) * 100 + "%");
-			},
-
-			// Error callback
-			(error) => {
-				console.error("Error loading model:", error);
-			},
-		);
-		}*/
 
 	updateTrajectory(trajectoryPoints) {
 		// Remove existing trajectory line if it exists

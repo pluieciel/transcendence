@@ -204,6 +204,8 @@ export class Game {
 		}
 		if (this.sceneManager.model) {
 			this.sceneManager.model.rotation.y += 0.02;
+			//this.sceneManager.model.rotation.z += 0.02;
+			//this.sceneManager.model.rotation.x += 0.02;
 		}
 
 		this.renderer.render(this.sceneManager.getScene(), this.sceneManager.getCamera());
