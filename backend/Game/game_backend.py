@@ -188,7 +188,20 @@ class GameBackend:
 							"time": datetime.now().strftime("%H:%M:%S")
 						}
 					)
-					self.chat_consumer.tournament_info = deepcopy(self.chat_consumer.tournament_info_initial)
+				await asyncio.sleep(30)
+				self.chat_consumer.tournament_info = deepcopy(self.chat_consumer.tournament_info_initial)
+				for group in groups:
+					await channel_layer.group_send(
+						group, {
+							"type": "send_message",
+							"tournament_info": json.dumps(self.chat_consumer.tournament_info),
+							"message_type": "system",
+							"message": "update_tournament_info",
+							"sender": "admin",
+							"recipient": "update_tournament_info",
+							"time": datetime.now().strftime("%H:%M:%S")
+						}
+					)
 			
 		except Exception as e:
 			self.logger.error(f"Error in on_game_end: {str(e)}")

@@ -113,11 +113,19 @@ export default class MainView {
 	initComponents() {
 		// Initialize Tournament
 		const tournamentContainer = this.container.querySelector("#tournamentContainer");
-		window.app.tournament = new Tournament(tournamentContainer);
+		if (!window.app.tournament) {
+			window.app.tournament = new Tournament(tournamentContainer);
+		} else {
+			window.app.tournament.render();
+		}
 
 		// Initialize ChatBox
 		const chatBoxContainer = this.container.querySelector("#chatBoxContainer");
-		window.app.chatBox = new ChatBox(chatBoxContainer);
+		if (!window.app.chatBox) {
+			window.app.chatBox = new ChatBox(chatBoxContainer);
+		} else {
+			window.app.chatBox.render();
+		}
 
 		new GameComponent(this.container.querySelector("#gameContainer"));
 

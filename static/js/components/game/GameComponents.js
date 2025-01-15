@@ -142,7 +142,7 @@ export default class GameComponent {
 				returnButton.style.display = "block";
 
 				returnButton.onclick = () => {
-					canvas.style.display = "none";
+					gameDiv.style.display = "none";
 					returnButton.style.display = "none";
 					document.querySelector("#mainPage").style.display = "block";
 					document.querySelector("#overlay").style.display = "none";
@@ -153,6 +153,7 @@ export default class GameComponent {
 					window.app.ingame = false;
 					sessionStorage.setItem("ingame", "false");
 				};
+				window.app.router.currentComponent.setProfileFields().then();
 			};
 
 			game.initialize(events.data);
