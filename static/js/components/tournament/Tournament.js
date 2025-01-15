@@ -176,7 +176,8 @@ export default class Tournament {
             Object.entries(this.info.round1).forEach(([key, value]) => {
                 if (value.state === "prepare" && (value.p1 === this.username || value.p2 === this.username)) {
                     //start game for this user
-                    window.app.gamews = new WebSocket(`${this.protocol}${this.host}/ws/game/?token=${this.token}&round=1&p1=${value.p1}&p2=${value.p2}`);
+                    this.round2_place = key === "game1" ? 1 : 2;
+                    window.app.gamews = new WebSocket(`${this.protocol}${this.host}/ws/game/?token=${this.token}&round=1&p1=${value.p1}&p2=${value.p2}&game=${key}`);
                     console.log(`${this.protocol}${this.host}/ws/game/?token=${this.token}&round=1&p1=${value.p1}&p2=${value.p2}`);
                     window.app.gamews.onmessage = (event) => {
                         const events = JSON.parse(event.data);
@@ -185,6 +186,65 @@ export default class Tournament {
                                 const canvas = document.querySelector("#gameCanvas");
                                 const game = new Game(canvas, window.app.gamews);
                                 console.log("Game initialization");
+
+                                game.onGameEnd = () => {
+                                    const returnButton = document.querySelector("#returnButton");
+                                    returnButton.style.display = "block";
+
+                                    returnButton.onclick = () => {
+                                        canvas.style.display = "none";
+                                        returnButton.style.display = "none";
+                                        document.querySelector("#mainPage").style.display = "block";
+                                        document.querySelector("#overlay").style.display = "none";
+                                        gameDiv.style.display = "none";
+                                        if (window.app.gamews) {
+                                            window.app.gamews.close();
+                                        }
+                                        window.app.ingame = false;
+                                        sessionStorage.setItem("ingame", "false");
+                                    };
+                                };
+
+                                game.initialize(events.data);
+                                document.querySelector("#mainPage").style.display = "none";
+                            }, 1000);
+                        }
+                    };
+                }
+            });
+        } else if (this.info.state === "Playing2to1") {
+            Object.entries(this.info.round2).forEach(([key, value]) => {
+                if (value.state === "prepare" && (value.p1 === this.username || value.p2 === this.username)) {
+                    //start game for this user
+                    this.round2_place = key === "game1" ? 1 : 2;
+                    window.app.gamews = new WebSocket(`${this.protocol}${this.host}/ws/game/?token=${this.token}&round=2&p1=${value.p1}&p2=${value.p2}`);
+                    console.log(`${this.protocol}${this.host}/ws/game/?token=${this.token}&round=2&p1=${value.p1}&p2=${value.p2}`);
+                    window.app.gamews.onmessage = (event) => {
+                        const events = JSON.parse(event.data);
+                        if (events.message_type === "init") {
+                            setTimeout(() => {
+                                const canvas = document.querySelector("#gameCanvas");
+                                const game = new Game(canvas, window.app.gamews);
+                                console.log("Game initialization");
+
+                                game.onGameEnd = () => {
+                                    const returnButton = document.querySelector("#returnButton");
+                                    returnButton.style.display = "block";
+
+                                    returnButton.onclick = () => {
+                                        canvas.style.display = "none";
+                                        returnButton.style.display = "none";
+                                        document.querySelector("#mainPage").style.display = "block";
+                                        document.querySelector("#overlay").style.display = "none";
+                                        gameDiv.style.display = "none";
+                                        if (window.app.gamews) {
+                                            window.app.gamews.close();
+                                        }
+                                        window.app.ingame = false;
+                                        sessionStorage.setItem("ingame", "false");
+                                    };
+                                };
+
                                 game.initialize(events.data);
                                 document.querySelector("#mainPage").style.display = "none";
                             }, 1000);

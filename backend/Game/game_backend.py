@@ -6,6 +6,9 @@ from .game_logic import GameInstance, GameBounds
 from channels.db import database_sync_to_async
 from .bot import Bot
 from api.user_db_utils import user_update_game
+from datetime import datetime
+import redis
+from channels.layers import get_channel_layer
 
 class User:
 	def __init__(self, user, channel, state):
@@ -29,7 +32,8 @@ class GameBackend:
 		if (self.is_bot_game):
 			self.player_right = Bot(bot, self.game)
 		self.logger.info(f"{self.is_bot_game} and {bot}")
-
+		from Chat.consumer import ChatConsumer
+		self.chat_consumer = ChatConsumer
 	def handle_key_event(self, websocket, key, is_down):
 		if websocket == self.player_left.channel:
 			self.logger.info(f"Left player pressed {key}")
@@ -51,7 +55,7 @@ class GameBackend:
 				self.logger.info("started game with a bot")
 				self.player_right.start_bot()
 			else:
-				self.logger.info("started game with a bot")
+				self.logger.info("started game with a player")
 			self.game.start()
 		else:
 			self.logger.warning("start game caleld but game is not full")
@@ -114,9 +118,11 @@ class GameBackend:
 				await self.update_elo(self.game.winner)
 
 			if self.game.winner == "LEFT":
-				self.game.winner = self.player_left.user.username
+				winner = self.player_left.user
+				self.game.winner = winner.username
 			elif self.game.winner == "RIGHT":
-				self.game.winner = self.player_right.user.username
+				winner = self.player_right.user
+				self.game.winner = winner.username
 
 			await self.broadcast_state()
 
@@ -129,8 +135,45 @@ class GameBackend:
 				await user_update_game(self.player_left.user, isplaying=False, game_id=-1)
 
 			self.manager.remove_game(self.game_id)
-			await self.manager.set_game_state(await self.manager.get_game_by_id(self.game_id), 'finished', self.game.player_left.score, self.game.player_right.score)
+			game_history_db = await self.manager.get_game_by_id(self.game_id)
+			await self.manager.set_game_state(game_history_db, 'finished', self.game.player_left.score, self.game.player_right.score)
+			
+			#next round for tournament
+			if game_history_db.game_category == "Tournament1":
+				next_game_place = game_history_db.tournament_round2_place
+				self.chat_consumer.tournament_info["round1"][f"game{next_game_place}"]["winner"] = winner.username
+				next_game_id = game_history_db.tournament_round2_game_id
+				new_game_history_db = await self.manager.get_game_by_id(next_game_id)
+				print(new_game_history_db, flush=True)
+				if next_game_place == 1:
+					await self.manager.set_game_state(new_game_history_db, 'waiting', player_a=winner)
+					self.chat_consumer.tournament_info["round2"]["game1"]["p1"] = winner.username
+				else:
+					await self.manager.set_game_state(new_game_history_db, 'waiting', player_b=winner)
+					self.chat_consumer.tournament_info["round2"]["game1"]["p2"] = winner.username
 
+				await database_sync_to_async(new_game_history_db.refresh_from_db)()
+				
+				if self.chat_consumer.tournament_info["round2"]["game1"].get("p1", None) and self.chat_consumer.tournament_info["round2"]["game1"].get("p2", None):
+					self.chat_consumer.tournament_info["round2"]["game1"]["state"] = "prepare"
+					self.chat_consumer.tournament_info["state"] = "Playing2to1"
+					
+				redis_client = redis.Redis(host='redis', port=6379, db=0)
+				groups = [g.decode('utf-8') for g in redis_client.smembers('active_groups')]
+				channel_layer = get_channel_layer()
+				for group in groups:
+					await channel_layer.group_send(
+						group, {
+							"type": "send_message",
+							"tournament_info": json.dumps(self.chat_consumer.tournament_info),
+							"message_type": "system",
+							"message": "update_tournament_info",
+							"sender": "admin",
+							"recipient": "update_tournament_info",
+							"time": datetime.now().strftime("%H:%M:%S")
+						}
+					)
+			
 		except Exception as e:
 			self.logger.error(f"Error in on_game_end: {str(e)}")
 			import traceback
