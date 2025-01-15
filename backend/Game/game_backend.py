@@ -145,18 +145,16 @@ class GameBackend:
 				next_game_id = game_history_db.tournament_round2_game_id
 				new_game_history_db = await self.manager.get_game_by_id(next_game_id)
 				print(new_game_history_db, flush=True)
-				player_b_obj = await database_sync_to_async(lambda: new_game_history_db.player_b)()
-				player_a_obj = await database_sync_to_async(lambda: new_game_history_db.player_a)()
 				if next_game_place == 1:
-					await self.manager.set_game_state(new_game_history_db, 'waiting', player_a=winner, player_b=player_b_obj)
+					await self.manager.set_game_state(new_game_history_db, 'waiting', player_a=winner)
 					self.chat_consumer.tournament_info["round2"]["game1"]["p1"] = winner.username
 				else:
-					await self.manager.set_game_state(new_game_history_db, 'waiting', player_a=player_a_obj, player_b=winner)
+					await self.manager.set_game_state(new_game_history_db, 'waiting', player_b=winner)
 					self.chat_consumer.tournament_info["round2"]["game1"]["p2"] = winner.username
 
 				await database_sync_to_async(new_game_history_db.refresh_from_db)()
 				
-				if player_a_obj and player_b_obj:
+				if self.chat_consumer.tournament_info["round2"]["game1"].get("p1", None) and self.chat_consumer.tournament_info["round2"]["game1"].get("p2", None):
 					self.chat_consumer.tournament_info["round2"]["game1"]["state"] = "prepare"
 					self.chat_consumer.tournament_info["state"] = "Playing2to1"
 					

@@ -125,8 +125,10 @@ class GameManager:
 		game.score_a = score_a
 		game.score_b = score_b
 		game.game_state = game_state
-		game.player_a = player_a
-		game.player_b = player_b
+		if player_a:
+			game.player_a = player_a
+		if player_b:
+			game.player_b = player_b
 		game.save()
 
 	@database_sync_to_async
