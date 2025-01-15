@@ -5,6 +5,8 @@ from django.utils import timezone
 from datetime import timedelta
 from channels.db import database_sync_to_async
 
+######################## USER ###########################
+
 class CustomUserManager(BaseUserManager):
     def create_user(self, username, password=None, avatar=None):
         if not username:
@@ -70,6 +72,9 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     def has_module_perms(self, app_label):
         return True
+    
+    
+######################## GAME INVITE ###########################
 
 class GameInvite(models.Model):
     sender = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='invite_sender')
@@ -95,12 +100,18 @@ def is_valid_invite(sender, recipient):
     else:
         return False
 
+
+##################### GAME HISTORY ###########################
+
 class GameHistory(models.Model):
     game_mode = models.CharField(max_length=32)
-    game_category = models.CharField(max_length=32) # Quick Match, Invite, Tournament?
+    game_category = models.CharField(max_length=32) # Quick Match, Invite, Tournament1/2?
     game_state = models.CharField(max_length=32, default='waiting') # waiting, playing, finished
     score_a = models.IntegerField(default=0)
     score_b = models.IntegerField(default=0)
     player_a = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, related_name='player_a')
     player_b = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, related_name='player_b')
     created_at = models.DateTimeField(auto_now_add=True)
+    tournament_count = models.IntegerField(default=0)
+    tournament_round2_game_id = models.IntegerField(default=-1)
+    tournament_round2_place = models.IntegerField(default=-1)

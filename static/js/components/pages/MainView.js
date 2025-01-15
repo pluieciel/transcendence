@@ -1,5 +1,7 @@
 import ChatBox from "../chat/ChatBox.js";
+import Tournament from "../tournament/Tournament.js";
 import { Game } from "../game/Game.js";
+import GameComponent from "../game/GameComponents.js";
 
 export default class MainView {
 	constructor(container) {
@@ -11,9 +13,11 @@ export default class MainView {
 		this.timerInterval = null;
 
 		this.username = decodedPayload.username;
+	
+
 		this.render();
-		this.setProfileFields();
 		this.initComponents();
+		this.setProfileFields();
 		this.addEventListeners();
 		if (window.app.ingame) {
 			console.log("Reconnecting to game");
@@ -28,18 +32,18 @@ export default class MainView {
 					this.displayGame(events);
 				}
 			};
-	
+
 			window.app.gamews.onclose = () => {
 				console.log("Disconnected from server");
 				window.app.ingame = false;
-				sessionStorage.setItem('ingame', 'false');
+				sessionStorage.setItem("ingame", "false");
 			};
 		}
 	}
 
 	render() {
 		this.container.innerHTML = `
-    <header>
+<header>
         <h1>PONG</h1>
 			<button id="settingsBtn">Settings</button>
 			<button id="logoutBtn">Log out</button>
@@ -75,8 +79,7 @@ export default class MainView {
 					<button id="playAI">AI</button>
 					<button id="rankedMatch">Ranked</button>
 					<button id="quickMatch" class="nav-link" data-view="game" data-bs-toggle="modal" data-bs-target="#matchSearch">Quick Match</button>
-					<button id="joinTournament">Join Tournament</button>
-					<button id="createTournament">Create Tournament</button>
+					<button id="tournamentButton" data-bs-toggle="modal" data-bs-target="#tournamentModal">Tournament</button>
 			</div>
 			<div class="profile">
 				<h2>Profile</h2>
@@ -91,156 +94,14 @@ export default class MainView {
 	<!-- ChatBox container -->
 	<div id="chatBoxContainer"></div>
 
-	<div class="modal fade" id="matchSearch" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-		<div class="modal-dialog modal-dialog-centered">
-			<div class="modal-content modal-content-game d-flex flex-column align-items-center justify-content-center text-center">
-				<h5 class="modal-title w-70 mt-3 mb-3" id="staticBackdropLabel">Searching for a game</h5>
-				<h2 id="timer">0s</h2> <!-- Timer below the header -->
-				<button type="button" class="btn btn-secondary m-3" id="gameSearchCancel" data-bs-dismiss="modal">Cancel</button>
-			</div>
-		</div>
-	</div>
+	<!-- Tournament container -->
+	<div id="tournamentContainer"></div>
 
-	<div>
-		<div id="nameLeft"></div>
-		<div id="scoreLeft"></div>
-		<div id="nameRight"></div>
-		<div id="scoreRight"></div>
-		<div id="overlay"></div>
-		<canvas id="gameCanvas">
-		</canvas>
-	</div>
+	<!-- Game container -->
+	<div id="gameContainer"></div>
 
         `;
-		this.timerElement = document.getElementById("timer");
-	}
 
-	searchGame() {
-		const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-		const host = window.location.host;
-		const token = window.app.getToken();
-
-		//if (!token) this.handleUnrecognizedToken();
-		const wsUrl = `${protocol}//${host}/ws/game/?token=${token}`;
-
-		window.app.gamews = new WebSocket(wsUrl);
-		this.startSearchGameTimer();
-
-		window.app.gamews.onmessage = (event) => {
-			console.log(event.data);
-			setTimeout(() => {
-				this.stopTimerAndDismissModal();
-			}, 1000);
-
-			const events = JSON.parse(event.data);
-			if (events.message_type === "init") {
-				this.displayGame(events);
-			}
-		};
-
-		window.app.gamews.onopen = () => {
-			console.log("Connected to server");
-			window.app.ingame = true;
-            sessionStorage.setItem('ingame', 'true');
-		};
-
-		window.app.gamews.onclose = () => {
-			console.log("Disconnected from server");
-			window.app.ingame = false;
-            sessionStorage.setItem('ingame', 'false');
-		};
-
-		window.app.gamews.onerror = (error) => {
-			console.error("WebSocket error:", error);
-		};
-	}
-
-	playBot(difficulty) {
-		const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-		const host = window.location.host;
-		const token = window.app.getToken();
-
-		//if (!token) this.handleUnrecognizedToken();
-		const wsUrl = `${protocol}//${host}/ws/game/?token=${token}&bot=` + difficulty;
-
-		window.app.gamews = new WebSocket(wsUrl);
-
-		window.app.gamews.onmessage = (event) => {
-			const events = JSON.parse(event.data);
-			if (events.message_type === "init") {
-				this.displayGame(events);
-			}
-		};
-
-		window.app.gamews.onopen = () => {
-			console.log("Connected to server");
-			window.app.ingame = true;
-            sessionStorage.setItem('ingame', 'true');
-		};
-
-		window.app.gamews.onclose = () => {
-			console.log("Disconnected from server");
-			window.app.ingame = false;
-            sessionStorage.setItem('ingame', 'false');
-		};
-
-		window.app.gamews.onerror = (error) => {
-			console.error("WebSocket error:", error);
-		};
-	}
-
-	displayGame(events) {
-		setTimeout(() => {
-			const canvas = this.container.querySelector("#gameCanvas");
-			const game = new Game(canvas, window.app.gamews);
-			console.log("Game initialization");
-			game.initialize(events.data);
-			this.container.querySelector("#mainPage").style.display = "none";
-		}, 1000);
-	}
-
-	stopTimerAndDismissModal() {
-		clearInterval(this.timerInterval); // Stop the timer
-		this.timerElement.innerText = "0s"; // Reset the timer display
-
-		// Hide the modal using Bootstrap
-		const matchSearchModal = bootstrap.Modal.getInstance(document.getElementById("matchSearch"));
-		console.log("Hiding " + matchSearchModal);
-		matchSearchModal.hide(); // Hide the modal
-
-		// Optionally reset other modal states if needed
-	}
-
-	startSearchGameTimer() {
-		this.countdownTime = 0; // Reset countdown time
-		this.timerElement.innerText = this.countdownTime + "s"; // Reset display
-
-		// Clear any existing interval before starting a new one
-		clearInterval(this.timerInterval);
-
-		// Start the timer
-		this.timerInterval = setInterval(() => {
-			this.countdownTime++; // Increment time
-			this.timerElement.innerText = this.countdownTime + "s"; // Update display
-		}, 1000); // Update every second
-
-		// Event listener for when the modal is shown (Bootstrap 5 uses 'shown.bs.modal')
-		const matchSearchModal = document.getElementById("matchSearch");
-		matchSearchModal.addEventListener("shown.bs.modal", () => {
-			this.startSearchGameTimer(); // Start timer when modal is shown
-		});
-
-		// Event listener for when the modal is hidden (clear the timer)
-		matchSearchModal.addEventListener("hidden.bs.modal", () => {
-			clearInterval(this.timerInterval); // Clear interval when modal is closed
-			this.timerElement.innerText = "0s"; // Reset timer display
-		});
-
-		// Event listener for cancel button (stop timer and hide modal)
-		const cancelGameSearch = this.container.querySelector("#gameSearchCancel");
-		cancelGameSearch.addEventListener("click", () => {
-			this.stopTimerAndDismissModal(); // Stop timer and dismiss modal
-		});
 	}
 
 	showLeaderboard() {
@@ -250,33 +111,35 @@ export default class MainView {
 	}
 
 	initComponents() {
+		// Initialize Tournament
+		const tournamentContainer = this.container.querySelector("#tournamentContainer");
+		window.app.tournament = new Tournament(tournamentContainer);
+
 		// Initialize ChatBox
 		const chatBoxContainer = this.container.querySelector("#chatBoxContainer");
-		this.chatBox = new ChatBox(chatBoxContainer);
+		window.app.chatBox = new ChatBox(chatBoxContainer);
+
+		new GameComponent(this.container.querySelector("#gameContainer"));
+
+		const quickMatchButton = this.container.querySelector("#quickMatch");
+		if (quickMatchButton) {
+			quickMatchButton.setAttribute("data-bs-toggle", "modal");
+			quickMatchButton.setAttribute("data-bs-target", "#matchSearch");
+    }
 	}
 
 	addEventListeners() {
 		// Logout button
 		const logoutBtn = this.container.querySelector("#logoutBtn");
 		const settings = this.container.querySelector("#settingsBtn");
-		const quickMatch = this.container.querySelector("#quickMatch");
-		const playAI = this.container.querySelector("#playAI");
 
 		logoutBtn.addEventListener("click", () => {
-			this.chatBox.disconnect();
+			window.app.chatBox.disconnect();
 			window.app.logout();
 		});
 
 		settings.addEventListener("click", () => {
 			window.app.router.navigateTo("/settings");
-		});
-
-		quickMatch.addEventListener("click", () => {
-			this.searchGame();
-		});
-
-		playAI.addEventListener("click", () => {
-			this.playBot(1); //TODO Choose difficulty
 		});
 	}
 
@@ -293,17 +156,9 @@ export default class MainView {
 					Authorization: `${window.app.getToken()}`,
 				},
 			});
-
-			const response_avatar = await fetch(`/api/get/avatar/${this.username}`, {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-					Authorization: `${window.app.getToken()}`,
-				},
-			});
-
 			const data = await response.json();
-			const avatarurl = await response_avatar.json();
+
+			const avatarUrl = await window.app.getAvatar(this.username);
 
 			if (data.success) {
 				elo_div.innerHTML = "Elo: " + data["elo"];
@@ -314,8 +169,8 @@ export default class MainView {
 				winrate_div.innerHTML = "Failed to load winrate";
 				tourn_div.innerHTML = "Failed to load tournaments";
 			}
-			if (avatarurl.success) {
-				avatar_div.innerHTML = `<img src=${avatarurl["avatar"]} alt="User Avatar" width="60" height="60"></img>`;
+			if (avatarUrl) {
+				avatar_div.innerHTML = `<img src=${avatarUrl} alt="User Avatar" width="60" height="60"></img>`;
 			}
 		} catch (error) {
 			elo_div.innerHTML = "Failed to load elo";

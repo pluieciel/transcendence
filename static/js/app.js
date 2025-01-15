@@ -1,8 +1,8 @@
-import LoginView from './components/LoginView.js';
+import LoginView from './components/pages/LoginView.js';
 import MainView from './components/pages/MainView.js';
 import SettingsView from './components/pages/SettingsView.js';
 import SignUpAuthView from './components/login/SignUpOAuth.js';
-import GameView from './components/GameView.js';
+//import GameView from './components/GameView.js';
 import Router from './router.js';
 
 class App {
@@ -14,7 +14,7 @@ class App {
 		this.routes = [
 			{ path: '/', component: LoginView },
             { path: '/index', component: MainView },
-            { path: '/game', component: GameView },
+            //{ path: '/game', component: GameView },
             { path: '/settings', component: SettingsView },
             { path: '/signup/oauth', component: SignUpAuthView },
 			{ path: '*', component: LoginView },
@@ -23,11 +23,28 @@ class App {
             isLoggedIn: sessionStorage.getItem('isLoggedIn') === 'true',
             token: sessionStorage.getItem('token') || '',
         };
+        this.avatarCache = {};
         this.ingame = sessionStorage.getItem('ingame') === 'true';
         console.log("ingame", this.ingame);
 		window.app = this;
         this.router = new Router(this.routes);
 
+    }
+
+    async getAvatar(username) {
+        if (this.avatarCache[username]) {
+            return this.avatarCache[username];
+        }
+        const response = await fetch(`/api/get/avatar/${username}`,{
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `${this.#state.token}`,
+            },
+        });
+        const data = await response.json();
+        this.avatarCache[username] = data.avatar;
+        return data.avatar;
     }
     
     login(data) {

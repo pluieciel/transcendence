@@ -63,7 +63,7 @@ export default class SignUp {
 		const scope = 'public';
 		const state = 'this_is_a_very_long_random_string_i_am_unguessable';
 		const authorizeUrl = `https://api.intra.42.fr/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&state=${state}`;
-        const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2 MB
+        const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1 MB
         
 		form42.addEventListener("click", () => {
 			window.location.href = authorizeUrl;

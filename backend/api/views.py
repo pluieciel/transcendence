@@ -68,7 +68,7 @@ class SignupConsumer(AsyncHttpConsumer):
     async def handle(self, body):
         # Rate limiting logic
         key = self.scope['client'][0]  # Use the client's IP address as the key
-        rate_limit = 20  # Allow 5 requests
+        rate_limit = 60  # Allow 5 requests
         time_window = 60  # Time window in seconds
         current_usage = cache.get(key, 0)
         #print(json.loads(body.decode()), flush=True)
@@ -205,7 +205,7 @@ class LoginConsumer(AsyncHttpConsumer):
     async def handle(self, body):
         # Rate limiting logic
         key = self.scope['client'][0]  # Use the client's IP address as the key
-        rate_limit = 20  # Allow 5 requests
+        rate_limit = 60  # Allow 5 requests
         time_window = 60  # Time window in seconds
         current_usage = cache.get(key, 0)
         if current_usage >= rate_limit:
