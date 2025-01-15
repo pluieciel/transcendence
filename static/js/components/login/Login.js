@@ -24,11 +24,31 @@ export default class Login {
                     </div>
                 </div>
             </div>
+            <div class="modal fade" id="totpModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="staticBackdropLabel">Two-Factor Authentication</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <form id="totpForm">
+	                        <div class="modal-body">
+	                                <div class="mb-3">
+	                                    <input id="totpInput" class="form-control" maxlength="6" required>
+	                                </div>
+	                                <div id="totpError" class="alert alert-danger d-none"></div>
+	                        </div>
+	                        <div class="modal-footer">
+	                            <button type="submit" class="btn btn-primary" id="totpSubmit">Submit</button>
+	                        </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
         `;
     }
 
-    addEventListeners() {
-        const form = this.container.querySelector('#loginForm');
+	addOAuthEventListeners() {
 		const form42 = this.container.querySelector('.LogIn42');
 		const clientId = 'u-s4t2ud-ba5b0c72367af9ad1efbf4d20585f3c315b613ece176ca16919733a7dba999d5';
 		const redirectUri = encodeURIComponent('http://10.11.3.2:9000/signup/oauth');
@@ -39,16 +59,56 @@ export default class Login {
 		form42.addEventListener("click", () => {
 			window.location.href = authorizeUrl;
         });
+	}
+
+	add2FAEventListeners() {
+        const submit = this.container.querySelector('#totpForm');
+        const errorDiv = this.container.querySelector('#totpError');
+
+        submit.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const totp = this.container.querySelector('#totpInput').value;
+            try {
+            	const username = this.container.querySelector('#username').value;
+				const response = await fetch('/api/login/2fa/', {
+					method: 'POST',
+				    headers: {
+				        'Content-Type': 'application/json',
+					},
+				    body: JSON.stringify({
+				        username: username,
+				        totp: totp,
+				    })
+				});
+				const data = await response.json();
+				if (data.success) {
+					const modal = bootstrap.Modal.getInstance(this.container.querySelector('#totpModal'));
+					if (modal)
+						modal.hide();
+					window.app.login(data);
+				} else {
+					errorDiv.textContent = data.message || 'Login failed';
+                    errorDiv.classList.remove('d-none');
+				}
+            } catch (error) {
+				errorDiv.textContent = 'An error occurred:' + error;
+                errorDiv.classList.remove('d-none');
+            }
+        });
+	}
+
+	addLoginEventListeners() {
+		const form = this.container.querySelector('#loginForm');
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             const username = this.container.querySelector('#username').value;
             const password = this.container.querySelector('#password').value;
             const errorDiv = this.container.querySelector('#loginError');
             const hashedPassword = CryptoJS.SHA256(password).toString();
-            
+
 			if (!username || !password)
 				errorDiv.textContent = 'Must fill username and password field';
-				
+
             // Handle login logic here
             try {
                 // This is an async operation - waits for server response
@@ -62,12 +122,14 @@ export default class Login {
                         password: hashedPassword
                     })
                 });
-            
                 const data = await response.json();
-            
                 // This code runs only after getting response from server
                 if (data.success) {
-                    window.app.login(data);
+                    if (data.is_2fa_enabled) {
+						new bootstrap.Modal(this.container.querySelector('#totpModal')).show();
+                    } else {
+                        window.app.login(data);
+                    }
                 } else {
                     errorDiv.textContent = data.message || 'Login failed';
                     errorDiv.classList.remove('d-none');
@@ -78,5 +140,11 @@ export default class Login {
                 errorDiv.classList.remove('d-none');
             }
         });
+	}
+
+    addEventListeners() {
+        this.addOAuthEventListeners();
+        this.add2FAEventListeners();
+		this.addLoginEventListeners();
     }
 }
