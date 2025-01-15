@@ -9,20 +9,18 @@ import jwt
 import os
 from Game.consumer import game_manager
 import redis
+from copy import deepcopy
 
 SECRET_KEY = os.environ.get('JWT_SECRET_KEY')
 
 class ChatConsumer(AsyncWebsocketConsumer):
     online_users = set()
     waiting_users = set()
-    tournament_info = {"state": "Waiting", "wait_list": [],
-                       "round1": {"game1":{}, "game2":{}},
-                       "round2": {"game1":{}},}
+    tournament_info_initial = {"state": "Waiting", "wait_list": [],
+                                "round1": {"game1":{}, "game2":{}},
+                                "round2": {"game1":{}}}
     # use deepcopy to copy the tournament_info for initial state
-    # tournament_info = {"state": "Player4to2", "wait_list": [],
-    #                    "round1": {"game1":{},
-    #                               "game2":{}},
-    #                    "round2": {"game1":{}}}
+    tournament_info = deepcopy(tournament_info_initial)
     def __init__(self, *args, **kwargs):
         from api.models import register_invite, is_valid_invite
         super().__init__(*args, **kwargs)
