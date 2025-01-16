@@ -19,7 +19,7 @@ export default class Login {
                             </div>
                             <div id="loginError" class="alert alert-danger d-none"></div>
                             <button type="submit" class="btn btn-primary w-100">Log In</button>
-                            <button type="button" class="btn btn-primary w-100 LogIn42 OAuth">Login In with 42</button>
+                            <button type="button" class="btn btn-primary w-100 OAuth" id="login42">Login In with 42</button>
                         </form>
                     </div>
                 </div>
@@ -49,14 +49,13 @@ export default class Login {
     }
 
 	addOAuthEventListeners() {
-		const form42 = this.container.querySelector('.LogIn42');
+		const login42 = this.container.querySelector('#login42');
 		const clientId = 'u-s4t2ud-8a6f002f24f0d857cbfedfb4fa1c8494933d7b0bcbb4a51dcc0efeb8806e046b';
-		const redirectUri = encodeURIComponent('https://10.11.3.1:9000/signup/oauth');
-		const scope = 'public';
+		const redirectUri = encodeURIComponent('https://10.11.3.1:9000/login/oauth');
 		const state = 'this_is_a_very_long_random_string_i_am_unguessable';
-		const authorizeUrl = `https://api.intra.42.fr/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&state=${state}`;
+		const authorizeUrl = `https://api.intra.42.fr/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=public&state=${state}`;
 
-		form42.addEventListener("click", () => {
+		login42.addEventListener("click", () => {
 			window.app.state.isLoggedIn = true;
 			sessionStorage.setItem('isLoggedIn', 'true');
 			window.location.href = authorizeUrl;

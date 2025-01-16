@@ -44,6 +44,17 @@ async def jwt_to_user(token):
     except jwt.InvalidTokenError:
         return False
 
+def generate_jwt(user):
+    iat = datetime.datetime.now(datetime.UTC)
+    exp = iat + datetime.timedelta(hours=1)
+
+    return jwt.encode({
+        'id': user.id,
+        'username': user.username,
+        'iat': iat,
+        'exp': exp
+    }, SECRET_KEY, algorithm='HS256')
+
 def generate_totp(secret, offset):
     time_counter = int(time.time() // 30) + offset
     time_bytes = time_counter.to_bytes(8, 'big')
@@ -254,16 +265,10 @@ class LoginConsumer(AsyncHttpConsumer):
             is_2fa_enabled = user.is_2fa_enabled
 
             if not is_2fa_enabled:
-                token = jwt.encode({
-                    'id': user.id,
-                    'username': user.username,
-                    'exp': datetime.datetime.now(datetime.UTC) + datetime.timedelta(hours=1)
-                }, SECRET_KEY, algorithm='HS256')
-
                 response_data = {
                     'success': True,
                     'message': 'Login successful',
-                    'token': token,
+                    'token': generate_jwt(user),
                 }
             else:
                 response_data = {
@@ -313,16 +318,10 @@ class Login2FAConsumer(AsyncHttpConsumer):
                 return await self.send_response(401, json.dumps(response_data).encode(),
                     headers=[(b"Content-Type", b"application/json")])
 
-            token = jwt.encode({
-                'id': user.id,
-                'username': user.username,
-                'exp': datetime.datetime.now(datetime.UTC) + datetime.timedelta(hours=1)
-            }, SECRET_KEY, algorithm='HS256')
-
             response_data = {
                 'success': True,
                 'message': 'Login successful',
-                'token': token
+                'token': generate_jwt(user)
             }
             return await self.send_response(200, json.dumps(response_data).encode(),
                 headers=[(b"Content-Type", b"application/json")])
@@ -564,7 +563,7 @@ class UpdateConsumer(AsyncHttpConsumer):
                     data[name] = content.decode('utf-8')
         return data
 
-class HandleOAuthConsumer(AsyncHttpConsumer):
+class LoginOAuthConsumer(AsyncHttpConsumer):
     async def handle(self, body):
         try:
             data = json.loads(body.decode())
@@ -576,7 +575,7 @@ class HandleOAuthConsumer(AsyncHttpConsumer):
                 'client_id': 'u-s4t2ud-8a6f002f24f0d857cbfedfb4fa1c8494933d7b0bcbb4a51dcc0efeb8806e046b',
                 'client_secret': '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',
                 'code': code,
-                'redirect_uri': 'https://10.11.3.1:9000/signup/oauth'
+                'redirect_uri': 'https://10.11.3.1:9000/login/oauth'
             }
 
             response = requests.post(url, data=params)
@@ -598,42 +597,24 @@ class HandleOAuthConsumer(AsyncHttpConsumer):
 
             if user_response.status_code == 200:
                 user_data = user_response.json()
-                user = await self.get_user_by_name(user_data['login'])
-                if user:
-                    token = jwt.encode({
-                        'id': user.id,
-                        'username': user.username,
-                        'exp': datetime.datetime.now(datetime.UTC) + datetime.timedelta(hours=1)
-                    }, SECRET_KEY, algorithm='HS256')
-                    response_data = {
-                        'success': True,
-						'status': 200,
-                        'message': 'Login successful',
-						'username': user_data['login'],
-                        'token': token
-                    }
-                    return await self.send_response(200, json.dumps(response_data).encode(),
-                        headers=[(b"Content-Type", b"application/json")])
+                username = user_data['login']
 
-                else:
-                    user = await self.create_user_oauth(user_data['login'], access_token)
-                    token = jwt.encode({
-                        'id': user.id,
-                        'username': user.username,
-                        'exp': datetime.datetime.now(datetime.UTC) + datetime.timedelta(hours=1)
-                    }, SECRET_KEY, algorithm='HS256')
-                    response_data = {
-                        'success': True,
-						'status': 201,
-                        'message': 'Signup successful',
-                        'token': token
-                    }
-                    return await self.send_response(201, json.dumps(response_data).encode(),
-                        headers=[(b"Content-Type", b"application/json")])
+                user = await self.get_user_by_name(username)
+                if not user:
+                    user = await self.create_user_oauth(username, access_token)
+
+                response_data = {
+                    'success': True,
+                    'message': 'Login successful',
+				    'username': username,
+                    'token': generate_jwt(user)
+                }
+                return await self.send_response(200, json.dumps(response_data).encode(),
+                    headers=[(b"Content-Type", b"application/json")])
             else:
                 response_data = {
                     'success': False,
-                    'message': f"Failed to fetch user data. Status code: {user_response.status_code}"
+                    'message': f"Failed to fetch user: {user_response.json()}"
                 }
                 return await self.send_response(500, json.dumps(response_data).encode(),
                     headers=[(b"Content-Type", b"application/json")])

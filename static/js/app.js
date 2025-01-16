@@ -1,7 +1,7 @@
 import LoginView from './components/pages/LoginView.js';
 import MainView from './components/pages/MainView.js';
 import SettingsView from './components/pages/SettingsView.js';
-import SignUpAuthView from './components/login/SignUpOAuth.js';
+import LoginOAuth from './components/login/LoginOAuth.js';
 //import GameView from './components/GameView.js';
 import Router from './router.js';
 
@@ -14,7 +14,7 @@ class App {
             { path: '/index', component: MainView },
             //{ path: '/game', component: GameView },
             { path: '/settings', component: SettingsView },
-            { path: '/signup/oauth', component: SignUpAuthView },
+            { path: '/login/oauth', component: LoginOAuth },
 			{ path: '*', component: LoginView },
 		]
         this.state = {
@@ -23,7 +23,6 @@ class App {
         };
         this.avatarCache = {};
         this.ingame = sessionStorage.getItem('ingame') === 'true';
-        console.log("ingame", this.ingame);
 		window.app = this;
         this.router = new Router(this.routes);
 
