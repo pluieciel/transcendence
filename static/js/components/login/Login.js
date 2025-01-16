@@ -51,7 +51,7 @@ export default class Login {
 	async addOAuthEventListeners() {
 		const errorDiv = this.container.querySelector('#loginError');
 		try {
-			const response = await fetch('/api/get/oauth/', {
+			const response = await fetch('/api/get/oauth/redirect', {
                 method: 'POST',
                 headers: {
 					'Content-Type': 'application/json'
@@ -61,15 +61,11 @@ export default class Login {
 
 			if (data.success) {
 				const login42 = this.container.querySelector('#login42');
-				const clientId = data.client_id;
-				const redirectUri = encodeURIComponent(data.redirect_uri);
-				const state = 'this_is_a_very_long_random_string_i_am_unguessable';
-				const authorizeUrl = `https://api.intra.42.fr/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=public&state=${state}`;
 
 				login42.addEventListener("click", () => {
 					window.app.state.isLoggedIn = true;
 					sessionStorage.setItem('isLoggedIn', 'true');
-					window.location.href = authorizeUrl;
+					window.location.href = data.auth_url;
 		        });
 			}
 		} catch (error) {

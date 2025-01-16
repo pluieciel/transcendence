@@ -1,7 +1,7 @@
 # views.py
 import time
 from operator import truediv
-from secrets import token_bytes
+from secrets import token_bytes, token_urlsafe
 from channels.generic.http import AsyncHttpConsumer
 from django.contrib.auth import get_user_model, authenticate
 from channels.db import database_sync_to_async
@@ -574,14 +574,27 @@ class OAuthConsumer(AsyncHttpConsumer):
     async def handle(self, body):
         try:
             client_id = get_secret_from_file('OAUTH_CLIENT_ID_FILE')
+            redirect_uri = os.environ.get('OAUTH_REDIRECT_URI')
+
+            # TODO: verify state
+            state = token_urlsafe(32)
+            state = 'this_is_a_very_long_random_string_i_am_unguessable'
+
+            auth_url = (
+                f"https://api.intra.42.fr/oauth/authorize?"
+                f"client_id={client_id}&"
+                f"redirect_uri={redirect_uri}&"
+                f"response_type=code&"
+                f"scope=public&"
+                f"state={state}"
+            )
 
             response_data = {
                 'success': True,
-                'client_id': client_id,
-                'redirect_uri': os.environ.get('OAUTH_REDIRECT_URI'),
+                'auth_url': auth_url,
             }
             return await self.send_response(200, json.dumps(response_data).encode(),
-                                            headers=[(b"Content-Type", b"application/json")])
+                headers=[(b"Content-Type", b"application/json")])
         except Exception as e:
             response_data = {
                 'success': False,

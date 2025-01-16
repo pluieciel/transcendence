@@ -38,7 +38,7 @@ http_patterns = [
     re_path(r'^api/get/profile/.*$', ProfileConsumer2.as_asgi()),
     re_path(r'^api/get/avatar/.*$', AvatarConsumer.as_asgi()),
     path('api/get/profile', ProfileConsumer.as_asgi()),
-    path('api/get/oauth/', OAuthConsumer.as_asgi()),
+    path('api/get/oauth/redirect', OAuthConsumer.as_asgi()),
     path('admin/', get_asgi_application()),
 ]
 
