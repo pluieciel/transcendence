@@ -19,7 +19,7 @@ export default class Login {
                             </div>
                             <div id="loginError" class="alert alert-danger d-none"></div>
                             <button type="submit" class="btn btn-primary w-100">Log In</button>
-                            <button type="button" class="btn btn-primary w-100 LogIn42 OAuth">Login In with 42</button>
+                            <button type="button" class="btn btn-primary w-100 OAuth" id="login42">Login In with 42</button>
                         </form>
                     </div>
                 </div>
@@ -48,17 +48,30 @@ export default class Login {
         `;
     }
 
-	addOAuthEventListeners() {
-		const form42 = this.container.querySelector('.LogIn42');
-		const clientId = 'u-s4t2ud-ba5b0c72367af9ad1efbf4d20585f3c315b613ece176ca16919733a7dba999d5';
-		const redirectUri = encodeURIComponent('http://10.11.3.2:9000/signup/oauth');
-		const scope = 'public';
-		const state = 'this_is_a_very_long_random_string_i_am_unguessable';
-		const authorizeUrl = `https://api.intra.42.fr/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&state=${state}`;
+	async addOAuthEventListeners() {
+		const errorDiv = this.container.querySelector('#loginError');
+		try {
+			const response = await fetch('/api/get/oauth/redirect', {
+                method: 'POST',
+                headers: {
+					'Content-Type': 'application/json'
+                },
+            });
+			const data = await response.json();
 
-		form42.addEventListener("click", () => {
-			window.location.href = authorizeUrl;
-        });
+			if (data.success) {
+				const login42 = this.container.querySelector('#login42');
+
+				login42.addEventListener("click", () => {
+					window.app.state.isLoggedIn = true;
+					sessionStorage.setItem('isLoggedIn', 'true');
+					window.location.href = data.auth_url;
+		        });
+			}
+		} catch (error) {
+			errorDiv.textContent = 'An error occurred:' + error;
+            errorDiv.classList.remove('d-none');
+		}
 	}
 
 	add2FAEventListeners() {
@@ -143,7 +156,7 @@ export default class Login {
 	}
 
     addEventListeners() {
-        this.addOAuthEventListeners();
+        this.addOAuthEventListeners().then();
         this.add2FAEventListeners();
 		this.addLoginEventListeners();
     }

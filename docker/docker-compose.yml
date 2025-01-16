@@ -38,11 +38,15 @@ services:
             POSTGRES_PASSWORD_FILE: /run/secrets/postgres-passwd
             DJANGO_SUPERUSER_PASSWORD_FILE: /run/secrets/django-passwd
             JWT_SECRET_KEY_FILE: /run/secrets/jwt-secret-key
+            OAUTH_CLIENT_ID_FILE: /run/secrets/oauth_client_id
+            OAUTH_CLIENT_SECRET_FILE: /run/secrets/oauth_client_secret
         env_file: .env
         secrets:
             - postgres-passwd
             - django-passwd
             - jwt-secret-key
+            - oauth_client_id
+            - oauth_client_secret
         volumes:
             - django_data:/usr/src/app
         networks:
@@ -288,3 +292,7 @@ secrets:
         file: ${PWD}/docker/secrets/grafana-passwd.txt
     jwt-secret-key:
         file: ${PWD}/docker/secrets/jwt-secret-key.txt
+    oauth_client_id:
+        file: ${PWD}/docker/secrets/oauth_client_id.txt
+    oauth_client_secret:
+        file: ${PWD}/docker/secrets/oauth_client_secret.txt

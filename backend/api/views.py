@@ -1,7 +1,7 @@
 # views.py
 import time
 from operator import truediv
-from secrets import token_bytes
+from secrets import token_bytes, token_urlsafe
 from channels.generic.http import AsyncHttpConsumer
 from django.contrib.auth import get_user_model, authenticate
 from channels.db import database_sync_to_async
@@ -44,6 +44,17 @@ async def jwt_to_user(token):
     except jwt.InvalidTokenError:
         return False
 
+def generate_jwt(user):
+    iat = datetime.datetime.now(datetime.UTC)
+    exp = iat + datetime.timedelta(hours=1)
+
+    return jwt.encode({
+        'id': user.id,
+        'username': user.username,
+        'iat': iat,
+        'exp': exp
+    }, SECRET_KEY, algorithm='HS256')
+
 def generate_totp(secret, offset):
     time_counter = int(time.time() // 30) + offset
     time_bytes = time_counter.to_bytes(8, 'big')
@@ -63,6 +74,13 @@ def verify_totp(totp_secret, totp_input):
         if totp == int(totp_input):
             return True
     return False
+
+def get_secret_from_file(env_var):
+    file_path = os.environ.get(env_var)
+    if file_path is None:
+        raise ValueError(f'{env_var} environment variable not set')
+    with open(file_path, 'r') as file:
+        return file.read().strip()
 
 class SignupConsumer(AsyncHttpConsumer):
     async def handle(self, body):
@@ -254,16 +272,10 @@ class LoginConsumer(AsyncHttpConsumer):
             is_2fa_enabled = user.is_2fa_enabled
 
             if not is_2fa_enabled:
-                token = jwt.encode({
-                    'id': user.id,
-                    'username': user.username,
-                    'exp': datetime.datetime.now(datetime.UTC) + datetime.timedelta(hours=1)
-                }, SECRET_KEY, algorithm='HS256')
-
                 response_data = {
                     'success': True,
                     'message': 'Login successful',
-                    'token': token,
+                    'token': generate_jwt(user),
                 }
             else:
                 response_data = {
@@ -301,7 +313,7 @@ class Login2FAConsumer(AsyncHttpConsumer):
             totp_input = data.get('totp')
             username = data.get('username')
 
-            user = await self.get_user(username)
+            user = await self.get_user_by_name(username)
 
             is_totp_valid = verify_totp(user.totp_secret, totp_input)
 
@@ -313,16 +325,10 @@ class Login2FAConsumer(AsyncHttpConsumer):
                 return await self.send_response(401, json.dumps(response_data).encode(),
                     headers=[(b"Content-Type", b"application/json")])
 
-            token = jwt.encode({
-                'id': user.id,
-                'username': user.username,
-                'exp': datetime.datetime.now(datetime.UTC) + datetime.timedelta(hours=1)
-            }, SECRET_KEY, algorithm='HS256')
-
             response_data = {
                 'success': True,
                 'message': 'Login successful',
-                'token': token
+                'token': generate_jwt(user)
             }
             return await self.send_response(200, json.dumps(response_data).encode(),
                 headers=[(b"Content-Type", b"application/json")])
@@ -335,9 +341,9 @@ class Login2FAConsumer(AsyncHttpConsumer):
                 headers=[(b"Content-Type", b"application/json")])
 
     @database_sync_to_async
-    def get_user(self, username):
+    def get_user_by_name(self, username):
         User = get_user_model()
-        return User.objects.get(username=username)
+        return User.objects.filter(username=username).first()
 
 class Generate2FAConsumer(AsyncHttpConsumer):
     async def handle(self, body):
@@ -564,19 +570,55 @@ class UpdateConsumer(AsyncHttpConsumer):
                     data[name] = content.decode('utf-8')
         return data
 
-class HandleOAuthConsumer(AsyncHttpConsumer):
+class OAuthConsumer(AsyncHttpConsumer):
+    async def handle(self, body):
+        try:
+            client_id = get_secret_from_file('OAUTH_CLIENT_ID_FILE')
+            redirect_uri = os.environ.get('OAUTH_REDIRECT_URI')
+
+            # TODO: verify state
+            state = token_urlsafe(32)
+            state = 'this_is_a_very_long_random_string_i_am_unguessable'
+
+            auth_url = (
+                f"https://api.intra.42.fr/oauth/authorize?"
+                f"client_id={client_id}&"
+                f"redirect_uri={redirect_uri}&"
+                f"response_type=code&"
+                f"scope=public&"
+                f"state={state}"
+            )
+
+            response_data = {
+                'success': True,
+                'auth_url': auth_url,
+            }
+            return await self.send_response(200, json.dumps(response_data).encode(),
+                headers=[(b"Content-Type", b"application/json")])
+        except Exception as e:
+            response_data = {
+                'success': False,
+                'message': str(e)
+            }
+            return await self.send_response(500, json.dumps(response_data).encode(),
+                headers=[(b"Content-Type", b"application/json")])
+
+class LoginOAuthConsumer(AsyncHttpConsumer):
     async def handle(self, body):
         try:
             data = json.loads(body.decode())
             code = data.get('token')
 
+            client_id = get_secret_from_file('OAUTH_CLIENT_ID_FILE')
+            client_secret = get_secret_from_file('OAUTH_CLIENT_SECRET_FILE')
+
             url = 'https://api.intra.42.fr/oauth/token'
             params = {
                 'grant_type': 'authorization_code',
-                'client_id': 'u-s4t2ud-ba5b0c72367af9ad1efbf4d20585f3c315b613ece176ca16919733a7dba999d5',
-                'client_secret': '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',
+                'client_id': client_id,
+                'client_secret': client_secret,
                 'code': code,
-                'redirect_uri': 'http://10.11.3.2:9000/signup/oauth'
+                'redirect_uri': os.environ.get('OAUTH_REDIRECT_URI')
             }
 
             response = requests.post(url, data=params)
@@ -598,29 +640,24 @@ class HandleOAuthConsumer(AsyncHttpConsumer):
 
             if user_response.status_code == 200:
                 user_data = user_response.json()
-                if await self.get_user_exists(user_data['login']):
-                    response_data = {
-                        'success': True,
-						'status': 200,
-                        'message': 'Login successful',
-						'username': user_data['login']
-                    }
-                    return await self.send_response(200, json.dumps(response_data).encode(),
-                        headers=[(b"Content-Type", b"application/json")])
+                username = user_data['login']
 
-                else:
-                    await self.create_user_oauth(user_data['login'], access_token)
-                    response_data = {
-                        'success': True,
-						'status': 201,
-                        'message': 'Signup successful'
-                    }
-                    return await self.send_response(201, json.dumps(response_data).encode(),
-                        headers=[(b"Content-Type", b"application/json")])
+                user = await self.get_user_by_name(username)
+                if not user:
+                    user = await self.create_user_oauth(username, access_token)
+
+                response_data = {
+                    'success': True,
+                    'message': 'Login successful',
+				    'username': username,
+                    'token': generate_jwt(user)
+                }
+                return await self.send_response(200, json.dumps(response_data).encode(),
+                    headers=[(b"Content-Type", b"application/json")])
             else:
                 response_data = {
                     'success': False,
-                    'message': f"Failed to fetch user data. Status code: {user_response.status_code}"
+                    'message': f"Failed to fetch user: {user_response.json()}"
                 }
                 return await self.send_response(500, json.dumps(response_data).encode(),
                     headers=[(b"Content-Type", b"application/json")])
@@ -632,15 +669,16 @@ class HandleOAuthConsumer(AsyncHttpConsumer):
             }
             return await self.send_response(500, json.dumps(response_data).encode(),
                 headers=[(b"Content-Type", b"application/json")])
+
     @database_sync_to_async
     def create_user_oauth(self, username, token):
         User = get_user_model()
-        user = User.objects.create_user_oauth(username=username, token=token)
-        return user
+        return User.objects.create_user_oauth(username=username, token=token)
+
     @database_sync_to_async
-    def get_user_exists(self, username):
+    def get_user_by_name(self, username):
         User = get_user_model()
-        return User.objects.filter(username=username).exists()
+        return User.objects.filter(username=username).first()
 
 class ProfileConsumer(AsyncHttpConsumer):
     async def handle(self, body):
@@ -696,9 +734,7 @@ class ProfileConsumer(AsyncHttpConsumer):
 class ProfileConsumer2(AsyncHttpConsumer):
     async def handle(self, body):
         try:
-            #print(self.scope, flush=True)
             headers = dict((key.decode('utf-8'), value.decode('utf-8')) for key, value in self.scope['headers'])
-            #print(headers, flush=True)
             auth_header = headers.get('authorization', None)
             if not auth_header:
                 response_data = {
