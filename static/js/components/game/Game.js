@@ -2,13 +2,15 @@ import { Renderer } from "./Renderer.js";
 import { SceneManager } from "./SceneManager.js";
 import { InputManager } from "./InputManager.js";
 import { ParticleSystem } from "./ParticleSystem.js";
+import { Loading } from "./Loading.js";
 //import * as THREE from 'three';
 import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
 
 export class Game {
 	constructor(canvas, ws) {
+		this.loading = new Loading();
 		this.renderer = new Renderer(canvas);
-		this.sceneManager = new SceneManager();
+		this.sceneManager = new SceneManager(this.loading);
 		this.inputManager = new InputManager();
 		this.uiManager = this.sceneManager.UIManager;
 		this.ws = ws;
@@ -34,6 +36,11 @@ export class Game {
 				this.sceneManager.trajVisible = !this.sceneManager.trajVisible;
 			}
 		});
+
+		this.loading.onComplete = () => {
+			this.sendInitDone();
+			this.sceneManager.bonuses.displayPowerUp(1, new THREE.Vector3(0, 0, 0));
+		};
 	}
 
 	handleUnrecognizedToken() {}
@@ -58,15 +65,14 @@ export class Game {
 	}
 
 	initialize(data, side) {
-		this.sceneManager.setupLights();
-		this.sceneManager.createObjects();
-		this.sceneManager.hideObjects();
+		// this.sceneManager.setupLights();
+		// this.sceneManager.createObjects();
+		// this.sceneManager.hideObjects();
 		this.ball = this.sceneManager.ball;
-		this.sceneManager.hideBall();
 		this.sceneInitialized = this.validateSceneInitialization();
 		this.animate();
 
-		this.particleSystem = new ParticleSystem(this.sceneManager.getScene());
+		this.particleSystem = new ParticleSystem(this.sceneManager.scene);
 		this.handleInit(data, side);
 		this.sendInitDone();
 	}
@@ -184,6 +190,10 @@ export class Game {
 		}
 	}
 
+	getScene() {
+		return this.sceneManager.scene;
+	}
+
 	handleGameEnd() {
 		// Your existing game end logic
 
@@ -208,6 +218,6 @@ export class Game {
 			//this.sceneManager.model.rotation.x += 0.02;
 		}
 
-		this.renderer.render(this.sceneManager.getScene(), this.sceneManager.getCamera());
+		this.renderer.render(this.sceneManager.scene, this.sceneManager.camera);
 	}
 }

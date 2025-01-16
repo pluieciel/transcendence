@@ -3,7 +3,7 @@ import time
 import random
 import math
 import logging
-from .game_logic import Vector2D
+from .normal_game_logic import Vector2D
 
 class Bot:
 	def __init__(self, difficulty, game):

@@ -152,7 +152,7 @@ class GameBounds:
 		self.left = Vector2D(-20, -3, -15)
 		self.right = Vector2D(20, -3, -15)
 
-class GameInstance:
+class NormalGameInstance:
 	def __init__(self, broadcast_fun, game_end_fun):
 		self.bounds = GameBounds()
 		self.player_left = Player(Vector2D(self.bounds.left.x + 2, -3, -15), 0,{"ArrowUp": False, "ArrowDown": False}, self.bounds)
@@ -166,8 +166,8 @@ class GameInstance:
 		self.loop_task = None
 		self.scored = False
 		self.scorePos = Vector2D(0,0,0)
-		self.maxScore = 2
-		self.maxScoreLimit = 50
+		self.maxScore = 100
+		self.maxScoreLimit = 150
 		self.broadcast_function = broadcast_fun
 		self.game_end_fun = game_end_fun
 		self.logger = logging.getLogger('game')

@@ -2,7 +2,8 @@ import asyncio
 import time
 import logging
 import json
-from .game_logic import GameInstance, GameBounds
+from .normal_game_logic import NormalGameInstance, GameBounds
+from .rumble_game_logic import RumbleGameInstance, GameBounds
 from channels.db import database_sync_to_async
 from .bot import Bot
 from api.user_db_utils import user_update_game
@@ -18,15 +19,17 @@ class User:
 
 class GameBackend:
 	def __init__(self, room_id, bot, manager, ranked):
+		self.logger = logging.getLogger('game')
 		self.game_id = room_id
-		self.game = GameInstance(self.broadcast_state, self.on_game_end)
+		self.game_type = "rumble"
+		self.game = self.get_game_instance(self.game_type)
 		self.game_mode = "Vanilla"
 		self.is_ranked = ranked
 		self.channel_layer = None
 		self.manager = manager
 		self.player_left = None
 		self.player_right = None
-		self.logger = logging.getLogger('game')
+
 		self.elo_k_factor = 40
 		self.is_bot_game = bot and bot > 0
 		if (self.is_bot_game):
@@ -41,6 +44,16 @@ class GameBackend:
 		elif websocket == self.player_right.channel:
 			self.logger.info(f"Right player pressed {key}")
 			self.game.player_right.keys[key] = is_down
+
+	def get_game_instance(self, type):
+		if (type is "vanilla"):
+			return NormalGameInstance(self.broadcast_state, self.on_game_end)
+		elif (type is "rumble"):
+			return RumbleGameInstance(self.rumble_broadcast_state, self.on_game_end)
+		else:
+			self.logger.error("Game type not found")
+
+
 
 	def is_full(self):
 		self.logger.info(self.player_left is not None and self.player_right is not None)
@@ -137,7 +150,7 @@ class GameBackend:
 			self.manager.remove_game(self.game_id)
 			game_history_db = await self.manager.get_game_by_id(self.game_id)
 			await self.manager.set_game_state(game_history_db, 'finished', self.game.player_left.score, self.game.player_right.score)
-			
+
 			#next round for tournament
 			if game_history_db.game_category == "Tournament1":
 				next_game_place = game_history_db.tournament_round2_place
@@ -150,11 +163,11 @@ class GameBackend:
 				else:
 					await self.manager.set_game_state(new_game_history_db, 'waiting', player_b=winner)
 					self.chat_consumer.tournament_info["round2"]["game1"]["p2"] = winner.username
-				
+
 				if self.chat_consumer.tournament_info["round2"]["game1"].get("p1", None) and self.chat_consumer.tournament_info["round2"]["game1"].get("p2", None):
 					self.chat_consumer.tournament_info["round2"]["game1"]["state"] = "prepare"
 					self.chat_consumer.tournament_info["state"] = "Playing2to1"
-					
+
 				redis_client = redis.Redis(host='redis', port=6379, db=0)
 				groups = [g.decode('utf-8') for g in redis_client.smembers('active_groups')]
 				channel_layer = get_channel_layer()
@@ -172,7 +185,7 @@ class GameBackend:
 					)
 			elif game_history_db.game_category == "Tournament2":
 				self.chat_consumer.tournament_info["round2"]["game1"]["winner"] = winner.username
-	
+
 				redis_client = redis.Redis(host='redis', port=6379, db=0)
 				groups = [g.decode('utf-8') for g in redis_client.smembers('active_groups')]
 				channel_layer = get_channel_layer()
@@ -202,7 +215,7 @@ class GameBackend:
 							"time": datetime.now().strftime("%H:%M:%S")
 						}
 					)
-			
+
 		except Exception as e:
 			self.logger.error(f"Error in on_game_end: {str(e)}")
 			import traceback
@@ -239,6 +252,54 @@ class GameBackend:
 			await self.update_user_elo(self.player_right.user, new_elo_pright)
 
 	async def broadcast_state(self):
+		events = []
+		if self.game.scored:
+			events.append({"type": "score", "position": vars(self.game.scorePos)})
+			self.game.scored = False
+		if self.game.ended:
+			self.logger.info(f"Appending winner info with {self.game.winner}")
+			events.append({"type": "game_end", "winner": self.game.winner})
+
+		trajectory_points = self.game.ball.predict_trajectory()
+		trajectory_data = [vars(point) for point in trajectory_points]
+
+		state = {
+			"type": "game.update",
+			"data": {
+				"positions": {
+					"player_left": vars(self.game.player_left.position),
+					"player_right": vars(self.game.player_right.position),
+					"ball": vars(self.game.ball.position),
+					"borders": {
+						"top": vars(self.game.bounds.top),
+						"bottom": vars(self.game.bounds.bottom),
+						"left": vars(self.game.bounds.left),
+						"right": vars(self.game.bounds.right),
+					}
+				},
+				"trajectory": trajectory_data,
+				"player": {
+					"left": {
+						"name": self.player_left.user.username,
+						"rank": self.player_left.user.elo,
+						"score": self.game.player_left.score
+					},
+					"right": {
+						"name": self.player_right.user.username,
+						"rank": self.player_right.user.elo,
+						"score": self.game.player_right.score
+					}
+				},
+				"game_started": self.game.is_running,
+				"events": events
+			}
+		}
+		try:
+			await self.channel_layer.group_send(str(self.game_id), state)
+		except Exception as e:
+			self.logger.info(f"Error {e}")
+
+	async def rumble_broadcast_state(self):
 		events = []
 		if self.game.scored:
 			events.append({"type": "score", "position": vars(self.game.scorePos)})

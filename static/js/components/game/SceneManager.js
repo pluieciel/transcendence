@@ -1,33 +1,61 @@
 import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
 import { UIManager } from "./UIManager.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { Bonuses } from "./BonusSystem.js";
+import { Loading } from "./Loading.js";
 
 export class SceneManager {
-	constructor() {
-		this.scene = new THREE.Scene();
-		this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-		this.camera.position.set(0, 0, 20);
+	constructor(loading) {
 		this.paddles = [];
 		this.ball = null;
-		this.UIManager = new UIManager();
 		this.topBorder = null;
 		this.bottomBorder = null;
 		this.rightBorder = null;
 		this.leftBorder = null;
 		this.trajectoryLine = null;
 		this.trajVisible = false;
+		this.controls = null;
+
+		this.loading = loading;
+		this.loading.addComponent("scene");
+		this.initializeComponents();
+		this.setupScene();
+	}
+
+	initializeComponents() {
+		this.scene = new THREE.Scene();
+		this.camera = this.createCamera();
+		//this.bonuses = new Bonuses(this.scene);
+		this.UIManager = new UIManager();
+	}
+
+	setupScene() {
+		this.setupLights();
+		this.createGameObjects();
+		this.hideObjects();
+	}
+
+	createCamera() {
+		const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+		camera.position.set(0, 0, 20);
+		//camera.position.set(0, 5, 5);
+
+		this.controls = new OrbitControls(camera, document.querySelector("canvas"));
+		this.controls.enableDamping = true; // Add smooth damping
+		this.controls.dampingFactor = 0.05;
+		this.controls.minDistance = 10; // Minimum zoom distance
+		this.controls.maxDistance = 50; // Maximum zoom
+		return camera;
 	}
 
 	updateTrajectory(trajectoryPoints) {
-		// Remove existing trajectory line if it exists
 		if (this.trajectoryLine) {
 			this.scene.remove(this.trajectoryLine);
 		}
 
 		if (!trajectoryPoints || trajectoryPoints.length < 2) return;
 
-		// Create geometry for the line
 		const points = trajectoryPoints.map((point) => new THREE.Vector3(point.x, point.y, point.z));
 
 		const geometry = new THREE.BufferGeometry().setFromPoints(points);
@@ -42,7 +70,6 @@ export class SceneManager {
 	}
 
 	hideObjects() {
-		// Hide all game objects
 		this.paddles.forEach((paddle) => (paddle.visible = false));
 		if (this.ball) this.ball.visible = false;
 		if (this.topBorder) this.topBorder.visible = false;
@@ -54,29 +81,37 @@ export class SceneManager {
 	}
 
 	hideBall() {
-		console.log("ball invisbile");
 		if (this.ball) this.ball.visible = false;
 	}
 
 	showObjects() {
-		// Show all game objects
 		this.paddles.forEach((paddle) => (paddle.visible = true));
 		if (this.ball) this.ball.visible = true;
 		if (this.topBorder) this.topBorder.visible = true;
 		if (this.bottomBorder) this.bottomBorder.visible = true;
 		if (this.leftBorder) this.leftBorder.visible = true;
 		if (this.rightBorder) this.rightBorder.visible = true;
-
 		this.UIManager.setTextsVisibility(true);
 	}
 
 	setupLights() {
 		const light = new THREE.DirectionalLight(0xfafafa, 9);
 		const ambientLight = new THREE.AmbientLight(0xfafafa); // Soft white light
-		light.position.set(0, 0, 1);
+		//light.position.set(0, 0, 1);
+		light.position.set(-10, 1, 3);
+		light.rotation.x = -Math.PI / 4;
+		light.rotation.y = -Math.PI / 4;
 		light.castShadow = true;
 		this.scene.add(light);
 		this.scene.add(ambientLight);
+	}
+
+	async createGameObjects() {
+		try {
+			await Promise.all([this.createPaddles(), this.createBall(), this.createPlayableArea() /*, this.bonuses.createBonuses()*/]);
+		} catch (error) {
+			console.error("Failed to create game objects:", error);
+		}
 	}
 
 	createPaddles() {
@@ -126,47 +161,5 @@ export class SceneManager {
 
 	createDecor() {
 		this.createPlayableArea();
-	}
-	createObjects() {
-		this.createPaddles();
-		this.createBall();
-		this.createDecor();
-	}
-
-	getScene() {
-		return this.scene;
-	}
-
-	getCamera() {
-		return this.camera;
-	}
-
-	getPaddles() {
-		return this.paddles;
-	}
-
-	updateGameState(data) {
-		if (data.player) {
-			// Update paddle positions
-			this.updatePaddle(this.paddles[0], data.player.left.position);
-			this.updatePaddle(this.paddles[1], data.player.right.position);
-			console.log("test000");
-		}
-
-		if (data.ball) {
-			this.updateBall(data.ball.position);
-		}
-	}
-
-	updatePaddle(paddle, position) {
-		if (paddle && position) {
-			paddle.position.set(position.x, position.y, position.z);
-		}
-	}
-
-	updateBall(position) {
-		if (this.ball && position) {
-			this.ball.position.set(position.x, position.y, position.z);
-		}
 	}
 }

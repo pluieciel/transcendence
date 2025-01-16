@@ -1,45 +1,68 @@
 import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
+export class BonusType {
+	static BUBBLE = 0;
+	static LIGHTNING = 1;
+	static COIN = 2;
+	static HEART = 3;
+}
 export class Bonuses {
-	constructor() {
-		this.defaultPath = "/js/components/game/";
-		this.bubble = this.defaultPath + "Bubble.glb";
+	constructor(scene) {
+		this.bonusGroup = new THREE.Group();
+		this.scene = scene;
 	}
 
-	getBonus() {
+	async createBonuses() {
 		const loader = new GLTFLoader();
-		const modelGroup = new THREE.Group();
+		const models = [
+			{ type: BonusType.BUBBLE, path: "/js/components/game/Bubble.glb" },
+			{ type: BonusType.LIGHTNING, path: "/js/components/game/Lightning.glb" },
+			{ type: BonusType.COIN, path: "/js/components/game/Coin.glb" },
+			{ type: BonusType.HEART, path: "/js/components/game/Heart.glb" },
+		];
 
-		loader.load(
-			"/js/components/game/Bubble.glb",
-			(gltf) => {
-				const bubbleModel = gltf.scene;
-				bubbleModel.scale.set(0.1, 0.1, 0.1);
-				this.modelGroup.add(bubbleModel);
+		try {
+			await Promise.all(models.map((model) => this.loadModel(model, loader)));
+			this.scene.add(this.bonusGroup);
+			return this.bonusGroup;
+		} catch (error) {
+			console.error("Failed to load bonus models:", error);
+			throw error;
+		}
+	}
 
-				// Load Lightning (powerup) after bubble is loaded
-				loader.load(
-					"/js/components/game/Lightning.glb",
-					(gltf) => {
-						const powerupModel = gltf.scene;
-						powerupModel.scale.set(0.1, 0.1, 0.1);
-						// Adjust position relative to bubble if needed
-						powerupModel.position.set(0, 0, 0);
-						this.modelGroup.add(powerupModel);
+	loadModel(model, loader) {
+		return new Promise((resolve, reject) => {
+			loader.load(
+				model.path,
+				(gltf) => {
+					const bonusModel = gltf.scene;
+					bonusModel.scale.set(0.1, 0.1, 0.1);
+					bonusModel.visible = false;
+					this.bonusGroup.add(bonusModel);
+					resolve();
+				},
+				null,
+				reject,
+			);
+		});
+	}
 
-						// Add the complete group to the scene
-						this.scene.add(this.modelGroup);
+	hidePowerups() {
+		if (!this.bonusGroup) {
+			console.error("Model group is not initialized.");
+			return;
+		}
+		this.bonusGroup.children.forEach((child) => {
+			child.visible = false;
+		});
+	}
 
-						// Store reference to the group
-						this.combinedModel = this.modelGroup;
-					},
-					null,
-					(error) => console.error("Error loading Lightning:", error),
-				);
-			},
-			null,
-			(error) => console.error("Error loading Bubble:", error),
-		);
+	displayPowerUp(PowerUp, position) {
+		this.hidePowerups();
+		this.bonusGroup.children[BonusType.BUBBLE].visible = true;
+		//this.bonusGroup.children[PowerUp].visible = true;
+		this.bonusGroup.position.set(position.x, position.y, position.z);
 	}
 }
