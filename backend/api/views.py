@@ -75,6 +75,13 @@ def verify_totp(totp_secret, totp_input):
             return True
     return False
 
+def get_secret_from_file(env_var):
+    file_path = os.environ.get(env_var)
+    if file_path is None:
+        raise ValueError(f'{env_var} environment variable not set')
+    with open(file_path, 'r') as file:
+        return file.read().strip()
+
 class SignupConsumer(AsyncHttpConsumer):
     async def handle(self, body):
         # Rate limiting logic
@@ -563,19 +570,42 @@ class UpdateConsumer(AsyncHttpConsumer):
                     data[name] = content.decode('utf-8')
         return data
 
+class OAuthConsumer(AsyncHttpConsumer):
+    async def handle(self, body):
+        try:
+            client_id = get_secret_from_file('OAUTH_CLIENT_ID_FILE')
+
+            response_data = {
+                'success': True,
+                'client_id': client_id,
+                'redirect_uri': os.environ.get('OAUTH_REDIRECT_URI'),
+            }
+            return await self.send_response(200, json.dumps(response_data).encode(),
+                                            headers=[(b"Content-Type", b"application/json")])
+        except Exception as e:
+            response_data = {
+                'success': False,
+                'message': str(e)
+            }
+            return await self.send_response(500, json.dumps(response_data).encode(),
+                headers=[(b"Content-Type", b"application/json")])
+
 class LoginOAuthConsumer(AsyncHttpConsumer):
     async def handle(self, body):
         try:
             data = json.loads(body.decode())
             code = data.get('token')
 
+            client_id = get_secret_from_file('OAUTH_CLIENT_ID_FILE')
+            client_secret = get_secret_from_file('OAUTH_CLIENT_SECRET_FILE')
+
             url = 'https://api.intra.42.fr/oauth/token'
             params = {
                 'grant_type': 'authorization_code',
-                'client_id': 'u-s4t2ud-8a6f002f24f0d857cbfedfb4fa1c8494933d7b0bcbb4a51dcc0efeb8806e046b',
-                'client_secret': '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',
+                'client_id': client_id,
+                'client_secret': client_secret,
                 'code': code,
-                'redirect_uri': 'https://10.11.3.1:9000/login/oauth'
+                'redirect_uri': os.environ.get('OAUTH_REDIRECT_URI')
             }
 
             response = requests.post(url, data=params)
@@ -691,9 +721,7 @@ class ProfileConsumer(AsyncHttpConsumer):
 class ProfileConsumer2(AsyncHttpConsumer):
     async def handle(self, body):
         try:
-            #print(self.scope, flush=True)
             headers = dict((key.decode('utf-8'), value.decode('utf-8')) for key, value in self.scope['headers'])
-            #print(headers, flush=True)
             auth_header = headers.get('authorization', None)
             if not auth_header:
                 response_data = {

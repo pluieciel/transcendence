@@ -48,18 +48,34 @@ export default class Login {
         `;
     }
 
-	addOAuthEventListeners() {
-		const login42 = this.container.querySelector('#login42');
-		const clientId = 'u-s4t2ud-8a6f002f24f0d857cbfedfb4fa1c8494933d7b0bcbb4a51dcc0efeb8806e046b';
-		const redirectUri = encodeURIComponent('https://10.11.3.1:9000/login/oauth');
-		const state = 'this_is_a_very_long_random_string_i_am_unguessable';
-		const authorizeUrl = `https://api.intra.42.fr/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=public&state=${state}`;
+	async addOAuthEventListeners() {
+		const errorDiv = this.container.querySelector('#loginError');
+		try {
+			const response = await fetch('/api/get/oauth/', {
+                method: 'POST',
+                headers: {
+					'Content-Type': 'application/json'
+                },
+            });
+			const data = await response.json();
 
-		login42.addEventListener("click", () => {
-			window.app.state.isLoggedIn = true;
-			sessionStorage.setItem('isLoggedIn', 'true');
-			window.location.href = authorizeUrl;
-        });
+			if (data.success) {
+				const login42 = this.container.querySelector('#login42');
+				const clientId = data.client_id;
+				const redirectUri = encodeURIComponent(data.redirect_uri);
+				const state = 'this_is_a_very_long_random_string_i_am_unguessable';
+				const authorizeUrl = `https://api.intra.42.fr/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=public&state=${state}`;
+
+				login42.addEventListener("click", () => {
+					window.app.state.isLoggedIn = true;
+					sessionStorage.setItem('isLoggedIn', 'true');
+					window.location.href = authorizeUrl;
+		        });
+			}
+		} catch (error) {
+			errorDiv.textContent = 'An error occurred:' + error;
+            errorDiv.classList.remove('d-none');
+		}
 	}
 
 	add2FAEventListeners() {
@@ -144,7 +160,7 @@ export default class Login {
 	}
 
     addEventListeners() {
-        this.addOAuthEventListeners();
+        this.addOAuthEventListeners().then();
         this.add2FAEventListeners();
 		this.addLoginEventListeners();
     }
