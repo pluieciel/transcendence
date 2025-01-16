@@ -301,7 +301,7 @@ class Login2FAConsumer(AsyncHttpConsumer):
             totp_input = data.get('totp')
             username = data.get('username')
 
-            user = await self.get_user(username)
+            user = await self.get_user_by_name(username)
 
             is_totp_valid = verify_totp(user.totp_secret, totp_input)
 
@@ -335,9 +335,9 @@ class Login2FAConsumer(AsyncHttpConsumer):
                 headers=[(b"Content-Type", b"application/json")])
 
     @database_sync_to_async
-    def get_user(self, username):
+    def get_user_by_name(self, username):
         User = get_user_model()
-        return User.objects.get(username=username)
+        return User.objects.filter(username=username).first()
 
 class Generate2FAConsumer(AsyncHttpConsumer):
     async def handle(self, body):
@@ -573,10 +573,10 @@ class HandleOAuthConsumer(AsyncHttpConsumer):
             url = 'https://api.intra.42.fr/oauth/token'
             params = {
                 'grant_type': 'authorization_code',
-                'client_id': 'u-s4t2ud-ba5b0c72367af9ad1efbf4d20585f3c315b613ece176ca16919733a7dba999d5',
-                'client_secret': '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',
+                'client_id': 'u-s4t2ud-8a6f002f24f0d857cbfedfb4fa1c8494933d7b0bcbb4a51dcc0efeb8806e046b',
+                'client_secret': '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',
                 'code': code,
-                'redirect_uri': 'http://10.11.3.2:9000/signup/oauth'
+                'redirect_uri': 'https://10.11.3.1:9000/signup/oauth'
             }
 
             response = requests.post(url, data=params)
@@ -598,22 +598,35 @@ class HandleOAuthConsumer(AsyncHttpConsumer):
 
             if user_response.status_code == 200:
                 user_data = user_response.json()
-                if await self.get_user_exists(user_data['login']):
+                user = await self.get_user_by_name(user_data['login'])
+                if user:
+                    token = jwt.encode({
+                        'id': user.id,
+                        'username': user.username,
+                        'exp': datetime.datetime.now(datetime.UTC) + datetime.timedelta(hours=1)
+                    }, SECRET_KEY, algorithm='HS256')
                     response_data = {
                         'success': True,
 						'status': 200,
                         'message': 'Login successful',
-						'username': user_data['login']
+						'username': user_data['login'],
+                        'token': token
                     }
                     return await self.send_response(200, json.dumps(response_data).encode(),
                         headers=[(b"Content-Type", b"application/json")])
 
                 else:
-                    await self.create_user_oauth(user_data['login'], access_token)
+                    user = await self.create_user_oauth(user_data['login'], access_token)
+                    token = jwt.encode({
+                        'id': user.id,
+                        'username': user.username,
+                        'exp': datetime.datetime.now(datetime.UTC) + datetime.timedelta(hours=1)
+                    }, SECRET_KEY, algorithm='HS256')
                     response_data = {
                         'success': True,
 						'status': 201,
-                        'message': 'Signup successful'
+                        'message': 'Signup successful',
+                        'token': token
                     }
                     return await self.send_response(201, json.dumps(response_data).encode(),
                         headers=[(b"Content-Type", b"application/json")])
@@ -632,15 +645,16 @@ class HandleOAuthConsumer(AsyncHttpConsumer):
             }
             return await self.send_response(500, json.dumps(response_data).encode(),
                 headers=[(b"Content-Type", b"application/json")])
+
     @database_sync_to_async
     def create_user_oauth(self, username, token):
         User = get_user_model()
-        user = User.objects.create_user_oauth(username=username, token=token)
-        return user
+        return User.objects.create_user_oauth(username=username, token=token)
+
     @database_sync_to_async
-    def get_user_exists(self, username):
+    def get_user_by_name(self, username):
         User = get_user_model()
-        return User.objects.filter(username=username).exists()
+        return User.objects.filter(username=username).first()
 
 class ProfileConsumer(AsyncHttpConsumer):
     async def handle(self, body):

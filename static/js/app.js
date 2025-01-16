@@ -6,8 +6,6 @@ import SignUpAuthView from './components/login/SignUpOAuth.js';
 import Router from './router.js';
 
 class App {
-    // Private
-    #state;
 
     constructor() {
 		
@@ -19,7 +17,7 @@ class App {
             { path: '/signup/oauth', component: SignUpAuthView },
 			{ path: '*', component: LoginView },
 		]
-        this.#state = {
+        this.state = {
             isLoggedIn: sessionStorage.getItem('isLoggedIn') === 'true',
             token: sessionStorage.getItem('token') || '',
         };
@@ -39,7 +37,7 @@ class App {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `${this.#state.token}`,
+                'Authorization': `${this.state.token}`,
             },
         });
         const data = await response.json();
@@ -48,28 +46,28 @@ class App {
     }
     
     login(data) {
-        this.#state.isLoggedIn = true;
-        this.#state.token = data.token;
+        this.state.isLoggedIn = true;
+        this.state.token = data.token;
         console.log("sessionStorageingame", sessionStorage.getItem('ingame'));
         sessionStorage.setItem('isLoggedIn', 'true');
-        sessionStorage.setItem('token', this.#state.token);
+        sessionStorage.setItem('token', this.state.token);
         this.router.navigateTo('/index');
     }
 
     logout() {
-        this.#state.isLoggedIn = false;
-        this.#state.token = '';
+        this.state.isLoggedIn = false;
+        this.state.token = '';
         this.ingame = false;
         sessionStorage.clear();
         this.router.navigateTo('/');
     }
 
     getIsLoggedIn() {
-        return this.#state.isLoggedIn;
+        return this.state.isLoggedIn;
     }
 
     getToken() {
-        return this.#state.token;
+        return this.state.token;
     }
 }
 

@@ -2,7 +2,8 @@ class SignUpAuthView {
     constructor(container) {
         this.container = container;
         this.render();
-        this.handleAuthResponse();
+        this.token = window.app.getToken();
+        this.handleAuthResponse().then();
     }
 
     render() {
@@ -53,9 +54,9 @@ class SignUpAuthView {
 
             const data = await response.json();
 
-            if (data['success']) {
-				if (data['status'] == 200) {
-					window.app.login(data['username']);
+            if (data.success) {
+				if (data.status == 200) {
+					window.app.login(data);
 					window.app.router.navigateTo('/index');
 				}
 				else if (data['status'] == 201)

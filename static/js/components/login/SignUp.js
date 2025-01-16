@@ -58,14 +58,17 @@ export default class SignUp {
     addEventListeners() {
 		const form = this.container.querySelector('#signupForm');
 		const form42 = this.container.querySelector('.SignUp42');
-		const clientId = 'u-s4t2ud-ba5b0c72367af9ad1efbf4d20585f3c315b613ece176ca16919733a7dba999d5';
-		const redirectUri = encodeURIComponent('http://10.11.3.2:9000/signup/oauth');
+		const clientId = 'u-s4t2ud-8a6f002f24f0d857cbfedfb4fa1c8494933d7b0bcbb4a51dcc0efeb8806e046b';
+		const redirectUri = encodeURIComponent('https://10.11.3.1:9000/signup/oauth');
 		const scope = 'public';
 		const state = 'this_is_a_very_long_random_string_i_am_unguessable';
-		const authorizeUrl = `https://api.intra.42.fr/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&state=${state}`;
+		const authorizeUrl = `https://api.intra.42.fr/oauth/authorize?client_id=${clientId}&redirect_uri=https%3A%2F%2F10.11.3.1%3A9000%2Fsignup%2Foauth&response_type=code&scope=${scope}&state=${state}`;
         const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1 MB
         
 		form42.addEventListener("click", () => {
+			window.app.state.isLoggedIn = true;
+			sessionStorage.setItem('isLoggedIn', 'true');
+			console.log("TEST");
 			window.location.href = authorizeUrl;
         });
         form.addEventListener('submit', async (e) => {
