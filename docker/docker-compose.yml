@@ -82,6 +82,10 @@ services:
         depends_on:
             django:
                 condition: service_started
+        environment:
+            JWT_SECRET_KEY_FILE: /run/secrets/jwt-secret-key
+        secrets:
+            - jwt-secret-key
         expose:
             - 9000
         ports:
