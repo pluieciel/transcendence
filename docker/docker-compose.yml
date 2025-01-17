@@ -89,7 +89,6 @@ services:
         volumes:
             - nginx_data:/var/www/html
             - nginx_logs:/var/log/nginx
-            - nginx_certs:/etc/nginx/certs
             - django_static_data:/var/www/django/static
             - django_data:/var/www/django/media
         networks:
@@ -264,8 +263,6 @@ volumes:
         name: postgres_logs
     nginx_logs:
         name: nginx_logs
-    nginx_certs:
-        name: nginx_certs
     elasticsearch_data:
         name: elasticsearch_data
     elasticsearch_logs:
