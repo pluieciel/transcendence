@@ -22,7 +22,6 @@ import hashlib
 import base64
 import struct
 
-SECRET_KEY = os.environ.get('JWT_SECRET_KEY')
 logger = logging.getLogger(__name__)
 
 async def jwt_to_user(token):
@@ -32,7 +31,8 @@ async def jwt_to_user(token):
         return User.objects.get(id=user_id)
 
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
+        jwt_secret = get_secret_from_file('JWT_SECRET_KEY_FILE')
+        payload = jwt.decode(token, jwt_secret, algorithms=['HS256'])
         user = await get_user(payload.get('id'))
         if user:
             return user
@@ -45,13 +45,16 @@ async def jwt_to_user(token):
         return False
 
 def generate_jwt(user, iat, exp):
+    jwt_secret = get_secret_from_file('JWT_SECRET_KEY_FILE')
+
     return jwt.encode({
         'id': user.id,
         'username': user.username,
         'iat': iat,
         'exp': exp
-    }, SECRET_KEY, algorithm='HS256')
+    }, jwt_secret, algorithm='HS256')
 
+# TODO: remove
 def generate_jwt2(user):
     iat = datetime.datetime.now(datetime.UTC)
     exp = iat + datetime.timedelta(hours=1)
@@ -61,7 +64,7 @@ def generate_jwt2(user):
         'username': user.username,
         'iat': iat,
         'exp': exp
-    }, SECRET_KEY, algorithm='HS256')
+    }, get_secret_from_file('JWT_SECRET_KEY_FILE'), algorithm='HS256')
 
 def generate_jwt_cookie(user):
     iat = datetime.datetime.now(datetime.UTC)
