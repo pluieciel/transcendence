@@ -44,7 +44,15 @@ async def jwt_to_user(token):
     except jwt.InvalidTokenError:
         return False
 
-def generate_jwt(user):
+def generate_jwt(user, iat, exp):
+    return jwt.encode({
+        'id': user.id,
+        'username': user.username,
+        'iat': iat,
+        'exp': exp
+    }, SECRET_KEY, algorithm='HS256')
+
+def generate_jwt2(user):
     iat = datetime.datetime.now(datetime.UTC)
     exp = iat + datetime.timedelta(hours=1)
 
@@ -54,6 +62,17 @@ def generate_jwt(user):
         'iat': iat,
         'exp': exp
     }, SECRET_KEY, algorithm='HS256')
+
+def generate_jwt_cookie(user):
+    iat = datetime.datetime.now(datetime.UTC)
+    exp = iat + datetime.timedelta(hours=1)
+
+    jwt_cookie = (
+            "jwt=" + generate_jwt(user, iat, exp)
+            + "; Expires=" + exp.strftime("%a, %d %b %Y %H:%M:%S GMT")
+            + "; HttpOnly; Secure; SameSite=Strict; Path=/"
+    )
+    return str.encode(jwt_cookie)
 
 def generate_totp(secret, offset):
     time_counter = int(time.time() // 30) + offset
@@ -275,7 +294,7 @@ class LoginConsumer(AsyncHttpConsumer):
                 response_data = {
                     'success': True,
                     'message': 'Login successful',
-                    'token': generate_jwt(user),
+                    'token': generate_jwt2(user),
                 }
             else:
                 response_data = {
@@ -285,7 +304,7 @@ class LoginConsumer(AsyncHttpConsumer):
                 }
 
             return await self.send_response(200, json.dumps(response_data).encode(),
-                headers=[(b"Content-Type", b"application/json")])
+                headers=[(b"Content-Type", b"application/json"), (b"Set-Cookie", generate_jwt_cookie(user))])
 
         except Exception as e:
             print(f"Login error: {str(e)}", flush=True)
@@ -328,10 +347,10 @@ class Login2FAConsumer(AsyncHttpConsumer):
             response_data = {
                 'success': True,
                 'message': 'Login successful',
-                'token': generate_jwt(user)
+                'token': generate_jwt2(user)
             }
             return await self.send_response(200, json.dumps(response_data).encode(),
-                headers=[(b"Content-Type", b"application/json")])
+                headers=[(b"Content-Type", b"application/json"), (b"Set-Cookie", generate_jwt_cookie(user))])
         except Exception as e:
             response_data = {
                 'success': False,
@@ -650,10 +669,10 @@ class LoginOAuthConsumer(AsyncHttpConsumer):
                     'success': True,
                     'message': 'Login successful',
 				    'username': username,
-                    'token': generate_jwt(user)
+                    'token': generate_jwt2(user)
                 }
                 return await self.send_response(200, json.dumps(response_data).encode(),
-                    headers=[(b"Content-Type", b"application/json")])
+                    headers=[(b"Content-Type", b"application/json"), (b"Set-Cookie", generate_jwt_cookie(user))])
             else:
                 response_data = {
                     'success': False,
