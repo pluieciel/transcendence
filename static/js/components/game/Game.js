@@ -29,17 +29,100 @@ export class Game {
 
 		this.particleSystem = null;
 		this.lastTime = 0;
+		this.axis = "x";
+		this.mode = "position";
+		this.factor = 0.05;
 
 		window.addEventListener("keydown", (event) => {
 			if (event.code === "Space") {
 				//this.emitParticles();
 				this.sceneManager.trajVisible = !this.sceneManager.trajVisible;
+			} else if (event.code == "KeyG") {
+				console.log("Entering position mode");
+				this.mode = "position";
+			} else if (event.code == "KeyS") {
+				this.mode = "scale";
+				console.log("Entering scale mode");
+			} else if (event.code == "NumpadAdd") {
+				if (this.mode == "scale") {
+					this.sceneManager.bonuses.paddle.scale.x += this.factor;
+					this.sceneManager.bonuses.paddle.scale.y += this.factor;
+					this.sceneManager.bonuses.paddle.scale.z += this.factor;
+					console.log(
+						"New scale is : " +
+							this.sceneManager.bonuses.paddle.scale.x +
+							", " +
+							this.sceneManager.bonuses.paddle.scale.y +
+							", " +
+							this.sceneManager.bonuses.paddle.scale.z,
+					);
+				} else if (this.mode == "position") {
+					console.log("axis is : " + this.axis);
+					if (this.axis == "x") {
+						this.sceneManager.bonuses.paddle.position.x += this.factor;
+						console.log("New x position is : " + this.sceneManager.bonuses.paddle.position.x);
+					} else if (this.axis == "y") {
+						this.sceneManager.bonuses.paddle.position.y += this.factor;
+						console.log("New position y is : " + this.sceneManager.bonuses.paddle.position.y);
+					} else if (this.axis == "z") {
+						this.sceneManager.bonuses.paddle.position.z += this.factor;
+						console.log("New position z is : " + this.sceneManager.bonuses.paddle.position.z);
+					}
+				}
+			} else if (event.code == "NumpadSubtract") {
+				if (this.mode == "scale") {
+					this.sceneManager.bonuses.paddle.scale.x -= this.factor;
+					this.sceneManager.bonuses.paddle.scale.y -= this.factor;
+					this.sceneManager.bonuses.paddle.scale.z -= this.factor;
+					console.log(
+						"New scale is : " +
+							this.sceneManager.bonuses.paddle.scale.x +
+							", " +
+							this.sceneManager.bonuses.paddle.scale.y +
+							", " +
+							this.sceneManager.bonuses.paddle.scale.z,
+					);
+				} else if (this.mode == "position") {
+					if (this.axis == "x") {
+						this.sceneManager.bonuses.paddle.position.x -= this.factor;
+						console.log("New x position is : " + this.sceneManager.bonuses.paddle.position.x);
+					} else if (this.axis == "y") {
+						this.sceneManager.bonuses.paddle.position.y -= this.factor;
+						console.log("New y position is : " + this.sceneManager.bonuses.paddle.position.y);
+					} else if (this.axis == "z") {
+						this.sceneManager.bonuses.paddle.position.z -= this.factor;
+						console.log("New z position is : " + this.sceneManager.bonuses.paddle.position.z);
+					}
+				}
+			} else if (event.code == "KeyX") {
+				this.axis = "x";
+				console.log("Axis set to x");
+			} else if (event.code == "KeyY") {
+				this.axis = "y";
+				console.log("Axis set to y");
+			} else if (event.code == "KeyZ") {
+				this.axis = "z";
+				console.log("Axis set to z");
+			} else if (event.code == "KeyF") {
+				this.sceneManager.bonuses.paddle.scale.set(0.3, 0.3, 0.3);
+				this.sceneManager.bonuses.paddle.position.x = -5.2;
+				this.sceneManager.bonuses.paddle.position.y = -1.6;
+				this.sceneManager.bonuses.paddle.position.z = 2.75;
+				this.sceneManager.bonuses.paddleRed.scale.set(0.3, 0.3, 0.3);
+				this.sceneManager.bonuses.paddleRed.position.x = 5.35;
+				this.sceneManager.bonuses.paddleRed.position.y = -1.6;
+				this.sceneManager.bonuses.paddleRed.position.z = 2.75;
+				this.sceneManager.bonuses.ball.position.x = 0.05;
+				this.sceneManager.bonuses.ball.position.y = -1.5;
+				this.sceneManager.bonuses.ball.position.z = 2.7;
+				this.sceneManager.bonuses.ball.scale.set(0.2, 0.2, 0.2);
 			}
+			console.log(event.code);
 		});
 
 		this.loading.onComplete = () => {
 			this.sendInitDone();
-			this.sceneManager.bonuses.displayPowerUp(1, new THREE.Vector3(0, 0, 0));
+			this.sceneManager.bonuses.displayPowerUp(0, new THREE.Vector3(0, 0, 0));
 		};
 	}
 
@@ -217,6 +300,15 @@ export class Game {
 			//this.sceneManager.model.rotation.z += 0.02;
 			//this.sceneManager.model.rotation.x += 0.02;
 		}
+		if (this.sceneManager.bonuses.ball) {
+			this.sceneManager.bonuses.ball.rotation.x += 0.02;
+			//this.sceneManager.bonuses.ball.rotation.z += 0.02;
+			this.sceneManager.bonuses.ball.rotation.y += 0.02;
+		}
+		/*if (this.sceneManager.camera) {
+			console.log(this.sceneManager.camera.position);
+			console.log(this.sceneManager.camera.rotation);
+			} else console.log("truc");*/
 
 		this.renderer.render(this.sceneManager.scene, this.sceneManager.camera);
 	}

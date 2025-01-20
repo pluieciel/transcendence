@@ -26,7 +26,7 @@ export class SceneManager {
 	initializeComponents() {
 		this.scene = new THREE.Scene();
 		this.camera = this.createCamera();
-		//this.bonuses = new Bonuses(this.scene);
+		this.bonuses = new Bonuses(this.scene);
 		this.UIManager = new UIManager();
 	}
 
@@ -108,7 +108,7 @@ export class SceneManager {
 
 	async createGameObjects() {
 		try {
-			await Promise.all([this.createPaddles(), this.createBall(), this.createPlayableArea() /*, this.bonuses.createBonuses()*/]);
+			await Promise.all([this.createPaddles(), this.createBall(), this.createPlayableArea(), this.bonuses.createBonuses()]);
 		} catch (error) {
 			console.error("Failed to create game objects:", error);
 		}
