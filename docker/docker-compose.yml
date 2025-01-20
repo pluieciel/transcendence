@@ -36,14 +36,12 @@ services:
                 condition: service_healthy
         environment:
             POSTGRES_PASSWORD_FILE: /run/secrets/postgres-passwd
-            DJANGO_SUPERUSER_PASSWORD_FILE: /run/secrets/django-passwd
             JWT_SECRET_KEY_FILE: /run/secrets/jwt-secret-key
             OAUTH_CLIENT_ID_FILE: /run/secrets/oauth_client_id
             OAUTH_CLIENT_SECRET_FILE: /run/secrets/oauth_client_secret
         env_file: .env
         secrets:
             - postgres-passwd
-            - django-passwd
             - jwt-secret-key
             - oauth_client_id
             - oauth_client_secret
@@ -63,12 +61,10 @@ services:
                 condition: service_healthy
         environment:
             POSTGRES_PASSWORD_FILE: /run/secrets/postgres-passwd
-            DJANGO_SUPERUSER_PASSWORD_FILE: /run/secrets/django-passwd
             JWT_SECRET_KEY_FILE: /run/secrets/jwt-secret-key
         env_file: .env
         secrets:
             - postgres-passwd
-            - django-passwd
             - jwt-secret-key
         volumes:
             - django_data:/usr/src/app
@@ -274,8 +270,6 @@ volumes:
 secrets:
     postgres-passwd:
         file: ${PWD}/docker/secrets/postgres-passwd.txt
-    django-passwd:
-        file: ${PWD}/docker/secrets/django-passwd.txt
     elasticsearch-passwd:
          file: ${PWD}/docker/secrets/elasticsearch-passwd.txt
     kibana-passwd:
