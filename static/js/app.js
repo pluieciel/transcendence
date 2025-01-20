@@ -1,89 +1,84 @@
-import LoginView from './components/LoginView.js';
+import LoginView from './components/pages/LoginView.js';
 import MainView from './components/pages/MainView.js';
 import SettingsView from './components/pages/SettingsView.js';
-import SignUpAuthView from './components/login/SignUpOAuth.js';
 import ProfileView from './components/pages/ProfileView.js';
-import GameView from './components/GameView.js';
+import LoginOAuth from './components/login/LoginOAuth.js';
 import Router from './router.js';
 
 class App {
-    // Private
-    #state;
 
     constructor() {
 		this.routes = [
 			{ path: '/', component: LoginView },
             { path: '/index', component: MainView },
-            { path: '/game', component: GameView },
             { path: '/settings', component: SettingsView },
-            { path: '/signup/oauth', component: SignUpAuthView },
             { path: '/profile', component: ProfileView },
+            { path: '/login/oauth', component: LoginOAuth },
 			{ path: '*', component: LoginView },
 		]
-        this.#state = {
+        this.state = {
             isLoggedIn: sessionStorage.getItem('isLoggedIn') === 'true',
             token: sessionStorage.getItem('token') || '',
         };
-        
+        this.avatarCache = {};
+        this.ingame = sessionStorage.getItem('ingame') === 'true';
 		window.app = this;
-		window.onload = this.applyTheme();
         this.router = new Router(this.routes);
 
     }
-	
-	applyTheme() {
-		if (this.#state.theme === "light") {
-			document.documentElement.style.setProperty('--primary-color', '#FAEBD7');
-			document.documentElement.style.setProperty('--secondary-color', '#353535');
-			document.documentElement.style.setProperty('--accent-color', '#E8C4A2');
-			document.documentElement.style.setProperty('--hover-color', '#FFE4C4');
-			document.documentElement.style.setProperty('--header-color', '#E8C4A2');
-			document.documentElement.style.setProperty('--button-box-color', 'rgba(0, 0, 0, 0.5)');
-		} else if (this.#state.theme === "dark") { 
-			document.documentElement.style.setProperty('--primary-color', '#121212');
-			document.documentElement.style.setProperty('--secondary-color', '#fff');
-			document.documentElement.style.setProperty('--accent-color', '#353535');
-			document.documentElement.style.setProperty('--hover-color', '#666');
-			document.documentElement.style.setProperty('--header-color', '#0a0a0a');
-			document.documentElement.style.setProperty('--button-box-color', 'rgba(255, 255, 255, 0.5)');
-		}
-	}
 
+    async getAvatar(username) {
+        if (this.avatarCache[username]) {
+            return this.avatarCache[username];
+        }
+        const response = await fetch(`/api/get/avatar/${username}`,{
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `${this.state.token}`,
+            },
+        });
+        const data = await response.json();
+        this.avatarCache[username] = data.avatar;
+        return data.avatar;
+    }
+    
     login(data) {
-		this.#state.isLoggedIn = true;
-        this.#state.token = data.token;
-		this.applyTheme();
+        this.state.isLoggedIn = true;
+        this.state.token = data.token;
+        console.log("sessionStorageingame", sessionStorage.getItem('ingame'));
         sessionStorage.setItem('isLoggedIn', 'true');
-        sessionStorage.setItem('token', this.#state.token);
+        sessionStorage.setItem('token', this.state.token);
         this.router.navigateTo('/index');
     }
 	
 	login42(username, token, theme) {
-		this.#state.isLoggedIn = true;
-        this.#state.token = token;
-		this.#state.theme = theme;
-		this.applyTheme();
+		this.state.isLoggedIn = true;
+        this.state.token = token;
+		this.state.theme = theme;
 		sessionStorage.setItem('isLoggedIn', 'true');
-        sessionStorage.setItem('token', this.#state.token);
+        sessionStorage.setItem('token', this.state.token);
         this.router.navigateTo('/index');
 	}
 
     logout() {
-        this.#state.isLoggedIn = false;
-        this.#state.token = '';
+        this.state.isLoggedIn = false;
+        this.state.token = '';
+        this.ingame = false;
         sessionStorage.clear();
         this.router.navigateTo('/');
     }
 
     getIsLoggedIn() {
-        return this.#state.isLoggedIn;
+        return this.state.isLoggedIn;
     }
 
     getToken() {
-        return this.#state.token;
+        return this.state.token;
     }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    console.log("DOMContentLoaded");
     window.app = new App();
 });

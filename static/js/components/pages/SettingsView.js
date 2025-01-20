@@ -1,11 +1,7 @@
 export default class MainView {
-	
-	#isAllowed;
-
-	constructor(container, appState) {
+    constructor(container) {
+        this.token = window.app.getToken();
 		this.container = container;
-		this.appState = appState;
-		this.#isAllowed = false;
         const decodedPayload = jwt_decode(window.app.getToken());
         this.username = decodedPayload.username;
         this.render();
@@ -16,7 +12,7 @@ export default class MainView {
         this.container.innerHTML = `
     <header>
         <h1>PONG</h1>
-			<button id="indexBtn">Main page</button>
+			<button id="indexBtn">Main</button>
 			<button id="logoutBtn">Log out</button>
 	</header>
 	<div class="welcome">
@@ -28,13 +24,34 @@ export default class MainView {
 			<button id="changeUsernameBtn">Change your username</button>
 			<input type="text" id="newUsername">
 			<button id="changePpBtn">Change your profile picture</button>
-			<button id="changeThemeBtn">Switch theme</button>
+			<button type="button" id="enable2FA">Enable 2FA</button>
+			<div class="modal fade" id="totpModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="staticBackdropLabel">Two-Factor Authentication</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <form id="totpForm">
+	                        <div class="modal-body">
+	                                <div id="qrCode"></div>
+	                                <div class="mb-3">
+	                                    <input id="totpInput" class="form-control" maxlength="6" required>
+	                                </div>
+	                                <div id="totpError" class="alert alert-danger d-none"></div>
+	                        </div>
+	                        <div class="modal-footer">
+	                            <button type="submit" class="btn btn-primary" id="totpSubmit">Submit</button>
+	                        </div>
+                        </form>
+                	</div>
+            	</div>
+			</div>
 		</div>
 		<div class="containerSensitive">
 			<h3>Be careful with those</h3>
-        	<input type="password" id="passwordInput" placeholder="Enter password to access">
 			<button id="passwordButton">Set New Password</button>
-        	<input type="password" id="newPasswordInput" placeholder="Enter your new password">
+        	<input type="password" id="newPasswordInput" placeholder="">
 			<button id="deleteAccBtn">Delete my account</button>
 		</div>
 	</div>
@@ -44,24 +61,76 @@ export default class MainView {
     }
 
     addEventListeners() {
-		const changeUsernameBtn = document.getElementById('changeUsernameBtn');
-        const changeThemeBtn = document.getElementById('changeThemeBtn');
-        const logoutBtn = document.getElementById('logoutBtn');
-		const indexBtn = document.getElementById('indexBtn');
-		const wipeBtn = document.getElementById('deleteAccBtn');
-		const button = document.getElementById('passwordButton');
-        const input = document.getElementById('passwordInput');
-
-        button.addEventListener('click', () => {
-			button.style.display = 'none';
-            input.style.display = 'inline-block';
-            input.focus();
+		const	enable2FA = this.container.querySelector('#enable2FA');
+		const	changeUsernameBtn = document.getElementById('changeUsernameBtn');
+        const	logoutBtn = document.getElementById('logoutBtn');
+		const	indexBtn = document.getElementById('indexBtn');
+		const	wipeBtn = document.getElementById('deleteAccBtn');
+		const	passwdBtn = document.getElementById('passwordButton');
+        const	newpwd = document.getElementById('newPasswordInput');
+		
+        passwdBtn.addEventListener('click', () => {
+			passwdBtn.style.display = 'none';
+            newpwd.style.display = 'inline-block';
+            newpwd.focus();
         });
+
+		enable2FA.addEventListener('click', async (e) => {
+			e.preventDefault();
+			try {
+				const response = await fetch('/api/settings/2fa/generate', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						'Authorization': `${this.token}`,
+					},
+				});
+				
+				const data = await response.json();
+				
+				if (data.success) {
+					new bootstrap.Modal(this.container.querySelector('#totpModal')).show();
+					const qrCode = this.container.querySelector('#qrCode');
+					qrCode.innerHTML = data.qr_code;
+				} else {
+					
+				}
+			} catch (error) {
+				
+			}
+		});
+		
+		newpwd.addEventListener('keydown', async (event) => {
+			const hashedNew = CryptoJS.SHA256(newpwd.value).toString();
+			if (event.key === "Enter" && isLoggedIn) {
+				try {
+					const response = await fetch('/api/change/password', {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+							'Authorization': `${window.app.state.token}`
+						},
+						body: JSON.stringify({
+							newPassword: hashedNew,
+						})
+					});
+				
+					const data = await response.json();
+				
+					if (data.success) {
+						console.log("changing username success");
+						this.appState.username = newUsername.value;
+					} else {
+						console.log("changing username failed");
+					}
+				} catch (error) {
+					console.error(error);
+				}
+			}
+		})
 		
 		newUsername.addEventListener('keydown', async (event) => {
 			if (event.key === "Enter") {
-				if (newUsername.value.slice(-2) === "42")
-					return this.error('Dont put 42 at the end of your username!!');
 				try {
 					const response = await fetch('/api/change/username', {
 						method: 'POST',
@@ -71,7 +140,7 @@ export default class MainView {
 						},
 						body: JSON.stringify({
 							newUsername: newUsername.value,
-							username: this.appState.username,
+							// username: this.appState.username,
 						})
 					});
 				
@@ -96,75 +165,8 @@ export default class MainView {
 			newUsername.focus();
 		});
 
-		changeThemeBtn.addEventListener('click', async () => {
-			try {
-				console.log("calling the api");
-				const response = await fetch('/api/change/theme', {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-						'Authorization': `${window.app.state.token}`
-					},
-					body: JSON.stringify({
-						currentTheme: window.app.state.theme,
-						username: this.appState.username,
-					})
-				});
-		
-				const data = await response.json();
-		
-				if (data.success) {
-					console.log("changing theme success");
-					window.app.state.theme = data['theme'];
-					window.app.applyTheme();
-					console.log("theme = " + window.app.state.theme);
-				} else {
-					console.log("changing theme failed");
-				}
-			} catch (error) {
-				console.error(error);
-			}
-		});
-		
-
-		input.addEventListener('keydown', async (event) => {
-			if (event.key === "Enter") {
-				const password = this.container.querySelector('#passwordInput').value;
-				const hashedPassword = CryptoJS.SHA256(password).toString();
-				try {
-					const response = await fetch('/api/login/', {
-						method: 'POST',
-						headers: {
-							'Content-Type': 'application/json'
-						},
-						body: JSON.stringify({
-							username: this.appState.username,
-							password: hashedPassword
-						})
-					});
-				
-					const data = await response.json();
-				
-					if (data.success) {
-						wipeBtn.style.display = "inline-block";
-						button.style.display = "inline-block";
-						input.style.display = "none";
-						this.isAllowed = true;
-						sessionStorage.setItem('token', data['token']);
-					} else {
-						console.log("login failed");
-					}
-				} catch (error) {
-					console.error(error);
-				}
-			}
-		});
-
-
 		wipeBtn.addEventListener('click', () => {
-			if (!this.isAllowed)
-				return ;
-			if (this.eraseInDB())
+			if (isLoggedIn && this.eraseInDB())
 				window.app.logout();
         });
 
@@ -186,7 +188,7 @@ export default class MainView {
                     'Authorization': `${window.app.state.token}`
 				},
 				body: JSON.stringify({
-					username: this.appState.username,
+					username: this.username,
 				})
 			});
 			

@@ -5,29 +5,45 @@ from channels.layers import get_channel_layer
 from datetime import datetime
 from django.contrib.auth import get_user_model, authenticate
 from channels.db import database_sync_to_async
+import jwt
+import os
+from Game.consumer import game_manager
+import redis
+from copy import deepcopy
+
+SECRET_KEY = os.environ.get('JWT_SECRET_KEY')
 
 class ChatConsumer(AsyncWebsocketConsumer):
     online_users = set()
     waiting_users = set()
+    tournament_info_initial = {"state": "Waiting", "wait_list": [],
+                                "round1": {"game1":{}, "game2":{}},
+                                "round2": {"game1":{}}}
+    # use deepcopy to copy the tournament_info for initial state
+    tournament_info = deepcopy(tournament_info_initial)
     def __init__(self, *args, **kwargs):
+        from api.models import register_invite, is_valid_invite
         super().__init__(*args, **kwargs)
         self.username = None
         self.room_group_name = None
+        self.register_invite = register_invite
+        self.is_valid_invite = is_valid_invite
+        self.redis_client = redis.Redis(host='redis', port=6379, db=0)
 
     async def connect(self):
-        #print("Query string:", self.scope.get("query_string", b""))
-
         query_string = self.scope["query_string"].decode()
-        #print("Decoded query string:", query_string)
-
         query_params = parse_qs(query_string)
-        #print("Parsed params:", query_params)
+        self.token = query_params.get("token", [None])[0]
+        try:
+            payload = jwt.decode(self.token, SECRET_KEY, algorithms=['HS256'])
+            self.username = payload.get('username')
 
-        self.username = query_params.get("username", [None])[0]
-        #print("Username:", self.username, "$")
+        except jwt.ExpiredSignatureError:
+            return
+        except jwt.InvalidTokenError:
+            return
 
         self.room_group_name = f"user_{self.username}"
-        #print(self.username)
         
         if self.username is None:
             await self.close()
@@ -43,44 +59,47 @@ class ChatConsumer(AsyncWebsocketConsumer):
         if self.username:
             ChatConsumer.online_users.add(self.username)
             ChatConsumer.waiting_users.add(self.username)
+            self.redis_client.sadd('active_groups', self.room_group_name)
 
-        channel_layer = get_channel_layer()
+        groups = [g.decode('utf-8') for g in self.redis_client.smembers('active_groups')]
         all_users = await self.get_all_usernames()
-        for group in [key for key in channel_layer.groups.keys() if key.startswith("user_")]:
-            await self.channel_layer.group_send(
-                group, {
-                    "type": "send_message",
-                    "message": json.dumps({
-                        "online_users": list(ChatConsumer.online_users),
-                        "waiting_users": list(ChatConsumer.waiting_users)
-                    }),
-                    "message_type": "system",
-                    "sender": "admin",
-                    "recipient": "update_online_users",
-                    "time": datetime.now().strftime("%H:%M:%S")
-                }
-            )
-            await self.channel_layer.group_send(
-                group, {
-                    "type": "send_message",
-                    "message": f"{self.username} has joined the chat",
-                    "message_type": "system",
-                    "sender": "admin",
-                    "recipient": "public",
-                    "time": datetime.now().strftime("%H:%M:%S")
-                }
-            )
-            await self.channel_layer.group_send(
-                group, {
-                    "type": "send_message",
-                    "message": "all_user_list",
-                    "message_type": "system",
-                    "sender": "admin",
-                    "recipient": "public",
-                    'usernames': all_users,
-                    "time": datetime.now().strftime("%H:%M:%S")
-                }
-            )
+        for group in groups:
+            if group.startswith("user_"):
+                await self.channel_layer.group_send(
+                    group, {
+                        "type": "send_message",
+                        "message": json.dumps({
+                            "online_users": list(ChatConsumer.online_users),
+                            "waiting_users": list(ChatConsumer.waiting_users),
+                            "tournament_info": ChatConsumer.tournament_info,
+                        }),
+                        "message_type": "system",
+                        "sender": "admin",
+                        "recipient": "update_online_users",
+                        "time": datetime.now().strftime("%H:%M:%S")
+                    }
+                )
+                await self.channel_layer.group_send(
+                    group, {
+                        "type": "send_message",
+                        "message": f"{self.username} has joined the chat",
+                        "message_type": "system",
+                        "sender": "admin",
+                        "recipient": "public",
+                        "time": datetime.now().strftime("%H:%M:%S")
+                    }
+                )
+                await self.channel_layer.group_send(
+                    group, {
+                        "type": "send_message",
+                        "message": "all_user_list",
+                        "message_type": "system",
+                        "sender": "admin",
+                        "recipient": "public",
+                        'usernames': all_users,
+                        "time": datetime.now().strftime("%H:%M:%S")
+                    }
+                )
 
         #update friend list
         user = await self.get_user(self.username)
@@ -98,53 +117,59 @@ class ChatConsumer(AsyncWebsocketConsumer):
         return list(users)
 
     async def disconnect(self, close_code):
-        await self.channel_layer.group_discard(
-            self.room_group_name,
-            self.channel_name
-        )
+        self.redis_client.srem('active_groups', str(self.room_group_name))
+        # await self.channel_layer.group_discard(
+        #     self.room_group_name,
+        #     self.channel_name
+        # )
         if self.username in ChatConsumer.online_users:
             ChatConsumer.online_users.remove(self.username)
         if self.username in ChatConsumer.waiting_users:
             ChatConsumer.waiting_users.remove(self.username)
-
-        channel_layer = get_channel_layer()
-        for group in [key for key in channel_layer.groups.keys() if key.startswith("user_")]:
-            await self.channel_layer.group_send(
-                group, {
-                    "type": "send_message",
-                    "message": json.dumps({
-                        "online_users": list(ChatConsumer.online_users),
-                        "waiting_users": list(ChatConsumer.waiting_users)
-                    }),
-                    "message_type": "system",
-                    "sender": "admin",
-                    "recipient": "update_online_users",
-                    "time": datetime.now().strftime("%H:%M:%S")
-                }
-            )
-            await self.channel_layer.group_send(
-                group, {
-                    "type": "send_message",
-                    "message": f"{self.username} has left the chat",
-                    "message_type": "system",
-                    "sender": "admin",
-                    "recipient": "public",
-                    "time": datetime.now().strftime("%H:%M:%S")
-                }
-            )
+        if ChatConsumer.tournament_info["state"] == "Waiting" and self.username in ChatConsumer.tournament_info["wait_list"]:
+            ChatConsumer.tournament_info["wait_list"].remove(self.username)
+        groups = [g.decode('utf-8') for g in self.redis_client.smembers('active_groups')]
+        for group in groups:
+            if group.startswith("user_"):
+                await self.channel_layer.group_send(
+                    group, {
+                        "type": "send_message",
+                        "message": json.dumps({
+                            "online_users": list(ChatConsumer.online_users),
+                            "waiting_users": list(ChatConsumer.waiting_users),
+                            "tournament_info": ChatConsumer.tournament_info,
+                        }),
+                        "message_type": "system",
+                        "sender": "admin",
+                        "recipient": "update_online_users",
+                        "time": datetime.now().strftime("%H:%M:%S")
+                    }
+                )
+                await self.channel_layer.group_send(
+                    group, {
+                        "type": "send_message",
+                        "message": f"{self.username} has left the chat",
+                        "message_type": "system",
+                        "sender": "admin",
+                        "recipient": "public",
+                        "time": datetime.now().strftime("%H:%M:%S")
+                    }
+                )
 
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
         message = text_data_json.get("message")
         sender = text_data_json.get("sender")
         recipient = text_data_json.get("recipient")
+        operation = text_data_json.get("operation", None)
         time = text_data_json.get("time", None)
         wait_status = text_data_json.get("wait_status", None)
         message_type = text_data_json.get("message_type", None)
         game_mode = text_data_json.get("game_mode", None)
         channel_layer = get_channel_layer()
         if recipient == "public":
-            for group in [key for key in channel_layer.groups.keys() if key.startswith("user_")]:
+            groups = [g.decode('utf-8') for g in self.redis_client.smembers('active_groups')]
+            for group in groups:
                 await self.channel_layer.group_send(
                     group, {
                         "type": "send_message",
@@ -155,12 +180,42 @@ class ChatConsumer(AsyncWebsocketConsumer):
                         "time": time
                     }
                 )
+        elif message_type == "system" and message == "update_tournament_info":
+            if operation == "add" and self.username not in ChatConsumer.tournament_info["wait_list"] and ChatConsumer.tournament_info["state"] == "Waiting":
+                ChatConsumer.tournament_info["wait_list"].append(self.username)
+                if len(ChatConsumer.tournament_info["wait_list"]) == 4 and ChatConsumer.tournament_info["state"] == "Waiting":
+                    # start tournament
+                    ChatConsumer.tournament_info["state"] = "Playing4to2"
+                    temp = ChatConsumer.tournament_info["wait_list"]
+                    #TODO: match making for first round, rewrite following line of code
+                    ChatConsumer.tournament_info["round1"] = {f"game{i+1}" : {"p1" : temp[i*2], "p2" : temp[i*2+1], "state" : "prepare"} for i in range(0, 2)}
+                    await game_manager.create_tournament_empty_games(ChatConsumer.tournament_info)
+
+
+            elif operation == "remove" and self.username in ChatConsumer.tournament_info["wait_list"] and ChatConsumer.tournament_info["state"] == "Waiting":
+                ChatConsumer.tournament_info["wait_list"].remove(self.username)
+
+            groups = [g.decode('utf-8') for g in self.redis_client.smembers('active_groups')]
+            for group in groups:
+                await self.channel_layer.group_send(
+                    group, {
+                        "type": "send_message",
+                        "tournament_info": json.dumps(ChatConsumer.tournament_info),
+                        "message_type": "system",
+                        "message": "update_tournament_info",
+                        "sender": "admin",
+                        "recipient": "update_tournament_info",
+                        "time": datetime.now().strftime("%H:%M:%S")
+                    }
+                )
+
         elif message_type == "system" and message == "update_waiting_status":
             if wait_status == True:
                 ChatConsumer.waiting_users.add(sender)
             elif wait_status == False and sender in ChatConsumer.waiting_users:
                 ChatConsumer.waiting_users.remove(sender)
-            for group in [key for key in channel_layer.groups.keys() if key.startswith("user_")]:
+            groups = [g.decode('utf-8') for g in self.redis_client.smembers('active_groups')]
+            for group in groups:
                 await self.channel_layer.group_send(
                     group, {
                         "type": "send_message",
@@ -185,12 +240,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
                         "type": "send_message",
                         "message": message,
                         "message_type": "chat",
-                        "sender": sender,
+                        "sender": self.username,
                         "recipient": recipient,
                         "time": time
                     }
                 )
         elif message_type == "system" and message == "invite_user":
+            # register invite
+            await self.register_invite(await self.get_user(sender), await self.get_user(recipient))
+
             recipient_group = f"user_{recipient}"
             await self.channel_layer.group_send(
                 recipient_group,
@@ -198,27 +256,31 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     "type": "send_message",
                     "message": "invites you to play a game",
                     "message_type": "system_invite",
-                    "sender": sender,
+                    "sender": self.username,
                     "recipient": recipient,
                     "game_mode": game_mode,
                     "time": time
                 }
             )
 
-        elif message_type == "system_accept" and message == "accept_invite":
-            sender_group = f"user_{sender}"
-            recipient_group = f"user_{recipient}"
-            await self.channel_layer.group_send(
-                recipient_group, {
-                    "type": "send_message",
-                    "message": "accepted your invite",
-                    "message_type": "system_accept",
-                    "sender": sender,
-                    "game_mode": game_mode,
-                    "recipient": recipient,
-                    "time": time
-                }
-            )
+        # moved to game consumer, to make sure the game is created before sending message
+        # elif message_type == "system_accept" and message == "accept_invite":
+        #     #print("accept invite received", flush=True)
+        #     if await self.is_valid_invite(await self.get_user(recipient), await self.get_user(sender)):
+        #         #print("accept invite valid", flush=True)
+        #         sender_group = f"user_{sender}"
+        #         recipient_group = f"user_{recipient}"
+        #         await self.channel_layer.group_send(
+        #             recipient_group, {
+        #                 "type": "send_message",
+        #                 "message": "accepted your invite",
+        #                 "message_type": "system_accept",
+        #                 "sender": self.username,
+        #                 "game_mode": game_mode,
+        #                 "recipient": recipient,
+        #                 "time": time
+        #             }
+        #         )
         
         elif message_type == "system" and message == "addfriend":
             user = await self.get_user(sender)
@@ -279,6 +341,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         message_type = event["message_type"]
         game_mode = event.get("game_mode", None)
         usernames = event.get("usernames", None)
+        tournament_info = event.get("tournament_info", None)
         # 发送消息到 WebSocket
         await self.send(text_data=json.dumps({
             "message": message,
@@ -287,5 +350,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
             "recipient": recipient,
             "game_mode": game_mode,
             "usernames" : usernames,
-            "time": time
+            "time": time,
+            "tournament_info": tournament_info,
         }))

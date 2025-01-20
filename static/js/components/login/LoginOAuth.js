@@ -1,8 +1,9 @@
-class SignUpAuthView {
+class LoginOAuth {
     constructor(container) {
         this.container = container;
         this.render();
-        this.handleAuthResponse();
+        this.token = window.app.getToken();
+        this.handleAuthResponse().then();
     }
 
     render() {
@@ -43,7 +44,7 @@ class SignUpAuthView {
         }
 
         try {
-            const response = await fetch('/api/signup/oauth', {
+            const response = await fetch('/api/login/oauth', {
                 method: 'POST',
                 headers: {
 					'Content-Type': 'application/json',
@@ -53,9 +54,10 @@ class SignUpAuthView {
 
             const data = await response.json();
 
-            if (data['success'])
-				window.app.login42(data['username'], data['token'], data['theme']);
-			else
+            if (data.success) {
+				window.app.login(data);
+				window.app.router.navigateTo('/index');
+            } else
                 this.showError(data.message || 'Sign up || Log in failed.');
         } catch (error) {
 			console.error('Error during fetch:', error);
@@ -71,4 +73,4 @@ class SignUpAuthView {
     }
 }
 
-export default SignUpAuthView;
+export default LoginOAuth;

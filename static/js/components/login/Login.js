@@ -19,7 +19,28 @@ export default class Login {
                             </div>
                             <div id="loginError" class="alert alert-danger d-none"></div>
                             <button type="submit" class="btn btn-primary w-100">Log In</button>
-                            <button type="button" class="btn btn-primary w-100 LogIn42 OAuth">Login In with 42</button>
+                            <button type="button" class="btn btn-primary w-100 OAuth" id="login42">Login In with 42</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="totpModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="staticBackdropLabel">Two-Factor Authentication</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <form id="totpForm">
+	                        <div class="modal-body">
+	                                <div class="mb-3">
+	                                    <input id="totpInput" class="form-control" maxlength="6" required>
+	                                </div>
+	                                <div id="totpError" class="alert alert-danger d-none"></div>
+	                        </div>
+	                        <div class="modal-footer">
+	                            <button type="submit" class="btn btn-primary" id="totpSubmit">Submit</button>
+	                        </div>
                         </form>
                     </div>
                 </div>
@@ -27,27 +48,81 @@ export default class Login {
         `;
     }
 
-    addEventListeners() {
-        const form = this.container.querySelector('#loginForm');
-		const form42 = this.container.querySelector('.LogIn42');
-		const clientId = 'u-s4t2ud-ba5b0c72367af9ad1efbf4d20585f3c315b613ece176ca16919733a7dba999d5';
-		const redirectUri = encodeURIComponent('https://10.11.2.6:9000/signup/oauth');
-		const scope = 'public';
-		const state = 'this_is_a_very_long_random_string_i_am_unguessable';
-		const authorizeUrl = `https://api.intra.42.fr/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&state=${state}`;
+	async addOAuthEventListeners() {
+		const errorDiv = this.container.querySelector('#loginError');
+		try {
+			const response = await fetch('/api/get/oauth/redirect', {
+                method: 'POST',
+                headers: {
+					'Content-Type': 'application/json'
+                },
+            });
+			const data = await response.json();
 
-		form42.addEventListener("click", () => {
-			window.location.href = authorizeUrl;
+			if (data.success) {
+				const login42 = this.container.querySelector('#login42');
+
+				login42.addEventListener("click", () => {
+					window.app.state.isLoggedIn = true;
+					sessionStorage.setItem('isLoggedIn', 'true');
+					window.location.href = data.auth_url;
+		        });
+			}
+		} catch (error) {
+			errorDiv.textContent = 'An error occurred:' + error;
+            errorDiv.classList.remove('d-none');
+		}
+	}
+
+	add2FAEventListeners() {
+        const submit = this.container.querySelector('#totpForm');
+        const errorDiv = this.container.querySelector('#totpError');
+
+        submit.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const totp = this.container.querySelector('#totpInput').value;
+            try {
+            	const username = this.container.querySelector('#username').value;
+				const response = await fetch('/api/login/2fa/', {
+					method: 'POST',
+				    headers: {
+				        'Content-Type': 'application/json',
+					},
+				    body: JSON.stringify({
+				        username: username,
+				        totp: totp,
+				    })
+				});
+				const data = await response.json();
+				if (data.success) {
+					const modal = bootstrap.Modal.getInstance(this.container.querySelector('#totpModal'));
+					if (modal)
+						modal.hide();
+					window.app.login(data);
+				} else {
+					errorDiv.textContent = data.message || 'Login failed';
+                    errorDiv.classList.remove('d-none');
+				}
+            } catch (error) {
+				errorDiv.textContent = 'An error occurred:' + error;
+                errorDiv.classList.remove('d-none');
+            }
         });
+	}
+
+	addLoginEventListeners() {
+		const form = this.container.querySelector('#loginForm');
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             const username = this.container.querySelector('#usrnm-form').value;
             const password = this.container.querySelector('#pwd-form').value;
             const errorDiv = this.container.querySelector('#loginError');
             const hashedPassword = CryptoJS.SHA256(password).toString();
-            
+
 			if (!username || !password)
 				errorDiv.textContent = 'Must fill username and password field';
+
+            // Handle login logic here
             try {
                 const response = await fetch('/api/login/', {
                     method: 'POST',
@@ -59,11 +134,15 @@ export default class Login {
                         password: hashedPassword
                     })
                 });
-            
                 const data = await response.json();
-            
+				
+                // This code runs only after getting response from server
                 if (data.success) {
-                    window.app.login(data);
+                    if (data.is_2fa_enabled) {
+						new bootstrap.Modal(this.container.querySelector('#totpModal')).show();
+                    } else {
+                        window.app.login(data);
+                    }
                 } else {
                     errorDiv.textContent = data.message || 'Login failed';
                     errorDiv.classList.remove('d-none');
@@ -73,5 +152,11 @@ export default class Login {
                 errorDiv.classList.remove('d-none');
             }
         });
+	}
+
+    addEventListeners() {
+        this.addOAuthEventListeners().then();
+        this.add2FAEventListeners();
+		this.addLoginEventListeners();
     }
 }

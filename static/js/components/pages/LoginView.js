@@ -1,5 +1,5 @@
-import Login from "./login/Login.js";
-import SignUp from "./login/SignUp.js";
+import Login from "../login/Login.js";
+import SignUp from "../login/SignUp.js";
 
 export default class LoginView {
 	constructor(container) {
@@ -7,7 +7,7 @@ export default class LoginView {
 		this.render();
 		this.addEventListeners();
 		this.showLogin();
-		//this.createDefaultUsers();
+		[...Array(8)].map((_, i) => i + 1).forEach(i => this.createDefaultUsers(`${i}`));
 	}
 
 	render() {
@@ -49,39 +49,19 @@ export default class LoginView {
 		});
 	}
 
-	async createDefaultUsers() {
-		const hashedPassword = CryptoJS.SHA256("1").toString();
-		const hashedPassword2 = CryptoJS.SHA256("2").toString();
-		const hashedPassword3 = CryptoJS.SHA256("a").toString();
-		const response1 = await fetch("/api/signup/", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				username: "1",
-				password: hashedPassword,
-			}),
-		});
-		const response2 = await fetch("/api/signup/", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				username: "2",
-				password: hashedPassword2,
-			}),
-		});
-		const response3 = await fetch("/api/signup/", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				username: "a",
-				password: hashedPassword3,
-			}),
-		});
+	async createDefaultUsers(user) {
+		const formData = new FormData();
+		const hashedPassword = CryptoJS.SHA256(user).toString();
+		formData.append('username', user);
+		formData.append('password', hashedPassword);
+
+		try {
+			const response = await fetch('/api/signup/', {
+				method: 'POST',
+				body: formData
+			});
+		} catch (error) {
+			console.error('Error creating default users:', error);
+		}
 	}
 }

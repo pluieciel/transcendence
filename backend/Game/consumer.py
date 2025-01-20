@@ -1,27 +1,47 @@
 from typing_extensions import List
 import channels
 from channels.generic.websocket import AsyncWebsocketConsumer
-from .game_logic import GameInstance  # Add this import
 from .game_backend import GameBackend
 from channels.layers import get_channel_layer
 from channels.db import database_sync_to_async
-from django.contrib.auth import get_user_model, authenticate
+from django.contrib.auth import get_user_model
 import json
 import logging
 import random
 from urllib.parse import parse_qs
 from api.views import jwt_to_user
+from channels.layers import get_channel_layer
+from datetime import datetime
+from time import sleep
+from api.user_db_utils import user_update_game
 
 class GameManager:
 	def __init__(self):
+		self.game_history = None
 		self.games = {}
 		self.logger = logging.getLogger('game')
+		self.tournament_count = 0
 
-	def get_game(self, user):
+	def _get_game_history_model(self):
+		if self.game_history is None:
+			from api.models import GameHistory
+			from Chat.consumer import ChatConsumer
+			self.game_history = GameHistory
+			self.chat_consumer = ChatConsumer
+
+	def remove_game(self, game_id):
+		if game_id in self.games:
+			game = self.games[game_id]
+			del self.games[game_id]
+
+	async def get_game(self, user, bot):
+		self._get_game_history_model()
 		self.logger.info(f"Getting game for user {user.username}")
-		game = self.check_available_game()
+		game = None
+		if (bot == 0):
+			game = await self.check_available_game()
 		if (game is None):
-			game = self.create_game()
+			game = await self.create_game(user, bot)
 		return (game)
 
 	def get_player_current_game(self, user):
@@ -30,55 +50,125 @@ class GameManager:
 		#self.logger.info(self.games)
 		#if (user.is_playing and self.games and self.games[user.current_game_id]):
 		#	return (self.games[user.current_game_id])
+		if user.current_game_id != -1:
+			return self.games.get(user.current_game_id, None)
 		return None
 
-	def check_available_game(self):
-		if (self.games):
-			for game_id, game in self.games.items():
-				if (game.is_full() is False):
-					self.logger.info("A game is available " + str(game_id))
-					return self.games[game_id]
-				else:
-					self.logger.info("game id " + str(game_id) + " was full")
+	async def check_available_game(self):
+		games = await self.get_waiting_game()
+		if (await self.is_game_exists(games)):
+			game = await self.get_first_game(games)
+			await self.set_game_state(game, 'playing')
+			return self.games[game.id]
 		return None
 
-	def create_game(self):
-		if len(self.games) == 0:
-			random_id = random.randint(1, 2000)
-			self.logger.info(f"No game were available, created one with id {random_id}")
-			self.games[random_id] = GameBackend(random_id)
-			return self.games[random_id]
-
-		elif (len(self.games) < 1950):
-			while True:
-				random_id = random_number = random.randint(1, 2000)
-				if random_id not in self.games:
-					self.logger.info("No game were available, created one with id " + str(random_id))
-					self.games[random_id] = GameBackend(random_id)
-					return self.games[random_id]
-					break
+	async def create_game(self, user, bot):
+		self._get_game_history_model()
+		if (bot == 0):
+			game_id = (await self.create_game_history(user)).id
 		else:
-			self.logger.info("Cannot create game, maximum number of concurrent games reached")
+			game_id = (await self.create_game_history(user, game_category='AI')).id
+		self.games[game_id] = GameBackend(game_id, bot, self, True) #TODO Ranked Mode
+		return self.games[game_id]
+
+	async def create_tournament_empty_games(self, tournament_info):
+		self.tournament_count += 1
+		self._get_game_history_model()
+		p1 = tournament_info["round1"][f"game1"]["p1"]
+		p2 = tournament_info["round1"][f"game1"]["p2"]
+		p3 = tournament_info["round1"][f"game2"]["p1"]
+		p4 = tournament_info["round1"][f"game2"]["p2"]
+		game_id3 = (await self.create_game_history(None, None, game_category='Tournament2', tournament_count=self.tournament_count)).id
+		game_id1 = (await self.create_game_history(await self.get_user(p1), await self.get_user(p2), game_category='Tournament1', tournament_count=self.tournament_count, tournament_round2_game_id=game_id3, tournament_round2_place=1)).id
+		game_id2 = (await self.create_game_history(await self.get_user(p3), await self.get_user(p4), game_category='Tournament1', tournament_count=self.tournament_count, tournament_round2_game_id=game_id3, tournament_round2_place=2)).id
+		self.games[game_id1] = GameBackend(game_id1, 0, self, True)
+		self.games[game_id2] = GameBackend(game_id2, 0, self, True)
+		self.games[game_id3] = GameBackend(game_id3, 0, self, True)
+		print(f"3games created {game_id1}, {game_id2}, {game_id3}, players: {p1}, {p2}, {p3}, {p4}", flush=True)
+
+	@database_sync_to_async
+	def get_waiting_game(self, game_category='Quick Match'):
+		return self.game_history.objects.filter(game_state='waiting', game_category=game_category)
+
+	@database_sync_to_async
+	def get_invite_game(self, player_a, player_b, game_category='Invite'):
+		game = self.game_history.objects.filter(player_a=player_a, player_b=player_b, game_state='waiting', game_category=game_category)
+		if not game.exists():
+			self.logger.info("Waiting for the game to be created")
+			sleep(0.5)
+			game = self.game_history.objects.filter(player_a=player_a, player_b=player_b, game_state='waiting', game_category=game_category)
+		return game.first()
+
+	@database_sync_to_async
+	def get_tournament_game(self, p1, p2, game_category='Tournament1'):
+		game = self.game_history.objects.filter(player_a=p1, player_b=p2, game_state='waiting', game_category=game_category)
+		return game.first()
+
+	@database_sync_to_async
+	def create_game_history(self, player_a, player_b=None, game_category='Quick Match', game_mode='Vanilla', game_state='waiting', tournament_count=0, tournament_round2_game_id=-1, tournament_round2_place=-1):
+		return self.game_history.objects.create(player_a=player_a, player_b=player_b, game_category=game_category, game_mode=game_mode, game_state=game_state, tournament_count=tournament_count, tournament_round2_game_id=tournament_round2_game_id, tournament_round2_place=tournament_round2_place)
+
+	@database_sync_to_async
+	def save_game_history(self, game_history):
+		game_history.save()
+
+	@database_sync_to_async
+	def is_game_exists(self, games):
+		return games.exists()
+
+	@database_sync_to_async
+	def get_first_game(self, games):
+		return games.first()
+
+	@database_sync_to_async
+	def set_game_state(self, game, game_state, score_a = 0, score_b = 0, player_a = None, player_b = None):
+		game.score_a = score_a
+		game.score_b = score_b
+		game.game_state = game_state
+		if player_a:
+			game.player_a = player_a
+		if player_b:
+			game.player_b = player_b
+		game.save()
+
+	@database_sync_to_async
+	def get_game_by_id(self, game_id):
+		return self.game_history.objects.get(id=game_id)
+
+	@database_sync_to_async
+	def get_user(self, username):
+		User = get_user_model()
+		user = User.objects.get(username=username)
+		return user
 
 game_manager = GameManager()
 
 class GameConsumer(AsyncWebsocketConsumer):
 
-	@database_sync_to_async
-	def save_user(self, user):
-		user.save()
-
 	async def connect(self):
+		from api.models import is_valid_invite
+		self.is_valid_invite = is_valid_invite
 		self.game = None
 		self.logger = logging.getLogger('game')
 		self.logger.info(f"Websocket connection made with channel name {self.channel_name}")
 
 		query_string = self.scope["query_string"].decode()
 		query_params = parse_qs(query_string)
+		self.logger.info(query_params)
 		token = query_params.get("token", [None])[0]
+		#for reconnect
+		reconnect = query_params.get("reconnect", [None])[0]
+		#for invitation
+		sender = query_params.get("sender", [None])[0]
+		recipient = query_params.get("recipient", [None])[0]
+		#for tournament
+		round = query_params.get("round", [None])[0]
+
 		if not token:
 			return
 		user = await jwt_to_user(token)
+		self.logger.info(f"User : {user}")
+		self.user = user
 
 		if not user:
 			await self.send(text_data=json.dumps({
@@ -86,33 +176,145 @@ class GameConsumer(AsyncWebsocketConsumer):
 				"message": "User not found or invalid token."
 			}))
 			return
+		game_manager._get_game_history_model()
 
-		self.logger.info("Searching for a game for " + user.username)
-		self.game = game_manager.get_player_current_game(user)
-		if (self.game):
-			self.logger.info("User found in a game, disconnecting the old session")
-			channel_name = await self.game.disconnect_user(user)
-			self.logger.info(channel_name)
-			logging.info(self.game.game_id)
-			await self.channel_layer.send(channel_name, {
-			    "type": "chat.message",
-			    "text": "Hello there!",
-			})
-			await self.channel_layer.group_discard(str(self.game.game_id), channel_name)
-		else:
-			self.game = game_manager.get_game(user)
-		self.game.channel_layer = self.channel_layer
-		self.game.assign_player(user, self.channel_name)
-		user.is_playing = True
-		user.current_game_id = self.game.game_id
-		await self.save_user(user)
-		await self.accept()
+		if reconnect: # reconnect to game
+			self.logger.info("Reconnecting to game")
+			self.game = game_manager.get_player_current_game(user)
+			if self.game:
+				self.game.channel_layer = self.channel_layer
+				self.game.assign_player(user, self.channel_name)
+				await self.accept()
+				await self.channel_layer.group_add(str(self.game.game_id), self.channel_name)
+				await self.send_initial_game_state(self.game)
+			return
 
-		await self.channel_layer.group_add(str(self.game.game_id), self.channel_name)
+		elif sender: # invitation: WS msg from B, A invite B, sender is A
+			#print(f"groupname: user_{user.username}", flush=True)
+			if user.is_playing or (await self.get_user(sender)).is_playing:
+				for group in [f"user_{user.username}", f"user_{sender}"]:
+					channel_layer = get_channel_layer()
+					await channel_layer.group_send(
+						group, {
+							"type": "send_message",
+							"message": f"{user.username} accepted {sender}'s invitation, but {sender} is in another game",
+							"message_type": "system",
+							"sender": "admin",
+							"recipient": "public",
+							"time": datetime.now().strftime("%H:%M:%S")
+						}
+					)
+				return # one of the players is in another game, no new game created
+			if not await self.is_valid_invite(await self.get_user(sender), self.user):
+				self.logger.info(f"Invalid invitation from {sender} to {self.user.username}")
+				return # invalid invitation
+			game_db = await game_manager.create_game_history(user, player_b=await self.get_user(sender), game_category='Invite')
+			self.game = GameBackend(game_db.id, 0, game_manager, True) #TODO Ranked mode
+			game_manager.games[game_db.id] = self.game
+			self.game.channel_layer = self.channel_layer
+			self.game.assign_player(user, self.channel_name)
+			await user_update_game(self.user, isplaying=True, game_id=self.game.game_id)
+			await self.accept()
 
-		if (self.game.is_full()):
-			self.logger.info(f"Game {self.game.game_id} is full and ready to start with {self.game.player_left.user.username} and {self.game.player_right.user.username}")
-			await self.send_initial_game_state(self.game)
+			await self.channel_layer.group_add(str(self.game.game_id), self.channel_name)
+
+			# game created, send message to inviter
+			inviter_group = f"user_{sender}"
+			await self.channel_layer.group_send(
+				inviter_group, {
+					"type": "send_message",
+					"message": "accepted your invite",
+					"message_type": "system_accept",
+					"sender": user.username,
+					"game_mode": "TO ADD",
+					"recipient": sender,
+					"time": datetime.now().strftime("%H:%M:%S")
+				}
+			)
+			return
+
+		elif recipient: # invitation: WS msg from A, A invite B, recipient is B
+			game_db = await game_manager.get_invite_game(await self.get_user(recipient), user)
+			self.game = game_manager.games[game_db.id]
+			self.game.channel_layer = self.channel_layer
+			self.game.assign_player(user, self.channel_name)
+			await user_update_game(self.user, isplaying=True, game_id=self.game.game_id)
+			await self.accept()
+
+			await self.channel_layer.group_add(str(self.game.game_id), self.channel_name)
+
+			if (self.game.is_full()):
+				self.logger.info("Game is ready to start,game is full")
+				await game_manager.set_game_state(await game_manager.get_game_by_id(self.game.game_id), 'playing')
+				await self.send_initial_game_state(self.game)
+			return
+
+		elif round: # tournament
+			if round == "1":
+				p1 = query_params.get("p1", [None])[0]
+				p2 = query_params.get("p2", [None])[0]
+				game = query_params.get("game", [None])[0]
+				self.logger.info(game)
+				game_db = await game_manager.get_tournament_game(await self.get_user(p1), await self.get_user(p2))
+				self.game = game_manager.games[game_db.id]
+				self.game.channel_layer = self.channel_layer
+				self.game.assign_player(user, self.channel_name)
+				await user_update_game(self.user, isplaying=True, game_id=self.game.game_id)
+				await self.accept()
+				await self.channel_layer.group_add(str(self.game.game_id), self.channel_name)
+				if (self.game.is_full()):
+					self.logger.info(f"Tournament R1 {game} is ready to start,game is full")
+					game_manager.chat_consumer.tournament_info["round1"][f"{game}"]["state"] = "playing"
+					await game_manager.set_game_state(await game_manager.get_game_by_id(self.game.game_id), 'playing')
+					await self.send_initial_game_state(self.game)
+			elif round == "2":
+				p1 = query_params.get("p1", [None])[0]
+				p2 = query_params.get("p2", [None])[0]
+				game_db = await game_manager.get_tournament_game(await self.get_user(p1), await self.get_user(p2), game_category='Tournament2')
+				self.game = game_manager.games[game_db.id]
+				self.game.channel_layer = self.channel_layer
+				self.game.assign_player(user, self.channel_name)
+				await user_update_game(self.user, isplaying=True, game_id=self.game.game_id)
+				await self.accept()
+				await self.channel_layer.group_add(str(self.game.game_id), self.channel_name)
+				if (self.game.is_full()):
+					self.logger.info("Tournament R2 Game is ready to start,game is full")
+					game_manager.chat_consumer.tournament_info["round2"]["game1"]["state"] = "playing"
+					await game_manager.set_game_state(await game_manager.get_game_by_id(self.game.game_id), 'playing')
+					await self.send_initial_game_state(self.game)
+			return
+
+
+		else: # quick match or bot
+			bot = int(query_params.get("bot", [0])[0])
+
+			self.logger.info("Searching for a game for " + user.username)
+			await database_sync_to_async(user.refresh_from_db)() # refresh user object
+			self.logger.debug(game_manager.games)
+			self.game = game_manager.get_player_current_game(user)
+			if (self.game):
+				self.logger.info("User found in a game, disconnecting the old session")
+				channel_name = await self.game.disconnect_user(user)
+				self.logger.info(channel_name)
+				logging.info(self.game.game_id)
+				await self.channel_layer.send(channel_name, {
+					"type": "chat.message",
+					"text": "Hello there!",
+				})
+				await self.channel_layer.group_discard(str(self.game.game_id), channel_name)
+			else:
+				self.game = await game_manager.get_game(user, bot)
+			self.game.channel_layer = self.channel_layer
+			self.game.assign_player(user, self.channel_name)
+			await user_update_game(self.user, isplaying=True, game_id=self.game.game_id)
+			await self.accept()
+
+			await self.channel_layer.group_add(str(self.game.game_id), self.channel_name)
+
+			if (self.game.is_full()):
+				self.logger.info("Game is ready to start,game is full")
+				await game_manager.set_game_state(await game_manager.get_game_by_id(self.game.game_id), 'playing')
+				await self.send_initial_game_state(self.game)
 
 	async def receive(self, text_data):
 		logging.getLogger('game').info(text_data)
@@ -139,16 +341,21 @@ class GameConsumer(AsyncWebsocketConsumer):
 
 
 	async def disconnect(self, close_code):
+		await user_update_game(self.user, isplaying=False, game_id=-1)
 		self.logger.info(f"WebSocket disconnected with code: {close_code}")
 
 	async def chat_message(self, event):
 		await self.send(text_data=json.dumps({"message":event["text"]}))
 
 	async def game_update(self, event):
-		await self.send(text_data=json.dumps({
-			"type": "game_update",
-			"data":event["data"]
-		}))
+		try:
+			#self.logger.info("Sending game updates")
+			await self.send(text_data=json.dumps({
+				"type": "game_update",
+				"data":event["data"]
+			}))
+		except Exception as e:
+			self.logger.info(f"Crashed in update {e}")
 
 	async def send_initial_game_state(self, instance):
 		self.logger.info(instance.game.player_left.position)
@@ -167,6 +374,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 						}
 					},
 					"player": {
+						#TODO ADD WIDTH AND SUCH
 						"left": {
 							"name": instance.player_left.user.username,
 							"rank": instance.player_left.user.elo,
@@ -181,10 +389,38 @@ class GameConsumer(AsyncWebsocketConsumer):
 				}
 			}
 
-		    # Send the response to the group (or WebSocket connection)
+			# Send the response to the group (or WebSocket connection)
 		await self.channel_layer.group_send(str(instance.game_id), init_response)
 
 	async def init(self, event):
+		print(event, flush=True)
 		await self.send(text_data=json.dumps({
 			"message_type": "init",
 			"data": event["data"]}))
+
+	@database_sync_to_async
+	def get_user(self, username):
+		User = get_user_model()
+		user = User.objects.get(username=username)
+		return user
+
+	async def send_message(self, event):
+		message = event["message"]
+		sender = event["sender"]
+		recipient = event["recipient"]
+		time = event["time"]
+		message_type = event["message_type"]
+		game_mode = event.get("game_mode", None)
+		usernames = event.get("usernames", None)
+		tournament_info = event.get("tournament_info", None)
+
+		await self.send(text_data=json.dumps({
+			"message": message,
+			"message_type": message_type,
+			"sender": sender,
+			"recipient": recipient,
+			"game_mode": game_mode,
+			"usernames" : usernames,
+			"time": time,
+			"tournament_info": tournament_info,
+		}))

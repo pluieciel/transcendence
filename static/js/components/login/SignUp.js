@@ -47,7 +47,6 @@ export default class SignUp {
 
                             <div id="passwordError" class="alert alert-danger d-none"></div>
                             <button type="submit" class="btn btn-primary w-100">Sign Up</button>
-                            <button type="button" class="btn btn-primary w-100 SignUp42 OAuth">Sign Up with 42</button>
                         </form>
                     </div>
                 </div>
@@ -57,17 +56,8 @@ export default class SignUp {
 
     addEventListeners() {
 		const form = this.container.querySelector('#signupForm');
-		const form42 = this.container.querySelector('.SignUp42');
-		const clientId = 'u-s4t2ud-ba5b0c72367af9ad1efbf4d20585f3c315b613ece176ca16919733a7dba999d5';
-		const redirectUri = encodeURIComponent('https://10.11.2.6:9000/signup/oauth');
-		const scope = 'public';
-		const state = 'this_is_a_very_long_random_string_i_am_unguessable';
-		const authorizeUrl = `https://api.intra.42.fr/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&state=${state}`;
-        const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2 MB
-        
-		form42.addEventListener("click", () => {
-			window.location.href = authorizeUrl;
-        });
+        const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1 MB
+
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             const username = this.container.querySelector('#usrnm-form').value;
@@ -118,7 +108,6 @@ export default class SignUp {
                 const data = await response.json();
             
                 if (data.success) {
-                    console.log(data.message);
                     window.app.router.navigateTo('/login');
                 } else {
                     errorDiv.textContent = data.message || 'Signup failed';
