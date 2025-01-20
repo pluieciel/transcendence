@@ -31,9 +31,11 @@ export class Game {
 		this.lastTime = 0;
 		this.axis = "x";
 		this.mode = "position";
-		this.factor = 0.05;
+		this.factor = 0.01;
 
 		window.addEventListener("keydown", (event) => {
+			const objectToModify = this.sceneManager.bonuses.paddle;
+			this.sceneManager.bonuses.table.visible = false;
 			if (event.code === "Space") {
 				//this.emitParticles();
 				this.sceneManager.trajVisible = !this.sceneManager.trajVisible;
@@ -45,53 +47,50 @@ export class Game {
 				console.log("Entering scale mode");
 			} else if (event.code == "NumpadAdd") {
 				if (this.mode == "scale") {
-					this.sceneManager.bonuses.paddle.scale.x += this.factor;
-					this.sceneManager.bonuses.paddle.scale.y += this.factor;
-					this.sceneManager.bonuses.paddle.scale.z += this.factor;
-					console.log(
-						"New scale is : " +
-							this.sceneManager.bonuses.paddle.scale.x +
-							", " +
-							this.sceneManager.bonuses.paddle.scale.y +
-							", " +
-							this.sceneManager.bonuses.paddle.scale.z,
-					);
-				} else if (this.mode == "position") {
-					console.log("axis is : " + this.axis);
 					if (this.axis == "x") {
-						this.sceneManager.bonuses.paddle.position.x += this.factor;
-						console.log("New x position is : " + this.sceneManager.bonuses.paddle.position.x);
+						objectToModify.scale.x += this.factor;
+						console.log("New x scale is : " + objectToModify.scale.x);
 					} else if (this.axis == "y") {
-						this.sceneManager.bonuses.paddle.position.y += this.factor;
-						console.log("New position y is : " + this.sceneManager.bonuses.paddle.position.y);
+						objectToModify.scale.y += this.factor;
+						console.log("New scale y is : " + objectToModify.scale.y);
 					} else if (this.axis == "z") {
-						this.sceneManager.bonuses.paddle.position.z += this.factor;
-						console.log("New position z is : " + this.sceneManager.bonuses.paddle.position.z);
+						objectToModify.scale.z += this.factor;
+						console.log("New scale z is : " + objectToModify.scale.z);
+					}
+				} else if (this.mode == "position") {
+					if (this.axis == "x") {
+						objectToModify.position.x += this.factor;
+						console.log("New x position is : " + objectToModify.position.x);
+					} else if (this.axis == "y") {
+						objectToModify.position.y += this.factor;
+						console.log("New position y is : " + objectToModify.position.y);
+					} else if (this.axis == "z") {
+						objectToModify.position.z += this.factor;
+						console.log("New position z is : " + objectToModify.position.z);
 					}
 				}
 			} else if (event.code == "NumpadSubtract") {
 				if (this.mode == "scale") {
-					this.sceneManager.bonuses.paddle.scale.x -= this.factor;
-					this.sceneManager.bonuses.paddle.scale.y -= this.factor;
-					this.sceneManager.bonuses.paddle.scale.z -= this.factor;
-					console.log(
-						"New scale is : " +
-							this.sceneManager.bonuses.paddle.scale.x +
-							", " +
-							this.sceneManager.bonuses.paddle.scale.y +
-							", " +
-							this.sceneManager.bonuses.paddle.scale.z,
-					);
+					if (this.axis == "x") {
+						objectToModify.scale.x -= this.factor;
+						console.log("New x scale is : " + objectToModify.scale.x);
+					} else if (this.axis == "y") {
+						objectToModify.scale.y -= this.factor;
+						console.log("New scale y is : " + objectToModify.scale.y);
+					} else if (this.axis == "z") {
+						objectToModify.scale.z -= this.factor;
+						console.log("New scale z is : " + objectToModify.scale.z);
+					}
 				} else if (this.mode == "position") {
 					if (this.axis == "x") {
-						this.sceneManager.bonuses.paddle.position.x -= this.factor;
-						console.log("New x position is : " + this.sceneManager.bonuses.paddle.position.x);
+						objectToModify.position.x -= this.factor;
+						console.log("New x position is : " + objectToModify.position.x);
 					} else if (this.axis == "y") {
-						this.sceneManager.bonuses.paddle.position.y -= this.factor;
-						console.log("New y position is : " + this.sceneManager.bonuses.paddle.position.y);
+						objectToModify.position.y -= this.factor;
+						console.log("New y position is : " + objectToModify.position.y);
 					} else if (this.axis == "z") {
-						this.sceneManager.bonuses.paddle.position.z -= this.factor;
-						console.log("New z position is : " + this.sceneManager.bonuses.paddle.position.z);
+						objectToModify.position.z -= this.factor;
+						console.log("New z position is : " + objectToModify.position.z);
 					}
 				}
 			} else if (event.code == "KeyX") {
@@ -104,10 +103,14 @@ export class Game {
 				this.axis = "z";
 				console.log("Axis set to z");
 			} else if (event.code == "KeyF") {
-				this.sceneManager.bonuses.paddle.scale.set(0.3, 0.3, 0.3);
-				this.sceneManager.bonuses.paddle.position.x = -5.2;
-				this.sceneManager.bonuses.paddle.position.y = -1.6;
-				this.sceneManager.bonuses.paddle.position.z = 2.75;
+				this.sceneManager.bonuses.table.scale.set(3, 0.9, 4.35);
+				this.sceneManager.bonuses.table.position.x = -0.15;
+				this.sceneManager.bonuses.table.position.y = 0.7;
+				this.sceneManager.bonuses.table.position.z = -21.6;
+				this.sceneManager.bonuses.paddle.scale.set(0.6, 0.25, 0.5);
+				this.sceneManager.bonuses.paddle.position.x = -18;
+				this.sceneManager.bonuses.paddle.position.y = -3.2;
+				this.sceneManager.bonuses.paddle.position.z = -15;
 				this.sceneManager.bonuses.paddleRed.scale.set(0.3, 0.3, 0.3);
 				this.sceneManager.bonuses.paddleRed.position.x = 5.35;
 				this.sceneManager.bonuses.paddleRed.position.y = -1.6;
@@ -115,7 +118,9 @@ export class Game {
 				this.sceneManager.bonuses.ball.position.x = 0.05;
 				this.sceneManager.bonuses.ball.position.y = -1.5;
 				this.sceneManager.bonuses.ball.position.z = 2.7;
-				this.sceneManager.bonuses.ball.scale.set(0.2, 0.2, 0.2);
+				console.log(this.sceneManager.paddles[0].position.x);
+				console.log(this.sceneManager.paddles[0].position.y);
+				console.log(this.sceneManager.paddles[0].position.z);
 			}
 			console.log(event.code);
 		});
@@ -190,6 +195,7 @@ export class Game {
 		const positions = data.positions;
 		this.sceneManager.paddles[0].position.set(positions.player_left.x, positions.player_left.y, positions.player_left.z);
 		this.sceneManager.paddles[1].position.set(positions.player_right.x, positions.player_right.y, positions.player_right.z);
+		this.sceneManager.paddles[0].visible = false;
 
 		this.sceneManager.ball.position.set(positions.ball.x, positions.ball.y, positions.ball.z);
 
@@ -227,8 +233,8 @@ export class Game {
 			const leftPos = data.positions.player_left;
 			const rightPos = data.positions.player_right;
 
-			if (this.sceneManager.paddles[0]) {
-				this.sceneManager.paddles[0].position.set(leftPos.x, leftPos.y, leftPos.z);
+			if (this.sceneManager.bonuses.paddle) {
+				this.sceneManager.bonuses.paddle.position.set(leftPos.x, leftPos.y - 0.2, leftPos.z);
 			}
 			if (this.sceneManager.paddles[1]) {
 				this.sceneManager.paddles[1].position.set(rightPos.x, rightPos.y, rightPos.z);
