@@ -1,12 +1,10 @@
 # views.py
 import time
-from operator import truediv
 from secrets import token_bytes, token_urlsafe
 from channels.generic.http import AsyncHttpConsumer
 from django.contrib.auth import get_user_model, authenticate
 from channels.db import database_sync_to_async
 import json, os
-import logging
 import requests
 import jwt
 import datetime
@@ -20,9 +18,6 @@ import qrcode.image.svg
 import hmac
 import hashlib
 import base64
-import struct
-
-logger = logging.getLogger(__name__)
 
 async def jwt_to_user(token):
     @database_sync_to_async
@@ -50,6 +45,7 @@ def generate_jwt(user, iat, exp):
     return jwt.encode({
         'id': user.id,
         'username': user.username,
+        'is_admin': user.is_admin,
         'iat': iat,
         'exp': exp
     }, jwt_secret, algorithm='HS256')
