@@ -89,11 +89,10 @@ services:
         expose:
             - 9000
         ports:
-            - 9000:9000
+            - "9000:9000"
         volumes:
             - nginx_data:/var/www/html
             - nginx_logs:/var/log/nginx
-            - django_static_data:/var/www/django/static
             - django_data:/var/www/django/media
         networks:
             - transcendence
@@ -253,12 +252,6 @@ volumes:
             type: none
             o: bind
             device: ${PWD}/static
-    django_static_data:
-        name: django_static_data
-        driver_opts:
-            type: none
-            o: bind
-            device: ${PWD}/backend/staticfiles
     django_logs:
         name: django_logs
     postgres_data:
