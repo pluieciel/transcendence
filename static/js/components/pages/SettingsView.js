@@ -6,6 +6,8 @@ export default class MainView {
 		this.container = container;
 		this.appState = appState;
 		this.#isAllowed = false;
+        const decodedPayload = jwt_decode(window.app.getToken());
+        this.username = decodedPayload.username;
         this.render();
         this.addEventListeners();
     }

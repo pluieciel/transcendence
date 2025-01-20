@@ -69,7 +69,7 @@ export default class Login {
                     errorDiv.classList.remove('d-none');
                 }
             } catch (error) {
-                errorDiv.textContent = 'An error occurred';
+                errorDiv.textContent = 'An error occurred:' + error;
                 errorDiv.classList.remove('d-none');
             }
         });

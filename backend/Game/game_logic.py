@@ -2,6 +2,7 @@ import asyncio
 import time
 import random
 import math
+import logging
 
 RIGHT_SIDE_DIR = 1
 LEFT_SIDE_DIR = -1
@@ -90,13 +91,10 @@ class Ball:
 			self.position.y += self.velocity.y * delta_time
 
 class Player:
-	def __init__(self, name, rank, position, score, keys, websocket, game_bounds):
-		self.name = name
-		self.rank = rank
+	def __init__(self, position, score, keys, game_bounds):
 		self.position = position
 		self.score = score
 		self.keys = keys
-		self.websocket = websocket
 		self.paddle_speed = 24
 		self.paddle_height = 4.0
 		self.paddle_thickness = 0.8
@@ -125,24 +123,18 @@ class GameBounds:
 		self.right = Vector2D(20, -3, -15)
 
 class GameInstance:
-	def __init__(self, room_id):
-		self.room_id = room_id
+	def __init__(self, broadcast_fun):
 		self.bounds = GameBounds()
-		self.player_left = Player("Player 1", 1500,
-								Vector2D(self.bounds.left.x + 2, -3, -15), 0,
-								{"ArrowUp": False, "ArrowDown": False},
-								None, self.bounds)
-		self.player_right = Player("Player 2", 2000,
-								 Vector2D(self.bounds.right.x - 2, -3, -15), 0,
-								 {"ArrowUp": False, "ArrowDown": False},
-								 None, self.bounds)
+		self.player_left = Player(Vector2D(self.bounds.left.x + 2, -3, -15), 0,{"ArrowUp": False, "ArrowDown": False}, self.bounds)
+		self.player_right = Player(Vector2D(self.bounds.right.x - 2, -3, -15), 0,{"ArrowUp": False, "ArrowDown": False}, self.bounds)
 		self.ball = Ball()
-		self.last_update_time = time.time()
+		self.paused = False
 		self.is_running = False
+		self.last_update_time = time.time()
 		self.loop_task = None
-		self.channel_layer = None
 		self.scored = False
 		self.scorePos = Vector2D(0,0,0)
+		self.broadcast_function = broadcast_fun
 
 	def check_collisions(self):
 		ball = self.ball
@@ -186,37 +178,16 @@ class GameInstance:
 		self.ball.countdown = 1
 		self.scored = True
 
-	def handle_key_event(self, websocket, key, is_down):
-		print(f"Handling key event: {key} {is_down}")
-		if websocket == self.player_left.websocket:
-			self.player_left.keys[key] = is_down
-		elif websocket == self.player_right.websocket:
-			self.player_right.keys[key] = is_down
 
-	def assign_player(self, consumer, username):
-		if not self.player_left.websocket:
-			self.player_left.websocket = consumer
-			return 'left'
-		elif not self.player_right.websocket:
-			self.player_right.websocket = consumer
-			return 'right'
-		return None
-
-	def is_full(self):
-		return (self.player_left.websocket is not None and
-				self.player_right.websocket is not None)
-
-	def start_game(self, channel_layer):
-		if self.is_full() and not self.is_running:
-			self.channel_layer = channel_layer
+	def start(self):
 			self.is_running = True
 			self.ball.start(random.choice([LEFT_SIDE_DIR, RIGHT_SIDE_DIR]), DEFAULT_BALL_POS)
 			self.loop_task = asyncio.create_task(self.game_loop())
 
-	def stop_game(self):
-		self.is_running = False
-		if self.loop_task:
-			self.loop_task.cancel()
+	def stop(self):
+				self.is_running = False
+				if self.loop_task:
+					self.loop_task.cancel()
 
 	async def game_loop(self):
 		try:
@@ -225,60 +196,19 @@ class GameInstance:
 				delta_time = current_time - self.last_update_time
 				self.last_update_time = current_time
 
-				self.player_left.update(delta_time)
-				self.player_right.update(delta_time)
-				self.ball.update(delta_time)
-				self.check_collisions()
-
-				await self.broadcast_state()
+				if not self.paused:
+					self.player_left.update(delta_time)
+					self.player_right.update(delta_time)
+					self.ball.update(delta_time)
+					self.check_collisions()
+					try:
+						await self.broadcast_function()
+					except Exception as e:
+						logging.getLogger('game').info(f"Error Broadcast : {e}")
 
 				await asyncio.sleep(1/60)  # 60 FPS
 
 		except asyncio.CancelledError:
-			print(f"Game {self.room_id} stopped")
+			print(f"Game stopped")
 		except Exception as e:
 			print(f"Error in game loop: {e}")
-
-	def update(self):
-		current_time = time.time()
-		delta_time = current_time - self.last_update_time
-		self.last_update_time = current_time
-
-		self.player_left.update(delta_time)
-		self.player_right.update(delta_time)
-		self.ball.update(delta_time)
-		self.check_collisions()
-
-	async def broadcast_state(self):
-		if not self.channel_layer:
-			return
-
-		events = []
-		if (self.scored):
-			events.append({"type":"score", "position" : vars(self.scorePos)})
-			print("Score")
-			self.scored = False
-
-		state = {
-			"type": "game.update",
-			"data": {
-				"player": {
-					"left": {
-						"position": vars(self.player_left.position),
-						"score": self.player_left.score
-					},
-					"right": {
-						"position": vars(self.player_right.position),
-						"score": self.player_right.score
-					}
-				},
-				"ball": {
-					"position": vars(self.ball.position),
-					"visibility" : self.ball.visible
-				},
-				"events": events
-			}
-
-		}
-
-		await self.channel_layer.group_send(self.room_id, state)

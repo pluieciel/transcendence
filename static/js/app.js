@@ -7,6 +7,9 @@ import GameView from './components/GameView.js';
 import Router from './router.js';
 
 class App {
+    // Private
+    #state;
+
     constructor() {
 		this.routes = [
 			{ path: '/', component: LoginView },
@@ -17,15 +20,14 @@ class App {
             { path: '/profile', component: ProfileView },
 			{ path: '*', component: LoginView },
 		]
-        this.state = {
+        this.#state = {
             isLoggedIn: sessionStorage.getItem('isLoggedIn') === 'true',
-            username: sessionStorage.getItem('username') || '',
             token: sessionStorage.getItem('token') || '',
         };
         
 		window.app = this;
 		window.onload = this.applyTheme();
-        this.router = new Router(this.routes, this.state);
+        this.router = new Router(this.routes);
 
     }
 	
@@ -48,14 +50,11 @@ class App {
 	}
 
     login(data) {
-        this.state.isLoggedIn = true;
-        this.state.username = data.user.username;
-        this.state.token = data.token;
-		this.state.theme = data.user.theme;		
+		this.#state.isLoggedIn = true;
+        this.#state.token = data.token;
 		this.applyTheme();
-		sessionStorage.setItem('isLoggedIn', 'true');
-        sessionStorage.setItem('username', this.state.username);
-        sessionStorage.setItem('token', this.state.token);
+        sessionStorage.setItem('isLoggedIn', 'true');
+        sessionStorage.setItem('token', this.#state.token);
         this.router.navigateTo('/index');
     }
 	
@@ -72,11 +71,18 @@ class App {
 	}
 
     logout() {
-        this.state.isLoggedIn = false;
-        this.state.username = '';
-        sessionStorage.removeItem('isLoggedIn');
-        sessionStorage.removeItem('username');
+        this.#state.isLoggedIn = false;
+        this.#state.token = '';
+        sessionStorage.clear();
         this.router.navigateTo('/');
+    }
+
+    getIsLoggedIn() {
+        return this.#state.isLoggedIn;
+    }
+
+    getToken() {
+        return this.#state.token;
     }
 }
 
