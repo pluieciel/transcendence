@@ -1,8 +1,9 @@
 from django.contrib.auth import get_user_model
 from channels.db import database_sync_to_async
-from dotenv import load_dotenv
 import os
 import jwt
+
+SECRET_KEY = os.environ.get('JWT_SECRET_KEY')
 
 async def jwt_to_user(token):
     @database_sync_to_async
@@ -11,10 +12,8 @@ async def jwt_to_user(token):
         return User.objects.get(id=user_id)
 
     try:
-        load_dotenv()
-        secret = os.getenv("SECRET_KEY")
-        payload = jwt.decode(token, secret, algorithms=['HS256'])
-        user = await get_user(payload.get('user_id'))
+        payload = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
+        user = await get_user(payload.get('id'))
         if user:
             return user
         else:

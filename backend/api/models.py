@@ -12,13 +12,12 @@ class CustomUserManager(BaseUserManager):
         user.save(using=self._db)
         return user
     
-    def	create_user_oauth(self, username):
+    def	create_user_oauth(self, username, avatar):
         if not username:
             raise ValueError('Users must have a username')
-        user = self.model(username=username, oauthlog=True)
+        user = self.model(username=username, oauthlog=True, avatar=avatar)
         user.save(using=self._db)
         return user
-        
 
     def create_superuser(self, username, password=None):
         user = self.create_user(

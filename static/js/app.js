@@ -32,14 +32,14 @@ class App {
     }
 	
 	applyTheme() {
-		if (window.app.state.theme === "light") {
+		if (this.#state.theme === "light") {
 			document.documentElement.style.setProperty('--primary-color', '#FAEBD7');
 			document.documentElement.style.setProperty('--secondary-color', '#353535');
 			document.documentElement.style.setProperty('--accent-color', '#E8C4A2');
 			document.documentElement.style.setProperty('--hover-color', '#FFE4C4');
 			document.documentElement.style.setProperty('--header-color', '#E8C4A2');
 			document.documentElement.style.setProperty('--button-box-color', 'rgba(0, 0, 0, 0.5)');
-		} else if (window.app.state.theme === "dark") { 
+		} else if (this.#state.theme === "dark") { 
 			document.documentElement.style.setProperty('--primary-color', '#121212');
 			document.documentElement.style.setProperty('--secondary-color', '#fff');
 			document.documentElement.style.setProperty('--accent-color', '#353535');
@@ -59,14 +59,12 @@ class App {
     }
 	
 	login42(username, token, theme) {
-		this.state.isLoggedIn = true;
-        this.state.username = username;
-        this.state.token = token;
-		this.state.theme = theme;		
+		this.#state.isLoggedIn = true;
+        this.#state.token = token;
+		this.#state.theme = theme;
 		this.applyTheme();
 		sessionStorage.setItem('isLoggedIn', 'true');
-        sessionStorage.setItem('username', this.state.username);
-        sessionStorage.setItem('token', this.state.token);
+        sessionStorage.setItem('token', this.#state.token);
         this.router.navigateTo('/index');
 	}
 

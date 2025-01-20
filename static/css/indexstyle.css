@@ -1,10 +1,10 @@
 :root {
-    --primary-color: #FAEBD7;
-    --secondary-color: #353535;
-    --accent-color: #E8C4A2;
-	--hover-color: #FFE4C4;
-	--header-color: #E8C4A2;
-	--button-box-color: rgba(0, 0, 0, 0.5);
+    --primary-color: #111;
+    --secondary-color: #fff;
+    --accent-color: #353535;
+	--hover-color: #666;
+	--header-color: #111;
+	--header-shadow-color: rgba(255, 255, 255, 0.3);
 }
 
 body {
@@ -92,7 +92,6 @@ a {
 	background-color: var(--primary-color);
 	color: var(--secondary-color);
     cursor: pointer;
-	/* border-radius: 10px; */
 	border: 0px solid var(--secondary-color);
     transition: background-color 0.2s, color 0.3s, scale 0.2s, transform 0.2s;
     margin: 10px 0;
@@ -200,4 +199,51 @@ a {
 	background-color: var(--primary-color);
 	margin: 5px;
 	display: none;
+}
+
+.game-buttons button, .containerPrivate > button {
+	color: var(--secondary-color);
+	border: 0;
+	background-color: var(--primary-color);
+	transition: all 0.5s;
+	position: relative;
+}
+
+.game-buttons button:hover, .containerPrivate > button:hover {
+	color: var(--secondary-color);
+}
+
+.game-buttons button::before, .containerPrivate > button::before{
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	z-index: 1;
+	transition: all 0.3s;
+}
+
+.game-buttons button:hover::before, .containerPrivate > button:hover::before{
+	opacity: 0 ;
+	transform: scale(0.5,0.5);
+}
+
+.game-buttons button::after, .containerPrivate > button::after{
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	z-index: 1;
+	opacity: 0;
+	transition: all 0.3s;
+	border: 1px solid var(--button-box-color);
+	transform: scale(1.2,1.2);
+}
+
+.game-buttons button:hover::after, .containerPrivate > button:hover::after{
+	opacity: 1;
+	transform: scale(1,1);
 }

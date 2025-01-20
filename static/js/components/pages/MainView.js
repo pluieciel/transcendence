@@ -5,8 +5,6 @@ export default class MainView {
 	constructor(container) {
 		this.container = container;
 		const decodedPayload = jwt_decode(window.app.getToken());
-		//console.log(appState.token);
-		//console.log(decodedPayload);
 
 		//Search game timer
 		this.countdownTime = 0;
@@ -50,15 +48,14 @@ export default class MainView {
 					<a href="https://github.com/neutrou" target="_blank" rel="noopener noreferrer">Victor Algranti</a><br><br>
 					We hope you enjoy exploring our project!
 				</p>
-
 			</div>
-					<div class="game-buttons">
-					<h2>PLAY!</h2>
-					<button id="playAI">AI</button>
-					<button id="rankedMatch">Ranked</button>
-					<button id="quickMatch" class="nav-link" data-view="game" data-bs-toggle="modal" data-bs-target="#matchSearch">Quick Match</button>
-					<button id="joinTournament">Join Tournament</button>
-					<button id="createTournament">Create Tournament</button>
+			<div class="game-buttons">
+				<h2>PLAY!</h2>
+				<button id="playAI">AI</button>
+				<button id="rankedMatch">Ranked</button>
+				<button id="quickMatch" class="nav-link" data-view="game" data-bs-toggle="modal" data-bs-target="#matchSearch">Quick Match</button>
+				<button id="joinTournament">Join Tournament</button>
+				<button id="createTournament">Create Tournament</button>
 			</div>
 			<div class="profile">
 				<h2>Profile</h2>
@@ -70,9 +67,8 @@ export default class MainView {
 			</div>
 		</div>
 	</div>
-	<!-- ChatBox container -->
 	<div id="chatBoxContainer"></div>
-
+	
 	<div class="modal fade" id="matchSearch" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
 		<div class="modal-dialog modal-dialog-centered">
 			<div class="modal-content modal-content-game d-flex flex-column align-items-center justify-content-center text-center">
@@ -89,7 +85,6 @@ export default class MainView {
 		<div id="nameRight"></div>
 		<div id="scoreRight"></div>
 	</canvas>
-
         `;
 		this.timerElement = document.getElementById("timer");
 	}
@@ -237,6 +232,8 @@ export default class MainView {
 		});
 	}
 
+
+	
 	async setProfileFields() {
 		var	name_div = document.getElementById("p-name");
 		var elo_div = document.getElementById("p-elo");
@@ -252,9 +249,10 @@ export default class MainView {
 			img.style.marginLeft = '5px';
 			name_div.innerHTML = this.username.substring(0, this.username.length - 2);
 			name_div.appendChild(img);
-		} else {
-			name_div.innerHTML = this.username;
 		}
+		else
+			name_div.innerHTML = this.username;
+
 		try {
 			const response = await fetch("/api/get/profile", {
 				method: "POST",
@@ -263,19 +261,18 @@ export default class MainView {
 					Authorization: `${window.app.getToken()}`,
 				},
 			});
-
-            const data = await response.json();
-        
+			const data = await response.json();
+			console.log(data);
+			
             if (data.success) {
 				elo_div.innerHTML = "Elo: " + data['elo'];
 				winrate_div.innerHTML = "Winrate: " + data['winrate'];
 				tourn_div.innerHTML = "Tournaments won: " + data['tourn'];
-			} else {
-				elo_div.innerHTML = "Failed to load elo";
-				winrate_div.innerHTML = "Failed to load winrate";
-				tourn_div.innerHTML = "Failed to load tournaments";
 			}
-		} catch (error) {
+			else
+				throw "data retrieving failure"
+		}
+		catch (error) {
 			elo_div.innerHTML = "Failed to load elo";
 			winrate_div.innerHTML = "Failed to load winrate";
 			tourn_div.innerHTML = "Failed to load tournaments";

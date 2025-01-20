@@ -269,7 +269,6 @@ class HandleOAuthConsumer(AsyncHttpConsumer):
                         'success': True,
                         'status': 200,
                         'message': 'Login successful',
-                        'username': user_data['login'] + "42"
                     }
                 else:
                     await self.create_user_oauth(user_data['login'] + "42")
@@ -277,18 +276,17 @@ class HandleOAuthConsumer(AsyncHttpConsumer):
                         'success': True,
                         'status': 201,
                         'message': 'Signup && Login successful',
-                        'username': user_data['login'] + "42"
                     }
                 user = await self.get_user(user_data['login'] + "42")
-                
-                load_dotenv()
+
                 token = jwt.encode({
-                    'user_id': user.id,
+                    'id': user.id,
+                    'username': user_data['login'] + "42",
+					'theme': user.theme or "light",
                     'exp': datetime.datetime.now(datetime.UTC) + datetime.timedelta(hours=1)
-                }, os.getenv("SECRET_KEY"), algorithm='HS256')
+                }, SECRET_KEY, algorithm='HS256')
                 
                 response_data['token'] = token
-                response_data['theme'] = user.theme or "light"
                 
                 return await self.send_response(response_data['status'], json.dumps(response_data).encode(),
                     headers=[(b"Content-Type", b"application/json")])
@@ -324,6 +322,7 @@ class HandleOAuthConsumer(AsyncHttpConsumer):
 class ProfileConsumer(AsyncHttpConsumer):
     async def handle(self, body):
         try:
+            print("BEGINGINGNGG", flush=True)
             headers = dict((key.decode('utf-8'), value.decode('utf-8')) for key, value in self.scope['headers'])
             auth_header = headers.get('authorization', None)
             if not auth_header:
@@ -333,7 +332,9 @@ class ProfileConsumer(AsyncHttpConsumer):
                 }
                 return await self.send_response(401, json.dumps(response_data).encode(),
                     headers=[(b"Content-Type", b"application/json")])
+            print("BEFORE JWT", flush=True)
             user = await jwt_to_user(auth_header)
+            print("AFTER JWT", flush=True)
             if not user:
                 response_data = {
                     'success': False,
@@ -343,11 +344,13 @@ class ProfileConsumer(AsyncHttpConsumer):
                     headers=[(b"Content-Type", b"application/json")])
 
             tot_games = (user.wins + user.looses)
+            print("computing tot games", flush=True)
             if tot_games == 0:
                 winrate = "No games found"
             else:
                 winrate = (user.wins / tot_games) * 100 + "%"
 
+            print("answering", flush=True)
             response_data = {
                 'success': True,
                 'elo': user.elo,
@@ -392,9 +395,8 @@ class ProfileConsumer2(AsyncHttpConsumer):
                 }
                 return await self.send_response(401, json.dumps(response_data).encode(),
                     headers=[(b"Content-Type", b"application/json")])
-            
+
             path = self.scope['path']
-            #print(f"Request path: {path}", flush=True)
             match = re.search(r'/api/get/profile/(\w+)', path)
             user_name = match.group(1)
             user = await self.get_user_by_name(user_name)
