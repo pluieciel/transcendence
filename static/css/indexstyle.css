@@ -93,31 +93,25 @@ a {
 	display: block;
 	padding: 10px 20px;
 	font-size: 1rem;
-	background-color: var(--primary-color);
-	color: var(--secondary-color);
     cursor: pointer;
-    transition: background-color 0.2s, color 0.3s, scale 0.2s, transform 0.2s;
     margin: 10px 0;
     text-align: center;
-    width: 100%;
     max-width: 200px;
-	position: static;
+	margin-right: 10px;
+	width: 100px;
+	position: absolute;
+	order: -1;
+	transition: all 0.2s;
+}
+
+#settingsBtn:hover, #indexBtn:hover, #logoutBtn:hover {
+    transform: scale(1.1);
 }
 
 .sendButton, .btn-closing-chat {
     background-color: #f0f0f0;
     color: #333;
     border: #ddd solid 1px;
-}
-
-#settingsBtn, #indexBtn, #logoutBtn {
-    margin-right: 10px;
-    padding: 10px;
-	width: 100px;
-    font-size: 1rem;
-	position: absolute;
-	order: -1;
-	transition: background-color 0.2s, transform 0.2s;
 }
 
 #settingsBtn, #indexBtn {
@@ -146,7 +140,6 @@ a {
 	margin: 5px;
 }
 
-/* border: 2px solid #ff00b3; */
 .game-buttons, .credits, .profile {
 	border: 1px solid var(--accent-color);
 	transition: all 0.5s;

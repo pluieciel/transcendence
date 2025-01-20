@@ -1,7 +1,6 @@
 import LoginView from './components/pages/LoginView.js';
 import MainView from './components/pages/MainView.js';
 import SettingsView from './components/pages/SettingsView.js';
-import ProfileView from './components/pages/ProfileView.js';
 import LoginOAuth from './components/login/LoginOAuth.js';
 import Router from './router.js';
 
@@ -12,7 +11,6 @@ class App {
 			{ path: '/', component: LoginView },
             { path: '/index', component: MainView },
             { path: '/settings', component: SettingsView },
-            { path: '/profile', component: ProfileView },
             { path: '/login/oauth', component: LoginOAuth },
 			{ path: '*', component: LoginView },
 		]
@@ -40,6 +38,7 @@ class App {
         });
         const data = await response.json();
         this.avatarCache[username] = data.avatar;
+		console.log(data.avatar);
         return data.avatar;
     }
     
