@@ -19,6 +19,10 @@ import hmac
 import hashlib
 import base64
 
+def get_cookie(headers, name):
+    cookies = headers.get('cookie', None)
+    return re.search(f'{name}=([^;]+)', cookies)
+
 async def jwt_to_user(headers):
     @database_sync_to_async
     def get_user(user_id):
@@ -27,8 +31,7 @@ async def jwt_to_user(headers):
 
     try:
         headers_dict = dict((key.decode('utf-8'), value.decode('utf-8')) for key, value in headers)
-        cookies = headers_dict.get('cookie', None)
-        jwt_cookie = re.search('jwt=([^;]+)', cookies)
+        jwt_cookie = get_cookie(headers_dict, 'jwt')
         if jwt_cookie:
             token = jwt_cookie.group(1)
             jwt_secret = get_secret_from_file('JWT_SECRET_KEY_FILE')
@@ -569,18 +572,12 @@ class OAuthConsumer(AsyncHttpConsumer):
         try:
             client_id = get_secret_from_file('OAUTH_CLIENT_ID_FILE')
             redirect_uri = os.environ.get('OAUTH_REDIRECT_URI')
-
-            # TODO: verify state
-            state = token_urlsafe(32)
-            state = 'this_is_a_very_long_random_string_i_am_unguessable'
-
             auth_url = (
                 f"https://api.intra.42.fr/oauth/authorize?"
                 f"client_id={client_id}&"
                 f"redirect_uri={redirect_uri}&"
                 f"response_type=code&"
-                f"scope=public&"
-                f"state={state}"
+                f"scope=public"
             )
 
             response_data = {
