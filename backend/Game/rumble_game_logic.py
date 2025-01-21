@@ -10,19 +10,19 @@ RIGHT_SIDE_DIR = 1
 LEFT_SIDE_DIR = -1
 
 class BounceMethods(ABC):
-    @abstractmethod
-    def BounceWall(self, ball, is_top):
-        pass
+	@abstractmethod
+	def BounceWall(self, ball, is_top):
+		pass
 
-    @abstractmethod
-    def BouncePaddle(self, ball, paddle_x, paddle_y):
-    	pass
+	@abstractmethod
+	def BouncePaddle(self, ball, paddle_x, paddle_y):
+		pass
 
 class RandomBounce(BounceMethods):
-    def BounceWall(self, ball, is_top):
-        pass
-    def BouncePaddle(self, ball, paddle_x, paddle_y):
-    	pass
+	def BounceWall(self, ball, is_top):
+		pass
+	def BouncePaddle(self, ball, paddle_x, paddle_y):
+		pass
 
 class NormalBounce(BounceMethods):
 	def BounceWall(self, ball, is_top):
@@ -48,9 +48,9 @@ class NormalBounce(BounceMethods):
 			ball.speed = ball.maxSpeed
 
 class MovementMethod(ABC):
-    @abstractmethod
-    def calculate_movement(self, input_direction: int, speed: float, delta_time: float) -> float:
-        pass
+	@abstractmethod
+	def calculate_movement(self, input_direction: int, speed: float, delta_time: float) -> float:
+		pass
 
 class NormalMovements(MovementMethod):
 	def calculate_movement(self, input_direction: int, speed: float, delta_time: float) -> float:
@@ -83,6 +83,7 @@ class Ball:
 		self.is_moving = False
 		self.acceleration = 1.2
 		self.bounce_methods = NormalBounce()
+		self.lastHitter = ""
 
 	def calculate_max_safe_speed(self, maxSpeedMult):
 		bounds = GameBounds()
@@ -125,6 +126,7 @@ class Ball:
 		self.velocity.x = direction * self.speed * math.cos(angle_rad)
 		self.velocity.y = self.speed * math.sin(angle_rad)
 		self.position = Vector2D(ballPos.x, ballPos.y, ballPos.z)
+		self.lastHitter = "RIGHT" if direction == LEFT_SIDE_DIR else "LEFT"
 
 	def start_movement(self):
 		self.is_moving = True
@@ -164,10 +166,10 @@ class Player:
 
 class GameBounds:
 	def __init__(self):
-		self.top = Vector2D(0, 7, -15)
-		self.bottom = Vector2D(0, -13, -15)
-		self.left = Vector2D(-20, -3, -15)
-		self.right = Vector2D(20, -3, -15)
+		self.top = Vector2D(0, 10.56, -15)
+		self.bottom = Vector2D(0, -17.89, -15)
+		self.left = Vector2D(-20.45, -3.70, -15)
+		self.right = Vector2D(20.42, -3.70, -15)
 
 class RumbleGameInstance:
 	def __init__(self, broadcast_fun, game_end_fun):
@@ -183,8 +185,8 @@ class RumbleGameInstance:
 		self.loop_task = None
 		self.scored = False
 		self.scorePos = Vector2D(0,0,0)
-		self.maxScore = 100
-		self.maxScoreLimit = 150
+		self.maxScore = 10
+		self.maxScoreLimit = 50
 		self.broadcast_function = broadcast_fun
 		self.game_end_fun = game_end_fun
 		self.logger = logging.getLogger('game')
@@ -200,24 +202,28 @@ class RumbleGameInstance:
 			ball.bounce_methods.BounceWall(ball, True)
 		elif ball_pos.y <= self.bounds.bottom.y + ball.radius:
 			ball.bounce_methods.BounceWall(ball, False)
+
 		right_paddle = self.player_right
 		if (ball_pos.x <= right_paddle.position.x + right_paddle.paddle_thickness/2 + ball.radius and
 			ball_pos.x >= right_paddle.position.x - right_paddle.paddle_thickness/2 - ball.radius):
 			if (abs(ball_pos.y - right_paddle.position.y) <=
 				right_paddle.paddle_height/2 + ball.radius):
-				if ball.velocity.x > 0:
-					ball.position.x = right_paddle.position.x - right_paddle.paddle_thickness/2 - ball.radius
-				ball.bounce_methods.BouncePaddle(ball, right_paddle.position.x, right_paddle.position.y)
-				paddle_hit = True
+					if ball.velocity.x > 0:
+						ball.position.x = right_paddle.position.x - right_paddle.paddle_thickness/2 - ball.radius
+						ball.bounce_methods.BouncePaddle(ball, right_paddle.position.x, right_paddle.position.y)
+						ball.lastHitter = "RIGHT"  # Add this line
+						paddle_hit = True
+
 		left_paddle = self.player_left
 		if (ball_pos.x >= left_paddle.position.x - left_paddle.paddle_thickness/2 - ball.radius and
 			ball_pos.x <= left_paddle.position.x + left_paddle.paddle_thickness/2 + ball.radius):
-			if (abs(ball_pos.y - left_paddle.position.y) <=
+				if (abs(ball_pos.y - left_paddle.position.y) <=
 				left_paddle.paddle_height/2 + ball.radius):
-				if ball.velocity.x < 0:
-					ball.position.x = left_paddle.position.x + left_paddle.paddle_thickness/2 + ball.radius
-				ball.bounce_methods.BouncePaddle(ball, left_paddle.position.x, left_paddle.position.y)
-				paddle_hit = True
+					if ball.velocity.x < 0:
+						ball.position.x = left_paddle.position.x + left_paddle.paddle_thickness/2 + ball.radius
+						ball.bounce_methods.BouncePaddle(ball, left_paddle.position.x, left_paddle.position.y)
+						ball.lastHitter = "LEFT"  # Add this line
+						paddle_hit = True
 
 		if not paddle_hit:
 			if ball_pos.x >= self.bounds.right.x:

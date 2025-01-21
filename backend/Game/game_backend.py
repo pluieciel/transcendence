@@ -259,6 +259,9 @@ class GameBackend:
 		if self.game.ended:
 			self.logger.info(f"Appending winner info with {self.game.winner}")
 			events.append({"type": "game_end", "winner": self.game.winner})
+		if self.game.ball.lastHitter:
+			self.logger.info(self.game.ball.lastHitter)
+			events.append({"type": "ball_last_hitter", "value": self.game.ball.lastHitter})
 
 		trajectory_points = self.game.ball.predict_trajectory()
 		trajectory_data = [vars(point) for point in trajectory_points]
@@ -307,6 +310,9 @@ class GameBackend:
 		if self.game.ended:
 			self.logger.info(f"Appending winner info with {self.game.winner}")
 			events.append({"type": "game_end", "winner": self.game.winner})
+		if self.game.ball.lastHitter:
+			self.logger.info(self.game.ball.lastHitter)
+			events.append({"type": "ball_last_hitter", "value": self.game.ball.lastHitter})
 
 		trajectory_points = self.game.ball.predict_trajectory()
 		trajectory_data = [vars(point) for point in trajectory_points]

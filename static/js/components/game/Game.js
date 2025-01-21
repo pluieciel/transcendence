@@ -6,11 +6,35 @@ import { Loading } from "./Loading.js";
 //import * as THREE from 'three';
 import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
 
+export class Renderers {
+	constructor(canvas, antialiasing) {
+		this.renderer = new THREE.WebGLRenderer({
+			canvas: canvas,
+			antialias: antialiasing, // Make this configurable
+			alpha: true,
+			powerPreference: "high-performance",
+			stencil: false,
+			samples: antialiasing ? 8 : 0, // Only use MSAA if anti-aliasing is enabled
+		});
+
+		this.renderer.setSize(window.innerWidth, window.innerHeight);
+		this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+		this.renderer.shadowMap.enabled = true;
+		this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+		this.renderer.outputColorSpace = THREE.SRGBColorSpace;
+		this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+		this.renderer.toneMappingExposure = 1;
+	}
+}
+
 export class Game {
 	constructor(canvas, ws) {
+		this.antialiasing = true;
+		this.bloom = true;
+		this.renderer = new Renderers(canvas, this.antialiasing);
 		this.loading = new Loading();
-		this.renderer = new Renderer(canvas);
-		this.sceneManager = new SceneManager(this.loading);
+		//this.renderer = new Renderer(canvas);
+		this.sceneManager = new SceneManager(this.loading, this.renderer.renderer, this.antialiasing, this.bloom);
 		this.inputManager = new InputManager();
 		this.uiManager = this.sceneManager.UIManager;
 		this.ws = ws;
@@ -33,97 +57,7 @@ export class Game {
 		this.mode = "position";
 		this.factor = 0.01;
 
-		window.addEventListener("keydown", (event) => {
-			const objectToModify = this.sceneManager.bonuses.paddle;
-			this.sceneManager.bonuses.table.visible = false;
-			if (event.code === "Space") {
-				//this.emitParticles();
-				this.sceneManager.trajVisible = !this.sceneManager.trajVisible;
-			} else if (event.code == "KeyG") {
-				console.log("Entering position mode");
-				this.mode = "position";
-			} else if (event.code == "KeyS") {
-				this.mode = "scale";
-				console.log("Entering scale mode");
-			} else if (event.code == "NumpadAdd") {
-				if (this.mode == "scale") {
-					if (this.axis == "x") {
-						objectToModify.scale.x += this.factor;
-						console.log("New x scale is : " + objectToModify.scale.x);
-					} else if (this.axis == "y") {
-						objectToModify.scale.y += this.factor;
-						console.log("New scale y is : " + objectToModify.scale.y);
-					} else if (this.axis == "z") {
-						objectToModify.scale.z += this.factor;
-						console.log("New scale z is : " + objectToModify.scale.z);
-					}
-				} else if (this.mode == "position") {
-					if (this.axis == "x") {
-						objectToModify.position.x += this.factor;
-						console.log("New x position is : " + objectToModify.position.x);
-					} else if (this.axis == "y") {
-						objectToModify.position.y += this.factor;
-						console.log("New position y is : " + objectToModify.position.y);
-					} else if (this.axis == "z") {
-						objectToModify.position.z += this.factor;
-						console.log("New position z is : " + objectToModify.position.z);
-					}
-				}
-			} else if (event.code == "NumpadSubtract") {
-				if (this.mode == "scale") {
-					if (this.axis == "x") {
-						objectToModify.scale.x -= this.factor;
-						console.log("New x scale is : " + objectToModify.scale.x);
-					} else if (this.axis == "y") {
-						objectToModify.scale.y -= this.factor;
-						console.log("New scale y is : " + objectToModify.scale.y);
-					} else if (this.axis == "z") {
-						objectToModify.scale.z -= this.factor;
-						console.log("New scale z is : " + objectToModify.scale.z);
-					}
-				} else if (this.mode == "position") {
-					if (this.axis == "x") {
-						objectToModify.position.x -= this.factor;
-						console.log("New x position is : " + objectToModify.position.x);
-					} else if (this.axis == "y") {
-						objectToModify.position.y -= this.factor;
-						console.log("New y position is : " + objectToModify.position.y);
-					} else if (this.axis == "z") {
-						objectToModify.position.z -= this.factor;
-						console.log("New z position is : " + objectToModify.position.z);
-					}
-				}
-			} else if (event.code == "KeyX") {
-				this.axis = "x";
-				console.log("Axis set to x");
-			} else if (event.code == "KeyY") {
-				this.axis = "y";
-				console.log("Axis set to y");
-			} else if (event.code == "KeyZ") {
-				this.axis = "z";
-				console.log("Axis set to z");
-			} else if (event.code == "KeyF") {
-				this.sceneManager.bonuses.table.scale.set(3, 0.9, 4.35);
-				this.sceneManager.bonuses.table.position.x = -0.15;
-				this.sceneManager.bonuses.table.position.y = 0.7;
-				this.sceneManager.bonuses.table.position.z = -21.6;
-				this.sceneManager.bonuses.paddle.scale.set(0.6, 0.25, 0.5);
-				this.sceneManager.bonuses.paddle.position.x = -18;
-				this.sceneManager.bonuses.paddle.position.y = -3.2;
-				this.sceneManager.bonuses.paddle.position.z = -15;
-				this.sceneManager.bonuses.paddleRed.scale.set(0.3, 0.3, 0.3);
-				this.sceneManager.bonuses.paddleRed.position.x = 5.35;
-				this.sceneManager.bonuses.paddleRed.position.y = -1.6;
-				this.sceneManager.bonuses.paddleRed.position.z = 2.75;
-				this.sceneManager.bonuses.ball.position.x = 0.05;
-				this.sceneManager.bonuses.ball.position.y = -1.5;
-				this.sceneManager.bonuses.ball.position.z = 2.7;
-				console.log(this.sceneManager.paddles[0].position.x);
-				console.log(this.sceneManager.paddles[0].position.y);
-				console.log(this.sceneManager.paddles[0].position.z);
-			}
-			console.log(event.code);
-		});
+		this.enableDebugMode(true, this.sceneManager.bonuses.table);
 
 		this.loading.onComplete = () => {
 			this.sendInitDone();
@@ -193,24 +127,24 @@ export class Game {
 
 	handleInit(data) {
 		const positions = data.positions;
-		this.sceneManager.paddles[0].position.set(positions.player_left.x, positions.player_left.y, positions.player_left.z);
-		this.sceneManager.paddles[1].position.set(positions.player_right.x, positions.player_right.y, positions.player_right.z);
-		this.sceneManager.paddles[0].visible = false;
+		//this.sceneManager.paddles[0].position.set(positions.player_left.x, positions.player_left.y, positions.player_left.z);
+		//this.sceneManager.paddles[1].position.set(positions.player_right.x, positions.player_right.y, positions.player_right.z);
+		//this.sceneManager.paddles[0].visible = false;
 
-		this.sceneManager.ball.position.set(positions.ball.x, positions.ball.y, positions.ball.z);
+		//this.sceneManager.ball.position.set(positions.ball.x, positions.ball.y, positions.ball.z);
 
 		this.sceneManager.topBorder.position.set(positions.borders.top.x, positions.borders.top.y, positions.borders.top.z);
 		this.sceneManager.bottomBorder.position.set(positions.borders.bottom.x, positions.borders.bottom.y, positions.borders.bottom.z);
 		this.sceneManager.leftBorder.position.set(positions.borders.left.x, positions.borders.left.y, positions.borders.left.z);
 		this.sceneManager.rightBorder.position.set(positions.borders.right.x, positions.borders.right.y, positions.borders.right.z);
-
+		console.log("x " + positions.borders.left.x + " y : " + positions.borders.left.y + " z " + positions.borders.left.z);
 		this.uiManager.updateNameLeft(data.player.left.name + " [" + data.player.left.rank + "]");
 		this.uiManager.updateNameRight(data.player.right.name + " [" + data.player.right.rank + "]");
 
 		this.uiManager.updateScoreLeft(data.player.left.score);
 		this.uiManager.updateScoreRight(data.player.right.score);
 
-		this.sceneManager.showObjects();
+		//this.sceneManager.showObjects();
 
 		this.uiManager.setOverlayVisibility(true);
 		this.uiManager.setOverText("Waiting for game start...");
@@ -233,11 +167,25 @@ export class Game {
 			const leftPos = data.positions.player_left;
 			const rightPos = data.positions.player_right;
 
-			if (this.sceneManager.bonuses.paddle) {
-				this.sceneManager.bonuses.paddle.position.set(leftPos.x, leftPos.y - 0.2, leftPos.z);
-			}
-			if (this.sceneManager.paddles[1]) {
-				this.sceneManager.paddles[1].position.set(rightPos.x, rightPos.y, rightPos.z);
+			if (this.sceneManager.debugMod) {
+				this.sceneManager.updateDebugPositions(data.positions);
+				this.sceneManager.bonuses.paddle.visible = false;
+				this.sceneManager.bonuses.paddleRed.visible = false;
+				this.sceneManager.bonuses.ball.visible = false;
+			} else {
+				if (this.sceneManager.bonuses.paddle) {
+					this.sceneManager.bonuses.paddle.position.set(leftPos.x, leftPos.y - 0.2, leftPos.z);
+					this.sceneManager.bonuses.paddle.visible = true;
+				}
+				if (this.sceneManager.bonuses.paddleRed) {
+					this.sceneManager.bonuses.paddleRed.position.set(rightPos.x, rightPos.y - 0.2, rightPos.z);
+					this.sceneManager.bonuses.paddleRed.visible = true;
+				}
+
+				if (data.positions.ball && this.sceneManager.bonuses.ball) {
+					this.sceneManager.bonuses.ball.position.set(data.positions.ball.x, data.positions.ball.y, data.positions.ball.z);
+					this.sceneManager.bonuses.ball.visible = true;
+				}
 			}
 
 			this.uiManager.updateScoreLeft(data.player.left.score);
@@ -246,11 +194,6 @@ export class Game {
 
 		if (data.trajectory) {
 			this.sceneManager.updateTrajectory(data.trajectory);
-		}
-
-		if (data.positions.ball && this.sceneManager.ball) {
-			this.sceneManager.ball.position.set(data.positions.ball.x, data.positions.ball.y, data.positions.ball.z);
-			this.sceneManager.ball.visible = true;
 		}
 
 		if (data.events && data.events.length > 0) {
@@ -269,6 +212,13 @@ export class Game {
 					this.ws.close(1000);
 					console.log("Websocket closed");
 					this.handleGameEnd();
+				}
+				if (event.type == "ball_last_hitter") {
+					if (event.value == "RIGHT") {
+						this.sceneManager.bonuses.updateBallColor(0xff0000, 0xff0000);
+					} else {
+						this.sceneManager.bonuses.updateBallColor(0x00ffff, 0x00ffff);
+					}
 				}
 			});
 		}
@@ -297,6 +247,7 @@ export class Game {
 
 		const deltaTime = (currentTime - this.lastTime) / 1000;
 		this.lastTime = currentTime;
+		//console.log(1 / deltaTime);
 
 		if (this.particleSystem) {
 			this.particleSystem.update(deltaTime);
@@ -316,6 +267,116 @@ export class Game {
 			console.log(this.sceneManager.camera.rotation);
 			} else console.log("truc");*/
 
-		this.renderer.render(this.sceneManager.scene, this.sceneManager.camera);
+		this.sceneManager.composer.render();
+		//this.renderer.render(this.sceneManager.scene, this.sceneManager.camera);
+	}
+
+	enableDebugMode(editor, objectToModify) {
+		window.addEventListener("keydown", (event) => {
+			if (event.code === "Space") {
+				this.sceneManager.toggleDebugMode();
+			}
+			if (editor) {
+				if (event.code == "KeyG") {
+					console.log("Entering position mode");
+					this.mode = "position";
+				} else if (event.code == "KeyS") {
+					this.mode = "scale";
+					console.log("Entering scale mode");
+				} else if (event.code == "NumpadAdd") {
+					if (this.mode == "scale") {
+						if (this.axis == "x") {
+							objectToModify.scale.x += this.factor;
+							console.log("New x scale is : " + objectToModify.scale.x);
+						} else if (this.axis == "y") {
+							objectToModify.scale.y += this.factor;
+							console.log("New scale y is : " + objectToModify.scale.y);
+						} else if (this.axis == "z") {
+							objectToModify.scale.z += this.factor;
+							console.log("New scale z is : " + objectToModify.scale.z);
+						} else if (this.axis == "all") {
+							objectToModify.scale.x += this.factor;
+							objectToModify.scale.y += this.factor;
+							objectToModify.scale.z += this.factor;
+							console.log("New scale x is : " + objectToModify.scale.x);
+							console.log("New scale y is : " + objectToModify.scale.y);
+							console.log("New scale z is : " + objectToModify.scale.z);
+						}
+					} else if (this.mode == "position") {
+						if (this.axis == "x") {
+							objectToModify.position.x += this.factor;
+							console.log("New x position is : " + objectToModify.position.x);
+						} else if (this.axis == "y") {
+							objectToModify.position.y += this.factor;
+							console.log("New position y is : " + objectToModify.position.y);
+						} else if (this.axis == "z") {
+							objectToModify.position.z += this.factor;
+							console.log("New position z is : " + objectToModify.position.z);
+						}
+					}
+				} else if (event.code == "NumpadSubtract") {
+					if (this.mode == "scale") {
+						if (this.axis == "x") {
+							objectToModify.scale.x -= this.factor;
+							console.log("New x scale is : " + objectToModify.scale.x);
+						} else if (this.axis == "y") {
+							objectToModify.scale.y -= this.factor;
+							console.log("New scale y is : " + objectToModify.scale.y);
+						} else if (this.axis == "z") {
+							objectToModify.scale.z -= this.factor;
+							console.log("New scale z is : " + objectToModify.scale.z);
+						} else if (this.axis == "all") {
+							objectToModify.scale.x -= this.factor;
+							objectToModify.scale.y -= this.factor;
+							objectToModify.scale.z -= this.factor;
+							console.log("New scale x is : " + objectToModify.scale.x);
+							console.log("New scale y is : " + objectToModify.scale.y);
+							console.log("New scale z is : " + objectToModify.scale.z);
+						}
+					} else if (this.mode == "position") {
+						if (this.axis == "x") {
+							objectToModify.position.x -= this.factor;
+							console.log("New x position is : " + objectToModify.position.x);
+						} else if (this.axis == "y") {
+							objectToModify.position.y -= this.factor;
+							console.log("New y position is : " + objectToModify.position.y);
+						} else if (this.axis == "z") {
+							objectToModify.position.z -= this.factor;
+							console.log("New z position is : " + objectToModify.position.z);
+						}
+					}
+				} else if (event.code == "KeyX") {
+					this.axis = "x";
+					console.log("Axis set to x");
+				} else if (event.code == "KeyY") {
+					this.axis = "y";
+					console.log("Axis set to y");
+				} else if (event.code == "KeyZ") {
+					this.axis = "z";
+					console.log("Axis set to z");
+				} else if (event.code == "KeyA") {
+					this.axis = "all";
+					console.log("Axis set to all");
+				} else if (event.code == "KeyF") {
+					this.sceneManager.bonuses.table.scale.set(4.14, 4.14, 4.14);
+					this.sceneManager.bonuses.table.position.x = 0;
+					this.sceneManager.bonuses.table.position.y = 1.59;
+					this.sceneManager.bonuses.table.position.z = -30.72;
+					this.sceneManager.bonuses.paddle.scale.set(0.6, 0.25, 0.5);
+					this.sceneManager.bonuses.paddle.position.x = -18;
+					this.sceneManager.bonuses.paddle.position.y = -3.2;
+					this.sceneManager.bonuses.paddle.position.z = -15;
+					this.sceneManager.bonuses.paddleRed.scale.set(0.6, 0.25, 0.5);
+					this.sceneManager.bonuses.paddleRed.position.x = 17.94;
+					this.sceneManager.bonuses.paddleRed.position.y = -3.2;
+					this.sceneManager.bonuses.paddleRed.position.z = -15;
+					this.sceneManager.bonuses.ball.position.x = 0;
+					this.sceneManager.bonuses.ball.position.y = -3;
+					this.sceneManager.bonuses.ball.position.z = -15;
+					this.sceneManager.bonuses.ball.scale.set(0.44, 0.44, 0.44);
+				}
+				console.log(event.code);
+			}
+		});
 	}
 }
