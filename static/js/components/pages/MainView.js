@@ -15,21 +15,7 @@ export default class MainView {
 
 		this.render();
 		this.initComponents();
-		
-		// Create observer to watch for DOM changes
-		const observer = new MutationObserver((mutations, obs) => {
-			// Look for our profile elements
-			const profileElements = document.getElementById("p-elo");
-			if (profileElements) {
-				obs.disconnect(); // Stop observing once found
-				this.setProfileFields(); // Now safe to call
-			}
-		});
-		// Start observing
-		observer.observe(document.body, {
-			childList: true,
-			subtree: true
-		});
+		this.setProfileFields();
 
 		this.addEventListeners();
 		if (window.app.ingame) {

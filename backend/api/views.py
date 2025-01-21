@@ -145,7 +145,6 @@ class SignupConsumer(AsyncHttpConsumer):
 				# Update avatar with resized image
 				avatar.file = img_byte_arr 
 			# Create new user
-			print('avatar = ' + avatar, flush=True)
 			await self.create_user(username, password, avatar)
 
 			response_data = {
