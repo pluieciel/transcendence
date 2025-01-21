@@ -17,7 +17,22 @@ export default class MainView {
 
 		this.render();
 		this.initComponents();
-		setTimeout(this.setProfileFields(), 500);
+		
+		// Create observer to watch for DOM changes
+		const observer = new MutationObserver((mutations, obs) => {
+			// Look for our profile elements
+			const profileElements = document.getElementById("p-elo");
+			if (profileElements) {
+				obs.disconnect(); // Stop observing once found
+				this.setProfileFields(); // Now safe to call
+			}
+		});
+		// Start observing
+		observer.observe(document.body, {
+			childList: true,
+			subtree: true
+		});
+
 		this.addEventListeners();
 		if (window.app.ingame) {
 			console.log("Reconnecting to game");
@@ -124,7 +139,7 @@ export default class MainView {
 		if (!window.app.chatBox) {
 			window.app.chatBox = new ChatBox(chatBoxContainer);
 		} else {
-			window.app.chatBox.render();
+			window.app.chatBox.render(chatBoxContainer);
 		}
 
 		new GameComponent(this.container.querySelector("#gameContainer"));
