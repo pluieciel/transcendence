@@ -19,20 +19,24 @@ import hmac
 import hashlib
 import base64
 
-async def jwt_to_user(token):
+async def jwt_to_user(headers):
     @database_sync_to_async
     def get_user(user_id):
         User = get_user_model()
         return User.objects.get(id=user_id)
 
     try:
-        jwt_secret = get_secret_from_file('JWT_SECRET_KEY_FILE')
-        payload = jwt.decode(token, jwt_secret, algorithms=['HS256'])
-        user = await get_user(payload.get('id'))
-        if user:
-            return user
-        else:
-            return False
+        headers_dict = dict((key.decode('utf-8'), value.decode('utf-8')) for key, value in headers)
+        cookies = headers_dict.get('cookie', None)
+        jwt_cookie = re.search('jwt=([^;]+)', cookies)
+        if jwt_cookie:
+            token = jwt_cookie.group(1)
+            jwt_secret = get_secret_from_file('JWT_SECRET_KEY_FILE')
+            payload = jwt.decode(token, jwt_secret, ['HS256'])
+            user = await get_user(payload.get('id'))
+            if user:
+                return user
+        return False
 
     except jwt.ExpiredSignatureError:
         return False
@@ -181,7 +185,7 @@ class SignupConsumer(AsyncHttpConsumer):
             }
             return await self.send_response(500, json.dumps(response_data).encode(),
                 headers=[(b"Content-Type", b"application/json")])
-    
+
     def is_valid_username(self, username):
         regex = r'^[a-zA-Z0-9]+$'
         return bool(re.match(regex, username))
@@ -366,16 +370,7 @@ class Login2FAConsumer(AsyncHttpConsumer):
 class Generate2FAConsumer(AsyncHttpConsumer):
     async def handle(self, body):
         try:
-            headers = dict((key.decode('utf-8'), value.decode('utf-8')) for key, value in self.scope['headers'])
-            auth_header = headers.get('authorization', None)
-            if not auth_header:
-                response_data = {
-                    'success': False,
-                    'message': 'Authorization header missing'
-                }
-                return await self.send_response(401, json.dumps(response_data).encode(),
-                    headers=[(b"Content-Type", b"application/json")])
-            user = await jwt_to_user(auth_header)
+            user = await jwt_to_user(self.scope['headers'])
             if not user:
                 response_data = {
                     'success': False,
@@ -422,16 +417,7 @@ class Generate2FAConsumer(AsyncHttpConsumer):
 class Enable2FAConsumer(AsyncHttpConsumer):
     async def handle(self, body):
         try:
-            headers = dict((key.decode('utf-8'), value.decode('utf-8')) for key, value in self.scope['headers'])
-            auth_header = headers.get('authorization', None)
-            if not auth_header:
-                response_data = {
-                    'success': False,
-                    'message': 'Authorization header missing'
-                }
-                return await self.send_response(401, json.dumps(response_data).encode(),
-                    headers=[(b"Content-Type", b"application/json")])
-            user = await jwt_to_user(auth_header)
+            user = await jwt_to_user(self.scope['headers'])
             if not user:
                 response_data = {
                     'success': False,
@@ -493,17 +479,7 @@ class UpdateConsumer(AsyncHttpConsumer):
         cache.set(key, current_usage + 1, timeout=time_window)
 
         try:
-            headers = dict((key.decode('utf-8'), value.decode('utf-8')) for key, value in self.scope['headers'])
-            #print(headers, flush=True)
-            auth_header = headers.get('authorization', None)
-            if not auth_header:
-                response_data = {
-                    'success': False,
-                    'message': 'Authorization header missing'
-                }
-                return await self.send_response(401, json.dumps(response_data).encode(),
-                    headers=[(b"Content-Type", b"application/json")])
-            user = await jwt_to_user(auth_header)
+            user = await jwt_to_user(self.scope['headers'])
             if not user:
                 response_data = {
                     'success': False,
@@ -701,22 +677,11 @@ class LoginOAuthConsumer(AsyncHttpConsumer):
 class ProfileConsumer(AsyncHttpConsumer):
     async def handle(self, body):
         try:
-            #print(self.scope, flush=True)
-            headers = dict((key.decode('utf-8'), value.decode('utf-8')) for key, value in self.scope['headers'])
-            #print(headers, flush=True)
-            auth_header = headers.get('authorization', None)
-            if not auth_header:
-                response_data = {
-                    'success': False,
-                    'message': 'Authorization header missing'
-                }
-                return await self.send_response(401, json.dumps(response_data).encode(),
-                    headers=[(b"Content-Type", b"application/json")])
-            user = await jwt_to_user(auth_header)
+            user = await jwt_to_user(self.scope['headers'])
             if not user:
                 response_data = {
                     'success': False,
-                    'message': 'Invalid token or User not found'
+                    'message': 'User not found'
                 }
                 return await self.send_response(401, json.dumps(response_data).encode(),
                     headers=[(b"Content-Type", b"application/json")])
@@ -752,16 +717,7 @@ class ProfileConsumer(AsyncHttpConsumer):
 class ProfileConsumer2(AsyncHttpConsumer):
     async def handle(self, body):
         try:
-            headers = dict((key.decode('utf-8'), value.decode('utf-8')) for key, value in self.scope['headers'])
-            auth_header = headers.get('authorization', None)
-            if not auth_header:
-                response_data = {
-                    'success': False,
-                    'message': 'Authorization header missing'
-                }
-                return await self.send_response(401, json.dumps(response_data).encode(),
-                    headers=[(b"Content-Type", b"application/json")])
-            user = await jwt_to_user(auth_header)
+            user = await jwt_to_user(self.scope['headers'])
             if not user:
                 response_data = {
                     'success': False,
@@ -813,18 +769,7 @@ class ProfileConsumer2(AsyncHttpConsumer):
 class AvatarConsumer(AsyncHttpConsumer):
     async def handle(self, body):
         try:
-            #print(self.scope, flush=True)
-            headers = dict((key.decode('utf-8'), value.decode('utf-8')) for key, value in self.scope['headers'])
-            #print(headers, flush=True)
-            auth_header = headers.get('authorization', None)
-            if not auth_header:
-                response_data = {
-                    'success': False,
-                    'message': 'Authorization header missing'
-                }
-                return await self.send_response(401, json.dumps(response_data).encode(),
-                    headers=[(b"Content-Type", b"application/json")])
-            user = await jwt_to_user(auth_header)
+            user = await jwt_to_user(self.scope['headers'])
             if not user:
                 response_data = {
                     'success': False,
