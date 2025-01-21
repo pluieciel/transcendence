@@ -62,6 +62,8 @@ export class Bonuses {
 							const materials = obj.material;
 							if (materials.name == "Material.001") {
 								this.ballMat = materials;
+								this.ballMat.color.set(0x676a6e);
+								this.ballMat.emissive.set(0x676a6e);
 							}
 						}
 					});

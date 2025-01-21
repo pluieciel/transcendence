@@ -228,12 +228,13 @@ export class SceneManager {
 
 	async createGameObjects() {
 		try {
-			await Promise.all([this.createDebugPaddles(), this.createDebugBall(), this.createDebugBounds(), this.bonuses.createBonuses()]);
+			await Promise.all([this.createDebugBall(), this.createDebugBounds(), this.bonuses.createBonuses()]);
+
 			this.bonuses.table.scale.set(4.14, 4.14, 4.14);
 			this.bonuses.table.position.x = 0;
 			this.bonuses.table.position.y = 1.59;
 			this.bonuses.table.position.z = -30.72;
-			this.bonuses.paddle.scale.set(0.6, 0.25, 0.5);
+			this.bonuses.paddle.scale.set(0.75, 0.25, 0.5);
 			this.bonuses.paddle.position.x = -18;
 			this.bonuses.paddle.position.y = -3.2;
 			this.bonuses.paddle.position.z = -15;
@@ -245,13 +246,16 @@ export class SceneManager {
 			this.bonuses.ball.position.y = -3;
 			this.bonuses.ball.position.z = -15;
 			this.bonuses.ball.scale.set(0.44, 0.44, 0.44);
+			this.createDebugPaddles();
 		} catch (error) {
 			console.error("Failed to create game objects:", error);
 		}
 	}
 
 	createDebugPaddles() {
-		const paddleGeometry = new THREE.BoxGeometry(0.8, 4, 0.4);
+		const paddleGeometry = new THREE.BoxGeometry(this.bonuses.paddle.scale.z * 1.6, this.bonuses.paddle.scale.x * 6.666666667, this.bonuses.paddle.scale.y * 1.6);
+		console.log("Thickness : " + this.bonuses.paddle.scale.z * 1.6);
+		console.log("Height : " + this.bonuses.paddle.scale.x * 6.666666667);
 		const edges = new THREE.EdgesGeometry(paddleGeometry);
 		const material = new THREE.LineBasicMaterial({ color: 0x00ff00 });
 		const paddle1 = new THREE.LineSegments(edges, material);

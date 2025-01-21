@@ -197,7 +197,6 @@ export class Game {
 		}
 
 		if (data.events && data.events.length > 0) {
-			console.log(data.events);
 			data.events.forEach((event) => {
 				if (event.type === "score" && event.position) {
 					const scorePosition = new THREE.Vector3(event.position.x, event.position.y, event.position.z);
@@ -216,8 +215,10 @@ export class Game {
 				if (event.type == "ball_last_hitter") {
 					if (event.value == "RIGHT") {
 						this.sceneManager.bonuses.updateBallColor(0xff0000, 0xff0000);
-					} else {
+					} else if (event.value == "LEFT") {
 						this.sceneManager.bonuses.updateBallColor(0x00ffff, 0x00ffff);
+					} else {
+						this.sceneManager.bonuses.updateBallColor(0x676a6e, 0x676a6e);
 					}
 				}
 			});
@@ -375,7 +376,6 @@ export class Game {
 					this.sceneManager.bonuses.ball.position.z = -15;
 					this.sceneManager.bonuses.ball.scale.set(0.44, 0.44, 0.44);
 				}
-				console.log(event.code);
 			}
 		});
 	}

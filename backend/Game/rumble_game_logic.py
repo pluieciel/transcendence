@@ -83,7 +83,7 @@ class Ball:
 		self.is_moving = False
 		self.acceleration = 1.2
 		self.bounce_methods = NormalBounce()
-		self.lastHitter = ""
+		self.lastHitter = "NONE"
 
 	def calculate_max_safe_speed(self, maxSpeedMult):
 		bounds = GameBounds()
@@ -126,7 +126,6 @@ class Ball:
 		self.velocity.x = direction * self.speed * math.cos(angle_rad)
 		self.velocity.y = self.speed * math.sin(angle_rad)
 		self.position = Vector2D(ballPos.x, ballPos.y, ballPos.z)
-		self.lastHitter = "RIGHT" if direction == LEFT_SIDE_DIR else "LEFT"
 
 	def start_movement(self):
 		self.is_moving = True
@@ -144,7 +143,7 @@ class Player:
 		self.score = score
 		self.keys = keys
 		self.paddle_speed = 35
-		self.paddle_height = 4.0
+		self.paddle_height = 5.006
 		self.paddle_thickness = 0.8
 		self.game_bounds = game_bounds
 		self.startPos = Vector2D(0, 0, 0)
@@ -236,10 +235,12 @@ class RumbleGameInstance:
 			self.player_left.score += 1
 			self.scorePos = Vector2D(self.bounds.right.x, self.ball.position.y, self.ball.position.z)
 			self.ball.start(LEFT_SIDE_DIR, Vector2D(self.player_right.position.x - 1, self.player_right.position.y, -15))
+			self.ball.lastHitter = "RIGHT"
 		elif winner == "RIGHT":
 			self.player_right.score += 1
 			self.scorePos = Vector2D(self.bounds.left.x, self.ball.position.y, self.ball.position.z)
 			self.ball.start(RIGHT_SIDE_DIR, Vector2D(self.player_left.position.x + 1, self.player_left.position.y, -15))
+			self.ball.lastHitter = "LEFT"
 		self.ball.visible = False
 		self.ball.is_moving = False
 		self.ball.countdown = 1
