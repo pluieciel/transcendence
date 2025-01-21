@@ -7,9 +7,14 @@ from django.contrib.auth import get_user_model, authenticate
 from channels.db import database_sync_to_async
 import jwt
 import os
+import re
 from Game.consumer import game_manager
 import redis
 from copy import deepcopy
+
+def get_cookie(headers, name):
+    cookies = headers.get('cookie', None)
+    return re.search(f'{name}=([^;]+)', cookies)
 
 def get_secret_from_file(env_var):
     file_path = os.environ.get(env_var)
@@ -36,9 +41,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
         self.redis_client = redis.Redis(host='redis', port=6379, db=0)
 
     async def connect(self):
-        query_string = self.scope["query_string"].decode()
-        query_params = parse_qs(query_string)
-        self.token = query_params.get("token", [None])[0]
+        headers_dict = dict((key.decode('utf-8'), value.decode('utf-8')) for key, value in self.scope['headers'])
+        jwt_cookie = get_cookie(headers_dict, 'jwt')
+        self.token = jwt_cookie.group(1)
         try:
             payload = jwt.decode(self.token, get_secret_from_file('JWT_SECRET_KEY_FILE'), algorithms=['HS256'])
             self.username = payload.get('username')
@@ -46,6 +51,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         except jwt.ExpiredSignatureError:
             return
         except jwt.InvalidTokenError:
+            print("InvalidTokenError1", flush=True)
             return
 
         self.room_group_name = f"user_{self.username}"

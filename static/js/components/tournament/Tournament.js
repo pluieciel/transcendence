@@ -3,9 +3,9 @@ import { Game } from "../game/Game.js";
 export default class Tournament {
 	constructor(container) {
 		this.container = container;
-		this.token = window.app.getToken();
-		const decodedPayload = jwt_decode(this.token);
-		this.username = decodedPayload.username;
+		// TODO: fix
+		//this.username = decodedPayload.username;
+		this.username = "TEST"
 		this.protocol = window.location.protocol === "https:" ? "wss://" : "ws://";
 		this.host = window.location.host;
 		this.info = { state: "Waiting", wait_list: [], round1: {}, round2: {}, round3: {} };
@@ -189,8 +189,8 @@ export default class Tournament {
                     gameButton1.onclick = () => {
                         //start game for this user
                         this.round2_place = key === "game1" ? 1 : 2;
-                        window.app.gamews = new WebSocket(`${this.protocol}${this.host}/ws/game/?token=${this.token}&round=1&p1=${value.p1}&p2=${value.p2}&game=${key}`);
-                        console.log(`${this.protocol}${this.host}/ws/game/?token=${this.token}&round=1&p1=${value.p1}&p2=${value.p2}`);
+                        window.app.gamews = new WebSocket(`${this.protocol}${this.host}/ws/game/?round=1&p1=${value.p1}&p2=${value.p2}&game=${key}`);
+                        console.log(`${this.protocol}${this.host}/ws/game/?round=1&p1=${value.p1}&p2=${value.p2}`);
                         window.app.gamews.onmessage = (event) => {
                             const events = JSON.parse(event.data);
                             if (events.message_type === "init") {
@@ -246,8 +246,8 @@ export default class Tournament {
                     gameButton2.onclick = () => {
                         //start game for this user
                         this.round2_place = key === "game1" ? 1 : 2;
-                        window.app.gamews = new WebSocket(`${this.protocol}${this.host}/ws/game/?token=${this.token}&round=2&p1=${value.p1}&p2=${value.p2}`);
-                        console.log(`${this.protocol}${this.host}/ws/game/?token=${this.token}&round=2&p1=${value.p1}&p2=${value.p2}`);
+                        window.app.gamews = new WebSocket(`${this.protocol}${this.host}/ws/game/?round=2&p1=${value.p1}&p2=${value.p2}`);
+                        console.log(`${this.protocol}${this.host}/ws/game/?round=2&p1=${value.p1}&p2=${value.p2}`);
                         window.app.gamews.onmessage = (event) => {
                             const events = JSON.parse(event.data);
                             if (events.message_type === "init") {

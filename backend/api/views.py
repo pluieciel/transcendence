@@ -44,6 +44,7 @@ async def jwt_to_user(headers):
     except jwt.ExpiredSignatureError:
         return False
     except jwt.InvalidTokenError:
+        print("InvalidTokenError2", flush=True)
         return False
 
 def generate_jwt(user, iat, exp):
@@ -56,18 +57,6 @@ def generate_jwt(user, iat, exp):
         'iat': iat,
         'exp': exp
     }, jwt_secret, algorithm='HS256')
-
-# TODO: remove
-def generate_jwt2(user):
-    iat = datetime.datetime.now(datetime.UTC)
-    exp = iat + datetime.timedelta(hours=1)
-
-    return jwt.encode({
-        'id': user.id,
-        'username': user.username,
-        'iat': iat,
-        'exp': exp
-    }, get_secret_from_file('JWT_SECRET_KEY_FILE'), algorithm='HS256')
 
 def generate_jwt_cookie(user):
     iat = datetime.datetime.now(datetime.UTC)
@@ -300,7 +289,6 @@ class LoginConsumer(AsyncHttpConsumer):
                 response_data = {
                     'success': True,
                     'message': 'Login successful',
-                    'token': generate_jwt2(user),
                 }
             else:
                 response_data = {
@@ -353,7 +341,6 @@ class Login2FAConsumer(AsyncHttpConsumer):
             response_data = {
                 'success': True,
                 'message': 'Login successful',
-                'token': generate_jwt2(user)
             }
             return await self.send_response(200, json.dumps(response_data).encode(),
                 headers=[(b"Content-Type", b"application/json"), (b"Set-Cookie", generate_jwt_cookie(user))])
@@ -641,7 +628,6 @@ class LoginOAuthConsumer(AsyncHttpConsumer):
                     'success': True,
                     'message': 'Login successful',
 				    'username': username,
-                    'token': generate_jwt2(user)
                 }
                 return await self.send_response(200, json.dumps(response_data).encode(),
                     headers=[(b"Content-Type", b"application/json"), (b"Set-Cookie", generate_jwt_cookie(user))])
