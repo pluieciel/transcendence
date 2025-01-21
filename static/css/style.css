@@ -1,7 +1,8 @@
 /* Navigation styles */
 .nav-container {
-	padding: 30px;
-	text-align: center;
+    padding: 30px;
+    text-align: center;
+	color: var(--secondary-color);
 }
 
 .nav-link:hover {
@@ -275,6 +276,24 @@
 
 .OAuth {
 	margin-top: 10px;
+}
+
+#usrnm-form, #pwd-form, #cfm-pwd-form {
+	border: none;
+	color: var(--secondary-color);
+	background-color: var(--primary-color);
+}
+
+#usrnm-form::placeholder, #pwd-form::placeholder, #cfm-pwd-form::placeholder{
+	color: var(--secondary-color);
+}
+
+#nav-links {
+	color: var(--secondary-color);
+}
+
+#loginForm, #signupForm {
+	background-color: var(--accent-color);
 }
 
 .new-message-dot {

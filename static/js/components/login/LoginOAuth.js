@@ -57,9 +57,8 @@ class LoginOAuth {
             if (data.success) {
 				window.app.login(data);
 				window.app.router.navigateTo('/index');
-            } else {
+            } else
                 this.showError(data.message || 'Sign up || Log in failed.');
-            }
         } catch (error) {
 			console.error('Error during fetch:', error);
 			this.showError('An error occurred during authentication.');

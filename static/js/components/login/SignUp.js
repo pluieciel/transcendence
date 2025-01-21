@@ -14,7 +14,7 @@ export default class SignUp {
                             <div class="mb-3">
                                 <input 
                                     type="text" 
-                                    id="username" 
+                                    id="usrnm-form" 
                                     placeholder="Enter username"
                                     class="form-control"
                                 >
@@ -22,7 +22,7 @@ export default class SignUp {
                             <div class="mb-3">
                                 <input 
                                     type="password" 
-                                    id="password" 
+                                    id="pwd-form" 
                                     placeholder="Enter password"
                                     class="form-control"
                                 >
@@ -30,7 +30,7 @@ export default class SignUp {
                             <div class="mb-3">
                                 <input 
                                     type="password" 
-                                    id="confirmPassword" 
+                                    id="cfm-pwd-form" 
                                     placeholder="Confirm password"
                                     class="form-control"
                                 >
@@ -60,22 +60,21 @@ export default class SignUp {
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const username = this.container.querySelector('#username').value;
-            const password = this.container.querySelector('#password').value;
-            const confirmPassword = this.container.querySelector('#confirmPassword').value;
+            const username = this.container.querySelector('#usrnm-form').value;
+            const password = this.container.querySelector('#pwd-form').value;
+            const confirmPassword = this.container.querySelector('#cfm-pwd-form').value;
             const errorDiv = this.container.querySelector('#passwordError');
+
+			if (!password || !confirmPassword || !username)
+				return this.error('Please fill all fields');
+			else if (username.slice(-2) === "42")
+				return this.error('Dont put 42 at the end of your username!!');
+			else if (username === "admin")
+				return this.error('You are not admin!!');
+			else if (password !== confirmPassword)
+				return this.error('Passwords do not match');
+
             
-			if (!password || !confirmPassword || !username) {
-                errorDiv.textContent = 'Please fill all fields';
-				errorDiv.classList.remove('d-none');
-				return;
-			}
-            
-            if (password !== confirmPassword) {
-                errorDiv.textContent = 'Passwords do not match';
-                errorDiv.classList.remove('d-none');
-                return;
-            }
             const formData = new FormData();
             const originalFile = this.container.querySelector('#avatar').files[0];
             const hashedPassword = CryptoJS.SHA256(password).toString();
@@ -101,7 +100,6 @@ export default class SignUp {
             
 
             try {
-                // This is an async operation - waits for server response
                 const response = await fetch('/api/signup/', {
                     method: 'POST',
                     body: formData
@@ -109,7 +107,6 @@ export default class SignUp {
             
                 const data = await response.json();
             
-                // This code runs only after getting response from server
                 if (data.success) {
                     window.app.router.navigateTo('/login');
                 } else {
@@ -117,10 +114,15 @@ export default class SignUp {
                     errorDiv.classList.remove('d-none');
                 }
             } catch (error) {
-                // Handles any errors during the async operation
                 errorDiv.textContent = 'An error occurred';
                 errorDiv.classList.remove('d-none');
             }
         });
     }
+
+	error(error) {
+		errorDiv.textContent = 'error';
+		errorDiv.classList.remove('d-none');
+		return;
+	}
 }

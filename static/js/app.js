@@ -2,17 +2,14 @@ import LoginView from './components/pages/LoginView.js';
 import MainView from './components/pages/MainView.js';
 import SettingsView from './components/pages/SettingsView.js';
 import LoginOAuth from './components/login/LoginOAuth.js';
-//import GameView from './components/GameView.js';
 import Router from './router.js';
 
 class App {
 
     constructor() {
-		
 		this.routes = [
 			{ path: '/', component: LoginView },
             { path: '/index', component: MainView },
-            //{ path: '/game', component: GameView },
             { path: '/settings', component: SettingsView },
             { path: '/login/oauth', component: LoginOAuth },
 			{ path: '*', component: LoginView },
@@ -41,6 +38,7 @@ class App {
         });
         const data = await response.json();
         this.avatarCache[username] = data.avatar;
+		console.log(data.avatar);
         return data.avatar;
     }
     
@@ -52,6 +50,15 @@ class App {
         sessionStorage.setItem('token', this.state.token);
         this.router.navigateTo('/index');
     }
+	
+	login42(username, token, theme) {
+		this.state.isLoggedIn = true;
+        this.state.token = token;
+		this.state.theme = theme;
+		sessionStorage.setItem('isLoggedIn', 'true');
+        sessionStorage.setItem('token', this.state.token);
+        this.router.navigateTo('/index');
+	}
 
     logout() {
         this.state.isLoggedIn = false;
@@ -70,7 +77,6 @@ class App {
     }
 }
 
-// Initialize app
 document.addEventListener('DOMContentLoaded', () => {
     console.log("DOMContentLoaded");
     window.app = new App();
