@@ -17,10 +17,10 @@ class CustomUserManager(BaseUserManager):
         user.save(using=self._db)
         return user
     
-    def	create_user_oauth(self, username, avatar):
+    def	create_user_oauth(self, username, avatarUrl):
         if not username:
             raise ValueError('Users must have a username')
-        user = self.model(username=username, oauthlog=True, avatar=avatar)
+        user = self.model(username=username, oauthlog=True, avatar42=avatarUrl)
         user.save(using=self._db)
         return user
 
@@ -56,6 +56,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     theme = models.CharField(default="light", max_length=5)
     friends = models.ManyToManyField('self', symmetrical=False, related_name='friend_set', blank=True)
     avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
+    avatar42 = models.CharField(null=True)
     nickname = models.CharField(max_length=30, null=True)
     totp_secret = models.CharField(max_length=64, unique=True, null=True)
     is_2fa_enabled = models.BooleanField(default=False)

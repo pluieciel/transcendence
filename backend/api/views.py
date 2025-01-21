@@ -646,7 +646,7 @@ class LoginOAuthConsumer(AsyncHttpConsumer):
 
 				user = await self.get_user_by_name(username)
 				if not user:
-					user = await self.create_user_oauth(username=username, avatar=user_data['image']['link'])
+					user = await self.create_user_oauth(username=username, avatarUrl=user_data['image']['link'])
 
 				response_data = {
 					'success': True,
@@ -673,9 +673,9 @@ class LoginOAuthConsumer(AsyncHttpConsumer):
 				headers=[(b"Content-Type", b"application/json")])
 
 	@database_sync_to_async
-	def create_user_oauth(self, username, avatar):
+	def create_user_oauth(self, username, avatarUrl):
 		User = get_user_model()
-		return User.objects.create_user_oauth(username=username, avatar=avatar)
+		return User.objects.create_user_oauth(username=username, avatarUrl=avatarUrl)
 
 	@database_sync_to_async
 	def get_user_by_name(self, username):
@@ -827,6 +827,10 @@ class AvatarConsumer(AsyncHttpConsumer):
 				'success': True,
 				'avatar' : f"{host}{user.avatar.url}" if user.avatar else f"{host}/default_avatar.png",
 			}
+			if (user.oauthlog):
+				print('avatar link ', flush=True)
+				print(user.avatar42, flush=True)
+				response_data['avatar'] = user.avatar42
 			return await self.send_response(200, json.dumps(response_data).encode(),
 				headers=[(b"Content-Type", b"application/json")])
 
