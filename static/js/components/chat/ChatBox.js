@@ -23,15 +23,15 @@ export default class ChatBox {
         this.showingOnlineUsers = 0;
         
         this.hasNewMessages = false;
-        this.render();
+        this.render(this.container);
         this.initWebSocket();
         this.addEventListeners();
         this.newMessageIndicator = this.container.querySelector('#newMessageIndicator');
         this.offcanvas = this.container.querySelector('#offcanvas');
     }
 
-    render() {
-        this.container.innerHTML = `
+    render(container) {
+        container.innerHTML = `
             <!-- Chat button -->
             <button class="btn btn-primary position-fixed end-0 bottom-0 m-3"
                     type="button" 
