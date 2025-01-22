@@ -85,6 +85,9 @@ export class Bonuses {
 
 	loadModel(path, loader) {
 		return new Promise((resolve, reject) => {
+			// Create a texture loader
+			const textureLoader = new THREE.TextureLoader();
+
 			loader.load(
 				path,
 				(gltf) => {
@@ -94,28 +97,43 @@ export class Bonuses {
 					model.rotation.y = Math.PI / 2;
 					model.position.z = -2;
 					model.visible = true;
-					// model.traverse((obj) => {
-					// 	if (obj.isMesh) {
-					// 		const materials = obj.material;
 
-					// 		// If the material is a multi-material array, loop through each material
-					// 		if (Array.isArray(materials)) {
-					// 			console.log("Multiple Material:", materials);
-					// 			materials.forEach((material, index) => {
-					// 				console.log(material.name);
-					// 			});
-					// 		} else {
-					// 			// Single material
-					// 			if (materials.name == "Material.003") {
-					// 				materials.color.set(0xff0000);
-					// 				materials.emissive.set(0xff0000);
-					// 				console.log("Color changed");
-					// 			} else {
-					// 				console.log("Material name isnt {Material.003} but {" + materials.name + "}");
-					// 			}
-					// 		}
-					// 	}
-					// });
+					// Find and modify specific materials
+					model.traverse((obj) => {
+						if (obj.isMesh) {
+							if (obj.material.name === "LeftBG") {
+								// Load and apply texture
+								textureLoader.load(
+									"/js/components/game/Textures/TextureLeftRed.png", // Replace with your texture path
+									(texture) => {
+										texture.encoding = THREE.sRGBEncoding;
+										texture.flipY = false; // Might need to adjust this
+										obj.material.map = texture;
+										obj.material.needsUpdate = true;
+									},
+									undefined,
+									(error) => {
+										console.error("Error loading texture:", error);
+									},
+								);
+							} else if (obj.material.name === "RightBG") {
+								// Load and apply texture
+								textureLoader.load(
+									"/js/components/game/Textures/TextureRightCyan.png", // Replace with your texture path
+									(texture) => {
+										texture.encoding = THREE.sRGBEncoding;
+										texture.flipY = false; // Might need to adjust this
+										obj.material.map = texture;
+										obj.material.needsUpdate = true;
+									},
+									undefined,
+									(error) => {
+										console.error("Error loading texture:", error);
+									},
+								);
+							}
+						}
+					});
 
 					resolve(model);
 				},

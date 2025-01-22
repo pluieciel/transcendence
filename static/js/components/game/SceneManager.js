@@ -161,7 +161,7 @@ export class SceneManager {
 
 	initializeComponents() {
 		this.scene = new THREE.Scene();
-		this.camera = this.createCamera();
+		this.createCamera();
 		this.bonuses = new Bonuses(this.scene);
 		this.UIManager = new UIManager();
 	}
@@ -185,16 +185,18 @@ export class SceneManager {
 	}
 
 	createCamera() {
-		const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-		camera.position.set(0, 0, 20);
+		this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+		this.camera.position.set(0, -8, 50);
+		//	this.camera.lookAt(0, 0, 0);
+		this.camera.rotation.z = -Math.PI;
 		//camera.position.set(0, 5, 5);
 
-		this.controls = new OrbitControls(camera, document.querySelector("canvas"));
-		this.controls.enableDamping = true; // Add smooth damping
-		this.controls.dampingFactor = 0.05;
-		this.controls.minDistance = 10; // Minimum zoom distance
-		this.controls.maxDistance = 50; // Maximum zoom
-		return camera;
+		// this.controls = new OrbitControls(this.camera, document.querySelector("canvas"));
+		// this.controls.enableDamping = true; // Add smooth damping
+		// this.controls.dampingFactor = 0.05;
+		// this.controls.minDistance = 10; // Minimum zoom distance
+		// this.controls.maxDistance = 50; // Maximum zoom
+		//return camera;
 	}
 
 	updateTrajectory(trajectoryPoints) {
