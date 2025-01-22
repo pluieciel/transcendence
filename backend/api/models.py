@@ -16,14 +16,13 @@ class CustomUserManager(BaseUserManager):
         user.set_password(password)
         user.save(using=self._db)
         return user
-
-    def	create_user_oauth(self, username, token):
+    
+    def	create_user_oauth(self, username, avatarUrl):
         if not username:
             raise ValueError('Users must have a username')
-        user = self.model(username=username, oauthlog=True)
+        user = self.model(username=username, oauthlog=True, avatar42=avatarUrl)
         user.save(using=self._db)
         return user
-
 
     def create_superuser(self, username, password=None):
         user = self.create_user(
@@ -35,6 +34,8 @@ class CustomUserManager(BaseUserManager):
         user.is_superuser = True
         user.save(using=self._db)
         return user
+    
+            
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=30, unique=True)
@@ -52,8 +53,10 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     current_game_id = models.IntegerField(default=-1)
     tourn_win = models.IntegerField(default=0)
     tourn_joined = models.IntegerField(default=0)
+    theme = models.CharField(default="light", max_length=5)
     friends = models.ManyToManyField('self', symmetrical=False, related_name='friend_set', blank=True)
     avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
+    avatar42 = models.CharField(null=True)
     nickname = models.CharField(max_length=30, null=True)
     totp_secret = models.CharField(max_length=64, unique=True, null=True)
     is_2fa_enabled = models.BooleanField(default=False)

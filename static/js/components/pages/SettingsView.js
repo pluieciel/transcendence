@@ -6,21 +6,26 @@ export default class MainView {
         this.username = decodedPayload.username;
         this.render();
         this.addEventListeners();
-        this.add2FAEventListeners();
     }
 
     render() {
         this.container.innerHTML = `
-        	<div class="container">
-			    <header>
-			        <h1>PONG</h1>
-						<button id="indexBtn">Main page</button>
-						<button id="logoutBtn">Log out</button>
-				</header>
-				<h1>TO REMOVE WAS TOO LAZY TO ADD CSS FOR NOW</h1>
-				<h1>TO REMOVE WAS TOO LAZY TO ADD CSS FOR NOW</h1>
-				<button type="button" class="btn btn-primary" id="enable2FA">Enable 2FA</button>
-				<div class="modal fade" id="totpModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <header>
+        <h1>PONG</h1>
+			<button id="indexBtn">Main</button>
+			<button id="logoutBtn">Log out</button>
+	</header>
+	<div class="welcome">
+        <p>Welcome to your settings, you can change everything here!</p>
+    </div>
+	<div class ="content">
+		<div class="containerPrivate">
+			<h3>Profile info i guess</h3>
+			<button id="changeUsernameBtn">Change your username</button>
+			<input type="text" id="newUsername">
+			<button id="changePpBtn">Change your profile picture</button>
+			<button type="button" id="enable2FA">Enable 2FA</button>
+			<div class="modal fade" id="totpModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
@@ -29,8 +34,7 @@ export default class MainView {
                         </div>
                         <form id="totpForm">
 	                        <div class="modal-body">
-	                                <div id="qrCode">
-	                                </div>
+	                                <div id="qrCode"></div>
 	                                <div class="mb-3">
 	                                    <input id="totpInput" class="form-control" maxlength="6" required>
 	                                </div>
@@ -40,100 +44,176 @@ export default class MainView {
 	                            <button type="submit" class="btn btn-primary" id="totpSubmit">Submit</button>
 	                        </div>
                         </form>
-                    </div>
-                </div>
-            </div>
+                	</div>
+            	</div>
+			</div>
+		</div>
+		<div class="containerSensitive">
+			<h3>Be careful with those</h3>
+			<button id="passwordButton">Set New Password</button>
+        	<input type="password" id="newPasswordInput" placeholder="">
+			<button id="deleteAccBtn">Delete my account</button>
+		</div>
+	</div>
+    <div id="passwordError" class="alert alert-danger d-none"></div>
+
         `;
     }
 
-    showLeaderboard() {
-        const mainContent = this.container.querySelector('#mainContent');
-        mainContent.innerHTML = '<h2>Leaderboard View</h2>';
-        // Add any additional logic to initialize the leaderboard view
-    }
-
-    add2FAEventListeners() {
-        const submit = this.container.querySelector('#totpForm');
-        const errorDiv = this.container.querySelector('#totpError');
-
-        submit.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const totp = this.container.querySelector('#totpInput').value;
-            try {
-				const response = await fetch('/api/settings/2fa/enable', {
-					method: 'POST',
-				    headers: {
-				        'Content-Type': 'application/json',
-				        'Authorization': `${this.token}`,
-					},
-				    body: JSON.stringify({
-				        totp: totp,
-				    })
-				});
-				const data = await response.json();
-				if (data.success) {
-					const modal = bootstrap.Modal.getInstance(this.container.querySelector('#totpModal'));
-					if (modal)
-						modal.hide();
-				} else {
-					errorDiv.textContent = data.message || 'Login failed';
-                    errorDiv.classList.remove('d-none');
-				}
-            } catch (error) {
-				errorDiv.textContent = 'An error occurred:' + error;
-                errorDiv.classList.remove('d-none');
-            }
-        });
-	}
-
     addEventListeners() {
-        // Logout button
-        const enable2FA = this.container.querySelector('#enable2FA');
-        enable2FA.addEventListener('click', async (e) => {
-            e.preventDefault();
-	        try {
-	            const response = await fetch('/api/settings/2fa/generate', {
-	                method: 'POST',
-	                headers: {
-	                    'Content-Type': 'application/json',
-	                    'Authorization': `${this.token}`,
-	                },
-	            });
+		const	enable2FA = this.container.querySelector('#enable2FA');
+		const	changeUsernameBtn = document.getElementById('changeUsernameBtn');
+        const	logoutBtn = document.getElementById('logoutBtn');
+		const	indexBtn = document.getElementById('indexBtn');
+		const	wipeBtn = document.getElementById('deleteAccBtn');
+		const	passwdBtn = document.getElementById('passwordButton');
+        const	newpwd = document.getElementById('newPasswordInput');
+		
+        passwdBtn.addEventListener('click', () => {
+			passwdBtn.style.display = 'none';
+            newpwd.style.display = 'inline-block';
+            newpwd.focus();
+        });
 
-	            const data = await response.json();
-
-	            if (data.success) {
+		enable2FA.addEventListener('click', async (e) => {
+			e.preventDefault();
+			try {
+				const response = await fetch('/api/settings/2fa/generate', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						'Authorization': `${this.token}`,
+					},
+				});
+				
+				const data = await response.json();
+				
+				if (data.success) {
 					new bootstrap.Modal(this.container.querySelector('#totpModal')).show();
 					const qrCode = this.container.querySelector('#qrCode');
 					qrCode.innerHTML = data.qr_code;
-	            } else {
+				} else {
+					
+				}
+			} catch (error) {
+				
+			}
+		});
+		
+		newpwd.addEventListener('keydown', async (event) => {
+			const hashedNew = CryptoJS.SHA256(newpwd.value).toString();
+			if (event.key === "Enter" && isLoggedIn) {
+				try {
+					const response = await fetch('/api/change/password', {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+							'Authorization': `${window.app.state.token}`
+						},
+						body: JSON.stringify({
+							newPassword: hashedNew,
+						})
+					});
+				
+					const data = await response.json();
+				
+					if (data.success) {
+						console.log("changing username success");
+						this.appState.username = newUsername.value;
+					} else {
+						console.log("changing username failed");
+					}
+				} catch (error) {
+					console.error(error);
+				}
+			}
+		})
+		
+		newUsername.addEventListener('keydown', async (event) => {
+			if (event.key === "Enter") {
+				try {
+					const response = await fetch('/api/change/username', {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+							'Authorization': `${window.app.state.token}`
+						},
+						body: JSON.stringify({
+							newUsername: newUsername.value,
+							// username: this.appState.username,
+						})
+					});
+				
+					const data = await response.json();
+				
+					if (data.success) {
+						console.log("changing username success");
+						this.appState.username = newUsername.value;
+					} else {
+						console.log("changing username failed");
+					}
+				} catch (error) {
+					console.error(error);
+				}
+			}
+		});
 
-	            }
-	        } catch (error) {
+		changeUsernameBtn.addEventListener('click', async () => {
+			const newUsername = document.getElementById('newUsername');
+			changeUsernameBtn.style.display = 'none';
+			newUsername.style.display = 'inline-block';
+			newUsername.focus();
+		});
 
-	        }
-	    });
-        const logoutBtn = this.container.querySelector('#logoutBtn');
-		const indexBtn = this.container.querySelector('#indexBtn');
-        logoutBtn.addEventListener('click', () => {
+		wipeBtn.addEventListener('click', () => {
+			if (isLoggedIn && this.eraseInDB())
+				window.app.logout();
+        });
+
+		logoutBtn.addEventListener('click', () => {
             window.app.logout();
         });
-        indexBtn.addEventListener('click', () => {
+        
+		indexBtn.addEventListener('click', () => {
             window.app.router.navigateTo('/index');
         });
-
-        // Navigation links
-        const navLinks = this.container.querySelectorAll('.nav-link');
-        navLinks.forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                const view = e.target.dataset.view;
-                if (view === 'game') {
-                    this.showGame();
-                } else if (view === 'leaderboard') {
-                    this.showLeaderboard();
-                }
-            });
-        });
     }
+
+	async eraseInDB() {
+		try {
+			const response = await fetch('/api/del/user', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+                    'Authorization': `${window.app.state.token}`
+				},
+				body: JSON.stringify({
+					username: this.username,
+				})
+			});
+			
+			if (!response.ok) {
+				console.error(`Error: ${response.status} - ${response.statusText}`);
+				return;
+			}
+			const responseText = await response.text();
+			const data = JSON.parse(responseText);
+
+			if (data.success) {
+				alert("deleted user successfully");
+			} else {
+				console.error("smth is wrong");
+			}
+		} catch (error) {
+			console.error('An error occurred: ', error);
+		}
+	}
+	
+	error(error) {
+		const errorDiv = this.container.querySelector('#passwordError');
+
+		errorDiv.textContent = 'error: ' + error;
+		errorDiv.classList.remove('d-none');
+		return;
+	}
 }

@@ -1,32 +1,33 @@
-/* General body styles */
 :root {
-    --primary-color: #013f05;
-    --secondary-color: #c7f0c7;
-    --accent-color: #057e0d;
-    --text-color: #000000;
-    --button-hover-bg: #06550c;
-    --button-hover-text: #FFFFFF;
+    --primary-color: #111;
+    --secondary-color: #fff;
+    --accent-color: #353535;
+	--hover-color: #666;
+	--header-color: #090909;
+	--header-shadow-color: rgba(255, 255, 255, 0.3);
+}
+
+::placeholder {
+	color: #000;
 }
 
 body {
     font-family: Arial, sans-serif;
-    color: #000000;
-    background-color: #c7f0c7;
+    color: var(--primary-color);
+    background-color: var(--primary-color);
     margin: 0;
     padding: 0;
     display: flex;
     flex-direction: column;
 }
 
-/* Header styles */
 header {
-    background-color: #013f05;
+    background-color: var(--header-color);
     padding: 20px;
-    color: #FFFFFF;
+    color: var(--secondary-color);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
     width: 100%;
     top: 0;
     left: 0;
@@ -51,9 +52,9 @@ a {
 	text-decoration: none;
 }
 
-/* Center the Welcome message under the header */
 .welcome {
-    margin-top: 100px; /* Adjust spacing from header */
+	color: var(--secondary-color);
+    margin-top: 100px;
     text-align: center;
     width: 100%;
     font-size: 1.5rem;
@@ -62,26 +63,25 @@ a {
 .content {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start; /* Align items to the top */
-    gap: 20px; /* Space between sections */
+    align-items: flex-start;
+    gap: 20px;
 }
 
 .content > div {
-    flex: 1; /* Make each section take equal width by default */
-    min-width: 250px; /* Ensure a minimum width to fit smaller contents */
-    max-width: 400px; /* Prevent excessive expansion */
+    flex: 1;
+    min-width: 250px;
+    max-width: 400px;
     padding: 15px;
 }
 
-.credits, .game-buttons, .profile {
+.credits, .game-buttons, .profile, .containerSensitive, .containerPrivate {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    border: 2px solid #057e0d;
-    background-color: #dcf7dc;
+	color: var(--secondary-color);
+    background-color: var(--accent-color);
     padding: 20px;
-    border-radius: 10px;
     width: fit-content;
     height: fit-content;
 	text-align: center;
@@ -89,70 +89,150 @@ a {
 	margin-right: 20px;
 }
 
-#settingsBtn, #indexBtn, #logoutBtn, .game-buttons button {
+#settingsBtn, #indexBtn, #logoutBtn {
 	display: block;
 	padding: 10px 20px;
 	font-size: 1rem;
-	background-color: #FFFFFF;
-	border-radius: 10px;
-	color: #0CF31C;
-    cursor: pointer; 
-	border: 0px solid #fff;
-    transition: background-color 0.3s, color 0.3s, border 0.2s, transform 0.2s;
-    margin: 10px 0; /* Adjust vertical spacing */
+    cursor: pointer;
+    margin: 10px 0;
     text-align: center;
-    width: 100%; /* Ensure consistent button width */
-    max-width: 200px; /* Limit maximum width */
-	position: static;
-}
-
-.game-buttons button {
-	border: 2px solid #057e0d;
-}
-
-.game-buttons button:hover {
-    background-color: #057e0d;
-    color: #000;
-    border: #000 solid 2px;
-}
-
-.sendButton, .btn-closing-chat {
-    background-color: #f0f0f0; /* Example custom background */
-    color: #333; /* Example custom text color */
-    border: #ddd solid 1px;
-}
-
-/* Ensure login button is fully visible */
-#settingsBtn, #indexBtn, #logoutBtn {
-    margin-right: 10px; /* Add spacing from the edge */
-    padding: 10px;
+    max-width: 200px;
+	margin-right: 10px;
 	width: 100px;
-    font-size: 1rem;
 	position: absolute;
-	order: -1; /* Move it to the start of the flex container */
-	color: #013f05;
-}
-
-#settingsBtn {
-	right: 150px;
-}
-
-#indexBtn {
-	right: 150px;
-}
-
-#logoutBtn {
-	right: 5px;
+	order: -1;
+	transition: all 0.2s;
 }
 
 #settingsBtn:hover, #indexBtn:hover, #logoutBtn:hover {
-	background-color: #06550c;
-    color: #FFFFFF;
-    border: #FFFFFF solid 2px;
     transform: scale(1.1);
-    box-shadow: 0 4px 15px rgba(255, 255, 255, 0.8);
 }
 
-#fab fa-js {
-	background-color: yellow;
+.sendButton, .btn-closing-chat {
+    background-color: #f0f0f0;
+    color: #333;
+    border: #ddd solid 1px;
+}
+
+#settingsBtn, #indexBtn {
+	color: #0ff;
+	right: 150px;
+	border: 0.5px solid rgb(0, 255, 255);
+	background-color: var(--header-color);
+	box-shadow: 0 4px 15px rgba(0, 255, 255, 0.8);
+}
+
+#logoutBtn {
+	color: #F00;
+	right: 150px;
+	border: 0.5px solid #F00;
+	background-color: var(--header-color);
+	box-shadow: 0 4px 15px rgba(255, 0, 0, 0.8);
+	right: 5px;
+}
+
+.containerPrivate > button, .containerSensitive > button {
+	padding: 10px 20px;
+	font-size: 16px;
+	cursor: pointer;
+	border-radius: 5px;
+	transition: all 0.2s;
+	margin: 5px;
+}
+
+.game-buttons, .credits, .profile {
+	border: 1px solid var(--accent-color);
+	transition: all 0.5s;
+}
+
+.game-buttons:hover, .credits:hover, .profile:hover {
+	border: 1px solid #f00;
+	box-shadow: 0 0 15px rgb(255, 0, 0);
+}
+
+.game-buttons > button {
+	padding: 10px 20px;
+    margin: 10px 0;
+    width: 100%;
+    max-width: 200px;
+	font-size: 1rem;
+	display: block;
+	position: static;
+	background-color: var(--primary-color);
+	color: var(--secondary-color);
+    cursor: pointer;
+    text-align: center;
+	border: 1px solid var(--primary-color);
+	transition: all 0.2s;
+}
+
+.game-buttons > button:hover {
+	border: 1px solid #0ff;
+	box-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
+	color: var(--secondary-color);
+}
+.containerPrivate > button {
+	color: var(--secondary-color);
+	border: 2px solid var(--primary-color);
+	background-color: var(--primary-color);
+}
+
+.containerPrivate > button:hover {
+	box-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
+}
+
+.containerSensitive > button {
+	border: 2px solid #f74f5f;
+	background-color: #f74f5f;
+}
+
+.containerSensitive > button:hover {
+	box-shadow: 0 0 15px rgba(255, 0, 0, 0.8);
+}
+
+#passwordInput {
+	padding: 10px;
+	font-size: 16px;
+	border: 1px solid var(--primary-color);
+	text-align: center;
+}
+
+#newPasswordInput {
+	padding: 10px 20px;
+	margin: 5px;
+	font-size: 16px;
+	color: #000;
+	background-color: #f74f5f;
+	border: 1px solid #f74f5f;
+	text-align: center;
+	display: none;
+	width: 180px;
+}
+
+#newPasswordInput:focus {
+	background-color: #F00;
+}
+
+#newUsername {
+	text-align: center;
+	padding: 8px 0px;
+	font-size: 16px;
+	border: 2px solid var(--primary-color);
+	background-color: var(--primary-color);
+	margin: 5px;
+	display: none;
+	color: #FFF;
+}
+
+#avatarImg {
+	border-radius: 50%;
+}
+
+#p-name, #p-avatar {
+	display: inline;
+	vertical-align: middle;
+}
+
+#staticBackdropLabel {
+	color: #000;
 }

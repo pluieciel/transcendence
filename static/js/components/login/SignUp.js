@@ -14,7 +14,7 @@ export default class SignUp {
                             <div class="mb-3">
                                 <input 
                                     type="text" 
-                                    id="username" 
+                                    id="usrnm-form" 
                                     placeholder="Enter username"
                                     class="form-control"
                                 >
@@ -22,7 +22,7 @@ export default class SignUp {
                             <div class="mb-3">
                                 <input 
                                     type="password" 
-                                    id="password" 
+                                    id="pwd-form" 
                                     placeholder="Enter password"
                                     class="form-control"
                                 >
@@ -30,7 +30,7 @@ export default class SignUp {
                             <div class="mb-3">
                                 <input 
                                     type="password" 
-                                    id="confirmPassword" 
+                                    id="cfm-pwd-form" 
                                     placeholder="Confirm password"
                                     class="form-control"
                                 >
@@ -47,7 +47,6 @@ export default class SignUp {
 
                             <div id="passwordError" class="alert alert-danger d-none"></div>
                             <button type="submit" class="btn btn-primary w-100">Sign Up</button>
-                            <button type="button" class="btn btn-primary w-100 SignUp42 OAuth">Sign Up with 42</button>
                         </form>
                     </div>
                 </div>
@@ -57,35 +56,25 @@ export default class SignUp {
 
     addEventListeners() {
 		const form = this.container.querySelector('#signupForm');
-		const form42 = this.container.querySelector('.SignUp42');
-		const clientId = 'u-s4t2ud-ba5b0c72367af9ad1efbf4d20585f3c315b613ece176ca16919733a7dba999d5';
-		const redirectUri = encodeURIComponent('http://10.11.3.2:9000/signup/oauth');
-		const scope = 'public';
-		const state = 'this_is_a_very_long_random_string_i_am_unguessable';
-		const authorizeUrl = `https://api.intra.42.fr/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&state=${state}`;
         const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1 MB
-        
-		form42.addEventListener("click", () => {
-			window.location.href = authorizeUrl;
-        });
+
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const username = this.container.querySelector('#username').value;
-            const password = this.container.querySelector('#password').value;
-            const confirmPassword = this.container.querySelector('#confirmPassword').value;
+            const username = this.container.querySelector('#usrnm-form').value;
+            const password = this.container.querySelector('#pwd-form').value;
+            const confirmPassword = this.container.querySelector('#cfm-pwd-form').value;
             const errorDiv = this.container.querySelector('#passwordError');
+
+			if (!password || !confirmPassword || !username)
+				return this.error('Please fill all fields');
+			else if (username.slice(-2) === "42")
+				return this.error('Dont put 42 at the end of your username!!');
+			else if (username === "admin")
+				return this.error('You are not admin!!');
+			else if (password !== confirmPassword)
+				return this.error('Passwords do not match');
+
             
-			if (!password || !confirmPassword || !username) {
-                errorDiv.textContent = 'Please fill all fields';
-				errorDiv.classList.remove('d-none');
-				return;
-			}
-            
-            if (password !== confirmPassword) {
-                errorDiv.textContent = 'Passwords do not match';
-                errorDiv.classList.remove('d-none');
-                return;
-            }
             const formData = new FormData();
             const originalFile = this.container.querySelector('#avatar').files[0];
             const hashedPassword = CryptoJS.SHA256(password).toString();
@@ -111,7 +100,6 @@ export default class SignUp {
             
 
             try {
-                // This is an async operation - waits for server response
                 const response = await fetch('/api/signup/', {
                     method: 'POST',
                     body: formData
@@ -119,7 +107,6 @@ export default class SignUp {
             
                 const data = await response.json();
             
-                // This code runs only after getting response from server
                 if (data.success) {
                     window.app.router.navigateTo('/login');
                 } else {
@@ -127,10 +114,15 @@ export default class SignUp {
                     errorDiv.classList.remove('d-none');
                 }
             } catch (error) {
-                // Handles any errors during the async operation
                 errorDiv.textContent = 'An error occurred';
                 errorDiv.classList.remove('d-none');
             }
         });
     }
+
+	error(error) {
+		errorDiv.textContent = 'error';
+		errorDiv.classList.remove('d-none');
+		return;
+	}
 }
