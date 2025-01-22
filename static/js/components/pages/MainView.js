@@ -108,22 +108,25 @@ export default class MainView {
 
     initComponents() {
         // Initialize Tournament
-        const tournamentContainer = this.container.querySelector(
-            "#tournamentContainer",
-        );
+        const tournamentContainer = this.container.querySelector("#tournamentContainer",);
         if (!window.app.tournament) {
             window.app.tournament = new Tournament(tournamentContainer);
         } else {
+			window.app.tournament.container = tournamentContainer;
             window.app.tournament.render();
+			window.app.tournament.addEventListeners();
+			window.app.tournament.updateContent();
         }
 
         // Initialize ChatBox
-        const chatBoxContainer =
-            this.container.querySelector("#chatBoxContainer");
+        const chatBoxContainer = this.container.querySelector("#chatBoxContainer");
         if (!window.app.chatBox) {
             window.app.chatBox = new ChatBox(chatBoxContainer);
         } else {
+			window.app.chatBox.container = chatBoxContainer;
             window.app.chatBox.render(chatBoxContainer);
+			window.app.chatBox.addEventListeners();
+			window.app.chatBox.updateOnlineUsersList();
         }
 
         new GameComponent(this.container.querySelector("#gameContainer"));
