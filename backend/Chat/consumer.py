@@ -51,7 +51,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         except jwt.ExpiredSignatureError:
             return
         except jwt.InvalidTokenError:
-            print("InvalidTokenError1", flush=True)
             return
 
         self.room_group_name = f"user_{self.username}"

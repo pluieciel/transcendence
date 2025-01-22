@@ -3,9 +3,7 @@ import { Game } from "../game/Game.js";
 export default class Tournament {
 	constructor(container) {
 		this.container = container;
-		// TODO: fix
-		//this.username = decodedPayload.username;
-		this.username = "TEST"
+		this.username = window.app.state.username;
 		this.protocol = window.location.protocol === "https:" ? "wss://" : "ws://";
 		this.host = window.location.host;
 		this.info = { state: "Waiting", wait_list: [], round1: {}, round2: {}, round3: {} };

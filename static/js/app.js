@@ -41,7 +41,7 @@ class App {
 
     login(data) {
         this.state.isLoggedIn = true;
-        console.log("sessionStorageingame", sessionStorage.getItem("ingame"));
+        this.state.username = data.username;
         sessionStorage.setItem("isLoggedIn", "true");
         this.router.navigateTo("/index");
     }

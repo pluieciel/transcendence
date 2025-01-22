@@ -11,8 +11,7 @@ export default class MainView {
         this.countdownTime = 0;
         this.timerInterval = null;
 		
-        //this.username = decodedPayload.username;
-        this.username = "TEST";
+        this.username = window.app.state.username;
 
         this.render();
         this.initComponents();

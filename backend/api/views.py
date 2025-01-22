@@ -44,7 +44,6 @@ async def jwt_to_user(headers):
     except jwt.ExpiredSignatureError:
         return False
     except jwt.InvalidTokenError:
-        print("InvalidTokenError2", flush=True)
         return False
 
 def generate_jwt(user, iat, exp):
@@ -254,8 +253,6 @@ class LoginConsumer(AsyncHttpConsumer):
             username = data.get('username')
             password = data.get('password')
 
-            #print(f"Login attempt: {username}", flush=True)
-
             # Validate input
             if not username or not password:
                 response_data = {
@@ -289,6 +286,7 @@ class LoginConsumer(AsyncHttpConsumer):
                 response_data = {
                     'success': True,
                     'message': 'Login successful',
+                    'username': username,
                 }
             else:
                 response_data = {
@@ -301,7 +299,6 @@ class LoginConsumer(AsyncHttpConsumer):
                 headers=[(b"Content-Type", b"application/json"), (b"Set-Cookie", generate_jwt_cookie(user))])
 
         except Exception as e:
-            print(f"Login error: {str(e)}", flush=True)
             response_data = {
                 'success': False,
                 'message': str(e)
@@ -341,6 +338,7 @@ class Login2FAConsumer(AsyncHttpConsumer):
             response_data = {
                 'success': True,
                 'message': 'Login successful',
+                'username': username,
             }
             return await self.send_response(200, json.dumps(response_data).encode(),
                 headers=[(b"Content-Type", b"application/json"), (b"Set-Cookie", generate_jwt_cookie(user))])

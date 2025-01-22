@@ -3,10 +3,7 @@ import { Game } from "../game/Game.js";
 export default class ChatBox {
     constructor(container) {
         this.container = container;
-        
-        // TODO: fix
-        //this.username = decodedPayload.username;
-        this.username = "TEST";
+        this.username = window.app.state.username;
         this.chatSocket = null;
         this.publicMessages = [];
         this.privateMessages = {};

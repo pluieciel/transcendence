@@ -1,9 +1,7 @@
 export default class MainView {
     constructor(container) {
 		this.container = container;
-		// TODO: fix
-        //this.username = decodedPayload.username;
-        this.username = "TEST";
+        this.username = window.app.state.username;
         this.render();
         this.addEventListeners();
         this.add2FAEventListeners();
