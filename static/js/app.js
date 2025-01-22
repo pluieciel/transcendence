@@ -1,20 +1,18 @@
-import LoginView from "./components/pages/LoginView.js";
-import MainView from "./components/pages/MainView.js";
-import SettingsView from "./components/pages/SettingsView.js";
-import LoginOAuth from "./components/login/LoginOAuth.js";
-//import GameView from './components/GameView.js';
-import Router from "./router.js";
+import LoginView from './components/pages/LoginView.js';
+import MainView from './components/pages/MainView.js';
+import SettingsView from './components/pages/SettingsView.js';
+import LoginOAuth from './components/login/LoginOAuth.js';
+import Router from './router.js';
 
 class App {
     constructor() {
-        this.routes = [
-            { path: "/", component: LoginView },
-            { path: "/index", component: MainView },
-            //{ path: '/game', component: GameView },
-            { path: "/settings", component: SettingsView },
-            { path: "/login/oauth", component: LoginOAuth },
-            { path: "*", component: LoginView },
-        ];
+		this.routes = [
+			{ path: '/', component: LoginView },
+            { path: '/index', component: MainView },
+            { path: '/settings', component: SettingsView },
+            { path: '/login/oauth', component: LoginOAuth },
+			{ path: '*', component: LoginView },
+		]
         this.state = {
             isLoggedIn: sessionStorage.getItem("isLoggedIn") === "true",
             username: sessionStorage.getItem("username"),
@@ -37,15 +35,16 @@ class App {
         });
         const data = await response.json();
         this.avatarCache[username] = data.avatar;
+		console.log(data.avatar);
         return data.avatar;
     }
 
     login(data) {
         this.state.isLoggedIn = true;
         this.state.username = data.username;
-        sessionStorage.setItem("isLoggedIn", "true");
-        sessionStorage.setItem("username", data.username);
-        this.router.navigateTo("/index");
+        sessionStorage.setItem('isLoggedIn', 'true');
+        sessionStorage.setItem('username', data.username);
+        this.router.navigateTo('/index');
     }
 
     logout() {
@@ -60,8 +59,7 @@ class App {
     }
 }
 
-// Initialize app
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener('DOMContentLoaded', () => {
     console.log("DOMContentLoaded");
     window.app = new App();
 });

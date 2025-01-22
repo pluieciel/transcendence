@@ -1,9 +1,11 @@
-# views.py
 import time
 from secrets import token_bytes, token_urlsafe
 from channels.generic.http import AsyncHttpConsumer
 from django.contrib.auth import get_user_model, authenticate
 from channels.db import database_sync_to_async
+from .utils import jwt_to_user
+import json
+from dotenv import load_dotenv
 import json, os
 import requests
 import jwt
@@ -102,8 +104,6 @@ class SignupConsumer(AsyncHttpConsumer):
         rate_limit = 60  # Allow 5 requests
         time_window = 60  # Time window in seconds
         current_usage = cache.get(key, 0)
-        #print(json.loads(body.decode()), flush=True)
-        #print("current usage: " + str(current_usage), flush=True)
         if current_usage >= rate_limit:
             response_data = {
                 'success': False,
@@ -156,7 +156,7 @@ class SignupConsumer(AsyncHttpConsumer):
                 resized_image.save(img_byte_arr, format=image.format or 'PNG')
                 img_byte_arr.seek(0)
                 # Update avatar with resized image
-                avatar.file = img_byte_arr
+                avatar.file = img_byte_arr 
             # Create new user
             await self.create_user(username, password, avatar)
 
@@ -614,18 +614,19 @@ class LoginOAuthConsumer(AsyncHttpConsumer):
 
             user_response = requests.get('https://api.intra.42.fr/v2/me', headers=headers)
 
+
             if user_response.status_code == 200:
                 user_data = user_response.json()
                 username = user_data['login']
 
                 user = await self.get_user_by_name(username)
                 if not user:
-                    user = await self.create_user_oauth(username, access_token)
+                    user = await self.create_user_oauth(username=username, avatarUrl=user_data['image']['link'])
 
                 response_data = {
                     'success': True,
                     'message': 'Login successful',
-				    'username': username,
+                    'username': username,
                 }
                 return await self.send_response(200, json.dumps(response_data).encode(),
                     headers=[(b"Content-Type", b"application/json"), (b"Set-Cookie", generate_jwt_cookie(user))])
@@ -646,9 +647,9 @@ class LoginOAuthConsumer(AsyncHttpConsumer):
                 headers=[(b"Content-Type", b"application/json")])
 
     @database_sync_to_async
-    def create_user_oauth(self, username, token):
+    def create_user_oauth(self, username, avatarUrl):
         User = get_user_model()
-        return User.objects.create_user_oauth(username=username, token=token)
+        return User.objects.create_user_oauth(username=username, avatarUrl=avatarUrl)
 
     @database_sync_to_async
     def get_user_by_name(self, username):
@@ -669,9 +670,9 @@ class ProfileConsumer(AsyncHttpConsumer):
 
             tot_games = (user.wins + user.looses)
             if tot_games == 0:
-                winrate = 0
+                winrate = "No games found"
             else:
-                winrate = (user.wins / tot_games) * 100
+                winrate = (user.wins / tot_games) * 100 + "%"
 
             response_data = {
                 'success': True,
@@ -708,7 +709,6 @@ class ProfileConsumer2(AsyncHttpConsumer):
                     headers=[(b"Content-Type", b"application/json")])
 
             path = self.scope['path']
-            #print(f"Request path: {path}", flush=True)
             match = re.search(r'/api/get/profile/(\w+)', path)
             user_name = match.group(1)
             user = await self.get_user_by_name(user_name)
@@ -772,6 +772,10 @@ class AvatarConsumer(AsyncHttpConsumer):
                 'success': True,
                 'avatar' : f"{host}{user.avatar.url}" if user.avatar else f"{host}/default_avatar.png",
             }
+            if (user.oauthlog):
+                print('avatar link ', flush=True)
+                print(user.avatar42, flush=True)
+                response_data['avatar'] = user.avatar42
             return await self.send_response(200, json.dumps(response_data).encode(),
                 headers=[(b"Content-Type", b"application/json")])
 

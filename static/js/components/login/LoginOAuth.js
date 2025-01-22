@@ -54,10 +54,10 @@ class LoginOAuth {
             const data = await response.json();
 
             if (data.success) {
-                window.app.login(data);
-                window.app.router.navigateTo("/index");
+				window.app.login(data);
+				window.app.router.navigateTo('/index');
             } else {
-                this.showError(data.message || "Sign up || Log in failed.");
+                this.showError(data.message || 'Sign up || Log in failed.');
             }
         } catch (error) {
             console.error("Error during fetch:", error);

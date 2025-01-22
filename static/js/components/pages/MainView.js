@@ -1,6 +1,5 @@
 import ChatBox from "../chat/ChatBox.js";
 import Tournament from "../tournament/Tournament.js";
-import { Game } from "../game/Game.js";
 import GameComponent from "../game/GameComponents.js";
 
 export default class MainView {
@@ -13,23 +12,9 @@ export default class MainView {
 		
         this.username = window.app.state.username;
 
-        this.render();
-        this.initComponents();
-
-        // Create observer to watch for DOM changes
-        const observer = new MutationObserver((mutations, obs) => {
-            // Look for our profile elements
-            const profileElements = document.getElementById("p-elo");
-            if (profileElements) {
-                obs.disconnect(); // Stop observing once found
-                this.setProfileFields(); // Now safe to call
-            }
-        });
-        // Start observing
-        observer.observe(document.body, {
-            childList: true,
-            subtree: true,
-        });
+		this.render();
+		this.initComponents();
+		this.setProfileFields();
 
         this.addEventListeners();
         if (window.app.ingame) {
@@ -96,7 +81,6 @@ export default class MainView {
 					</div>
 					<div class="profile">
 						<h2>Profile</h2>
-						<div id="p-avatar"></div>
 						<h3 id="p-name">${this.username}</h3>
 						<h3 id="p-elo">Loading...</h3>
 						<h3 id="p-winrate">Loading...</h3>
@@ -161,44 +145,47 @@ export default class MainView {
             window.app.logout();
         });
 
-        settings.addEventListener("click", () => {
-            window.app.router.navigateTo("/settings");
-        });
-    }
+		settings.addEventListener("click", () => {
+			window.app.router.navigateTo("/settings");
+		});
+	}
 
-    async setProfileFields() {
-        var elo_div = document.getElementById("p-elo");
-        var winrate_div = document.getElementById("p-winrate");
-        var tourn_div = document.getElementById("p-tourn");
-        var avatar_div = document.getElementById("p-avatar");
-        try {
-            const response = await fetch("/api/get/profile", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            });
-            const data = await response.json();
+
+	
+	async setProfileFields() {
+		var elo_div = document.getElementById("p-elo");
+		var winrate_div = document.getElementById("p-winrate");
+		var tourn_div = document.getElementById("p-tourn");
+		var name_div = document.getElementById("p-name");
+
+		try {
+			const response = await fetch("/api/get/profile", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+			});
+			const data = await response.json();
 
             const avatarUrl = await window.app.getAvatar(this.username);
 
-            if (data.success) {
-                elo_div.innerHTML = "Elo: " + data["elo"];
-                winrate_div.innerHTML = "Winrate: " + data["winrate"] + "%";
-                tourn_div.innerHTML = "Tournaments won: " + data["tourn"];
-            } else {
-                elo_div.innerHTML = "Failed to load elo";
-                winrate_div.innerHTML = "Failed to load winrate";
-                tourn_div.innerHTML = "Failed to load tournaments";
-            }
-            if (avatarUrl) {
-                avatar_div.innerHTML = `<img src=${avatarUrl} alt="User Avatar" width="60" height="60"></img>`;
-            }
-        } catch (error) {
-            elo_div.innerHTML = "Failed to load elo";
-            winrate_div.innerHTML = "Failed to load winrate";
-            tourn_div.innerHTML = "Failed to load tournaments";
-            console.error("An error occurred: ", error);
-        }
-    }
+			if (data.success) {
+				elo_div.innerHTML = "Elo: " + data["elo"];
+				winrate_div.innerHTML = "Winrate: " + data["winrate"];
+				tourn_div.innerHTML = "Tournaments won: " + data["tourn"];
+			} else {
+				elo_div.innerHTML = "Failed to load elo";
+				winrate_div.innerHTML = "Failed to load winrate";
+				tourn_div.innerHTML = "Failed to load tournaments";
+			}
+			if (avatarUrl) {
+				name_div.innerHTML = `<img id="avatarImg" src=${avatarUrl} alt="User Avatar" width="30" height="30"></img> ` + this.username;
+			}
+		} catch (error) {
+			elo_div.innerHTML = "Failed to load elo";
+			winrate_div.innerHTML = "Failed to load winrate";
+			tourn_div.innerHTML = "Failed to load tournaments";
+			console.error("An error occurred: ", error);
+		}
+	}
 }

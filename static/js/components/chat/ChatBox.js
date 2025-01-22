@@ -655,10 +655,9 @@ export default class ChatBox {
         }
 
         chatContainer.innerHTML = this.privateMessages[user]
-            .map((msg) => this.createMessageHTML(msg))
-            .join("");
-
-        // Remove 'd-none' if this tab is active
+            .map(msg => this.createMessageHTML(msg))
+            .join('');
+    
         if (this.activeTab === `user-${user}`) {
             chatContainer.classList.remove("d-none");
         }
