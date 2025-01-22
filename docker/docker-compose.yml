@@ -62,12 +62,14 @@ services:
         environment:
             POSTGRES_PASSWORD_FILE: /run/secrets/postgres-passwd
             JWT_SECRET_KEY_FILE: /run/secrets/jwt-secret-key
+            DEEPSEEKAPI: /run/secrets/deepseekapi
             OAUTH_CLIENT_ID_FILE: /run/secrets/oauth_client_id
             OAUTH_CLIENT_SECRET_FILE: /run/secrets/oauth_client_secret
         env_file: .env
         secrets:
             - postgres-passwd
             - jwt-secret-key
+            - deepseekapi
             - oauth_client_id
             - oauth_client_secret
         volumes:
@@ -288,3 +290,5 @@ secrets:
         file: ${PWD}/docker/secrets/oauth_client_id.txt
     oauth_client_secret:
         file: ${PWD}/docker/secrets/oauth_client_secret.txt
+    deepseekapi:
+        file: ${PWD}/docker/secrets/deepseekapi.txt

@@ -3,7 +3,7 @@ from secrets import token_bytes, token_urlsafe
 from channels.generic.http import AsyncHttpConsumer
 from django.contrib.auth import get_user_model, authenticate
 from channels.db import database_sync_to_async
-from .utils import jwt_to_user
+#from .utils import jwt_to_user
 import json
 from dotenv import load_dotenv
 import json, os
