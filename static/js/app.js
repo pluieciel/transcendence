@@ -17,6 +17,7 @@ class App {
         ];
         this.state = {
             isLoggedIn: sessionStorage.getItem("isLoggedIn") === "true",
+            username: sessionStorage.getItem("username"),
         };
         this.avatarCache = {};
         this.ingame = sessionStorage.getItem("ingame") === "true";
@@ -43,6 +44,7 @@ class App {
         this.state.isLoggedIn = true;
         this.state.username = data.username;
         sessionStorage.setItem("isLoggedIn", "true");
+        sessionStorage.setItem("username", data.username);
         this.router.navigateTo("/index");
     }
 

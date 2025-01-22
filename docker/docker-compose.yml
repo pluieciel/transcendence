@@ -50,6 +50,31 @@ services:
         networks:
             - transcendence
         restart: unless-stopped
+    django_ws:
+        build: ${PWD}/docker/django
+        image: django
+        container_name: django_ws
+        depends_on:
+            postgres:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
+        environment:
+            POSTGRES_PASSWORD_FILE: /run/secrets/postgres-passwd
+            JWT_SECRET_KEY_FILE: /run/secrets/jwt-secret-key
+            OAUTH_CLIENT_ID_FILE: /run/secrets/oauth_client_id
+            OAUTH_CLIENT_SECRET_FILE: /run/secrets/oauth_client_secret
+        env_file: .env
+        secrets:
+            - postgres-passwd
+            - jwt-secret-key
+            - oauth_client_id
+            - oauth_client_secret
+        volumes:
+            - django_data:/usr/src/app
+        networks:
+            - transcendence
+        restart: unless-stopped
     nginx:
         build: ${PWD}/docker/nginx
         image: nginx
