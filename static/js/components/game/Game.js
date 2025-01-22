@@ -55,10 +55,9 @@ export class Game {
 		this.lastTime = 0;
 		this.axis = "x";
 		this.mode = "position";
-		this.factor = 0.01;
+		this.factor = 0.1;
 
-		this.enableDebugMode(true, this.sceneManager.bonuses.table);
-
+		this.enableDebugMode(true);
 		this.loading.onComplete = () => {
 			this.sendInitDone();
 			this.sceneManager.bonuses.displayPowerUp(0, new THREE.Vector3(0, 0, 0));
@@ -272,7 +271,8 @@ export class Game {
 		//this.renderer.render(this.sceneManager.scene, this.sceneManager.camera);
 	}
 
-	enableDebugMode(editor, objectToModify) {
+	enableDebugMode(editor) {
+		let objectToModify = null;
 		window.addEventListener("keydown", (event) => {
 			if (event.code === "Space") {
 				this.sceneManager.toggleDebugMode();
@@ -280,10 +280,17 @@ export class Game {
 			if (editor) {
 				if (event.code == "KeyG") {
 					console.log("Entering position mode");
+					console.log(objectToModify);
 					this.mode = "position";
+				} else if (event.code == "KeyO") {
+					objectToModify = this.sceneManager.text;
+					console.log("Object set : " + objectToModify);
 				} else if (event.code == "KeyS") {
 					this.mode = "scale";
 					console.log("Entering scale mode");
+				} else if (event.code == "KeyR") {
+					this.mode = "rotate";
+					console.log("Entering rotate mode");
 				} else if (event.code == "NumpadAdd") {
 					if (this.mode == "scale") {
 						if (this.axis == "x") {
@@ -313,6 +320,17 @@ export class Game {
 						} else if (this.axis == "z") {
 							objectToModify.position.z += this.factor;
 							console.log("New position z is : " + objectToModify.position.z);
+						}
+					} else if (this.mode == "rotate") {
+						if (this.axis == "x") {
+							objectToModify.rotation.x += this.factor;
+							console.log("New x rotation is : " + objectToModify.rotation.x);
+						} else if (this.axis == "y") {
+							objectToModify.rotation.y += this.factor;
+							console.log("New rotation y is : " + objectToModify.rotation.y);
+						} else if (this.axis == "z") {
+							objectToModify.rotation.z += this.factor;
+							console.log("New rotation z is : " + objectToModify.rotation.z);
 						}
 					}
 				} else if (event.code == "NumpadSubtract") {
@@ -345,6 +363,17 @@ export class Game {
 							objectToModify.position.z -= this.factor;
 							console.log("New z position is : " + objectToModify.position.z);
 						}
+					} else if (this.mode == "rotate") {
+						if (this.axis == "x") {
+							objectToModify.rotation.x -= this.factor;
+							console.log("New x rotation is : " + objectToModify.rotation.x);
+						} else if (this.axis == "y") {
+							objectToModify.rotation.y -= this.factor;
+							console.log("New rotation y is : " + objectToModify.rotation.y);
+						} else if (this.axis == "z") {
+							objectToModify.rotation.z -= this.factor;
+							console.log("New rotation z is : " + objectToModify.rotation.z);
+						}
 					}
 				} else if (event.code == "KeyX") {
 					this.axis = "x";
@@ -358,23 +387,6 @@ export class Game {
 				} else if (event.code == "KeyA") {
 					this.axis = "all";
 					console.log("Axis set to all");
-				} else if (event.code == "KeyF") {
-					this.sceneManager.bonuses.table.scale.set(4.14, 4.14, 4.14);
-					this.sceneManager.bonuses.table.position.x = 0;
-					this.sceneManager.bonuses.table.position.y = 1.59;
-					this.sceneManager.bonuses.table.position.z = -30.72;
-					this.sceneManager.bonuses.paddle.scale.set(0.6, 0.25, 0.5);
-					this.sceneManager.bonuses.paddle.position.x = -18;
-					this.sceneManager.bonuses.paddle.position.y = -3.2;
-					this.sceneManager.bonuses.paddle.position.z = -15;
-					this.sceneManager.bonuses.paddleRed.scale.set(0.6, 0.25, 0.5);
-					this.sceneManager.bonuses.paddleRed.position.x = 17.94;
-					this.sceneManager.bonuses.paddleRed.position.y = -3.2;
-					this.sceneManager.bonuses.paddleRed.position.z = -15;
-					this.sceneManager.bonuses.ball.position.x = 0;
-					this.sceneManager.bonuses.ball.position.y = -3;
-					this.sceneManager.bonuses.ball.position.z = -15;
-					this.sceneManager.bonuses.ball.scale.set(0.44, 0.44, 0.44);
 				}
 			}
 		});
