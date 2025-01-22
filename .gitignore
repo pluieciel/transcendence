@@ -1,6 +1,3 @@
 docker/secrets
 *.pyc
 *.idea
-todo
-avatars
-staticfiles

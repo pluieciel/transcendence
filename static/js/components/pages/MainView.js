@@ -3,45 +3,44 @@ import Tournament from "../tournament/Tournament.js";
 import GameComponent from "../game/GameComponents.js";
 
 export default class MainView {
-	constructor(container) {
-		this.container = container;
-		const decodedPayload = jwt_decode(window.app.getToken());
+    constructor(container) {
+        this.container = container;
 
-		this.countdownTime = 0;
-		this.timerInterval = null;
-
-		this.username = decodedPayload.username;
-	
+        //Search game timer
+        this.countdownTime = 0;
+        this.timerInterval = null;
+		
+        this.username = window.app.state.username;
 
 		this.render();
 		this.initComponents();
 		this.setProfileFields();
 
-		this.addEventListeners();
-		if (window.app.ingame) {
-			console.log("Reconnecting to game");
-			const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-			const host = window.location.host;
-			const token = window.app.getToken();
-			const wsUrl = `${protocol}//${host}/ws/game/?token=${token}&reconnect=true`;
-			window.app.gamews = new WebSocket(wsUrl);
-			window.app.gamews.onmessage = (event) => {
-				const events = JSON.parse(event.data);
-				if (events.message_type === "init") {
-					this.displayGame(events);
-				}
-			};
+        this.addEventListeners();
+        if (window.app.ingame) {
+            console.log("Reconnecting to game");
+            const protocol =
+                window.location.protocol === "https:" ? "wss:" : "ws:";
+            const host = window.location.host;
+            const wsUrl = `${protocol}//${host}/ws/game/reconnect=true`;
+            window.app.gamews = new WebSocket(wsUrl);
+            window.app.gamews.onmessage = (event) => {
+                const events = JSON.parse(event.data);
+                if (events.message_type === "init") {
+                    this.displayGame(events);
+                }
+            };
 
-			window.app.gamews.onclose = () => {
-				console.log("Disconnected from server");
-				window.app.ingame = false;
-				sessionStorage.setItem("ingame", "false");
-			};
-		}
-	}
+            window.app.gamews.onclose = () => {
+                console.log("Disconnected from server");
+                window.app.ingame = false;
+                sessionStorage.setItem("ingame", "false");
+            };
+        }
+    }
 
-	render() {
-		this.container.innerHTML = `
+    render() {
+        this.container.innerHTML = `
 			<header>
 				<h1>PONG</h1>
 					<button id="settingsBtn">Settings</button>
@@ -99,50 +98,52 @@ export default class MainView {
 			<div id="gameContainer"></div>
 
         `;
+    }
 
-	}
+    showLeaderboard() {
+        const mainContent = this.container.querySelector("#mainContent");
+        mainContent.innerHTML = "<h2>Leaderboard View</h2>";
+        // Add any additional logic to initialize the leaderboard view
+    }
 
-	showLeaderboard() {
-		const mainContent = this.container.querySelector("#mainContent");
-		mainContent.innerHTML = "<h2>Leaderboard View</h2>";
-		// Add any additional logic to initialize the leaderboard view
-	}
+    initComponents() {
+        // Initialize Tournament
+        const tournamentContainer = this.container.querySelector(
+            "#tournamentContainer",
+        );
+        if (!window.app.tournament) {
+            window.app.tournament = new Tournament(tournamentContainer);
+        } else {
+            window.app.tournament.render();
+        }
 
-	initComponents() {
-		// Initialize Tournament
-		const tournamentContainer = this.container.querySelector("#tournamentContainer");
-		if (!window.app.tournament) {
-			window.app.tournament = new Tournament(tournamentContainer);
-		} else {
-			window.app.tournament.render();
-		}
+        // Initialize ChatBox
+        const chatBoxContainer =
+            this.container.querySelector("#chatBoxContainer");
+        if (!window.app.chatBox) {
+            window.app.chatBox = new ChatBox(chatBoxContainer);
+        } else {
+            window.app.chatBox.render(chatBoxContainer);
+        }
 
-		// Initialize ChatBox
-		const chatBoxContainer = this.container.querySelector("#chatBoxContainer");
-		if (!window.app.chatBox) {
-			window.app.chatBox = new ChatBox(chatBoxContainer);
-		} else {
-			window.app.chatBox.render(chatBoxContainer);
-		}
+        new GameComponent(this.container.querySelector("#gameContainer"));
 
-		new GameComponent(this.container.querySelector("#gameContainer"));
+        const quickMatchButton = this.container.querySelector("#quickMatch");
+        if (quickMatchButton) {
+            quickMatchButton.setAttribute("data-bs-toggle", "modal");
+            quickMatchButton.setAttribute("data-bs-target", "#matchSearch");
+        }
+    }
 
-		const quickMatchButton = this.container.querySelector("#quickMatch");
-		if (quickMatchButton) {
-			quickMatchButton.setAttribute("data-bs-toggle", "modal");
-			quickMatchButton.setAttribute("data-bs-target", "#matchSearch");
-    	}
-	}
+    addEventListeners() {
+        // Logout button
+        const logoutBtn = this.container.querySelector("#logoutBtn");
+        const settings = this.container.querySelector("#settingsBtn");
 
-	addEventListeners() {
-		// Logout button
-		const logoutBtn = this.container.querySelector("#logoutBtn");
-		const settings = this.container.querySelector("#settingsBtn");
-
-		logoutBtn.addEventListener("click", () => {
-			window.app.chatBox.disconnect();
-			window.app.logout();
-		});
+        logoutBtn.addEventListener("click", () => {
+            window.app.chatBox.disconnect();
+            window.app.logout();
+        });
 
 		settings.addEventListener("click", () => {
 			window.app.router.navigateTo("/settings");
@@ -162,12 +163,11 @@ export default class MainView {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
-					Authorization: `${window.app.getToken()}`,
 				},
 			});
 			const data = await response.json();
 
-			const avatarUrl = await window.app.getAvatar(this.username);
+            const avatarUrl = await window.app.getAvatar(this.username);
 
 			if (data.success) {
 				elo_div.innerHTML = "Elo: " + data["elo"];

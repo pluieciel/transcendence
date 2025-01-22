@@ -36,14 +36,12 @@ services:
                 condition: service_healthy
         environment:
             POSTGRES_PASSWORD_FILE: /run/secrets/postgres-passwd
-            DJANGO_SUPERUSER_PASSWORD_FILE: /run/secrets/django-passwd
             JWT_SECRET_KEY_FILE: /run/secrets/jwt-secret-key
             OAUTH_CLIENT_ID_FILE: /run/secrets/oauth_client_id
             OAUTH_CLIENT_SECRET_FILE: /run/secrets/oauth_client_secret
         env_file: .env
         secrets:
             - postgres-passwd
-            - django-passwd
             - jwt-secret-key
             - oauth_client_id
             - oauth_client_secret
@@ -52,10 +50,10 @@ services:
         networks:
             - transcendence
         restart: unless-stopped
-    django2:
-        build: ${PWD}/docker/django2
-        image: django2
-        container_name: django2
+    django_ws:
+        build: ${PWD}/docker/django
+        image: django
+        container_name: django_ws
         depends_on:
             postgres:
                 condition: service_healthy
@@ -63,13 +61,15 @@ services:
                 condition: service_healthy
         environment:
             POSTGRES_PASSWORD_FILE: /run/secrets/postgres-passwd
-            DJANGO_SUPERUSER_PASSWORD_FILE: /run/secrets/django-passwd
             JWT_SECRET_KEY_FILE: /run/secrets/jwt-secret-key
+            OAUTH_CLIENT_ID_FILE: /run/secrets/oauth_client_id
+            OAUTH_CLIENT_SECRET_FILE: /run/secrets/oauth_client_secret
         env_file: .env
         secrets:
             - postgres-passwd
-            - django-passwd
             - jwt-secret-key
+            - oauth_client_id
+            - oauth_client_secret
         volumes:
             - django_data:/usr/src/app
         networks:
@@ -82,15 +82,17 @@ services:
         depends_on:
             django:
                 condition: service_started
+        environment:
+            JWT_SECRET_KEY_FILE: /run/secrets/jwt-secret-key
+        secrets:
+            - jwt-secret-key
         expose:
             - 9000
         ports:
-            - 9000:9000
+            - "9000:9000"
         volumes:
             - nginx_data:/var/www/html
             - nginx_logs:/var/log/nginx
-            - nginx_certs:/etc/nginx/certs
-            - django_static_data:/var/www/django/static
             - django_data:/var/www/django/media
         networks:
             - transcendence
@@ -232,7 +234,7 @@ services:
 #        networks:
 #            - transcendence
 #        restart: unless-stopped
-#
+
 networks:
     transcendence:
         name: transcendence
@@ -250,12 +252,6 @@ volumes:
             type: none
             o: bind
             device: ${PWD}/static
-    django_static_data:
-        name: django_static_data
-        driver_opts:
-            type: none
-            o: bind
-            device: ${PWD}/backend/staticfiles
     django_logs:
         name: django_logs
     postgres_data:
@@ -264,8 +260,6 @@ volumes:
         name: postgres_logs
     nginx_logs:
         name: nginx_logs
-    nginx_certs:
-        name: nginx_certs
     elasticsearch_data:
         name: elasticsearch_data
     elasticsearch_logs:
@@ -280,10 +274,8 @@ volumes:
 secrets:
     postgres-passwd:
         file: ${PWD}/docker/secrets/postgres-passwd.txt
-    django-passwd:
-        file: ${PWD}/docker/secrets/django-passwd.txt
     elasticsearch-passwd:
-         file: ${PWD}/docker/secrets/elasticsearch-passwd.txt
+        file: ${PWD}/docker/secrets/elasticsearch-passwd.txt
     kibana-passwd:
         file: ${PWD}/docker/secrets/kibana-passwd.txt
     prometheus-passwd:
