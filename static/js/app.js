@@ -5,7 +5,6 @@ import LoginOAuth from './components/login/LoginOAuth.js';
 import Router from './router.js';
 
 class App {
-
     constructor() {
 		this.routes = [
 			{ path: '/', component: LoginView },
@@ -15,25 +14,23 @@ class App {
 			{ path: '*', component: LoginView },
 		]
         this.state = {
-            isLoggedIn: sessionStorage.getItem('isLoggedIn') === 'true',
-            token: sessionStorage.getItem('token') || '',
+            isLoggedIn: sessionStorage.getItem("isLoggedIn") === "true",
+            username: sessionStorage.getItem("username"),
         };
         this.avatarCache = {};
-        this.ingame = sessionStorage.getItem('ingame') === 'true';
-		window.app = this;
+        this.ingame = sessionStorage.getItem("ingame") === "true";
+        window.app = this;
         this.router = new Router(this.routes);
-
     }
 
     async getAvatar(username) {
         if (this.avatarCache[username]) {
             return this.avatarCache[username];
         }
-        const response = await fetch(`/api/get/avatar/${username}`,{
-            method: 'POST',
+        const response = await fetch(`/api/get/avatar/${username}`, {
+            method: "POST",
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `${this.state.token}`,
+                "Content-Type": "application/json",
             },
         });
         const data = await response.json();
@@ -41,39 +38,24 @@ class App {
 		console.log(data.avatar);
         return data.avatar;
     }
-    
+
     login(data) {
         this.state.isLoggedIn = true;
-        this.state.token = data.token;
-        console.log("sessionStorageingame", sessionStorage.getItem('ingame'));
+        this.state.username = data.username;
         sessionStorage.setItem('isLoggedIn', 'true');
-        sessionStorage.setItem('token', this.state.token);
+        sessionStorage.setItem('username', data.username);
         this.router.navigateTo('/index');
     }
-	
-	login42(username, token, theme) {
-		this.state.isLoggedIn = true;
-        this.state.token = token;
-		this.state.theme = theme;
-		sessionStorage.setItem('isLoggedIn', 'true');
-        sessionStorage.setItem('token', this.state.token);
-        this.router.navigateTo('/index');
-	}
 
     logout() {
         this.state.isLoggedIn = false;
-        this.state.token = '';
         this.ingame = false;
         sessionStorage.clear();
-        this.router.navigateTo('/');
+        this.router.navigateTo("/");
     }
 
     getIsLoggedIn() {
         return this.state.isLoggedIn;
-    }
-
-    getToken() {
-        return this.state.token;
     }
 }
 

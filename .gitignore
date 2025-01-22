@@ -3,4 +3,3 @@ docker/secrets
 *.idea
 todo
 avatars
-staticfiles

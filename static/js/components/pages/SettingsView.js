@@ -1,9 +1,7 @@
 export default class MainView {
     constructor(container) {
-        this.token = window.app.getToken();
 		this.container = container;
-        const decodedPayload = jwt_decode(window.app.getToken());
-        this.username = decodedPayload.username;
+        this.username = window.app.state.username;
         this.render();
         this.addEventListeners();
     }
@@ -82,7 +80,6 @@ export default class MainView {
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json',
-						'Authorization': `${this.token}`,
 					},
 				});
 				
@@ -108,7 +105,6 @@ export default class MainView {
 						method: 'POST',
 						headers: {
 							'Content-Type': 'application/json',
-							'Authorization': `${window.app.state.token}`
 						},
 						body: JSON.stringify({
 							newPassword: hashedNew,
@@ -136,7 +132,6 @@ export default class MainView {
 						method: 'POST',
 						headers: {
 							'Content-Type': 'application/json',
-							'Authorization': `${window.app.state.token}`
 						},
 						body: JSON.stringify({
 							newUsername: newUsername.value,
@@ -185,7 +180,6 @@ export default class MainView {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
-                    'Authorization': `${window.app.state.token}`
 				},
 				body: JSON.stringify({
 					username: this.username,

@@ -7,11 +7,21 @@ from django.contrib.auth import get_user_model, authenticate
 from channels.db import database_sync_to_async
 import jwt
 import os
+import re
 from Game.consumer import game_manager
 import redis
 from copy import deepcopy
 
-SECRET_KEY = os.environ.get('JWT_SECRET_KEY')
+def get_cookie(headers, name):
+    cookies = headers.get('cookie', None)
+    return re.search(f'{name}=([^;]+)', cookies)
+
+def get_secret_from_file(env_var):
+    file_path = os.environ.get(env_var)
+    if file_path is None:
+        raise ValueError(f'{env_var} environment variable not set')
+    with open(file_path, 'r') as file:
+        return file.read().strip()
 
 class ChatConsumer(AsyncWebsocketConsumer):
     online_users = set()
@@ -31,11 +41,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
         self.redis_client = redis.Redis(host='redis', port=6379, db=0)
 
     async def connect(self):
-        query_string = self.scope["query_string"].decode()
-        query_params = parse_qs(query_string)
-        self.token = query_params.get("token", [None])[0]
+        headers_dict = dict((key.decode('utf-8'), value.decode('utf-8')) for key, value in self.scope['headers'])
+        jwt_cookie = get_cookie(headers_dict, 'jwt')
+        self.token = jwt_cookie.group(1)
         try:
-            payload = jwt.decode(self.token, SECRET_KEY, algorithms=['HS256'])
+            payload = jwt.decode(self.token, get_secret_from_file('JWT_SECRET_KEY_FILE'), algorithms=['HS256'])
             self.username = payload.get('username')
 
         except jwt.ExpiredSignatureError:
@@ -44,12 +54,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
             return
 
         self.room_group_name = f"user_{self.username}"
-        
+
         if self.username is None:
             await self.close()
             print("No username provided")
             return
-        
+
         await self.channel_layer.group_add(
             self.room_group_name,
             self.channel_name
@@ -229,10 +239,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
         elif message_type == "chat":
             sender_group = f"user_{sender}"
             recipient_group = f"user_{recipient}"
-            
+
             print(f"Sender group: {sender_group}")
             print(f"Recipient group: {recipient_group}")
-            
+
             for group in [sender_group, recipient_group]:
                 await self.channel_layer.group_send(
                     group,
@@ -281,7 +291,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         #                 "time": time
         #             }
         #         )
-        
+
         elif message_type == "system" and message == "addfriend":
             user = await self.get_user(sender)
             newfriendname = text_data_json.get("friend", None)
@@ -315,16 +325,16 @@ class ChatConsumer(AsyncWebsocketConsumer):
         User = get_user_model()
         user = User.objects.get(username=username)
         return user
-    
+
     @database_sync_to_async
     def get_friends_usernames(self, user):
         """Fetch friend usernames from the database."""
         return list(user.friends.values_list('username', flat=True))
-    
+
     @database_sync_to_async
     def is_friend(self, user, friendname):
         return user.friends.filter(username=friendname).exists()
-    
+
     @database_sync_to_async
     def add_friend(self, user, friend):
         user.friends.add(friend)
