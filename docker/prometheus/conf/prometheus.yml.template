@@ -3,6 +3,7 @@ scrape_configs:
     basic_auth:
       username: ${PROMETHEUS_USERNAME}
       password: ${PROMETHEUS_PASSWORD}
+    metrics_path: /admin/prometheus/metrics
     static_configs:
       - targets: ['prometheus:9090']
   - job_name: 'cadvisor'
