@@ -223,9 +223,11 @@ services:
                 condition: service_started
         environment:
             GF_SECURITY_ADMIN_PASSWORD__FILE: /run/secrets/grafana-passwd
+            PROMETHEUS_PASSWORD_FILE: /run/secrets/prometheus-passwd
         env_file: .env
         secrets:
             - grafana-passwd
+            - prometheus-passwd
         volumes:
             - grafana_data:/var/lib/grafana
         expose:
