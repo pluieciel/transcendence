@@ -15,6 +15,7 @@ from api.views import get_secret_from_file
 from openai import OpenAI
 from django.core.cache import cache
 import asyncio
+import markdown
 
 def get_cookie(headers, name):
     cookies = headers.get('cookie', None)
@@ -388,7 +389,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             response = await loop.run_in_executor(
                 None,  # Uses default ThreadPoolExecutor
                 lambda: client.chat.completions.create(
-                            model="deepseek-reasoner",
+                            model="deepseek-chat",
                             messages=self.ai_chat_history,
                             stream=False
                         )
@@ -407,11 +408,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
         try:
             async def process_ai():
                 response = await self.deepseek_request(self.client, text)
+                #print(response.choices[0].message.content, flush=True)
                 for group in groups:
                     await self.channel_layer.group_send(
                         group, {
                             "type": "send_message",
-                            "message": response.choices[0].message.content,
+                            "message": markdown.markdown(response.choices[0].message.content.replace('\\', '\\\\')),
                             "message_type": "chat",
                             "sender": "DeepSeek",
                             "recipient": recipient,
