@@ -237,9 +237,10 @@ export default class ChatBox {
                 this.updateOnlineUsersList();
             } else if (data.recipient === "public") {
                 if (!this.blocked.includes(data.sender)) {
-                    data.message = this.escapeHtml(data.message);
+                    if (data.sender !== "DeepSeek") {data.message = this.escapeHtml(data.message);}
                     this.publicMessages.push(data);
                     this.updatePublicChat();
+                    renderMathInElement(document.body);
                 }
             } else if (data.message_type === "system_accept") {
                 console.log(data);
