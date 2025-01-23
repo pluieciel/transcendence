@@ -11,17 +11,14 @@ import re
 from Game.consumer import game_manager
 import redis
 from copy import deepcopy
+from api.views import get_secret_from_file
+from openai import OpenAI
+from django.core.cache import cache
+import asyncio
 
 def get_cookie(headers, name):
     cookies = headers.get('cookie', None)
     return re.search(f'{name}=([^;]+)', cookies)
-
-def get_secret_from_file(env_var):
-    file_path = os.environ.get(env_var)
-    if file_path is None:
-        raise ValueError(f'{env_var} environment variable not set')
-    with open(file_path, 'r') as file:
-        return file.read().strip()
 
 class ChatConsumer(AsyncWebsocketConsumer):
     online_users = set()
@@ -39,6 +36,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
         self.register_invite = register_invite
         self.is_valid_invite = is_valid_invite
         self.redis_client = redis.Redis(host='redis', port=6379, db=0)
+        self.apikey = get_secret_from_file('DEEPSEEKAPI')
+        self.client = OpenAI(api_key=self.apikey, base_url="https://api.deepseek.com")
 
     async def connect(self):
         headers_dict = dict((key.decode('utf-8'), value.decode('utf-8')) for key, value in self.scope['headers'])
@@ -190,6 +189,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
                         "time": time
                     }
                 )
+            
+            if message.startswith("[AI]"):
+                #anti-spam
+                current_usage = cache.get(sender, 0)
+                if current_usage >= 2:
+                    return
+                cache.set(sender, current_usage + 1, timeout=25)
+                asyncio.create_task(self.handle_ai_message(message[4:], groups, recipient, time))
+
         elif message_type == "system" and message == "update_tournament_info":
             if operation == "add" and self.username not in ChatConsumer.tournament_info["wait_list"] and ChatConsumer.tournament_info["state"] == "Waiting":
                 ChatConsumer.tournament_info["wait_list"].append(self.username)
@@ -363,3 +371,24 @@ class ChatConsumer(AsyncWebsocketConsumer):
             "time": time,
             "tournament_info": tournament_info,
         }))
+
+    async def deepseek_request(self, client, text):
+        return client.chat.completions.create(
+                model="deepseek-chat",
+                messages=[{"role": "user", "content": text}],
+                stream=False
+            )
+
+    async def handle_ai_message(self, text, groups, recipient, time):
+        response = await self.deepseek_request(self.client, text)
+        for group in groups:
+            await self.channel_layer.group_send(
+                group, {
+                    "type": "send_message",
+                    "message": response.choices[0].message.content,
+                    "message_type": "chat",
+                    "sender": "DeepSeek",
+                    "recipient": recipient,
+                    "time": time,
+                }
+            )

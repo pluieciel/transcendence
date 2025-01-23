@@ -33,14 +33,14 @@ services:
         environment:
             POSTGRES_PASSWORD_FILE: /run/secrets/postgres-passwd
             JWT_SECRET_KEY_FILE: /run/secrets/jwt-secret-key
-            OAUTH_CLIENT_ID_FILE: /run/secrets/oauth_client_id
-            OAUTH_CLIENT_SECRET_FILE: /run/secrets/oauth_client_secret
+            OAUTH_CLIENT_ID_FILE: /run/secrets/oauth-client-id
+            OAUTH_CLIENT_SECRET_FILE: /run/secrets/oauth-client-secret
         env_file: .env
         secrets:
             - postgres-passwd
             - jwt-secret-key
-            - oauth_client_id
-            - oauth_client_secret
+            - oauth-client-id
+            - oauth-client-secret
         volumes:
             - django_data:/usr/src/app
         networks:
@@ -58,14 +58,16 @@ services:
         environment:
             POSTGRES_PASSWORD_FILE: /run/secrets/postgres-passwd
             JWT_SECRET_KEY_FILE: /run/secrets/jwt-secret-key
-            OAUTH_CLIENT_ID_FILE: /run/secrets/oauth_client_id
-            OAUTH_CLIENT_SECRET_FILE: /run/secrets/oauth_client_secret
+            DEEPSEEKAPI: /run/secrets/deepseekapi
+            OAUTH_CLIENT_ID_FILE: /run/secrets/oauth-client-id
+            OAUTH_CLIENT_SECRET_FILE: /run/secrets/oauth-client-secret
         env_file: .env
         secrets:
             - postgres-passwd
             - jwt-secret-key
-            - oauth_client_id
-            - oauth_client_secret
+            - deepseekapi
+            - oauth-client-id
+            - oauth-client-secret
         volumes:
             - django_data:/usr/src/app
         networks:
@@ -281,7 +283,9 @@ secrets:
         file: ${PWD}/docker/secrets/grafana-passwd.txt
     jwt-secret-key:
         file: ${PWD}/docker/secrets/jwt-secret-key.txt
-    oauth_client_id:
-        file: ${PWD}/docker/secrets/oauth_client_id.txt
-    oauth_client_secret:
-        file: ${PWD}/docker/secrets/oauth_client_secret.txt
+    oauth-client-id:
+        file: ${PWD}/docker/secrets/oauth-client-id.txt
+    oauth-client-secret:
+        file: ${PWD}/docker/secrets/oauth-client-secret.txt
+    deepseekapi:
+        file: ${PWD}/docker/secrets/deepseekapi.txt
