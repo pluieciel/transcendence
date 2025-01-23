@@ -30,15 +30,9 @@ class LoginOAuth {
 
     async handleAuthResponse() {
         const code = this.getQueryParameter("code");
-        const state = this.getQueryParameter("state");
 
-        if (!code || !state) {
+        if (!code) {
             this.showError("Invalid authentication response.");
-            return;
-        }
-
-        if (state !== "this_is_a_very_long_random_string_i_am_unguessable") {
-            this.showError("State parameter mismatch.");
             return;
         }
 
@@ -55,7 +49,6 @@ class LoginOAuth {
 
             if (data.success) {
 				window.app.login(data);
-				window.app.router.navigateTo('/index');
             } else {
                 this.showError(data.message || 'Sign up || Log in failed.');
             }
