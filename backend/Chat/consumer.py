@@ -15,6 +15,7 @@ from api.views import get_secret_from_file
 from openai import OpenAI
 from django.core.cache import cache
 import asyncio
+import markdown
 
 def get_cookie(headers, name):
     cookies = headers.get('cookie', None)
@@ -38,6 +39,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         self.redis_client = redis.Redis(host='redis', port=6379, db=0)
         self.apikey = get_secret_from_file('DEEPSEEKAPI')
         self.client = OpenAI(api_key=self.apikey, base_url="https://api.deepseek.com")
+        self.ai_chat_history = []
 
     async def connect(self):
         headers_dict = dict((key.decode('utf-8'), value.decode('utf-8')) for key, value in self.scope['headers'])
@@ -193,10 +195,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
             if message.startswith("[AI]"):
                 #anti-spam
                 current_usage = cache.get(sender, 0)
-                if current_usage >= 2:
+                if current_usage >= 5:
                     return
                 cache.set(sender, current_usage + 1, timeout=25)
-                asyncio.create_task(self.handle_ai_message(message[4:], groups, recipient, time))
+                await self.handle_ai_message(message[4:], groups, recipient, time)
 
         elif message_type == "system" and message == "update_tournament_info":
             if operation == "add" and self.username not in ChatConsumer.tournament_info["wait_list"] and ChatConsumer.tournament_info["state"] == "Waiting":
@@ -372,23 +374,53 @@ class ChatConsumer(AsyncWebsocketConsumer):
             "tournament_info": tournament_info,
         }))
 
+    # async def deepseek_request(self, client, text):
+    #     return client.chat.completions.create(
+    #             model="deepseek-chat",
+    #             messages=[{"role": "user", "content": text}],
+    #             stream=False
+    #         )
+
     async def deepseek_request(self, client, text):
-        return client.chat.completions.create(
-                model="deepseek-chat",
-                messages=[{"role": "user", "content": text}],
-                stream=False
-            )
+        try:
+            self.ai_chat_history.append({"role": "user", "content": text})
+            # Run the sync API call in a thread
+            loop = asyncio.get_event_loop()
+            response = await loop.run_in_executor(
+                None,  # Uses default ThreadPoolExecutor
+                lambda: client.chat.completions.create(
+                            model="deepseek-chat",
+                            messages=self.ai_chat_history,
+                            stream=False
+                        )
+                )
+            if response:
+                self.ai_chat_history.append({
+                    "role": "assistant",
+                    "content": response.choices[0].message.content
+                })
+            return response
+        except Exception as e:
+            print(f"DeepSeek API error: {e}", flush=True)
+            return None
 
     async def handle_ai_message(self, text, groups, recipient, time):
-        response = await self.deepseek_request(self.client, text)
-        for group in groups:
-            await self.channel_layer.group_send(
-                group, {
-                    "type": "send_message",
-                    "message": response.choices[0].message.content,
-                    "message_type": "chat",
-                    "sender": "DeepSeek",
-                    "recipient": recipient,
-                    "time": time,
-                }
-            )
+        try:
+            async def process_ai():
+                response = await self.deepseek_request(self.client, text)
+                #print(response.choices[0].message.content, flush=True)
+                for group in groups:
+                    await self.channel_layer.group_send(
+                        group, {
+                            "type": "send_message",
+                            "message": markdown.markdown(response.choices[0].message.content.replace('\\', '\\\\')),
+                            "message_type": "chat",
+                            "sender": "DeepSeek",
+                            "recipient": recipient,
+                            "time": time,
+                        }
+                    )
+            asyncio.create_task(process_ai())
+
+        except Exception as e:
+            print(f"AI message error: {e}", flush=True)

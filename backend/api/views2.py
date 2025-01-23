@@ -6,7 +6,7 @@ import json
 import logging
 from .utils import check_jwt
 
-SECRET_KEY = 'ultrasafe_secret_key'
+#SECRET_KEY = 'ultrasafe_secret_key'
 logger = logging.getLogger(__name__)
 
 class RemoveConsumer(AsyncHttpConsumer):
