@@ -5,10 +5,6 @@
 	color: var(--secondary-color);
 }
 
-.nav-link:hover {
-	color: #42b983;
-}
-
 .chat-nav-link {
 	font-weight: bold;
 	color: #2c3e50;
@@ -16,11 +12,6 @@
 	padding: 0 10px;
 }
 
-.chat-nav-link:hover {
-	color: #42b983;
-}
-
-/* Button styles */
 .btn-primary {
 	background-color: #42b983;
 	border-color: #42b983;
@@ -276,16 +267,6 @@
 
 .OAuth {
 	margin-top: 10px;
-}
-
-#usrnm-form, #pwd-form, #cfm-pwd-form {
-	border: none;
-	color: var(--secondary-color);
-	background-color: var(--primary-color);
-}
-
-#usrnm-form::placeholder, #pwd-form::placeholder, #cfm-pwd-form::placeholder{
-	color: var(--secondary-color);
 }
 
 #nav-links {

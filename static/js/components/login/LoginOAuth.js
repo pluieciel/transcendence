@@ -10,7 +10,7 @@ class LoginOAuth {
             <div class="container">
                 <div class="row justify-content-center">
                     <div class="col-md-4">
-                        <div class="card p-4 shadow">
+                        <div id="OAuthLoader" class="card p-4">
                             <h4 class="text-center">Signing in with 42</h4>
                             <p>Please wait while we complete your registration...</p>
                             <div id="loadingSpinner" class="text-center">

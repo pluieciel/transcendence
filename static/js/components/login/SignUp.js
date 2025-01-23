@@ -10,7 +10,7 @@ export default class SignUp {
             <div class="container">
                 <div class="row justify-content-center">
                     <div class="col-md-4">
-                        <form id="signupForm" class="card p-4 shadow">
+                        <form id="signupForm" class="card p-4">
                             <div class="mb-3">
                                 <input 
                                     type="text" 
@@ -46,7 +46,7 @@ export default class SignUp {
                             </div>
 
                             <div id="passwordError" class="alert alert-danger d-none"></div>
-                            <button type="submit" class="btn btn-primary w-100">Sign Up</button>
+                            <button id="signupBtn" type="submit" class="btn btn-primary w-100">Sign Up</button>
                         </form>
                     </div>
                 </div>

@@ -15,8 +15,8 @@ export default class LoginView {
             <div>
                 <nav class="nav-container">
                     <div class="nav-links d-flex justify-content-center">
-                        <a href="#" id="signup-link" class="nav-link" data-view="signup">Sign Up </a>|
-                        <a href="#" id="login-link" class="nav-link" data-view="login"> Login</a>
+                        <a href="#" id="signup-link" class="nav-link" data-view="signup"></a>
+                        <a href="#" id="login-link" class="nav-link" data-view="login"></a>
                     </div>
                 </nav>
                 <div id="authContent"></div>
@@ -36,14 +36,23 @@ export default class LoginView {
 
 	addEventListeners() {
 		const navLinks = this.container.querySelectorAll(".nav-link");
+		const loginHref = document.getElementById("login-link");
+		const signupHref = document.getElementById("signup-link");
+
+		signupHref.innerHTML = "Sign up";
+		
 		navLinks.forEach((link) => {
 			link.addEventListener("click", (e) => {
 				e.preventDefault();
 				const view = e.target.dataset.view;
 				if (view === "login") {
 					this.showLogin();
+					signupHref.innerHTML = "Sign up";
+					loginHref.innerHTML = "";
 				} else if (view === "signup") {
 					this.showSignup();
+					signupHref.innerHTML = "";
+					loginHref.innerHTML = "Log in";
 				}
 			});
 		});

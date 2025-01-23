@@ -1,10 +1,11 @@
-export default class MainView {
+export default class SettingsView {
     constructor(container) {
 		this.container = container;
         this.username = window.app.state.username;
         this.render();
         this.add2FAEventListeners();
         this.addEventListeners();
+		this.addUserData();
     }
 
     render() {
@@ -18,7 +19,7 @@ export default class MainView {
         <p>Welcome to your settings, you can change everything here!</p>
     </div>
 	<div class ="content">
-		<div class="containerPrivate">
+		<div class="containerPrivate redHover">
 			<h3>Profile info i guess</h3>
 			<button id="changeUsernameBtn">Change your username</button>
 			<input type="text" id="newUsername">
@@ -50,7 +51,17 @@ export default class MainView {
             	</div>
 			</div>
 		</div>
-		<div class="containerSensitive">
+		<div class="containerGame redHover">
+			<h3>Game customization</h3>
+			<div id="row">
+				<button id="leftArrow" class="arrow"><</button>
+				<div id="colorDiv"></div>
+				<button id="rightArrow"class="arrow">></button>
+			</div>
+			<button id="aabutton">Antialiasing</button>
+			<button id="savebtn">Save changes</button>
+		</div>
+		<div class="containerSensitive redHover">
 			<h3>Be careful with those</h3>
 			<button id="passwordButton">Set New Password</button>
         	<input type="password" id="newPasswordInput" placeholder="">
@@ -95,6 +106,23 @@ export default class MainView {
         });
 	}
 
+	addUserData() {
+		const	colorDiv = document.getElementById('colorDiv');
+		const	colorIndex = window.app.cnb;
+		let colorArray = {
+			0: 'Blue',
+			1: 'Cyan',
+			2: 'Green',
+			3: 'Orange',
+			4: 'Pink',
+			5: 'Purple',
+			6: 'Red',
+			7: 'Soft Green',
+			8: 'White'
+		};
+		colorDiv.innerHTML = colorArray[colorIndex]
+	}
+	
     addEventListeners() {
 		const	enable2FA = this.container.querySelector('#enable2FA');
 		const	changeUsernameBtn = document.getElementById('changeUsernameBtn');
@@ -103,8 +131,53 @@ export default class MainView {
 		const	wipeBtn = document.getElementById('deleteAccBtn');
 		const	passwdBtn = document.getElementById('passwordButton');
         const	newpwd = document.getElementById('newPasswordInput');
+        const	leftArrow = document.getElementById('leftArrow');
+        const	rightArrow = document.getElementById('rightArrow');
+		const	saveChanges = document.getElementById('savebtn');
+
+		leftArrow.addEventListener('click', () => {
+			if (window.app.cnb == 0)
+				window.app.cnb = 8;
+			else
+				window.app.cnb -= 1;
+			window.app.setColor();
+			this.addUserData();
+		});
 		
-        passwdBtn.addEventListener('click', () => {
+		rightArrow.addEventListener('click', () => {
+			if (window.app.cnb == 8)
+				window.app.cnb = 0;
+			else
+				window.app.cnb += 1;
+			window.app.setColor();
+			this.addUserData();
+		});
+
+		saveChanges.addEventListener('click', async () => {
+			try {
+				const response = await fetch('/api/settings/set/color', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({
+						'newColor': window.app.cnb,
+						}),			
+					});
+
+				const data = await response.json();
+
+				if (data.success)
+					console.log("color change success");
+				else
+					throw new Error(data['message']);
+			}
+			catch (error) {
+				console.error(error);
+			};
+		});		
+
+		passwdBtn.addEventListener('click', () => {
 			passwdBtn.style.display = 'none';
             newpwd.style.display = 'inline-block';
             newpwd.focus();
@@ -119,9 +192,9 @@ export default class MainView {
 						'Content-Type': 'application/json',
 					},
 				});
-				
+
 				const data = await response.json();
-				
+
 				if (data.success) {
 					new bootstrap.Modal(this.container.querySelector('#totpModal')).show();
 					const qrCode = this.container.querySelector('#qrCode');
@@ -138,7 +211,7 @@ export default class MainView {
 		
 		newpwd.addEventListener('keydown', async (event) => {
 			const hashedNew = CryptoJS.SHA256(newpwd.value).toString();
-			if (event.key === "Enter" && isLoggedIn) {
+			if (event.key === "Enter") {
 				try {
 					const response = await fetch('/api/change/password', {
 						method: 'POST',
@@ -174,7 +247,6 @@ export default class MainView {
 						},
 						body: JSON.stringify({
 							newUsername: newUsername.value,
-							// username: this.appState.username,
 						})
 					});
 				
@@ -200,7 +272,7 @@ export default class MainView {
 		});
 
 		wipeBtn.addEventListener('click', () => {
-			if (isLoggedIn && this.eraseInDB())
+			if (this.eraseInDB())
 				window.app.logout();
         });
 
@@ -227,7 +299,7 @@ export default class MainView {
 			
 			if (!response.ok) {
 				console.error(`Error: ${response.status} - ${response.statusText}`);
-				return;
+				return false;
 			}
 			const responseText = await response.text();
 			const data = JSON.parse(responseText);
@@ -240,6 +312,7 @@ export default class MainView {
 		} catch (error) {
 			console.error('An error occurred: ', error);
 		}
+		return true;
 	}
 	
 	error(error) {
