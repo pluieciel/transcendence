@@ -3,6 +3,7 @@ export default class MainView {
 		this.container = container;
         this.username = window.app.state.username;
         this.render();
+        this.add2FAEventListeners();
         this.addEventListeners();
     }
 
@@ -32,7 +33,10 @@ export default class MainView {
                         </div>
                         <form id="totpForm">
 	                        <div class="modal-body">
-	                                <div id="qrCode"></div>
+	                                <div class="mb-3">
+										<div id="qrCode"></div>
+										<div id="qrCodeError" class="alert alert-danger d-none"></div>
+									</div>
 	                                <div class="mb-3">
 	                                    <input id="totpInput" class="form-control" maxlength="6" required>
 	                                </div>
@@ -57,6 +61,39 @@ export default class MainView {
 
         `;
     }
+
+	add2FAEventListeners() {
+        const submit = this.container.querySelector('#totpForm');
+        const errorDiv = this.container.querySelector('#totpError');
+
+        submit.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const totp = this.container.querySelector('#totpInput').value;
+            try {
+				const response = await fetch('/api/settings/2fa/enable', {
+					method: 'POST',
+				    headers: {
+				        'Content-Type': 'application/json'
+					},
+				    body: JSON.stringify({
+				        totp: totp,
+				    })
+				});
+				const data = await response.json();
+				if (data.success) {
+					const modal = bootstrap.Modal.getInstance(this.container.querySelector('#totpModal'));
+					if (modal)
+						modal.hide();
+				} else {
+					errorDiv.textContent = data.message || 'Login failed';
+                    errorDiv.classList.remove('d-none');
+				}
+            } catch (error) {
+				errorDiv.textContent = 'An error occurred:' + error;
+                errorDiv.classList.remove('d-none');
+            }
+        });
+	}
 
     addEventListeners() {
 		const	enable2FA = this.container.querySelector('#enable2FA');
@@ -90,10 +127,12 @@ export default class MainView {
 					const qrCode = this.container.querySelector('#qrCode');
 					qrCode.innerHTML = data.qr_code;
 				} else {
-					
+					errorDiv.textContent = data.message;
+                    errorDiv.classList.remove('d-none');
 				}
 			} catch (error) {
-				
+				errorDiv.textContent = 'An error occurred:' + error;
+                errorDiv.classList.remove('d-none');
 			}
 		});
 		

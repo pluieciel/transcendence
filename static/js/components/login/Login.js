@@ -63,6 +63,7 @@ export default class Login {
 				const login42 = this.container.querySelector('#login42');
 
 				login42.addEventListener("click", () => {
+                    // TODO: avoid setting isLoggedIn to true here
 					window.app.state.isLoggedIn = true;
 					sessionStorage.setItem('isLoggedIn', 'true');
 					window.location.href = data.auth_url;
@@ -82,7 +83,7 @@ export default class Login {
             e.preventDefault();
             const totp = this.container.querySelector('#totpInput').value;
             try {
-            	const username = this.container.querySelector('#username').value;
+            	const username = this.container.querySelector('#usrnm-form').value;
 				const response = await fetch('/api/login/2fa/', {
 					method: 'POST',
 				    headers: {
