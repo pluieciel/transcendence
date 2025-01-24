@@ -54,11 +54,17 @@ export default class SettingsView {
 		<div class="containerGame redHover">
 			<h3>Game customization</h3>
 			<div id="row">
-				<button id="leftArrow" class="arrow"><</button>
-				<div id="colorDiv"></div>
-				<button id="rightArrow"class="arrow">></button>
+			<button id="leftArrow" class="arrow"><</button>
+			<div id="colorDiv"></div>
+			<button id="rightArrow"class="arrow">></button>
 			</div>
-			<button id="aabutton">Antialiasing</button>
+			<div id="row">
+			<button>High Quality</button>
+			<label class="switch">
+			<input type="checkbox">
+			<span class="slider round"></span>
+			</label>
+			</div>
 			<button id="savebtn">Save changes</button>
 		</div>
 		<div class="containerSensitive redHover">
@@ -106,9 +112,12 @@ export default class SettingsView {
         });
 	}
 
-	addUserData() {
+	async addUserData() {
+		if (!window.app.settings.fetched)
+			await window.app.getPreferences();
 		const	colorDiv = document.getElementById('colorDiv');
-		const	colorIndex = window.app.cnb;
+		const	colorIndex = window.app.settings.color;
+		const	quality = window.app.settings.quality;
 		let colorArray = {
 			0: 'Blue',
 			1: 'Cyan',
@@ -120,7 +129,8 @@ export default class SettingsView {
 			7: 'Soft Green',
 			8: 'White'
 		};
-		colorDiv.innerHTML = colorArray[colorIndex]
+		colorDiv.innerHTML = colorArray[colorIndex];
+		document.querySelector('.switch input').checked = quality
 	}
 	
     addEventListeners() {
@@ -134,34 +144,35 @@ export default class SettingsView {
         const	leftArrow = document.getElementById('leftArrow');
         const	rightArrow = document.getElementById('rightArrow');
 		const	saveChanges = document.getElementById('savebtn');
-
+		
 		leftArrow.addEventListener('click', () => {
-			if (window.app.cnb == 0)
-				window.app.cnb = 8;
+			if (window.app.settings.color == 0)
+				window.app.settings.color = 8;
 			else
-				window.app.cnb -= 1;
-			window.app.setColor();
+			window.app.settings.color -= 1;
 			this.addUserData();
+			window.app.setColor();
 		});
 		
 		rightArrow.addEventListener('click', () => {
-			if (window.app.cnb == 8)
-				window.app.cnb = 0;
+			if (window.app.settings.color == 8)
+				window.app.settings.color = 0;
 			else
-				window.app.cnb += 1;
+				window.app.settings.color += 1;
 			window.app.setColor();
 			this.addUserData();
 		});
 
 		saveChanges.addEventListener('click', async () => {
 			try {
-				const response = await fetch('/api/settings/set/color', {
+				const response = await fetch('/api/settings/set/preferences', {
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json',
 					},
 					body: JSON.stringify({
-						'newColor': window.app.cnb,
+						'newColor': window.app.settings.color,
+						'newQuality': document.querySelector('.switch input').checked,
 						}),			
 					});
 
@@ -292,23 +303,14 @@ export default class SettingsView {
 				headers: {
 					'Content-Type': 'application/json',
 				},
-				body: JSON.stringify({
-					username: this.username,
-				})
 			});
-			
-			if (!response.ok) {
-				console.error(`Error: ${response.status} - ${response.statusText}`);
-				return false;
-			}
-			const responseText = await response.text();
-			const data = JSON.parse(responseText);
 
-			if (data.success) {
+			const data = await response.json();
+
+			if (data.success)
 				alert("deleted user successfully");
-			} else {
-				console.error("smth is wrong");
-			}
+			else
+				throw new Error(data.message);
 		} catch (error) {
 			console.error('An error occurred: ', error);
 		}

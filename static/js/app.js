@@ -18,13 +18,14 @@ class App {
 			username: sessionStorage.getItem("username"),
 		};
 		this.avatarCache = {};
+		this.settings = {'fetched' : false};
 		this.ingame = sessionStorage.getItem("ingame") === "true";
 		window.app = this;
 		this.router = new Router(this.routes);
 	}
 
 	setColor() {
-		switch (this.cnb) {
+		switch (this.settings.color) {
 			default: document.documentElement.style.setProperty("--user-color", "#00BDD1");break;
 			case 0: document.documentElement.style.setProperty("--user-color", "#0004CC");break;
 			case 1: document.documentElement.style.setProperty("--user-color", "#00BDD1");break;
@@ -50,18 +51,31 @@ class App {
 		});
 		const data = await response.json();
 		this.avatarCache[username] = data.avatar;
-		console.log(data.avatar);
 		return data.avatar;
+	}
+
+	async getPreferences() {
+		const response = await fetch(`/api/settings/get/preferences`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+		});
+		const data = await response.json();
+		if (!data.success)
+			return;
+		this.settings.color = data['color'];
+		this.settings.quality = data['quality'];
+		this.settings.fetched = true;
+		this.setColor();
 	}
 
 	login(data) {
 		this.state.isLoggedIn = true;
 		this.state.username = data.username;
-		this.cnb = data.color;
-		console.log(this.cnb);
-		this.setColor();
 		sessionStorage.setItem('isLoggedIn', 'true');
 		sessionStorage.setItem('username', data.username);
+		this.getPreferences();
 		this.router.navigateTo('/index');
 	}
 

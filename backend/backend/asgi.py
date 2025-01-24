@@ -24,7 +24,8 @@ from api.consumers.profile2 import ProfileConsumer2
 from api.consumers.avatar import AvatarConsumer
 from api.consumers.login import LoginConsumer
 from api.consumers.signup import SignupConsumer
-from api.views2 import RemoveConsumer, setNewUsername, setColor
+from api.consumers.preferences import getPreferences, setPreferences
+from api.consumers.remove import RemoveConsumer
 from django.contrib import admin
 from django.conf.urls.static import static
 from django.conf import settings
@@ -47,9 +48,9 @@ http_patterns = [
     re_path(r'^api/get/profile/.*$', ProfileConsumer2.as_asgi()),
     re_path(r'^api/get/avatar/.*$', AvatarConsumer.as_asgi()),
     path('api/get/profile', ProfileConsumer.as_asgi()),
-	path('api/settings/set/color', setColor.as_asgi()),
+	path('api/settings/set/preferences', setPreferences.as_asgi()),
+	path('api/settings/get/preferences', getPreferences.as_asgi()),
     path('api/del/user', RemoveConsumer.as_asgi()),
-    path('api/change/username', setNewUsername.as_asgi()),
     path('api/get/oauth/redirect', OAuthConsumer.as_asgi()),
     path('admin/', get_asgi_application()),
 ]
