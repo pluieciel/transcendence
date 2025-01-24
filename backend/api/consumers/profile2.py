@@ -1,26 +1,34 @@
 from channels.generic.http import AsyncHttpConsumer
-from .utils import jwt_to_user
+from api.utils import jwt_to_user
+from api.db_utils import get_user_by_name
 import json
+import re
 
-class ProfileConsumer(AsyncHttpConsumer):
+class ProfileConsumer2(AsyncHttpConsumer):
 	async def handle(self, body):
 		try:
 			user = await jwt_to_user(self.scope['headers'])
 			if not user:
 				response_data = {
 					'success': False,
-					'message': 'User not found'
+					'message': 'Invalid token or User not found'
 				}
 				return await self.send_response(401, json.dumps(response_data).encode(),
 					headers=[(b"Content-Type", b"application/json")])
 
+			path = self.scope['path']
+			match = re.search(r'/api/get/profile/(\w+)', path)
+			user_name = match.group(1)
+			user = await get_user_by_name(user_name)
+
 			tot_games = (user.wins + user.looses)
 			if tot_games == 0:
-				winrate = "No games found"
+				winrate = 0
 			else:
-				winrate = (user.wins / tot_games) * 100 + "%"
+				winrate = (user.wins / tot_games) * 100
 
 			response_data = {
+				'username': user.username,
 				'success': True,
 				'elo': user.elo,
 				'winrate': winrate,

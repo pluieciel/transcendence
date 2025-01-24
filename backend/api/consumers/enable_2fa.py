@@ -1,16 +1,22 @@
 from channels.generic.http import AsyncHttpConsumer
-from .utils import generate_jwt_cookie, verify_totp
-from .db_utils import get_user_by_name
+from channels.db import database_sync_to_async
+from api.utils import jwt_to_user, verify_totp
 import json
 
-class Login2FAConsumer(AsyncHttpConsumer):
+class Enable2FAConsumer(AsyncHttpConsumer):
 	async def handle(self, body):
 		try:
+			user = await jwt_to_user(self.scope['headers'])
+			if not user:
+				response_data = {
+					'success': False,
+					'message': 'Invalid token or User not found'
+				}
+				return await self.send_response(401, json.dumps(response_data).encode(),
+					headers=[(b"Content-Type", b"application/json")])
+
 			data = json.loads(body.decode())
 			totp_input = data.get('totp')
-			username = data.get('username')
-
-			user = await get_user_by_name(username)
 
 			is_totp_valid = verify_totp(user.totp_secret, totp_input)
 
@@ -22,17 +28,23 @@ class Login2FAConsumer(AsyncHttpConsumer):
 				return await self.send_response(401, json.dumps(response_data).encode(),
 					headers=[(b"Content-Type", b"application/json")])
 
+			await self.update_is_2fa_enabled(user, True)
+
 			response_data = {
 				'success': True,
-				'message': 'Login successful',
-				'username': username,
+				'message': '2FA enabled',
 			}
 			return await self.send_response(200, json.dumps(response_data).encode(),
-				headers=[(b"Content-Type", b"application/json"), (b"Set-Cookie", generate_jwt_cookie(user))])
+				headers=[(b"Content-Type", b"application/json")])
 		except Exception as e:
 			response_data = {
 				'success': False,
 				'message': str(e)
 			}
 			return await self.send_response(500, json.dumps(response_data).encode(),
-				headers=[(b"Content-Type", b"application/json")])
+					headers=[(b"Content-Type", b"application/json")])
+
+	@database_sync_to_async
+	def update_is_2fa_enabled(self, user, is_2fa_enabled):
+		user.is_2fa_enabled = is_2fa_enabled
+		user.save()

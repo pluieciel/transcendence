@@ -1,8 +1,8 @@
 from django.contrib.auth import get_user_model
 from channels.generic.http import AsyncHttpConsumer
 from channels.db import database_sync_to_async
-from .utils import generate_jwt_cookie, get_secret_from_file
-from .db_utils import get_user_by_name
+from api.utils import generate_jwt_cookie, get_secret_from_file
+from api.db_utils import get_user_by_name
 import json
 import os
 import requests

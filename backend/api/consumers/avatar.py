@@ -1,6 +1,6 @@
 from channels.generic.http import AsyncHttpConsumer
-from .utils import jwt_to_user
-from .db_utils import get_user_by_name
+from api.utils import jwt_to_user
+from api.db_utils import get_user_by_name
 import json
 import re
 

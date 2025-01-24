@@ -1,6 +1,6 @@
 from channels.generic.http import AsyncHttpConsumer
 from channels.db import database_sync_to_async
-from .utils import jwt_to_user, generate_totp
+from api.utils import jwt_to_user, generate_totp
 from secrets import token_bytes
 import time
 import json

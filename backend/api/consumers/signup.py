@@ -4,7 +4,7 @@ from django.core.files.base import ContentFile
 from django.core.cache import cache
 from channels.generic.http import AsyncHttpConsumer
 from channels.db import database_sync_to_async
-from .db_utils import get_user_exists
+from api.db_utils import get_user_exists
 import json
 import re
 import io
@@ -106,7 +106,7 @@ class SignupConsumer(AsyncHttpConsumer):
 	async def parse_multipart_form_data(self, body):
 		"""Parse multipart form data and return a dictionary."""
 		from django.http import QueryDict
-		#from django.utils.datastructures import MultiValueDict
+		#from djangoapi.utils.datastructures import MultiValueDict
 
 		# Create a QueryDict to hold the parsed data
 		data = QueryDict(mutable=True)

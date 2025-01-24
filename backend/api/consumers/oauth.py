@@ -1,5 +1,5 @@
 from channels.generic.http import AsyncHttpConsumer
-from .utils import get_secret_from_file
+from api.utils import get_secret_from_file
 import json
 import os
 

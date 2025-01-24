@@ -2,8 +2,8 @@ from django.contrib.auth import authenticate
 from django.core.cache import cache
 from channels.generic.http import AsyncHttpConsumer
 from channels.db import database_sync_to_async
-from .utils import generate_jwt_cookie
-from .db_utils import get_user_exists
+from api.utils import generate_jwt_cookie
+from api.db_utils import get_user_exists
 import json
 
 class LoginConsumer(AsyncHttpConsumer):
