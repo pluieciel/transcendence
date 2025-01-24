@@ -1,19 +1,20 @@
 from channels.generic.http import AsyncHttpConsumer
 from django.contrib.auth import get_user_model
 from channels.db import database_sync_to_async
+from .utils import jwt_to_user
 import json
-from django.core.cache import cache
-from .utils import check_jwt, jwt_to_user
-import logging
-
-#SECRET_KEY = 'ultrasafe_secret_key'
-SECRET_KEY = 'ultrasafe_secret_key'
-logger = logging.getLogger(__name__)
 
 class RemoveConsumer(AsyncHttpConsumer):
 	async def handle(self, body):
 		try:
-			user = await check_jwt(self)
+			user = await jwt_to_user(self.scope['headers'])
+			if not user:
+				response_data = {
+					'success': False,
+					'message': 'Invalid token or User not found'
+				}
+				return await self.send_response(401, json.dumps(response_data).encode(),
+					headers=[(b"Content-Type", b"application/json")])
 			data = json.loads(body.decode())
 			username = data.get('username')
 
@@ -82,7 +83,14 @@ class RemoveConsumer(AsyncHttpConsumer):
 class setNewUsername(AsyncHttpConsumer):
 	async def handle(self, body):
 		try:
-			user = await check_jwt(self)
+			user = await jwt_to_user(self.scope['headers'])
+			if not user:
+				response_data = {
+					'success': False,
+					'message': 'Invalid token or User not found'
+				}
+				return await self.send_response(401, json.dumps(response_data).encode(),
+					headers=[(b"Content-Type", b"application/json")])
 			data = json.loads(body.decode())
 			username = data.get('username')
 			newUsername = data.get('newUsername')
