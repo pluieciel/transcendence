@@ -3,8 +3,14 @@ scrape_configs:
     basic_auth:
       username: ${PROMETHEUS_USERNAME}
       password: ${PROMETHEUS_PASSWORD}
+    metrics_path: /admin/prometheus/metrics
     static_configs:
       - targets: ['prometheus:9090']
   - job_name: 'cadvisor'
     static_configs:
       - targets: ['cadvisor:8080']
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+rule_files:
+  - 'alert_rules.yml'
