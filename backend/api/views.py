@@ -596,9 +596,6 @@ class LoginOAuthConsumer(AsyncHttpConsumer):
 				'redirect_uri': os.environ.get('OAUTH_REDIRECT_URI')
 			}
 
-			# print("\n\n\n\n\n\n\n\n\n\n\n\nDEBUG\n\n\n\n\n\n\n\n\n\n\n\n", flush=True)
-			# print(access_token, flush=True)
-
 			response = requests.post(url, data=params)
 
 			if response.status_code != 200:
@@ -630,6 +627,7 @@ class LoginOAuthConsumer(AsyncHttpConsumer):
 					'success': True,
 					'message': 'Login successful',
 					'username': username,
+					'color' : user.color,
 				}
 				return await self.send_response(200, json.dumps(response_data).encode(),
 					headers=[(b"Content-Type", b"application/json"), (b"Set-Cookie", generate_jwt_cookie(user))])

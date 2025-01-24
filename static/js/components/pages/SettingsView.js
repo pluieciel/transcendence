@@ -120,6 +120,7 @@ export default class SettingsView {
 			7: 'Soft Green',
 			8: 'White'
 		};
+		console.log(colorIndex);
 		colorDiv.innerHTML = colorArray[colorIndex]
 	}
 	
