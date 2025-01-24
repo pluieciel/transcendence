@@ -10,7 +10,7 @@ import logging
 import random
 import re
 from urllib.parse import parse_qs
-from api.views import jwt_to_user
+from api.utils import jwt_to_user
 from channels.layers import get_channel_layer
 from datetime import datetime
 from time import sleep
