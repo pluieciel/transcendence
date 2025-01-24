@@ -307,19 +307,13 @@ export default class SettingsView {
 					username: this.username,
 				})
 			});
-			
-			if (!response.ok) {
-				console.error(`Error: ${response.status} - ${response.statusText}`);
-				return false;
-			}
-			const responseText = await response.text();
-			const data = JSON.parse(responseText);
 
-			if (data.success) {
+			const data = await response.json();
+
+			if (data.success)
 				alert("deleted user successfully");
-			} else {
-				console.error("smth is wrong");
-			}
+			else
+				throw new Error(data.message);
 		} catch (error) {
 			console.error('An error occurred: ', error);
 		}
