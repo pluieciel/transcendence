@@ -7,7 +7,6 @@ export default class LoginView {
 		this.render();
 		this.addEventListeners();
 		this.showLogin();
-		[...Array(8)].map((_, i) => i + 1).forEach(i => this.createDefaultUsers(`${i}`));
 	}
 
 	render() {
@@ -40,7 +39,7 @@ export default class LoginView {
 		const signupHref = document.getElementById("signup-link");
 
 		signupHref.innerHTML = "Sign up";
-		
+
 		navLinks.forEach((link) => {
 			link.addEventListener("click", (e) => {
 				e.preventDefault();
@@ -56,21 +55,5 @@ export default class LoginView {
 				}
 			});
 		});
-	}
-
-	async createDefaultUsers(user) {
-		const formData = new FormData();
-		const hashedPassword = CryptoJS.SHA256(user).toString();
-		formData.append('username', user);
-		formData.append('password', hashedPassword);
-
-		try {
-			const response = await fetch('/api/signup/', {
-				method: 'POST',
-				body: formData
-			});
-		} catch (error) {
-			console.error('Error creating default users:', error);
-		}
 	}
 }
