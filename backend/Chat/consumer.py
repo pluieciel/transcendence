@@ -11,7 +11,7 @@ import re
 from Game.consumer import game_manager
 import redis
 from copy import deepcopy
-from api.views import get_secret_from_file
+from api.utils import get_secret_from_file
 from openai import OpenAI
 from django.core.cache import cache
 import asyncio
@@ -37,7 +37,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         self.register_invite = register_invite
         self.is_valid_invite = is_valid_invite
         self.redis_client = redis.Redis(host='redis', port=6379, db=0)
-        self.apikey = get_secret_from_file('DEEPSEEKAPI')
+        self.apikey = get_secret_from_file('DEEPSEEK_API_KEY_FILE')
         self.client = OpenAI(api_key=self.apikey, base_url="https://api.deepseek.com")
         self.ai_chat_history = []
 
