@@ -85,21 +85,3 @@ def get_secret_from_file(env_var):
 		raise ValueError(f'{env_var} environment variable not set')
 	with open(file_path, 'r') as file:
 		return file.read().strip()
-    
-async def check_jwt(self):
-    headers = dict((key.decode('utf-8'), value.decode('utf-8')) for key, value in self.scope['headers'])
-    auth_header = headers.get('authorization', None)
-    if not auth_header:
-        response_data = {
-            'success': False,
-            'message': 'Authorization header missing'
-        }
-        raise "Authorization header missing"
-    user = "TSET"
-    if not user:
-        response_data = {
-            'success': False,
-            'message': 'Invalid token or User not found'
-        }
-        raise "Invalid token or User not found"
-    return user
