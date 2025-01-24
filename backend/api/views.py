@@ -6,6 +6,7 @@ from channels.generic.http import AsyncHttpConsumer
 from channels.db import database_sync_to_async
 from secrets import token_bytes, token_urlsafe
 from .utils import get_cookie, jwt_to_user, generate_jwt, generate_jwt_cookie, generate_totp, verify_totp, get_secret_from_file
+from .db_utils import get_user_exists, get_user_by_name
 import time
 import json
 import os
@@ -56,7 +57,7 @@ class SignupConsumer(AsyncHttpConsumer):
 					headers=[(b"Content-Type", b"application/json")])
 
 			# Check if username exists
-			if await self.get_user_exists(username):
+			if await get_user_exists(username):
 				response_data = {
 					'success': False,
 					'message': 'Username already exists'
@@ -99,11 +100,6 @@ class SignupConsumer(AsyncHttpConsumer):
 	def is_valid_username(self, username):
 		regex = r'^[a-zA-Z0-9]+$'
 		return bool(re.match(regex, username))
-
-	@database_sync_to_async
-	def get_user_exists(self, username):
-		User = get_user_model()
-		return User.objects.filter(username=username).exists()
 
 	@database_sync_to_async
 	def create_user(self, username, password, avatar):
@@ -181,7 +177,7 @@ class LoginConsumer(AsyncHttpConsumer):
 				return await self.send_response(400, json.dumps(response_data).encode(),
 					headers=[(b"Content-Type", b"application/json")])
 
-			if not await self.get_user_exists(username):
+			if not await get_user_exists(username):
 				response_data = {
 					'success': False,
 					'message': 'Username doesn\'t exist'
@@ -230,50 +226,6 @@ class LoginConsumer(AsyncHttpConsumer):
 	def authenticate_user(self, username, password):
 		user = authenticate(username=username, password=password)
 		return user
-
-	@database_sync_to_async
-	def get_user_exists(self, username):
-		User = get_user_model()
-		return User.objects.filter(username=username).exists()
-
-class Login2FAConsumer(AsyncHttpConsumer):
-	async def handle(self, body):
-		try:
-			data = json.loads(body.decode())
-			totp_input = data.get('totp')
-			username = data.get('username')
-
-			user = await self.get_user_by_name(username)
-
-			is_totp_valid = verify_totp(user.totp_secret, totp_input)
-
-			if not is_totp_valid:
-				response_data = {
-					'success': False,
-					'message': 'Invalid totp code'
-				}
-				return await self.send_response(401, json.dumps(response_data).encode(),
-					headers=[(b"Content-Type", b"application/json")])
-
-			response_data = {
-				'success': True,
-				'message': 'Login successful',
-				'username': username,
-			}
-			return await self.send_response(200, json.dumps(response_data).encode(),
-				headers=[(b"Content-Type", b"application/json"), (b"Set-Cookie", generate_jwt_cookie(user))])
-		except Exception as e:
-			response_data = {
-				'success': False,
-				'message': str(e)
-			}
-			return await self.send_response(500, json.dumps(response_data).encode(),
-				headers=[(b"Content-Type", b"application/json")])
-
-	@database_sync_to_async
-	def get_user_by_name(self, username):
-		User = get_user_model()
-		return User.objects.filter(username=username).first()
 
 class Generate2FAConsumer(AsyncHttpConsumer):
 	async def handle(self, body):
@@ -368,110 +320,6 @@ class Enable2FAConsumer(AsyncHttpConsumer):
 		user.is_2fa_enabled = is_2fa_enabled
 		user.save()
 
-class UpdateConsumer(AsyncHttpConsumer):
-	async def handle(self, body):
-		# Rate limiting logic
-		key = self.scope['client'][0]  # Use the client's IP address as the key
-		rate_limit = 20  # Allow 5 requests
-		time_window = 60  # Time window in seconds
-		current_usage = cache.get(key, 0)
-		#print(json.loads(body.decode()), flush=True)
-		#print("current usage: " + str(current_usage), flush=True)
-		if current_usage >= rate_limit:
-			response_data = {
-				'success': False,
-				'message': 'Too many requests. Please try again later.'
-			}
-			return await self.send_response(429, json.dumps(response_data).encode(),
-				headers=[(b"Content-Type", b"application/json")])
-		cache.set(key, current_usage + 1, timeout=time_window)
-
-		try:
-			user = await jwt_to_user(self.scope['headers'])
-			if not user:
-				response_data = {
-					'success': False,
-					'message': 'Invalid token or User not found'
-				}
-				return await self.send_response(401, json.dumps(response_data).encode(),
-					headers=[(b"Content-Type", b"application/json")])
-
-			data = await self.parse_multipart_form_data(body)
-			password = data.get('password')
-			nickname = data.get('nickname')
-			avatar = data.get('avatar')
-
-			if avatar:
-				image_bytes = avatar.file.read()
-				image = Image.open(io.BytesIO(image_bytes))
-				resized_image = image.resize((60, 60), Image.Resampling.LANCZOS)
-				img_byte_arr = io.BytesIO()
-				resized_image.save(img_byte_arr, format=image.format or 'PNG')
-				img_byte_arr.seek(0)
-				avatar.file = img_byte_arr
-				await self.update_avatar(user, avatar)
-
-			if password:
-				await self.update_password(user, password)
-
-			if nickname:
-				await self.update_nickname(user, nickname)
-
-			response_data = {
-				'success': True,
-				'message': 'Update successful'
-			}
-
-			return await self.send_response(201,
-				json.dumps(response_data).encode(),
-				headers=[(b"Content-Type", b"application/json")])
-
-		except Exception as e:
-			response_data = {
-				'success': False,
-				'message': str(e)
-			}
-			return await self.send_response(500, json.dumps(response_data).encode(),
-				headers=[(b"Content-Type", b"application/json")])
-
-	@database_sync_to_async
-	def update_avatar(self, user, avatar):
-		user.avatar.save(avatar.name, ContentFile(avatar.file.read()), save=True)
-
-	@database_sync_to_async
-	def update_password(self, user, pw):
-		user.set_password(pw)
-		user.save()
-
-	@database_sync_to_async
-	def update_nickname(self, user, nn):
-		user.nickname = nn
-		user.save()
-
-	async def parse_multipart_form_data(self, body):
-		"""Parse multipart form data and return a dictionary."""
-		from django.http import QueryDict
-		data = QueryDict(mutable=True)
-		boundary = body.split(b'\r\n')[0]
-		parts = body.split(boundary)[1:-1]  # Ignore the first and last parts (which are empty)
-		for part in parts:
-			if b'Content-Disposition' in part:
-				headers, content = part.split(b'\r\n\r\n', 1)
-				headers = headers.decode('utf-8')
-				content = content.rstrip(b'\r\n')  # Remove trailing newlines
-				name = None
-				filename = None
-				for line in headers.splitlines():
-					if 'name="' in line:
-						name = line.split('name="')[1].split('"')[0]
-					if 'filename="' in line:
-						filename = line.split('filename="')[1].split('"')[0]
-				if filename:
-					data[name] = ContentFile(content, name=filename)
-				else:
-					data[name] = content.decode('utf-8')
-		return data
-
 class OAuthConsumer(AsyncHttpConsumer):
 	async def handle(self, body):
 		try:
@@ -535,15 +383,13 @@ class LoginOAuthConsumer(AsyncHttpConsumer):
 				'Authorization': f'Bearer {access_token}'
 			}
 
-
 			user_response = requests.get('https://api.intra.42.fr/v2/me', headers=headers)
-
 
 			if user_response.status_code == 200:
 				user_data = user_response.json()
 				username = user_data['login']
 
-				user = await self.get_user_by_name(username)
+				user = await get_user_by_name(username)
 				if not user:
 					user = await self.create_user_oauth(username=username, avatarUrl=user_data['image']['link'])
 
@@ -574,11 +420,6 @@ class LoginOAuthConsumer(AsyncHttpConsumer):
 	def create_user_oauth(self, username, avatarUrl):
 		User = get_user_model()
 		return User.objects.create_user_oauth(username=username, avatarUrl=avatarUrl)
-
-	@database_sync_to_async
-	def get_user_by_name(self, username):
-		User = get_user_model()
-		return User.objects.filter(username=username).first()
 
 class ProfileConsumer(AsyncHttpConsumer):
 	async def handle(self, body):
@@ -615,11 +456,6 @@ class ProfileConsumer(AsyncHttpConsumer):
 			return await self.send_response(500, json.dumps(response_data).encode(),
 				headers=[(b"Content-Type", b"application/json")])
 
-	@database_sync_to_async
-	def get_user(self, user_id):
-		User = get_user_model()
-		return User.objects.get(id=user_id)
-
 class ProfileConsumer2(AsyncHttpConsumer):
 	async def handle(self, body):
 		try:
@@ -635,7 +471,7 @@ class ProfileConsumer2(AsyncHttpConsumer):
 			path = self.scope['path']
 			match = re.search(r'/api/get/profile/(\w+)', path)
 			user_name = match.group(1)
-			user = await self.get_user_by_name(user_name)
+			user = await get_user_by_name(user_name)
 
 			tot_games = (user.wins + user.looses)
 			if tot_games == 0:
@@ -661,16 +497,6 @@ class ProfileConsumer2(AsyncHttpConsumer):
 			return await self.send_response(500, json.dumps(response_data).encode(),
 				headers=[(b"Content-Type", b"application/json")])
 
-	@database_sync_to_async
-	def get_user(self, user_id):
-		User = get_user_model()
-		return User.objects.get(id=user_id)
-
-	@database_sync_to_async
-	def get_user_by_name(self, username):
-		User = get_user_model()
-		return User.objects.filter(username=username).first()
-
 class AvatarConsumer(AsyncHttpConsumer):
 	async def handle(self, body):
 		try:
@@ -686,7 +512,7 @@ class AvatarConsumer(AsyncHttpConsumer):
 			path = self.scope['path']
 			match = re.search(r'/api/get/avatar/(\w+)', path)
 			user_name = match.group(1)
-			user = await self.get_user_by_name(user_name)
+			user = await get_user_by_name(user_name)
 			host = 'https://' + next((value.decode('utf-8') for key, value in self.scope['headers'] if key == b'x-forwarded-host'), 'localhost:9000')
 			if host == 'https://localhost:9000':
 				host = next((value.decode('utf-8') for key, value in self.scope['headers'] if key == b'origin'), 'localhost:9000')
@@ -710,8 +536,3 @@ class AvatarConsumer(AsyncHttpConsumer):
 			}
 			return await self.send_response(500, json.dumps(response_data).encode(),
 				headers=[(b"Content-Type", b"application/json")])
-
-	@database_sync_to_async
-	def get_user_by_name(self, username):
-		User = get_user_model()
-		return User.objects.filter(username=username).first()

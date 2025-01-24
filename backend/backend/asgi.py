@@ -14,7 +14,8 @@ from channels.auth import AuthMiddlewareStack
 from Chat.routing import websocket_urlpatterns as chat_websocket_patterns
 from Game.routing import websocket_urlpatterns as game_websocket_patterns
 from django.urls import path, re_path
-from api.views import SignupConsumer, LoginConsumer, UpdateConsumer, ProfileConsumer, ProfileConsumer2, LoginOAuthConsumer, AvatarConsumer, Login2FAConsumer, Generate2FAConsumer, Enable2FAConsumer, OAuthConsumer
+from api.views import SignupConsumer, LoginConsumer, ProfileConsumer, ProfileConsumer2, LoginOAuthConsumer, AvatarConsumer, Generate2FAConsumer, Enable2FAConsumer, OAuthConsumer
+from api.login2fa import Login2FAConsumer
 from api.views2 import RemoveConsumer, setNewUsername, setColor
 from django.contrib import admin
 from django.conf.urls.static import static
@@ -35,7 +36,6 @@ http_patterns = [
     path('api/login/oauth', LoginOAuthConsumer.as_asgi()),
     path('api/settings/2fa/generate', Generate2FAConsumer.as_asgi()),
     path('api/settings/2fa/enable', Enable2FAConsumer.as_asgi()),
-    path('api/update/', UpdateConsumer.as_asgi()),
     re_path(r'^api/get/profile/.*$', ProfileConsumer2.as_asgi()),
     re_path(r'^api/get/avatar/.*$', AvatarConsumer.as_asgi()),
     path('api/get/profile', ProfileConsumer.as_asgi()),

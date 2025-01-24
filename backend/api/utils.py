@@ -7,6 +7,8 @@ import hmac
 import hashlib
 import jwt
 import datetime
+import time
+import base64
 
 def get_cookie(headers, name):
 	cookies = headers.get('cookie', None)

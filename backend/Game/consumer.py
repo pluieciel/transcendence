@@ -14,7 +14,7 @@ from api.utils import jwt_to_user
 from channels.layers import get_channel_layer
 from datetime import datetime
 from time import sleep
-from api.user_db_utils import user_update_game
+from api.db_utils import user_update_game
 
 class GameManager:
 	def __init__(self):
