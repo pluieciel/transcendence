@@ -303,9 +303,6 @@ export default class SettingsView {
 				headers: {
 					'Content-Type': 'application/json',
 				},
-				body: JSON.stringify({
-					username: this.username,
-				})
 			});
 
 			const data = await response.json();

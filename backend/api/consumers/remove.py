@@ -17,7 +17,7 @@ class RemoveConsumer(AsyncHttpConsumer):
 				return await self.send_response(401, json.dumps(response_data).encode(),
 					headers=[(b"Content-Type", b"application/json")])
 
-			if not await self.get_user_exists(user.username):
+			if not await get_user_exists(user.username):
 				response_data = {
 					'success': False,
 					'message': 'Username doesnt exists'
