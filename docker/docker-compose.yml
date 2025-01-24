@@ -48,7 +48,6 @@ services:
             - transcendence
         restart: unless-stopped
     django_ws:
-        build: ${PWD}/docker/django
         image: django
         container_name: django_ws
         depends_on:
@@ -59,14 +58,14 @@ services:
         environment:
             POSTGRES_PASSWORD_FILE: /run/secrets/postgres-passwd
             JWT_SECRET_KEY_FILE: /run/secrets/jwt-secret-key
-            DEEPSEEKAPI: /run/secrets/deepseekapi
+            DEEPSEEK_API_KEY_FILE: /run/secrets/deepseek-api-key
             OAUTH_CLIENT_ID_FILE: /run/secrets/oauth-client-id
             OAUTH_CLIENT_SECRET_FILE: /run/secrets/oauth-client-secret
         env_file: .env
         secrets:
             - postgres-passwd
             - jwt-secret-key
-            - deepseekapi
+            - deepseek-api-key
             - oauth-client-id
             - oauth-client-secret
         volumes:
@@ -182,73 +181,73 @@ services:
 #        networks:
 #            - transcendence
 #        restart: unless-stopped
-    cadvisor:
-        build: ${PWD}/docker/cadvisor
-        image: cadvisor
-        container_name: cadvisor
-        volumes:
-            - /:/rootfs:ro
-            - /var/run:/var/run:ro
-            - /sys:/sys:ro
-            - /var/lib/docker/:/var/lib/docker:ro
-        expose:
-            - 8080
-        networks:
-            - transcendence
-        restart: unless-stopped
-    node-exporter:
-        build: ${PWD}/docker/node-exporter
-        image: node-exporter
-        container_name: node-exporter
-        volumes:
-            - /:/rootfs:ro
-            - /proc:/host/proc:ro
-            - /sys:/host/sys:ro
-        expose:
-            - 9100
-        networks:
-            - transcendence
-        restart: unless-stopped
-    prometheus:
-        build: ${PWD}/docker/prometheus
-        image: prometheus
-        container_name: prometheus
-        depends_on:
-            cadvisor:
-                condition: service_started
-        environment:
-            PROMETHEUS_PASSWORD_FILE: /run/secrets/prometheus-passwd
-        env_file: .env
-        secrets:
-            - prometheus-passwd
-        volumes:
-            - prometheus_data:/etc/prometheus/data
-        expose:
-            - 9090
-        networks:
-            - transcendence
-        restart: unless-stopped
-    grafana:
-        build: ${PWD}/docker/grafana
-        image: grafana
-        container_name: grafana
-        depends_on:
-            prometheus:
-                condition: service_started
-        environment:
-            GF_SECURITY_ADMIN_PASSWORD__FILE: /run/secrets/grafana-passwd
-            PROMETHEUS_PASSWORD_FILE: /run/secrets/prometheus-passwd
-        env_file: .env
-        secrets:
-            - grafana-passwd
-            - prometheus-passwd
-        volumes:
-            - grafana_data:/var/lib/grafana
-        expose:
-            - 3000
-        networks:
-            - transcendence
-        restart: unless-stopped
+#    cadvisor:
+#        build: ${PWD}/docker/cadvisor
+#        image: cadvisor
+#        container_name: cadvisor
+#        volumes:
+#            - /:/rootfs:ro
+#            - /var/run:/var/run:ro
+#            - /sys:/sys:ro
+#            - /var/lib/docker/:/var/lib/docker:ro
+#        expose:
+#            - 8080
+#        networks:
+#            - transcendence
+#        restart: unless-stopped
+#    node-exporter:
+#        build: ${PWD}/docker/node-exporter
+#        image: node-exporter
+#        container_name: node-exporter
+#        volumes:
+#            - /:/rootfs:ro
+#            - /proc:/host/proc:ro
+#            - /sys:/host/sys:ro
+#        expose:
+#            - 9100
+#        networks:
+#            - transcendence
+#        restart: unless-stopped
+#    prometheus:
+#        build: ${PWD}/docker/prometheus
+#        image: prometheus
+#        container_name: prometheus
+#        depends_on:
+#            cadvisor:
+#                condition: service_started
+#        environment:
+#            PROMETHEUS_PASSWORD_FILE: /run/secrets/prometheus-passwd
+#        env_file: .env
+#        secrets:
+#            - prometheus-passwd
+#        volumes:
+#            - prometheus_data:/etc/prometheus/data
+#        expose:
+#            - 9090
+#        networks:
+#            - transcendence
+#        restart: unless-stopped
+#    grafana:
+#        build: ${PWD}/docker/grafana
+#        image: grafana
+#        container_name: grafana
+#        depends_on:
+#            prometheus:
+#                condition: service_started
+#        environment:
+#            GF_SECURITY_ADMIN_PASSWORD__FILE: /run/secrets/grafana-passwd
+#            PROMETHEUS_PASSWORD_FILE: /run/secrets/prometheus-passwd
+#        env_file: .env
+#        secrets:
+#            - grafana-passwd
+#            - prometheus-passwd
+#        volumes:
+#            - grafana_data:/var/lib/grafana
+#        expose:
+#            - 3000
+#        networks:
+#            - transcendence
+#        restart: unless-stopped
 
 networks:
     transcendence:
@@ -303,5 +302,5 @@ secrets:
         file: ${PWD}/docker/secrets/oauth-client-id.txt
     oauth-client-secret:
         file: ${PWD}/docker/secrets/oauth-client-secret.txt
-    deepseekapi:
-        file: ${PWD}/docker/secrets/deepseekapi.txt
+    deepseek-api-key:
+        file: ${PWD}/docker/secrets/deepseek-api-key.txt
