@@ -42,7 +42,7 @@ export default class MainView {
     render() {
         this.container.innerHTML = `
 			<header>
-				<h1>PONG</h1>
+				<h1 id="pong">PONG</h1>
 					<button id="settingsBtn">Settings</button>
 					<button id="logoutBtn">Log out</button>
 			</header>
@@ -52,7 +52,7 @@ export default class MainView {
 					<p>Welcome to Pong! Get ready to play!</p>
 				</div>
 				<div class ="content">
-					<div class="credits">
+					<div class="credits redHover">
 						<h2>Credits</h2>
 						<p>
 							Welcome to <strong>ft_transcendence</strong>,<br>
@@ -72,14 +72,13 @@ export default class MainView {
 						</p>
 
 					</div>
-							<div class="game-buttons">
+							<div class="game-buttons redHover">
 							<h2>PLAY!</h2>
 							<button id="playAI">AI</button>
-							<button id="rankedMatch">Ranked</button>
 							<button id="quickMatch" class="nav-link" data-view="game" data-bs-toggle="modal" data-bs-target="#matchSearch">Quick Match</button>
 							<button id="tournamentButton" data-bs-toggle="modal" data-bs-target="#tournamentModal">Tournament</button>
 					</div>
-					<div class="profile">
+					<div class="profile redHover">
 						<h2>Profile</h2>
 						<h3 id="p-name">${this.username}</h3>
 						<h3 id="p-elo">Loading...</h3>
