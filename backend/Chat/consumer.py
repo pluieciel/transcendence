@@ -11,7 +11,7 @@ import re
 from Game.consumer import game_manager
 import redis
 from copy import deepcopy
-from api.views import get_secret_from_file
+from api.utils import get_secret_from_file
 from openai import OpenAI
 from django.core.cache import cache
 import asyncio
