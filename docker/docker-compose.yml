@@ -18,10 +18,7 @@ services:
         restart: unless-stopped
         healthcheck:
             test:
-                [
-                    "CMD-SHELL",
-                    "pg_isready -h localhost -p $POSTGRES_PORT -U postgres",
-                ]
+                ["CMD-SHELL", "pg_isready -h localhost -p $POSTGRES_PORT -U postgres"]
             interval: 5s
             timeout: 2s
             retries: 3
@@ -36,26 +33,23 @@ services:
                 condition: service_healthy
         environment:
             POSTGRES_PASSWORD_FILE: /run/secrets/postgres-passwd
-            DJANGO_SUPERUSER_PASSWORD_FILE: /run/secrets/django-passwd
             JWT_SECRET_KEY_FILE: /run/secrets/jwt-secret-key
-            OAUTH_CLIENT_ID_FILE: /run/secrets/oauth_client_id
-            OAUTH_CLIENT_SECRET_FILE: /run/secrets/oauth_client_secret
+            OAUTH_CLIENT_ID_FILE: /run/secrets/oauth-client-id
+            OAUTH_CLIENT_SECRET_FILE: /run/secrets/oauth-client-secret
         env_file: .env
         secrets:
             - postgres-passwd
-            - django-passwd
             - jwt-secret-key
-            - oauth_client_id
-            - oauth_client_secret
+            - oauth-client-id
+            - oauth-client-secret
         volumes:
             - django_data:/usr/src/app
         networks:
             - transcendence
         restart: unless-stopped
-    django2:
-        build: ${PWD}/docker/django2
-        image: django2
-        container_name: django2
+    django_ws:
+        image: django
+        container_name: django_ws
         depends_on:
             postgres:
                 condition: service_healthy
@@ -63,13 +57,17 @@ services:
                 condition: service_healthy
         environment:
             POSTGRES_PASSWORD_FILE: /run/secrets/postgres-passwd
-            DJANGO_SUPERUSER_PASSWORD_FILE: /run/secrets/django-passwd
             JWT_SECRET_KEY_FILE: /run/secrets/jwt-secret-key
+            DEEPSEEK_API_KEY_FILE: /run/secrets/deepseek-api-key
+            OAUTH_CLIENT_ID_FILE: /run/secrets/oauth-client-id
+            OAUTH_CLIENT_SECRET_FILE: /run/secrets/oauth-client-secret
         env_file: .env
         secrets:
             - postgres-passwd
-            - django-passwd
             - jwt-secret-key
+            - deepseek-api-key
+            - oauth-client-id
+            - oauth-client-secret
         volumes:
             - django_data:/usr/src/app
         networks:
@@ -82,21 +80,24 @@ services:
         depends_on:
             django:
                 condition: service_started
+        environment:
+            JWT_SECRET_KEY_FILE: /run/secrets/jwt-secret-key
+        secrets:
+            - jwt-secret-key
         expose:
             - 9000
         ports:
-            - 9000:9000
+            - "9000:9000"
         volumes:
             - nginx_data:/var/www/html
             - nginx_logs:/var/log/nginx
-            - nginx_certs:/etc/nginx/certs
-            - django_static_data:/var/www/django/static
             - django_data:/var/www/django/media
         networks:
             - transcendence
         restart: unless-stopped
     redis:
-        image: redis:alpine
+        build: ${PWD}/docker/redis
+        image: redis
         container_name: redis
         expose:
             - 6379
@@ -194,6 +195,19 @@ services:
 #        networks:
 #            - transcendence
 #        restart: unless-stopped
+#    node-exporter:
+#        build: ${PWD}/docker/node-exporter
+#        image: node-exporter
+#        container_name: node-exporter
+#        volumes:
+#            - /:/rootfs:ro
+#            - /proc:/host/proc:ro
+#            - /sys:/host/sys:ro
+#        expose:
+#            - 9100
+#        networks:
+#            - transcendence
+#        restart: unless-stopped
 #    prometheus:
 #        build: ${PWD}/docker/prometheus
 #        image: prometheus
@@ -222,9 +236,11 @@ services:
 #                condition: service_started
 #        environment:
 #            GF_SECURITY_ADMIN_PASSWORD__FILE: /run/secrets/grafana-passwd
+#            PROMETHEUS_PASSWORD_FILE: /run/secrets/prometheus-passwd
 #        env_file: .env
 #        secrets:
 #            - grafana-passwd
+#            - prometheus-passwd
 #        volumes:
 #            - grafana_data:/var/lib/grafana
 #        expose:
@@ -232,7 +248,7 @@ services:
 #        networks:
 #            - transcendence
 #        restart: unless-stopped
-#
+
 networks:
     transcendence:
         name: transcendence
@@ -250,12 +266,6 @@ volumes:
             type: none
             o: bind
             device: ${PWD}/static
-    django_static_data:
-        name: django_static_data
-        driver_opts:
-            type: none
-            o: bind
-            device: ${PWD}/backend/staticfiles
     django_logs:
         name: django_logs
     postgres_data:
@@ -264,8 +274,6 @@ volumes:
         name: postgres_logs
     nginx_logs:
         name: nginx_logs
-    nginx_certs:
-        name: nginx_certs
     elasticsearch_data:
         name: elasticsearch_data
     elasticsearch_logs:
@@ -280,10 +288,8 @@ volumes:
 secrets:
     postgres-passwd:
         file: ${PWD}/docker/secrets/postgres-passwd.txt
-    django-passwd:
-        file: ${PWD}/docker/secrets/django-passwd.txt
     elasticsearch-passwd:
-         file: ${PWD}/docker/secrets/elasticsearch-passwd.txt
+        file: ${PWD}/docker/secrets/elasticsearch-passwd.txt
     kibana-passwd:
         file: ${PWD}/docker/secrets/kibana-passwd.txt
     prometheus-passwd:
@@ -292,7 +298,9 @@ secrets:
         file: ${PWD}/docker/secrets/grafana-passwd.txt
     jwt-secret-key:
         file: ${PWD}/docker/secrets/jwt-secret-key.txt
-    oauth_client_id:
-        file: ${PWD}/docker/secrets/oauth_client_id.txt
-    oauth_client_secret:
-        file: ${PWD}/docker/secrets/oauth_client_secret.txt
+    oauth-client-id:
+        file: ${PWD}/docker/secrets/oauth-client-id.txt
+    oauth-client-secret:
+        file: ${PWD}/docker/secrets/oauth-client-secret.txt
+    deepseek-api-key:
+        file: ${PWD}/docker/secrets/deepseek-api-key.txt

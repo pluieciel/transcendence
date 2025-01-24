@@ -10,7 +10,7 @@ export default class Login {
             <div class="container">
                 <div class="row justify-content-center">
                     <div class="col-md-4">
-                        <form id="loginForm" class="card p-4 shadow">
+                        <form id="loginForm" class="card p-4">
                             <div class="mb-3">
                                 <input type="text" id="usrnm-form" placeholder="Enter username" class="form-control">
                             </div>
@@ -18,8 +18,8 @@ export default class Login {
                                 <input type="password" id="pwd-form" placeholder="Enter password" class="form-control">
                             </div>
                             <div id="loginError" class="alert alert-danger d-none"></div>
-                            <button type="submit" class="btn btn-primary w-100">Log In</button>
-                            <button type="button" class="btn btn-primary w-100 OAuth" id="login42">Login In with 42</button>
+                            <button id="loginBtn" type="submit" class="btn btn-primary w-100">Log In</button>
+                            <button id="login42Btn" type="button" class="btn btn-primary w-100 OAuth">Login In with 42</button>
                         </form>
                     </div>
                 </div>
@@ -60,9 +60,10 @@ export default class Login {
 			const data = await response.json();
 
 			if (data.success) {
-				const login42 = this.container.querySelector('#login42');
+				const login42 = this.container.querySelector('#login42Btn');
 
 				login42.addEventListener("click", () => {
+                    // TODO: avoid setting isLoggedIn to true here
 					window.app.state.isLoggedIn = true;
 					sessionStorage.setItem('isLoggedIn', 'true');
 					window.location.href = data.auth_url;
@@ -82,7 +83,7 @@ export default class Login {
             e.preventDefault();
             const totp = this.container.querySelector('#totpInput').value;
             try {
-            	const username = this.container.querySelector('#username').value;
+            	const username = this.container.querySelector('#usrnm-form').value;
 				const response = await fetch('/api/login/2fa/', {
 					method: 'POST',
 				    headers: {

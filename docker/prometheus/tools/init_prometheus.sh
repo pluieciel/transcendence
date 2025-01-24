@@ -16,4 +16,5 @@ exec /bin/prometheus \
     --config.file=/etc/prometheus/config/prometheus.yml \
     --web.external-url=/admin/prometheus/ \
     --web.route-prefix=/admin/prometheus/ \
-    --storage.tsdb.path=/etc/prometheus/data
+    --storage.tsdb.path=/etc/prometheus/data \
+    --storage.tsdb.retention.time=90d

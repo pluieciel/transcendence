@@ -8,12 +8,13 @@ from django.contrib.auth import get_user_model
 import json
 import logging
 import random
+import re
 from urllib.parse import parse_qs
-from api.views import jwt_to_user
+from api.utils import jwt_to_user
 from channels.layers import get_channel_layer
 from datetime import datetime
 from time import sleep
-from api.user_db_utils import user_update_game
+from api.db_utils import user_update_game
 
 class GameManager:
 	def __init__(self):
@@ -154,8 +155,6 @@ class GameConsumer(AsyncWebsocketConsumer):
 
 		query_string = self.scope["query_string"].decode()
 		query_params = parse_qs(query_string)
-		self.logger.info(query_params)
-		token = query_params.get("token", [None])[0]
 		#for reconnect
 		reconnect = query_params.get("reconnect", [None])[0]
 		#for invitation
@@ -164,9 +163,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 		#for tournament
 		round = query_params.get("round", [None])[0]
 
-		if not token:
-			return
-		user = await jwt_to_user(token)
+		user = await jwt_to_user(self.scope['headers'])
 		self.logger.info(f"User : {user}")
 		self.user = user
 

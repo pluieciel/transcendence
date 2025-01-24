@@ -6,7 +6,7 @@ from .normal_game_logic import NormalGameInstance, GameBounds
 from .rumble_game_logic import RumbleGameInstance, GameBounds
 from channels.db import database_sync_to_async
 from .bot import Bot
-from api.user_db_utils import user_update_game
+from api.db_utils import user_update_game
 from datetime import datetime
 import redis
 from channels.layers import get_channel_layer

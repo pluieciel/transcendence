@@ -5,79 +5,93 @@ import LoginOAuth from './components/login/LoginOAuth.js';
 import Router from './router.js';
 
 class App {
-
-    constructor() {
+	constructor() {
 		this.routes = [
 			{ path: '/', component: LoginView },
-            { path: '/index', component: MainView },
-            { path: '/settings', component: SettingsView },
-            { path: '/login/oauth', component: LoginOAuth },
+			{ path: '/index', component: MainView },
+			{ path: '/settings', component: SettingsView },
+			{ path: '/login/oauth', component: LoginOAuth },
 			{ path: '*', component: LoginView },
 		]
-        this.state = {
-            isLoggedIn: sessionStorage.getItem('isLoggedIn') === 'true',
-            token: sessionStorage.getItem('token') || '',
-        };
-        this.avatarCache = {};
-        this.ingame = sessionStorage.getItem('ingame') === 'true';
+		this.state = {
+			isLoggedIn: sessionStorage.getItem("isLoggedIn") === "true",
+			username: sessionStorage.getItem("username"),
+		};
+		this.avatarCache = {};
+		this.settings = {'fetched' : false};
+		this.ingame = sessionStorage.getItem("ingame") === "true";
 		window.app = this;
-        this.router = new Router(this.routes);
-
-    }
-
-    async getAvatar(username) {
-        if (this.avatarCache[username]) {
-            return this.avatarCache[username];
-        }
-        const response = await fetch(`/api/get/avatar/${username}`,{
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `${this.state.token}`,
-            },
-        });
-        const data = await response.json();
-        this.avatarCache[username] = data.avatar;
-		console.log(data.avatar);
-        return data.avatar;
-    }
-    
-    login(data) {
-        this.state.isLoggedIn = true;
-        this.state.token = data.token;
-        console.log("sessionStorageingame", sessionStorage.getItem('ingame'));
-        sessionStorage.setItem('isLoggedIn', 'true');
-        sessionStorage.setItem('token', this.state.token);
-        this.router.navigateTo('/index');
-    }
-	
-	login42(username, token, theme) {
-		this.state.isLoggedIn = true;
-        this.state.token = token;
-		this.state.theme = theme;
-		sessionStorage.setItem('isLoggedIn', 'true');
-        sessionStorage.setItem('token', this.state.token);
-        this.router.navigateTo('/index');
+		this.router = new Router(this.routes);
 	}
 
-    logout() {
-        this.state.isLoggedIn = false;
-        this.state.token = '';
-        this.ingame = false;
-        sessionStorage.clear();
-        this.router.navigateTo('/');
-    }
+	setColor() {
+		switch (this.settings.color) {
+			default: document.documentElement.style.setProperty("--user-color", "#00BDD1");break;
+			case 0: document.documentElement.style.setProperty("--user-color", "#0004CC");break;
+			case 1: document.documentElement.style.setProperty("--user-color", "#00BDD1");break;
+			case 2: document.documentElement.style.setProperty("--user-color", "#00AD06");break;
+			case 3: document.documentElement.style.setProperty("--user-color", "#E67E00");break;
+			case 4: document.documentElement.style.setProperty("--user-color", "#E6008F");break;
+			case 5: document.documentElement.style.setProperty("--user-color", "#6400C4");break;
+			case 6: document.documentElement.style.setProperty("--user-color", "#E71200");break;
+			case 7: document.documentElement.style.setProperty("--user-color", "#0EC384");break;
+			case 8: document.documentElement.style.setProperty("--user-color", "#E6E3E1");break;
+		}
+	}
 
-    getIsLoggedIn() {
-        return this.state.isLoggedIn;
-    }
+	async getAvatar(username) {
+		if (this.avatarCache[username]) {
+			return this.avatarCache[username];
+		}
+		const response = await fetch(`/api/get/avatar/${username}`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+		});
+		const data = await response.json();
+		this.avatarCache[username] = data.avatar;
+		return data.avatar;
+	}
 
-    getToken() {
-        return this.state.token;
-    }
+	async getPreferences() {
+		const response = await fetch(`/api/settings/get/preferences`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+		});
+		const data = await response.json();
+		if (!data.success)
+			return;
+		this.settings.color = data['color'];
+		this.settings.quality = data['quality'];
+		this.settings.fetched = true;
+		this.setColor();
+	}
+
+	login(data) {
+		this.state.isLoggedIn = true;
+		this.state.username = data.username;
+		sessionStorage.setItem('isLoggedIn', 'true');
+		sessionStorage.setItem('username', data.username);
+		this.getPreferences();
+		this.router.navigateTo('/index');
+	}
+
+	logout() {
+		this.state.isLoggedIn = false;
+		this.ingame = false;
+		sessionStorage.clear();
+		this.router.navigateTo("/");
+	}
+
+	getIsLoggedIn() {
+		return this.state.isLoggedIn;
+	}
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("DOMContentLoaded");
-    window.app = new App();
+	console.log("DOMContentLoaded");
+	window.app = new App();
 });

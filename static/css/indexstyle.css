@@ -5,6 +5,7 @@
 	--hover-color: #666;
 	--header-color: #090909;
 	--header-shadow-color: rgba(255, 255, 255, 0.3);
+	--user-color: #0ff;
 }
 
 ::placeholder {
@@ -34,10 +35,12 @@ header {
 	position: absolute;
 	overflow: hidden;
     box-sizing: border-box;
+	box-shadow: 0 0 5px var(--user-color);
 }
 
 h1, h2 {
     font-size: 2.5rem;
+	text-shadow: 0 0 2px #fff;
     margin: 0;
 }
 
@@ -48,8 +51,13 @@ h3 {
 
 a {
 	font-size: 0.9rem;
-	color: grey;
+	color: var(--secondary-color);
+	text-shadow: 0 2px 10px var(--user-color);
 	text-decoration: none;
+}
+
+#pong {
+	text-shadow: 0 0 15px #fff;
 }
 
 .welcome {
@@ -74,7 +82,7 @@ a {
     padding: 15px;
 }
 
-.credits, .game-buttons, .profile, .containerSensitive, .containerPrivate {
+.credits, .game-buttons, .profile, .containerSensitive, .containerPrivate, .containerGame {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -115,39 +123,29 @@ a {
 }
 
 #settingsBtn, #indexBtn {
-	color: #0ff;
+	color: var(--user-color);
 	right: 150px;
-	border: 0.5px solid rgb(0, 255, 255);
+	border: 0.5px solid var(--user-color);
 	background-color: var(--header-color);
-	box-shadow: 0 4px 15px rgba(0, 255, 255, 0.8);
+	box-shadow: 0 4px 15px var(--user-color);
 }
 
 #logoutBtn {
-	color: #F00;
+	color: var(--user-color);
 	right: 150px;
-	border: 0.5px solid #F00;
+	border: 0.5px solid var(--user-color);
 	background-color: var(--header-color);
-	box-shadow: 0 4px 15px rgba(255, 0, 0, 0.8);
+	box-shadow: 0 4px 15px var(--user-color);
 	right: 5px;
 }
 
-.containerPrivate > button, .containerSensitive > button {
+.containerPrivate > button, .containerSensitive > button, .containerGame > button, #row > button {
 	padding: 10px 20px;
 	font-size: 16px;
 	cursor: pointer;
 	border-radius: 5px;
 	transition: all 0.2s;
 	margin: 5px;
-}
-
-.game-buttons, .credits, .profile {
-	border: 1px solid var(--accent-color);
-	transition: all 0.5s;
-}
-
-.game-buttons:hover, .credits:hover, .profile:hover {
-	border: 1px solid #f00;
-	box-shadow: 0 0 15px rgb(255, 0, 0);
 }
 
 .game-buttons > button {
@@ -163,22 +161,21 @@ a {
     cursor: pointer;
     text-align: center;
 	border: 1px solid var(--primary-color);
-	transition: all 0.2s;
+	transition: all 0.5s;
 }
 
 .game-buttons > button:hover {
-	border: 1px solid #0ff;
-	box-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
-	color: var(--secondary-color);
+	background-color: #000;
 }
-.containerPrivate > button {
+
+.containerPrivate > button, .containerGame > button, #row > button {
 	color: var(--secondary-color);
 	border: 2px solid var(--primary-color);
 	background-color: var(--primary-color);
 }
 
-.containerPrivate > button:hover {
-	box-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
+.containerPrivate > button:hover, .containerGame > button:hover, .arrow:hover {
+	box-shadow: 0 0 15px var(--user-color);
 }
 
 .containerSensitive > button {
@@ -187,8 +184,19 @@ a {
 }
 
 .containerSensitive > button:hover {
-	box-shadow: 0 0 15px rgba(255, 0, 0, 0.8);
+	box-shadow: 0 0 15px var(--user-color);
 }
+
+.redHover {
+	border: 1px solid var(--accent-color);
+	transition: all 0.5s;
+}
+
+.redHover:hover {
+	border: 1px solid var(--user-color);
+	box-shadow: 0 0 15px var(--user-color);
+}
+
 
 #passwordInput {
 	padding: 10px;
@@ -236,3 +244,72 @@ a {
 #staticBackdropLabel {
 	color: #000;
 }
+
+#usrnm-form, #pwd-form, #cfm-pwd-form {
+	text-align: center;
+	border: none;
+	color: var(--secondary-color);
+	background-color: var(--hover-color);
+}
+
+#usrnm-form::placeholder, #pwd-form::placeholder, #cfm-pwd-form::placeholder{
+	color: var(--secondary-color);
+}
+
+#loginBtn, #login42Btn, #signupBtn {
+	border: 1px solid var(--primary-color);
+	background-color: var(--primary-color);	
+	transition: all 0.5s;
+}
+
+#loginBtn:hover, #login42Btn:hover, #signupBtn:hover {
+	border: 1px solid var(--user-color);
+	box-shadow: 0 0 15px var(--user-color);
+}
+
+#loginForm, #signupForm {
+	border: 1px solid var(--user-color);
+	box-shadow: 0 0 20px var(--user-color);
+}
+
+#OAuthLoader {
+	margin-top: 25px;
+	border: 1px solid var(--user-color);
+	box-shadow: 0 0 15px var(--user-color);
+	color: var(--secondary-color);
+	background-color: var(--accent-color);
+}
+
+#chatIcon {
+	background-color: var(--accent-color);
+    border: 1px solid var(--user-color);
+    box-shadow: 0 0 8px var(--user-color);
+}
+
+#playAI, #quickMatch, #tournamentButton {
+	border-radius: 5px;
+}
+
+#colorDiv {
+	padding: 10px 20px;
+	font-size: 16px;
+	margin: 5px;
+	width: 128px;
+	background-color: var(--primary-color);
+	color: var(--secondary-color);
+	border-radius: 5px;
+	border: 2px solid var(--primary-color);
+}
+
+.arrow {
+	display: inline;
+}
+
+#row {
+	display: flex;
+	/* justify-content: space-between;
+	vertical-align: text-top; */
+	justify-content: center;
+    align-items: center;
+}
+

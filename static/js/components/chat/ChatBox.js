@@ -2,16 +2,13 @@ import { Game } from "../game/Game.js";
 
 export default class ChatBox {
     constructor(container) {
-        this.token = window.app.getToken();
-        const decodedPayload = jwt_decode(this.token);
-        //console.log(decodedPayload);
         this.container = container;
-        this.username = decodedPayload.username;
+        this.username = window.app.state.username;
         this.chatSocket = null;
         this.publicMessages = [];
         this.privateMessages = {};
-        this.newMessage = '';
-        this.activeTab = 'online';
+        this.newMessage = "";
+        this.activeTab = "online";
         this.users = [];
         this.blocked = [];
         this.onlineusers = [];
@@ -21,37 +18,40 @@ export default class ChatBox {
         this.waiting = true;
         this.focususer = undefined;
         this.showingOnlineUsers = 0;
-        
+
         this.hasNewMessages = false;
         this.render(this.container);
         this.initWebSocket();
         this.addEventListeners();
-        this.newMessageIndicator = this.container.querySelector('#newMessageIndicator');
-        this.offcanvas = this.container.querySelector('#offcanvas');
+        this.newMessageIndicator = this.container.querySelector(
+            "#newMessageIndicator",
+        );
+        this.offcanvas = this.container.querySelector("#offcanvas");
     }
 
     render(container) {
         container.innerHTML = `
             <!-- Chat button -->
             <button class="btn btn-primary position-fixed end-0 bottom-0 m-3"
-                    type="button" 
-                    data-bs-toggle="offcanvas" 
-                    data-bs-target="#offcanvas">
+                    type="button"
+                    data-bs-toggle="offcanvas"
+                    data-bs-target="#offcanvas"
+					id="chatIcon">
                 <i class="fas fa-comment"></i>
                 <span id="newMessageIndicator" class="new-message-dot" style="display: none;"></span>
             </button>
-            
+
             <!-- Chat box -->
             <div class="offcanvas offcanvas-end custom-offcanvas"
-                    data-bs-scroll="true" 
-                    tabindex="-1" 
+                    data-bs-scroll="true"
+                    tabindex="-1"
                     id="offcanvas">
-                <div class="card-header text-bg-dark d-flex justify-content-between align-items-center p-2" 
+                <div class="card-header text-bg-dark d-flex justify-content-between align-items-center p-2"
                     data-bs-theme="dark">
-                    <button type="button" 
-                            class="btn-close position-absolute start-0 ms-2" 
+                    <button type="button"
+                            class="btn-close position-absolute start-0 ms-2"
 							id="btn-closing-chat"
-                            data-bs-dismiss="offcanvas" 
+                            data-bs-dismiss="offcanvas"
                             aria-label="Close">
                     </button>
                     <div class="w-100 d-flex align-items-center flex-grow-1 justify-content-center">
@@ -77,7 +77,7 @@ export default class ChatBox {
                             </li>
                             <div id="userTabs"></div>
                         </ul>
-                        
+
                         <!-- Chat content -->
                         <div class="card-body chat-messages overflow-auto" id="messageContainer">
                             <div id="onlineUsers" class="chat-messagebox online-users-list"></div>
@@ -89,7 +89,7 @@ export default class ChatBox {
                     <!-- Input -->
                     <div class="card-footer">
                         <div class="input-group">
-                            <input type="text" 
+                            <input type="text"
                                     class="form-control"
                                     id="messageInput"
                                     placeholder="${this.username}: Type a message...">
@@ -132,32 +132,32 @@ export default class ChatBox {
                             <form id="updateForm">
                                 <span>Change password</span>
                                 <div class="mb-3">
-                                    <input 
-                                        type="password" 
-                                        id="password" 
+                                    <input
+                                        type="password"
+                                        id="password"
                                         placeholder="Enter password"
                                         class="form-control">
                                 </div>
                                 <div class="mb-3">
-                                    <input 
-                                        type="password" 
-                                        id="confirmPassword" 
+                                    <input
+                                        type="password"
+                                        id="confirmPassword"
                                         placeholder="Confirm password"
                                         class="form-control">
                                 </div>
                                 <span>Change display nickname</span>
                                 <div class="mb-3">
-                                    <input 
-                                        type="nickname" 
-                                        id="nickname" 
+                                    <input
+                                        type="nickname"
+                                        id="nickname"
                                         placeholder="Enter nickname"
                                         class="form-control">
                                 </div>
                                 <div class="mb-3">
                                     Change Avatar:
-                                    <input 
-                                        type="file" 
-                                        id="avatar" 
+                                    <input
+                                        type="file"
+                                        id="avatar"
                                         accept="image/*">
                                 </div>
                                 <div id="passwordError" class="alert alert-danger d-none"></div>
@@ -173,77 +173,109 @@ export default class ChatBox {
         `;
 
         // Initialize Bootstrap offcanvas
-        new bootstrap.Offcanvas(document.getElementById('offcanvas'));
+        new bootstrap.Offcanvas(document.getElementById("offcanvas"));
     }
 
     initWebSocket() {
-        this.protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+        this.protocol =
+            window.location.protocol === "https:" ? "wss://" : "ws://";
         this.host = window.location.host;
-        this.chatSocket = new WebSocket(`${this.protocol}${this.host}/ws/chat/?token=${this.token}`);
-        
+        this.chatSocket = new WebSocket(
+            `${this.protocol}${this.host}/ws/chat/`,
+        );
+
         this.chatSocket.onopen = () => {
             console.log("WebSocket connection established");
         };
-        
+
         this.chatSocket.onclose = () => {
             console.log("WebSocket connection closed");
         };
-        
+
         this.chatSocket.onmessage = (e) => {
             const data = JSON.parse(e.data);
             //console.log(data);
-            if (data.message_type === "system" && data.message === 'all_user_list') {
-                this.allusers = data.usernames.sort((a, b) => a.localeCompare(b));
+            if (
+                data.message_type === "system" &&
+                data.message === "all_user_list"
+            ) {
+                this.allusers = data.usernames.sort((a, b) =>
+                    a.localeCompare(b),
+                );
                 this.updateOnlineUsersList();
-            } else if (data.message_type === "system" && data.message === 'update_tournament_info') {
+            } else if (
+                data.message_type === "system" &&
+                data.message === "update_tournament_info"
+            ) {
                 //console.log(data.tournament_info);
                 window.app.tournament.info = JSON.parse(data.tournament_info);
                 window.app.tournament.updateContent();
                 window.app.tournament.updateGame();
             } else if (data.type == "friend_list") {
-                this.friends = data.usernames.sort((a, b) => a.localeCompare(b));
+                this.friends = data.usernames.sort((a, b) =>
+                    a.localeCompare(b),
+                );
                 this.updateOnlineUsersList();
-            } else if (data.message_type === "system" && data.recipient === 'update_online_users') {
-                const dict = JSON.parse(data.message)
+            } else if (
+                data.message_type === "system" &&
+                data.recipient === "update_online_users"
+            ) {
+                const dict = JSON.parse(data.message);
                 //console.log(data);
-                this.onlineusers = dict.online_users.filter(user => user !== this.username).sort((a, b) => a.localeCompare(b));
+                this.onlineusers = dict.online_users
+                    .filter((user) => user !== this.username)
+                    .sort((a, b) => a.localeCompare(b));
                 this.onlineusers.unshift(this.username);
                 this.waiting_users = dict.waiting_users;
                 window.app.tournament.info = dict.tournament_info;
                 window.app.tournament.updateContent();
                 this.updateOnlineUsersList();
-            } else if (data.message_type === "system" && data.recipient === 'update_waiting_users') {
+            } else if (
+                data.message_type === "system" &&
+                data.recipient === "update_waiting_users"
+            ) {
                 this.waiting_users = JSON.parse(data.message);
                 this.updateOnlineUsersList();
-            } else if (data.recipient === 'public') {
+            } else if (data.recipient === "public") {
                 if (!this.blocked.includes(data.sender)) {
-					data.message = this.escapeHtml(data.message);
+                    if (data.sender !== "DeepSeek") {data.message = this.escapeHtml(data.message);}
                     this.publicMessages.push(data);
                     this.updatePublicChat();
+                    renderMathInElement(document.body);
                 }
             } else if (data.message_type === "system_accept") {
                 console.log(data);
                 // TODO: add start game logic
-                window.app.gamews = new WebSocket(`${this.protocol}${this.host}/ws/game/invite?token=${this.token}&recipient=${data.sender}`);
-                console.log(`${this.protocol}${this.host}/ws/game/invite?token=${this.token}&recipient=${data.sender}`);
+                window.app.gamews = new WebSocket(
+                    `${this.protocol}${this.host}/ws/game/invite?recipient=${data.sender}`,
+                );
+                console.log(
+                    `${this.protocol}${this.host}/ws/game/invite?recipient=${data.sender}`,
+                );
                 window.app.gamews.onmessage = (event) => {
                     const events = JSON.parse(event.data);
                     if (events.message_type === "init") {
                         setTimeout(() => {
-                            const canvas = document.querySelector("#gameCanvas");
+                            const canvas =
+                                document.querySelector("#gameCanvas");
                             const game = new Game(canvas, window.app.gamews);
                             console.log("Game initialization");
                             const gameDiv = document.querySelector("#gameDiv");
-			                gameDiv.style.display = "block";
+                            gameDiv.style.display = "block";
 
                             game.onGameEnd = () => {
-                                const returnButton = document.querySelector("#returnButton");
+                                const returnButton =
+                                    document.querySelector("#returnButton");
                                 returnButton.style.display = "block";
 
                                 returnButton.onclick = () => {
                                     returnButton.style.display = "none";
-                                    document.querySelector("#mainPage").style.display = "block";
-                                    document.querySelector("#overlay").style.display = "none";
+                                    document.querySelector(
+                                        "#mainPage",
+                                    ).style.display = "block";
+                                    document.querySelector(
+                                        "#overlay",
+                                    ).style.display = "none";
                                     gameDiv.style.display = "none";
                                     if (window.app.gamews) {
                                         window.app.gamews.close();
@@ -251,11 +283,14 @@ export default class ChatBox {
                                     window.app.ingame = false;
                                     sessionStorage.setItem("ingame", "false");
                                 };
-                                window.app.router.currentComponent.setProfileFields().then();
+                                window.app.router.currentComponent
+                                    .setProfileFields()
+                                    .then();
                             };
 
                             game.initialize(events.data);
-                            document.querySelector("#mainPage").style.display = "none";
+                            document.querySelector("#mainPage").style.display =
+                                "none";
                         }, 1000);
                     }
                 };
@@ -268,24 +303,31 @@ export default class ChatBox {
     }
 
     updateOnlineUsersList() {
-        const container = this.container.querySelector('#onlineUsers');
+        const container = this.container.querySelector("#onlineUsers");
         if (this.showingOnlineUsers === 0) {
-            container.innerHTML = this.onlineusers.map(user => {
-            return `
+            container.innerHTML = this.onlineusers
+                .map((user) => {
+                    return `
                 <div class="user-item d-flex align-items-center p-2 justify-content-between">
                     <span class="d-flex align-items-center">
                         <span class="online-indicator me-2"></span>
                         <div id="avatar_${user}"></div>
                         <span class="user-name ms-2">${user}</span>
                     </span>
-                    ${user !== this.username ? `
+                    ${
+                        user !== this.username
+                            ? `
                         <span class="d-flex align-items-center">
-                            ${this.waiting_users.includes(user) ? `
+                            ${
+                                this.waiting_users.includes(user)
+                                    ? `
                                 <button class="btn btn-primary square-btn me-1" data-action="invite" data-user="${user}"
                                     data-bs-toggle="modal" data-bs-target="#sendInvitation">
                                     <i class="fa-solid fa-gamepad"></i>
                                 </button>
-                            ` : ''}
+                            `
+                                    : ""
+                            }
                             <button class="btn btn-primary square-btn me-1" data-action="watchgame" data-user="${user}">
                                 <i class="fa-solid fa-eye"></i>
                             </button>
@@ -303,31 +345,39 @@ export default class ChatBox {
                             <button class="btn btn-primary square-btn me-1" data-action="chat" data-user="${user}">
                                 <i class="fas fa-comments"></i>
                             </button>
-                            <button class="btn btn-primary square-btn ${this.blocked.includes(user) ? 'square-btn-red' : ''}" 
-                                    data-action="block" 
+                            <button class="btn btn-primary square-btn ${this.blocked.includes(user) ? "square-btn-red" : ""}"
+                                    data-action="block"
                                     data-user="${user}">
                                 <i class="fas fa-ban"></i>
                             </button>
                         </span>
-                    ` : `
+                    `
+                            : `
                         <span class="d-flex align-items-center">
                             <button class="btn btn-primary square-btn me-1" data-action="setting"
                                 data-bs-toggle="modal" data-bs-target="#usersetting">
                                 <i class="fa-solid fa-gear"></i>
                             </button>
-                            <button id="Donotdisturb" class="btn btn-primary square-btn me-1 ${this.waiting? '' : 'square-btn-red'}"
+                            <button id="Donotdisturb" class="btn btn-primary square-btn me-1 ${this.waiting ? "" : "square-btn-red"}"
                                 data-action="waiting"
                                 data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Do not disturb">
                                 <i class="fa-solid fa-gamepad"></i>
                             </button>
                         </span>
-                    `}
+                    `
+                    }
                 </div>
-            `}).join('');
-            container.innerHTML = "<div class=\"text-white\">Online Users</div>" + container.innerHTML;
+            `;
+                })
+                .join("");
+            container.innerHTML =
+                '<div class="text-white">Online Users</div>' +
+                container.innerHTML;
 
             this.onlineusers.map(async (user) => {
-                const avatar_div = this.container.querySelector(`#avatar_${user}`);
+                const avatar_div = this.container.querySelector(
+                    `#avatar_${user}`,
+                );
                 if (avatar_div) {
                     const avatarUrl = await window.app.getAvatar(user);
                     if (avatarUrl) {
@@ -338,11 +388,10 @@ export default class ChatBox {
                 const wr_div = this.container.querySelector(`#wr_${user}`);
                 const tn_div = this.container.querySelector(`#tn_${user}`);
                 if (elo_div) {
-                    const response = await fetch(`/api/get/profile/${user}`,{
-                        method: 'POST',
+                    const response = await fetch(`/api/get/profile/${user}`, {
+                        method: "POST",
                         headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `${this.token}`,
+                            "Content-Type": "application/json",
                         },
                     });
                     const data = await response.json();
@@ -350,48 +399,62 @@ export default class ChatBox {
                     if (data.elo) {
                         elo_div.innerHTML = `Elo: ${data.elo}`;
                         wr_div.innerHTML = `Winrate: ${data.winrate}%`;
-                        tn_div.innerHTML = `Tournaments won: ${data['tourn']}`;
+                        tn_div.innerHTML = `Tournaments won: ${data["tourn"]}`;
                     }
                 }
             });
 
             setTimeout(() => {
-                const donotdisbutton = this.container.querySelector('#Donotdisturb');
+                const donotdisbutton =
+                    this.container.querySelector("#Donotdisturb");
                 const tooltip = bootstrap.Tooltip.getInstance(donotdisbutton);
                 if (tooltip) tooltip.dispose();
                 if (donotdisbutton) new bootstrap.Tooltip(donotdisbutton); // Initialize the tooltip
             }, 50);
 
-            const popoverTriggerList = this.container.querySelectorAll('[data-bs-toggle="popover"]');
-            const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl));
-        } else if (this.showingOnlineUsers === 1){
+            const popoverTriggerList = this.container.querySelectorAll(
+                '[data-bs-toggle="popover"]',
+            );
+            const popoverList = [...popoverTriggerList].map(
+                (popoverTriggerEl) => new bootstrap.Popover(popoverTriggerEl),
+            );
+        } else if (this.showingOnlineUsers === 1) {
             // show all user list
-            container.innerHTML = this.allusers.map(user => {
-                return `
+            container.innerHTML = this.allusers
+                .map((user) => {
+                    return `
                     <div class="user-item d-flex align-items-center p-2 justify-content-between">
                         <span class="d-flex align-items-center">
-                            <span class="${this.onlineusers.includes(user)?'online-indicator':'offline-indicator'} me-2"></span>
+                            <span class="${this.onlineusers.includes(user) ? "online-indicator" : "offline-indicator"} me-2"></span>
                             <div id="avatar_${user}"></div>
                             <span class="user-name ms-2">${user}</span>
                         </span>
-                        ${(this.friends.includes(user) || user === this.username) ? '':
-                        `<span class="d-flex align-items-center">  
+                        ${
+                            this.friends.includes(user) ||
+                            user === this.username
+                                ? ""
+                                : `<span class="d-flex align-items-center">
                             <button class="btn btn-primary square-btn me-1" data-action="addfriend" data-user="${user}">
                                 <i class="fa-solid fa-plus"></i>
                             </button>
-                        </span>`} 
+                        </span>`
+                        }
                     </div>
-                `}).join('');
-            container.innerHTML = "<div class=\"text-white\">All Users</div>" + container.innerHTML;
+                `;
+                })
+                .join("");
+            container.innerHTML =
+                '<div class="text-white">All Users</div>' + container.innerHTML;
 
             this.allusers.map(async (user) => {
-                const avatar_div = this.container.querySelector(`#avatar_${user}`);
+                const avatar_div = this.container.querySelector(
+                    `#avatar_${user}`,
+                );
                 if (avatar_div) {
-                    const response = await fetch(`/api/get/avatar/${user}`,{
-                        method: 'POST',
+                    const response = await fetch(`/api/get/avatar/${user}`, {
+                        method: "POST",
                         headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `${this.token}`,
+                            "Content-Type": "application/json",
                         },
                     });
                     const data = await response.json();
@@ -400,24 +463,29 @@ export default class ChatBox {
                     }
                 }
             });
-        } else if (this.showingOnlineUsers === 2){
+        } else if (this.showingOnlineUsers === 2) {
             // show friend list
-            container.innerHTML = this.friends.map(user => {
-                return `
+            container.innerHTML = this.friends
+                .map((user) => {
+                    return `
                     <div class="user-item d-flex align-items-center p-2 justify-content-between">
                         <span class="d-flex align-items-center">
-                            <span class="${this.onlineusers.includes(user)?'online-indicator':'offline-indicator'} me-2"></span>
+                            <span class="${this.onlineusers.includes(user) ? "online-indicator" : "offline-indicator"} me-2"></span>
                             <div id="avatar_${user}"></div>
                             <span class="user-name ms-2">${user}</span>
                         </span>
 
                         <span class="d-flex align-items-center">
-                            ${this.waiting_users.includes(user) ? `
+                            ${
+                                this.waiting_users.includes(user)
+                                    ? `
                                 <button class="btn btn-primary square-btn me-1" data-action="invite" data-user="${user}"
                                     data-bs-toggle="modal" data-bs-target="#sendInvitation">
                                     <i class="fa-solid fa-gamepad"></i>
                                 </button>
-                            ` : ''}
+                            `
+                                    : ""
+                            }
                             <div class="dropdown">
                                 <button class="btn btn-primary square-btn me-1" data-action="profile" data-user="${user}"
                                     data-bs-toggle="dropdown" aria-expanded="false">
@@ -429,22 +497,31 @@ export default class ChatBox {
                                     <li class="dropdown-item" id='tnf_${user}'>Loading...</li>
                                 </ul>
                             </div>
-                            ${this.waiting_users.includes(user) ? `
+                            ${
+                                this.waiting_users.includes(user)
+                                    ? `
                             <button class="btn btn-primary square-btn me-1" data-action="chat" data-user="${user}">
                                 <i class="fas fa-comments"></i>
                             </button>
-                            ` : ''}
+                            `
+                                    : ""
+                            }
                             <button class="btn btn-primary square-btn me-1 square-btn-red" data-action="removefriend" data-user="${user}">
                                 <i class="fa-solid fa-trash"></i>
                             </button>
                         </span>
-                        
+
                     </div>
-                `}).join('');
-            container.innerHTML = "<div class=\"text-white\">Friends</div>" + container.innerHTML;
+                `;
+                })
+                .join("");
+            container.innerHTML =
+                '<div class="text-white">Friends</div>' + container.innerHTML;
 
             this.friends.map(async (user) => {
-                const avatar_div = this.container.querySelector(`#avatar_${user}`);
+                const avatar_div = this.container.querySelector(
+                    `#avatar_${user}`,
+                );
                 if (avatar_div) {
                     const avatarUrl = await window.app.getAvatar(user);
                     if (avatarUrl) {
@@ -456,11 +533,10 @@ export default class ChatBox {
                 const wr_div = this.container.querySelector(`#wrf_${user}`);
                 const tn_div = this.container.querySelector(`#tnf_${user}`);
                 if (elo_div) {
-                    const response = await fetch(`/api/get/profile/${user}`,{
-                        method: 'POST',
+                    const response = await fetch(`/api/get/profile/${user}`, {
+                        method: "POST",
                         headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `${this.token}`,
+                            "Content-Type": "application/json",
                         },
                     });
                     const data = await response.json();
@@ -468,7 +544,7 @@ export default class ChatBox {
                     if (data.elo) {
                         elo_div.innerHTML = `Elo: ${data.elo}`;
                         wr_div.innerHTML = `Winrate: ${data.winrate}%`;
-                        tn_div.innerHTML = `Tournaments won: ${data['tourn']}`;
+                        tn_div.innerHTML = `Tournaments won: ${data["tourn"]}`;
                     }
                 }
             });
@@ -476,99 +552,123 @@ export default class ChatBox {
     }
 
     updatePublicChat() {
-        const container = this.container.querySelector('#publicChat');
-        container.innerHTML = this.publicMessages.map(msg => this.createMessageHTML(msg)).join('');
+        const container = this.container.querySelector("#publicChat");
+        container.innerHTML = this.publicMessages
+            .map((msg) => this.createMessageHTML(msg))
+            .join("");
     }
 
     handlePrivateMessage(data) {
         data.message = this.escapeHtml(data.message);
         if (!this.privateMessages[data.sender]) {
-			this.privateMessages[data.sender] = [];
+            this.privateMessages[data.sender] = [];
         }
         if (!this.privateMessages[data.recipient]) {
-			this.privateMessages[data.recipient] = [];
+            this.privateMessages[data.recipient] = [];
         }
         if (!this.blocked.includes(data.sender)) {
             this.privateMessages[data.sender].push(data);
             this.addUserTab(data.sender);
             this.updatePrivateChat(data.sender);
         }
-        if (!this.blocked.includes(data.recipient) || data.sender === this.username) {
-			this.privateMessages[data.recipient].push(data);
+        if (
+            !this.blocked.includes(data.recipient) ||
+            data.sender === this.username
+        ) {
+            this.privateMessages[data.recipient].push(data);
             this.addUserTab(data.recipient);
             this.updatePrivateChat(data.recipient);
         }
     }
-	
+
     createMessageHTML(msg) {
-        if ((msg.message_type === 'chat' || msg.message_type === 'system_invite')
-            && !this.offcanvas.classList.contains('show')) {
+        if (
+            (msg.message_type === "chat" ||
+                msg.message_type === "system_invite") &&
+            !this.offcanvas.classList.contains("show")
+        ) {
             this.hasNewMessages = true;
             this.updateNewMessageIndicator();
         }
         return `
-            <div class="chat-message ${msg.sender === this.username ? 'right' : msg.message_type === 'chat' ? 'left' : 'admin'}">
-                <div class="message-content ${msg.message_type !== 'chat' ? msg.message_type === 'system' ? 'admin-message' : 'invite-message' : ''}">
+            <div class="chat-message ${msg.sender === this.username ? "right" : msg.message_type === "chat" ? "left" : "admin"}">
+                <div class="message-content ${msg.message_type !== "chat" ? (msg.message_type === "system" ? "admin-message" : "invite-message") : ""}">
                     <div class="message-header">
                         <span class="message-username">${this.capitalizeFirstLetter(msg.sender)}</span>
                         <span class="message-timestamp">${msg.time}</span>
                     </div>
-					<span class="message-text" id="invite-message">${msg.message_type === 'system_invite' ? 
-                        '<strong>' + msg.sender + '</strong> ' + msg.message + " in mode: " + msg.game_mode +
-                        `<button class="btn btn-primary square-btn me-1" data-action="accept" data-user="${msg.sender}" data-mode="${msg.game_mode}">
+					<span class="message-text" id="invite-message">${
+                        msg.message_type === "system_invite"
+                            ? "<strong>" +
+                              msg.sender +
+                              "</strong> " +
+                              msg.message +
+                              " in mode: " +
+                              msg.game_mode +
+                              `<button class="btn btn-primary square-btn me-1" data-action="accept" data-user="${msg.sender}" data-mode="${msg.game_mode}">
                                 <i class="fa-solid fa-check"></i>
                             </button>`
-                        : msg.message}</span>
+                            : msg.message
+                    }</span>
                 </div>
             </div>
         `;
     }
 
     addUserTab(user) {
-        if (!this.users.includes(user) && user !== this.username && user !== "admin" && user !== "public") {
+        if (
+            !this.users.includes(user) &&
+            user !== this.username &&
+            user !== "admin" &&
+            user !== "public"
+        ) {
             this.users.push(user);
             this.updateUserTabs();
         }
     }
 
     updateUserTabs() {
-        const container = this.container.querySelector('#userTabs');
-        container.innerHTML = this.users.map(user => `
+        const container = this.container.querySelector("#userTabs");
+        container.innerHTML = this.users
+            .map(
+                (user) => `
             <li class="nav-item">
-                <a class="chat-nav-link" 
-                   data-tab="user-${user}" 
+                <a class="chat-nav-link"
+                   data-tab="user-${user}"
                    title="${user}"
                    data-user="${user}">
                     ${user.charAt(0).toUpperCase()}
                 </a>
             </li>
-        `).join('');
+        `,
+            )
+            .join("");
     }
 
     updatePrivateChat(user) {
-        const container = this.container.querySelector('#privateChats');
+        const container = this.container.querySelector("#privateChats");
         let chatContainer = container.querySelector(`#chat-${user}`);
-        
+
         if (!chatContainer) {
-            chatContainer = document.createElement('div');
+            chatContainer = document.createElement("div");
             chatContainer.id = `chat-${user}`;
-            chatContainer.classList.add('chat-messagebox', 'd-none');
+            chatContainer.classList.add("chat-messagebox", "d-none");
             container.appendChild(chatContainer);
         }
-    
+
         chatContainer.innerHTML = this.privateMessages[user]
             .map(msg => this.createMessageHTML(msg))
             .join('');
     
         if (this.activeTab === `user-${user}`) {
-            chatContainer.classList.remove('d-none');
+            chatContainer.classList.remove("d-none");
         }
     }
 
     addEventListeners() {
         // Send message
-        const sendButton = this.container.querySelector('#sendButton');
-        const messageInput = this.container.querySelector('#messageInput');
+        const sendButton = this.container.querySelector("#sendButton");
+        const messageInput = this.container.querySelector("#messageInput");
 
         const sendMessage = () => {
             const message = messageInput.value.trim();
@@ -578,70 +678,85 @@ export default class ChatBox {
                 message: message,
                 message_type: "chat",
                 sender: this.username,
-                recipient: (this.activeTab === 'public' || this.activeTab === "online") ? 'public' : this.activeTab.replace('user-', ''),
-                time: new Date().toLocaleTimeString()
+                recipient:
+                    this.activeTab === "public" || this.activeTab === "online"
+                        ? "public"
+                        : this.activeTab.replace("user-", ""),
+                time: new Date().toLocaleTimeString(),
             };
 
             this.chatSocket.send(JSON.stringify(messageData));
-            messageInput.value = '';
+            messageInput.value = "";
         };
 
-        sendButton.addEventListener('click', sendMessage);
-        messageInput.addEventListener('keyup', (e) => {
-            if (e.key === 'Enter') sendMessage();
+        sendButton.addEventListener("click", sendMessage);
+        messageInput.addEventListener("keyup", (e) => {
+            if (e.key === "Enter") sendMessage();
         });
 
         // Tab switching
-        const tabsContainer = this.container.querySelector('#chatTabs');
-        tabsContainer.addEventListener('click', (e) => {
-            const tabLink = e.target.closest('.chat-nav-link');
+        const tabsContainer = this.container.querySelector("#chatTabs");
+        tabsContainer.addEventListener("click", (e) => {
+            const tabLink = e.target.closest(".chat-nav-link");
             //console.log(tabLink);
             if (!tabLink) return;
 
             // Update active tab
-            this.container.querySelectorAll('.chat-nav-link').forEach(link => link.classList.remove('active'));
-            tabLink.classList.add('active');
+            this.container
+                .querySelectorAll(".chat-nav-link")
+                .forEach((link) => link.classList.remove("active"));
+            tabLink.classList.add("active");
 
             // Show/hide content
             const tab = tabLink.dataset.tab;
-            
-            this.container.querySelector('#onlineUsers').classList.add('d-none');
-            this.container.querySelector('#publicChat').classList.add('d-none');
-            this.container.querySelectorAll('[id^="chat-"]').forEach(el => {if (el) el.classList.add('d-none')});
-            
-            if (tab === 'online') {
-                this.container.querySelector('#onlineUsers').classList.remove('d-none');
-                if (this.activeTab === 'online') {
+
+            this.container
+                .querySelector("#onlineUsers")
+                .classList.add("d-none");
+            this.container.querySelector("#publicChat").classList.add("d-none");
+            this.container.querySelectorAll('[id^="chat-"]').forEach((el) => {
+                if (el) el.classList.add("d-none");
+            });
+
+            if (tab === "online") {
+                this.container
+                    .querySelector("#onlineUsers")
+                    .classList.remove("d-none");
+                if (this.activeTab === "online") {
                     this.showingOnlineUsers = (this.showingOnlineUsers + 1) % 3;
                 }
                 this.updateOnlineUsersList();
-            } else if (tab === 'public') {
-                this.container.querySelector('#publicChat').classList.remove('d-none');
+            } else if (tab === "public") {
+                this.container
+                    .querySelector("#publicChat")
+                    .classList.remove("d-none");
             } else {
                 const user = tabLink.dataset.user;
                 const userChat = this.container.querySelector(`#chat-${user}`);
-                if (userChat) userChat.classList.remove('d-none');
+                if (userChat) userChat.classList.remove("d-none");
             }
             this.activeTab = tab;
         });
 
         // User actions (chat/block)
-        const onlineUsers = this.container.querySelector('#onlineUsers');
-        onlineUsers.addEventListener('click', (e) => {
-            const button = e.target.closest('button');
+        const onlineUsers = this.container.querySelector("#onlineUsers");
+        onlineUsers.addEventListener("click", (e) => {
+            const button = e.target.closest("button");
             if (!button) return;
 
             const action = button.dataset.action;
             const user = button.dataset.user;
 
-            if (action === 'chat') {
+            if (action === "chat") {
                 this.addUserTab(user);
                 // Switch to user's chat tab
-                const userTab = this.container.querySelector(`[data-tab="user-${user}"]`);
+                const userTab = this.container.querySelector(
+                    `[data-tab="user-${user}"]`,
+                );
                 if (userTab) userTab.click();
-            } else if (action === 'block') {
+            } else if (action === "block") {
                 this.toggleBlockUser(user);
-            } else if (action === 'waiting') {
+            } else if (action === "waiting") {
                 const tooltip = bootstrap.Tooltip.getInstance(button);
                 if (tooltip) tooltip.dispose();
                 this.waiting = !this.waiting;
@@ -652,12 +767,14 @@ export default class ChatBox {
                     recipient: "admin",
                     message_type: "system",
                     wait_status: this.waiting,
-                    time: new Date().toLocaleTimeString()
+                    time: new Date().toLocaleTimeString(),
                 };
                 this.chatSocket.send(JSON.stringify(messageData));
-            } else if (action === 'invite') {
+            } else if (action === "invite") {
                 this.focususer = user;
-                const modalBody = document.querySelector('#sendInvitation .modal-body');
+                const modalBody = document.querySelector(
+                    "#sendInvitation .modal-body",
+                );
                 modalBody.innerHTML = `<p>Invite <strong>${user}</strong> to game, choose game mode:</p>
                 <div class="form-check">
                     <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1" value="Vanilla" checked>
@@ -672,27 +789,27 @@ export default class ChatBox {
                         </label>
                 </div>
             `;
-            } else if (action === 'addfriend') {
+            } else if (action === "addfriend") {
                 const messageData = {
                     message: "addfriend",
                     sender: this.username,
                     recipient: "admin",
                     message_type: "system",
                     friend: user,
-                    time: new Date().toLocaleTimeString()
+                    time: new Date().toLocaleTimeString(),
                 };
                 this.chatSocket.send(JSON.stringify(messageData));
                 setTimeout(() => {
                     this.updateOnlineUsersList();
                 }, 200);
-            } else if (action === 'removefriend') {
+            } else if (action === "removefriend") {
                 const messageData = {
                     message: "removefriend",
                     sender: this.username,
                     recipient: "admin",
                     message_type: "system",
                     friend: user,
-                    time: new Date().toLocaleTimeString()
+                    time: new Date().toLocaleTimeString(),
                 };
                 this.chatSocket.send(JSON.stringify(messageData));
                 setTimeout(() => {
@@ -704,15 +821,15 @@ export default class ChatBox {
         });
 
         // Right-click to remove user tab
-        tabsContainer.addEventListener('contextmenu', (e) => {
-            const tabLink = e.target.closest('.chat-nav-link');
+        tabsContainer.addEventListener("contextmenu", (e) => {
+            const tabLink = e.target.closest(".chat-nav-link");
             if (!tabLink || !tabLink.dataset.user) return;
 
             e.preventDefault();
             const user = tabLink.dataset.user;
-            this.users = this.users.filter(u => u !== user);
+            this.users = this.users.filter((u) => u !== user);
             this.updateUserTabs();
-            
+
             // Switch to public chat if removed tab was active
             if (this.activeTab === `user-${user}`) {
                 this.container.querySelector('[data-tab="public"]').click();
@@ -720,39 +837,42 @@ export default class ChatBox {
         });
 
         // send invite
-        const sendbutton = this.container.querySelector('#sendInvitationButton');
-        sendbutton.addEventListener('click', (e) => {
-            const button = e.target.closest('button');
+        const sendbutton = this.container.querySelector(
+            "#sendInvitationButton",
+        );
+        sendbutton.addEventListener("click", (e) => {
+            const button = e.target.closest("button");
             if (!button) return;
 
-            const radios = document.querySelectorAll('input[name="flexRadioDefault"]');
+            const radios = document.querySelectorAll(
+                'input[name="flexRadioDefault"]',
+            );
             let selectedValue;
             radios.forEach((radio) => {
-                if (radio.checked)
-                    selectedValue = radio.value; // Get the value of the checked radio
+                if (radio.checked) selectedValue = radio.value; // Get the value of the checked radio
             });
             const messageData = {
-                    message: "invite_user",
-                    sender: this.username,
-                    recipient: this.focususer,
-                    message_type: "system",
-                    game_mode: selectedValue,
-                    time: new Date().toLocaleTimeString()
-                };
-                this.chatSocket.send(JSON.stringify(messageData));
+                message: "invite_user",
+                sender: this.username,
+                recipient: this.focususer,
+                message_type: "system",
+                game_mode: selectedValue,
+                time: new Date().toLocaleTimeString(),
+            };
+            this.chatSocket.send(JSON.stringify(messageData));
         });
 
         // accept invite
-        const invitemsg = this.container.querySelector('#privateChats');
-        invitemsg.addEventListener('click', (e) => {
-            const button = e.target.closest('button');
+        const invitemsg = this.container.querySelector("#privateChats");
+        invitemsg.addEventListener("click", (e) => {
+            const button = e.target.closest("button");
             if (!button) return;
 
             const action = button.dataset.action;
             const user = button.dataset.user;
             const mode = button.dataset.mode;
 
-            if (action === 'accept') {
+            if (action === "accept") {
                 //console.log("accept invite");
                 const messageData = {
                     message: "accept_invite",
@@ -760,30 +880,40 @@ export default class ChatBox {
                     recipient: user,
                     game_mode: mode,
                     message_type: "system_accept",
-                    time: new Date().toLocaleTimeString()
+                    time: new Date().toLocaleTimeString(),
                 };
                 this.chatSocket.send(JSON.stringify(messageData));
                 // TODO: add start game logic
-		        window.app.gamews = new WebSocket(`${this.protocol}${this.host}/ws/game/invite?token=${this.token}&sender=${user}`);
-                console.log(`${this.protocol}${this.host}/ws/game/invite?token=${this.token}&sender=${user}`);
+                window.app.gamews = new WebSocket(
+                    `${this.protocol}${this.host}/ws/game/invite?sender=${user}`,
+                );
+                console.log(
+                    `${this.protocol}${this.host}/ws/game/invite?sender=${user}`,
+                );
                 window.app.gamews.onmessage = (event) => {
                     const events = JSON.parse(event.data);
                     if (events.message_type === "init") {
                         setTimeout(() => {
-                            const canvas = document.querySelector("#gameCanvas");
+                            const canvas =
+                                document.querySelector("#gameCanvas");
                             const game = new Game(canvas, window.app.gamews);
                             console.log("Game initialization");
                             const gameDiv = document.querySelector("#gameDiv");
                             gameDiv.style.display = "block";
-                            
+
                             game.onGameEnd = () => {
-                                const returnButton = document.querySelector("#returnButton");
+                                const returnButton =
+                                    document.querySelector("#returnButton");
                                 returnButton.style.display = "block";
 
                                 returnButton.onclick = () => {
                                     returnButton.style.display = "none";
-                                    document.querySelector("#mainPage").style.display = "block";
-                                    document.querySelector("#overlay").style.display = "none";
+                                    document.querySelector(
+                                        "#mainPage",
+                                    ).style.display = "block";
+                                    document.querySelector(
+                                        "#overlay",
+                                    ).style.display = "none";
                                     gameDiv.style.display = "none";
                                     if (window.app.gamews) {
                                         window.app.gamews.close();
@@ -791,101 +921,110 @@ export default class ChatBox {
                                     window.app.ingame = false;
                                     sessionStorage.setItem("ingame", "false");
                                 };
-                                window.app.router.currentComponent.setProfileFields().then();
+                                window.app.router.currentComponent
+                                    .setProfileFields()
+                                    .then();
                             };
 
                             game.initialize(events.data);
-                            document.querySelector("#mainPage").style.display = "none";
+                            document.querySelector("#mainPage").style.display =
+                                "none";
                         }, 1000);
                     }
                 };
-                window.app.gamews.onopen = function(event) {
+                window.app.gamews.onopen = function (event) {
                     console.log("WebSocket invite connection established");
                     window.app.ingame = true;
-                    sessionStorage.setItem('ingame', 'true');
+                    sessionStorage.setItem("ingame", "true");
                 };
-                window.app.gamews.onclose = function(event) {
-                    console.log("WebSocket invite connection closed", event.code, event.reason);
+                window.app.gamews.onclose = function (event) {
+                    console.log(
+                        "WebSocket invite connection closed",
+                        event.code,
+                        event.reason,
+                    );
                     window.app.ingame = false;
-                    sessionStorage.setItem('ingame', 'false');
+                    sessionStorage.setItem("ingame", "false");
                 };
             }
         });
 
         // submit user info update
-        const updateSubmitButton = this.container.querySelector('#sendUpdateForm');
-        updateSubmitButton.addEventListener('click', async (e) => {
-            const infoForm = this.container.querySelector('#updateForm');
-            const password = infoForm.querySelector('#password').value;
-            const confirmPassword = infoForm.querySelector('#confirmPassword').value;
-            const nickname = infoForm.querySelector('#nickname').value;
-            const errorDiv = this.container.querySelector('#passwordError');
-            
+        const updateSubmitButton =
+            this.container.querySelector("#sendUpdateForm");
+        updateSubmitButton.addEventListener("click", async (e) => {
+            const infoForm = this.container.querySelector("#updateForm");
+            const password = infoForm.querySelector("#password").value;
+            const confirmPassword =
+                infoForm.querySelector("#confirmPassword").value;
+            const nickname = infoForm.querySelector("#nickname").value;
+            const errorDiv = this.container.querySelector("#passwordError");
+
             if (password !== confirmPassword) {
-                errorDiv.textContent = 'Passwords do not match';
-                errorDiv.classList.remove('d-none');
+                errorDiv.textContent = "Passwords do not match";
+                errorDiv.classList.remove("d-none");
                 return;
             }
             const formData = new FormData();
-            const originalFile = this.container.querySelector('#avatar').files[0];
+            const originalFile =
+                this.container.querySelector("#avatar").files[0];
             const hashedPassword = CryptoJS.SHA256(password).toString();
-            if (password !== "")
-                formData.append('password', hashedPassword);
-            if (nickname !== "")
-                formData.append('nickname', nickname);
+            if (password !== "") formData.append("password", hashedPassword);
+            if (nickname !== "") formData.append("nickname", nickname);
             if (originalFile) {
                 const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1 MB
                 if (originalFile.size > MAX_FILE_SIZE) {
-                    errorDiv.textContent = 'File size exceeds the 1MB limit';
-                    errorDiv.classList.remove('d-none');
+                    errorDiv.textContent = "File size exceeds the 1MB limit";
+                    errorDiv.classList.remove("d-none");
                     return;
                 }
-                const extension = originalFile.name.split('.').pop();
+                const extension = originalFile.name.split(".").pop();
                 const newFilename = `${this.username}.${extension}`;
                 const modifiedFile = new File([originalFile], newFilename, {
                     type: originalFile.type,
-                    lastModified: originalFile.lastModified
+                    lastModified: originalFile.lastModified,
                 });
-                formData.append('avatar', modifiedFile);
+                formData.append("avatar", modifiedFile);
                 delete window.app.avatarCache[this.username]; // delete cache to force update
             }
-            
-            if (!formData.has('password') && !formData.has('nickname') && !formData.has('avatar')) {
-                errorDiv.textContent = 'Nothing to update';
-                errorDiv.classList.remove('d-none');
+
+            if (
+                !formData.has("password") &&
+                !formData.has("nickname") &&
+                !formData.has("avatar")
+            ) {
+                errorDiv.textContent = "Nothing to update";
+                errorDiv.classList.remove("d-none");
                 return;
             }
 
             try {
-                const response = await fetch('/api/update/', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `${this.token}`,
-                    },
-                    body: formData
+                const response = await fetch("/api/update/", {
+                    method: "POST",
+                    body: formData,
                 });
-            
+
                 const data = await response.json();
-            
+
                 // This code runs only after getting response from server
                 if (data.success) {
                     errorDiv.textContent = data.message;
-                    errorDiv.classList.remove('d-none');
+                    errorDiv.classList.remove("d-none");
                 } else {
-                    errorDiv.textContent = data.message || 'Signup failed';
-                    errorDiv.classList.remove('d-none');
+                    errorDiv.textContent = data.message || "Signup failed";
+                    errorDiv.classList.remove("d-none");
                 }
             } catch (error) {
                 // Handles any errors during the async operation
-                errorDiv.textContent = 'An error occurred';
-                errorDiv.classList.remove('d-none');
+                errorDiv.textContent = "An error occurred";
+                errorDiv.classList.remove("d-none");
             }
         });
     }
 
     toggleBlockUser(user) {
         if (this.blocked.includes(user)) {
-            this.blocked = this.blocked.filter(u => u !== user);
+            this.blocked = this.blocked.filter((u) => u !== user);
         } else {
             this.blocked.push(user);
         }
@@ -893,26 +1032,31 @@ export default class ChatBox {
     }
 
     capitalizeFirstLetter(string) {
-        if (!string) return '';
+        if (!string) return "";
         return string.charAt(0).toUpperCase() + string.slice(1);
     }
 
     scrollToBottom() {
-		const container = this.container.querySelector('#messageContainer');
+        const container = this.container.querySelector("#messageContainer");
         container.scrollTop = container.scrollHeight;
     }
-	
-	escapeHtml(str) {
-		return str.replace(/[&<>"']/g, function (match) {
-			switch (match) {
-				case '&': return '&amp;';
-				case '<': return '&lt;';
-				case '>': return '&gt;';
-				case '"': return '&quot;';
-				case "'": return '&apos;';
-			}
-		});
-	}
+
+    escapeHtml(str) {
+        return str.replace(/[&<>"']/g, function (match) {
+            switch (match) {
+                case "&":
+                    return "&amp;";
+                case "<":
+                    return "&lt;";
+                case ">":
+                    return "&gt;";
+                case '"':
+                    return "&quot;";
+                case "'":
+                    return "&apos;";
+            }
+        });
+    }
 
     disconnect() {
         this.chatSocket.close();
@@ -920,11 +1064,11 @@ export default class ChatBox {
 
     updateNewMessageIndicator() {
         if (this.hasNewMessages) {
-            this.newMessageIndicator.style.display = 'inline-block'; // Show the red dot
+            this.newMessageIndicator.style.display = "inline-block"; // Show the red dot
         }
     }
     clearNewMessages() {
         this.hasNewMessages = false;
-        this.newMessageIndicator.style.display = 'none'; // Hide the red dot
+        this.newMessageIndicator.style.display = "none"; // Hide the red dot
     }
 }
