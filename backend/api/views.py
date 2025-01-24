@@ -284,7 +284,6 @@ class LoginConsumer(AsyncHttpConsumer):
 				response_data = {
 					'success': True,
 					'message': 'Login successful',
-					'color' : user.color,
 					'username': username,
 				}
 			else:
@@ -627,7 +626,6 @@ class LoginOAuthConsumer(AsyncHttpConsumer):
 					'success': True,
 					'message': 'Login successful',
 					'username': username,
-					'color' : user.color,
 				}
 				return await self.send_response(200, json.dumps(response_data).encode(),
 					headers=[(b"Content-Type", b"application/json"), (b"Set-Cookie", generate_jwt_cookie(user))])
@@ -792,3 +790,30 @@ class AvatarConsumer(AsyncHttpConsumer):
 	def get_user_by_name(self, username):
 		User = get_user_model()
 		return User.objects.filter(username=username).first()
+
+class getPreferences(AsyncHttpConsumer):
+	async def handle(self, body):
+		try:
+			user = await jwt_to_user(self.scope['headers'])
+			if not user:
+				response_data = {
+					'success': False,
+					'message': 'Invalid token or User not found'
+				}
+				return await self.send_response(401, json.dumps(response_data).encode(),
+					headers=[(b"Content-Type", b"application/json")])
+			response_data = {
+				'success': True,
+				'color': user.color,
+				'quality': user.quality,
+			}
+			return await self.send_response(200, json.dumps(response_data).encode(),
+				headers=[(b"Content-Type", b"application/json")])
+		except Exception as e:
+			response_data = {
+				'success': False,
+				'message': str(e)
+			}
+			return await self.send_response(500, json.dumps(response_data).encode(),
+				headers=[(b"Content-Type", b"application/json")])
+	

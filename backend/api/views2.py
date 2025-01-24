@@ -153,7 +153,7 @@ class setNewUsername(AsyncHttpConsumer):
 		except Exception as e:
 			return False
 		
-class setColor(AsyncHttpConsumer):
+class setPreferences(AsyncHttpConsumer):
 	async def handle(self, body):
 		try:
 			user = await jwt_to_user(self.scope['headers'])
@@ -166,7 +166,7 @@ class setColor(AsyncHttpConsumer):
 					headers=[(b"Content-Type", b"application/json")])
 
 			data = json.loads(body.decode())
-			if not await self.change_color(user, data.get('newColor')):
+			if not await self.change_color(user, data.get('newColor')) or not await self.change_quality(user, data.get('newQuality')):
 				response_data = {
 					'success': False,
 					'message': 'Failed to set color'
@@ -194,6 +194,15 @@ class setColor(AsyncHttpConsumer):
 	def change_color(self, user, newcolor):
 		try:
 			user.color = newcolor
+			user.save()
+			return True
+		except Exception as e:
+			return False
+
+	@database_sync_to_async
+	def change_quality(self, user, quality):
+		try:
+			user.quality = quality
 			user.save()
 			return True
 		except Exception as e:

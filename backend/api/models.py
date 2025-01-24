@@ -62,6 +62,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_2fa_enabled = models.BooleanField(default=False)
     invites = models.ManyToManyField('self', symmetrical=False, related_name='invite_set', blank=True)
     color = models.IntegerField(default=1)
+    quality = models.BooleanField(default=False)
 
     objects = CustomUserManager()
 
