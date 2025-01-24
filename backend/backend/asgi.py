@@ -14,8 +14,16 @@ from channels.auth import AuthMiddlewareStack
 from Chat.routing import websocket_urlpatterns as chat_websocket_patterns
 from Game.routing import websocket_urlpatterns as game_websocket_patterns
 from django.urls import path, re_path
-from api.views import SignupConsumer, LoginConsumer, ProfileConsumer, ProfileConsumer2, LoginOAuthConsumer, AvatarConsumer, Generate2FAConsumer, Enable2FAConsumer, OAuthConsumer
-from api.login2fa import Login2FAConsumer
+from api.login_2fa import Login2FAConsumer
+from api.enable_2fa import Enable2FAConsumer
+from api.generate_2fa import Generate2FAConsumer
+from api.oauth import OAuthConsumer
+from api.login_oauth import LoginOAuthConsumer
+from api.profile import ProfileConsumer
+from api.profile2 import ProfileConsumer2
+from api.avatar import AvatarConsumer
+from api.login import LoginConsumer
+from api.signup import SignupConsumer
 from api.views2 import RemoveConsumer, setNewUsername, setColor
 from django.contrib import admin
 from django.conf.urls.static import static

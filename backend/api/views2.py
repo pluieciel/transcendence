@@ -3,8 +3,7 @@ from django.contrib.auth import get_user_model
 from channels.db import database_sync_to_async
 import json
 from django.core.cache import cache
-from .views import jwt_to_user
-from .utils import check_jwt
+from .utils import check_jwt, jwt_to_user
 import logging
 
 #SECRET_KEY = 'ultrasafe_secret_key'
