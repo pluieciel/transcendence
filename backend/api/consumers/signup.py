@@ -5,17 +5,18 @@ from django.core.cache import cache
 from channels.generic.http import AsyncHttpConsumer
 from channels.db import database_sync_to_async
 from api.db_utils import get_user_exists
+from api.utils import get_secret_from_file
 import json
 import re
 import io
+import requests
 
 class SignupConsumer(AsyncHttpConsumer):
 	async def handle(self, body):
-		# Rate limiting logic
-		key = self.scope['client'][0]  # Use the client's IP address as the key
-		rate_limit = 60  # Allow 5 requests
-		time_window = 60  # Time window in seconds
-		current_usage = cache.get(key, 0)
+		ip_addr = self.scope['client'][0]
+		rate_limit = 60
+		time_window = 60
+		current_usage = cache.get(ip_addr, 0)
 		if current_usage >= rate_limit:
 			response_data = {
 				'success': False,
@@ -23,13 +24,14 @@ class SignupConsumer(AsyncHttpConsumer):
 			}
 			return await self.send_response(429, json.dumps(response_data).encode(),
 				headers=[(b"Content-Type", b"application/json")])
-		cache.set(key, current_usage + 1, timeout=time_window)
+		cache.set(ip_addr, current_usage + 1, timeout=time_window)
 
 		try:
 			data = await self.parse_multipart_form_data(body)
 			username = data.get('username')
 			password = data.get('password')
 			avatar = data.get('avatar')
+			recaptcha_token = data.get('recaptcha_token')
 
 			# Validate input
 			if not (self.is_valid_username(username)):
@@ -58,17 +60,38 @@ class SignupConsumer(AsyncHttpConsumer):
 					headers=[(b"Content-Type", b"application/json")])
 
 			if avatar:
-				# Read raw bytes from ContentFile
 				image_bytes = avatar.file.read()
-				# Open and resize image
 				image = Image.open(io.BytesIO(image_bytes))
 				resized_image = image.resize((60, 60), Image.Resampling.LANCZOS)
-				# Save resized image to bytes
 				img_byte_arr = io.BytesIO()
 				resized_image.save(img_byte_arr, format=image.format or 'PNG')
 				img_byte_arr.seek(0)
-				# Update avatar with resized image
 				avatar.file = img_byte_arr 
+
+			if not recaptcha_token:
+				response_data = {
+					'success': False,
+					'message': 'Please verify that you are not a robot'
+				}
+				return await self.send_response(400, json.dumps(response_data).encode(),
+					headers=[(b"Content-Type", b"application/json")])
+
+			url = 'https://www.google.com/recaptcha/api/siteverify'
+			params = {
+				'secret': get_secret_from_file('RECAPTCHA_CLIENT_SECRET_FILE'),
+				'response': recaptcha_token,
+				'remoteip': ip_addr,
+			}
+			response = requests.post(url, data=params)
+
+			if not response.json()['success']:
+				response_data = {
+					'success': False,
+					'message': '01100110 01110101 01100011 01101011 00100000 01111001 01101111 01110101 00100000 01110010 01101111 01100010 01101111 01110100'
+				}
+				return await self.send_response(401, json.dumps(response_data).encode(),
+					headers=[(b"Content-Type", b"application/json")])
+
 			# Create new user
 			await self.create_user(username, password, avatar)
 

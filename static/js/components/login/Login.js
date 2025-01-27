@@ -12,10 +12,10 @@ export default class Login {
                     <div class="col-md-4">
                         <form id="loginForm" class="card p-4">
                             <div class="mb-3">
-                                <input type="text" id="usrnm-form" placeholder="Enter username" class="form-control">
+                                <input type="text" id="usrnm-form" placeholder="Enter username" class="form-control" required>
                             </div>
                             <div class="mb-3">
-                                <input type="password" id="pwd-form" placeholder="Enter password" class="form-control">
+                                <input type="password" id="pwd-form" placeholder="Enter password" class="form-control" required>
                             </div>
                             <div id="loginError" class="alert alert-danger d-none"></div>
                             <button id="loginBtn" type="submit" class="btn btn-primary w-100">Log In</button>
@@ -119,9 +119,6 @@ export default class Login {
             const password = this.container.querySelector('#pwd-form').value;
             const errorDiv = this.container.querySelector('#loginError');
             const hashedPassword = CryptoJS.SHA256(password).toString();
-
-			if (!username || !password)
-				errorDiv.textContent = 'Must fill username and password field';
 
             // Handle login logic here
             try {
