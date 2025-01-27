@@ -35,7 +35,8 @@ export default class ChatBox {
             <button class="btn btn-primary position-fixed end-0 bottom-0 m-3"
                     type="button"
                     data-bs-toggle="offcanvas"
-                    data-bs-target="#offcanvas">
+                    data-bs-target="#offcanvas"
+					id="chatIcon">
                 <i class="fas fa-comment"></i>
                 <span id="newMessageIndicator" class="new-message-dot" style="display: none;"></span>
             </button>

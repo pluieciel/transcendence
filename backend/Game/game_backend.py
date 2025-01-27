@@ -46,9 +46,9 @@ class GameBackend:
 			self.game.player_right.keys[key] = is_down
 
 	def get_game_instance(self, type):
-		if (type is "vanilla"):
+		if (type == "vanilla"):
 			return NormalGameInstance(self.broadcast_state, self.on_game_end)
-		elif (type is "rumble"):
+		elif (type == "rumble"):
 			return RumbleGameInstance(self.rumble_broadcast_state, self.on_game_end)
 		else:
 			self.logger.error("Game type not found")

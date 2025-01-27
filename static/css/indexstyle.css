@@ -307,5 +307,9 @@ a {
 
 #row {
 	display: flex;
-	justify-content: space-between;
+	/* justify-content: space-between;
+	vertical-align: text-top; */
+	justify-content: center;
+    align-items: center;
 }
+

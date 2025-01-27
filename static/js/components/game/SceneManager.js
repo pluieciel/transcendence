@@ -5,6 +5,10 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { Bonuses } from "./BonusSystem.js";
 import { Loading } from "./Loading.js";
 
+//Text
+import { TextGeometry } from "three/addons/geometries/TextGeometry.js";
+import { FontLoader } from "three/addons/loaders/FontLoader.js";
+
 //Bloom
 import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
@@ -28,6 +32,7 @@ export class SceneManager {
 		this.controls = null;
 		this.renderer = renderer;
 		this.debugMod = false;
+		this.light = null;
 
 		this.loading = loading;
 		this.loading.addComponent("scene");
@@ -35,6 +40,8 @@ export class SceneManager {
 		this.bloom = bloom;
 		this.initializeComponents();
 		this.setupScene();
+
+		this.text = null;
 
 		this.bloomParams = {
 			exposure: 1,
@@ -186,17 +193,17 @@ export class SceneManager {
 
 	createCamera() {
 		this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-		this.camera.position.set(0, -8, 50);
-		//	this.camera.lookAt(0, 0, 0);
-		this.camera.rotation.z = -Math.PI;
-		//camera.position.set(0, 5, 5);
 
-		// this.controls = new OrbitControls(this.camera, document.querySelector("canvas"));
-		// this.controls.enableDamping = true; // Add smooth damping
-		// this.controls.dampingFactor = 0.05;
-		// this.controls.minDistance = 10; // Minimum zoom distance
-		// this.controls.maxDistance = 50; // Maximum zoom
-		//return camera;
+		// Set initial position and rotation
+		this.camera.position.set(0, -8, 50);
+		this.camera.rotation.z = -Math.PI;
+
+		/*this.controls = new OrbitControls(this.camera, document.querySelector("canvas"));
+		this.controls.enableDamping = true;
+		this.controls.dampingFactor = 0.05;
+		this.controls.minDistance = 10;
+		this.controls.maxDistance = 50;
+	this.controls.update();*/
 	}
 
 	updateTrajectory(trajectoryPoints) {
@@ -220,18 +227,26 @@ export class SceneManager {
 	}
 
 	setupLights() {
-		const light = new THREE.DirectionalLight(0xfafafa, 9);
-		light.position.set(-10, 1, 3);
-		light.rotation.x = -Math.PI / 4;
-		light.rotation.y = -Math.PI / 4;
-		light.castShadow = true;
-		this.scene.add(light);
+		this.light = new THREE.DirectionalLight(0xfafafa, 9);
+		//this.light.position.set(0, 136, 96);
+		this.light.position.set(0, 255, 158);
+		this.light.castShadow = true;
+		this.scene.add(this.light);
 	}
 
 	async createGameObjects() {
 		try {
-			await Promise.all([this.createDebugBall(), this.createDebugBounds(), this.bonuses.createBonuses()]);
-
+			await Promise.all([
+				this.createDebugBall(),
+				this.createDebugBounds(),
+				this.bonuses.createBonuses(),
+				this.createNameRight("valgrant", new THREE.Vector3(0, -23, -10.4), 0x00ffff, 2),
+				this.createNameLeft("jnunes42", new THREE.Vector3(0, -23, -10.4), 0x00ffff, 2),
+				this.createEloRight("[812]", new THREE.Vector3(0, -20.70, -11.90), 0x00ffff, 2),
+				this.createEloLeft("[1247]", new THREE.Vector3(0, -20.70, -11.90), 0x00ffff, 2),
+				this.createPlayerAvatar("/js/components/game/Textures/valgrant.jpeg", new THREE.Vector3(-14.7, -21.9, -11)),
+				this.createPlayerAvatar("/js/components/game/Textures/image.png", new THREE.Vector3(14.7, -21.9, -11)),
+			]);
 			this.bonuses.table.scale.set(4.14, 4.14, 4.14);
 			this.bonuses.table.position.x = 0;
 			this.bonuses.table.position.y = 1.59;
@@ -252,6 +267,245 @@ export class SceneManager {
 		} catch (error) {
 			console.error("Failed to create game objects:", error);
 		}
+	}
+
+	createPlayerAvatar(imageUrl, position) {
+		return new Promise((resolve, reject) => {
+			const textureLoader = new THREE.TextureLoader();
+			textureLoader.load(
+				imageUrl,
+				(texture) => {
+					// Ensure proper texture encoding
+					texture.encoding = THREE.sRGBEncoding;
+					texture.needsUpdate = true;
+
+					const aspectRatio = texture.image.width / texture.image.height;
+					const width = 5;
+					const height = width / aspectRatio;
+
+					const geometry = new THREE.PlaneGeometry(width, height);
+					const material = new THREE.MeshBasicMaterial({
+						map: texture,
+						transparent: true,
+						side: THREE.DoubleSide,
+						//color: 0xffffff, // White color to not affect texture
+						opacity: 1,
+						depthWrite: true,
+						depthTest: true,
+					});
+
+					const avatar = new THREE.Mesh(geometry, material);
+					avatar.position.copy(position);
+
+					// Ensure proper texture display
+					avatar.material.map.flipY = false; // Try with and without this
+					avatar.material.needsUpdate = true;
+					avatar.rotation.x = -0.5;
+					avatar.scale.set(0.8, 0.8, 0.8);
+					this.avatar = avatar;
+					this.scene.add(avatar);
+					resolve(avatar);
+				},
+				undefined,
+				(error) => {
+					console.error("Error loading avatar texture:", error);
+					reject(error);
+				},
+			);
+		});
+	}
+	async createNameRight(text, position, color = 0xffffff, size = 1) {
+		return new Promise((resolve, reject) => {
+			const loader = new FontLoader();
+
+			loader.load(
+				"https://threejs.org/examples/fonts/helvetiker_regular.typeface.json",
+				(font) => {
+					const geometry = new TextGeometry(text, {
+						font: font,
+						size: size,
+						height: 0.2,
+						curveSegments: 12,
+						bevelEnabled: false,
+					});
+
+					const material = new THREE.MeshStandardMaterial({
+						color: color,
+						metalness: 0,
+						roughness: 1,
+					});
+
+					this.text = new THREE.Mesh(geometry, material);
+					geometry.computeBoundingBox();
+					//-2.4720004501342787 x
+					//20.643999099731445  l
+
+					//-5.150000137329112 x
+					//9.687999725341797 l
+
+					//	console.log("aadsdasds  " + (20.643999099731445 - 9.687999725341797) / (-2.4720004501342787 - -5.150000137329112)) = 4.091113014977945;
+					//	console.log("aadsdasds**  " + (20.643999099731445 - -2.4720004501342787 * 4.091113014977945)) = 30.75723231430713;
+
+					this.text.position.copy(position);
+					this.text.position.x = (geometry.boundingBox.max.x - 30.75723231430713) / 4.091113014977945;
+					this.text.rotation.x = -0.5;
+					this.text.rotation.z = Math.PI;
+					this.text.scale.set(0.5, 0.5, 0.5);
+					this.scene.add(this.text);
+					resolve(this.text);
+				},
+				undefined,
+				reject,
+			);
+		});
+	}
+
+	async createNameLeft(text, position, color = 0xffffff, size = 1) {
+		return new Promise((resolve, reject) => {
+			const loader = new FontLoader();
+
+			loader.load(
+				"https://threejs.org/examples/fonts/helvetiker_regular.typeface.json",
+				(font) => {
+					const geometry = new TextGeometry(text, {
+						font: font,
+						size: size,
+						height: 0.2,
+						curveSegments: 12,
+						bevelEnabled: false,
+					});
+
+					const material = new THREE.MeshStandardMaterial({
+						color: color,
+						metalness: 0,
+						roughness: 1,
+					});
+
+					this.text = new THREE.Mesh(geometry, material);
+					geometry.computeBoundingBox();
+					//-2.4720004501342787 x
+					//20.643999099731445  l
+
+					//-5.150000137329112 x
+					//9.687999725341797 l
+
+					//9.03489994215556 x
+					//5.125999927520752 l
+
+					//11.335659155487376 x
+					//15.765999794006348 l
+
+					//	console.log("aadsdasds  " + (20.643999099731445 - 9.687999725341797) / (-2.4720004501342787 - -5.150000137329112)) = 4.091113014977945;
+					//	console.log("aadsdasds**  " + (20.643999099731445 - -2.4720004501342787 * 4.091113014977945)) = 30.75723231430713;
+
+
+					//console.log("aadsdasds  " + (5.125999927520752 - 15.765999794006348) / (9.03489994215556 - 11.335659155487376)) = 4.624560364609999
+					//console.log("aadsdasds**  " + (5.125999927520752 - 9.03489994215556 * 4.624560364609999)) = -36.656440243189024
+
+					this.text.position.copy(position);
+					this.text.position.x = (geometry.boundingBox.max.x - -36.656440243189024) / 4.624560364609999;
+					this.text.rotation.x = -0.5;
+					this.text.rotation.z = Math.PI;
+					this.text.scale.set(0.5, 0.5, 0.5);
+					this.scene.add(this.text);
+					resolve(this.text);
+				},
+				undefined,
+				reject,
+			);
+		});
+	}
+
+	async createEloRight(text, position, color = 0xffffff, size = 1) {
+		return new Promise((resolve, reject) => {
+			const loader = new FontLoader();
+
+			loader.load(
+				"https://threejs.org/examples/fonts/helvetiker_regular.typeface.json",
+				(font) => {
+					const geometry = new TextGeometry(text, {
+						font: font,
+						size: size,
+						height: 0.2,
+						curveSegments: 12,
+						bevelEnabled: false,
+					});
+
+					const material = new THREE.MeshStandardMaterial({
+						color: color,
+						metalness: 0,
+						roughness: 1,
+					});
+
+					this.text = new THREE.Mesh(geometry, material);
+					geometry.computeBoundingBox();
+					//-2.4720004501342787 x
+					//20.643999099731445  l
+
+					//-5.150000137329112 x
+					//9.687999725341797 l
+
+					//	console.log("aadsdasds  " + (20.643999099731445 - 9.687999725341797) / (-2.4720004501342787 - -5.150000137329112)) = 4.091113014977945;
+					//	console.log("aadsdasds**  " + (20.643999099731445 - -2.4720004501342787 * 4.091113014977945)) = 30.75723231430713;
+
+					this.text.position.copy(position);
+					this.text.position.x = (geometry.boundingBox.max.x - 30.75723231430713) / 4.091113014977945;
+					this.text.rotation.x = -0.5;
+					this.text.rotation.z = Math.PI;
+					this.text.scale.set(0.5, 0.5, 0.5);
+					this.scene.add(this.text);
+					resolve(this.text);
+				},
+				undefined,
+				reject,
+			);
+		});
+	}
+
+		async createEloLeft(text, position, color = 0xffffff, size = 1) {
+		return new Promise((resolve, reject) => {
+			const loader = new FontLoader();
+
+			loader.load(
+				"https://threejs.org/examples/fonts/helvetiker_regular.typeface.json",
+				(font) => {
+					const geometry = new TextGeometry(text, {
+						font: font,
+						size: size,
+						height: 0.2,
+						curveSegments: 12,
+						bevelEnabled: false,
+					});
+
+					const material = new THREE.MeshStandardMaterial({
+						color: color,
+						metalness: 0,
+						roughness: 1,
+					});
+
+					this.text = new THREE.Mesh(geometry, material);
+					geometry.computeBoundingBox();
+					//-2.4720004501342787 x
+					//20.643999099731445  l
+
+					//-5.150000137329112 x
+					//9.687999725341797 l
+
+					//	console.log("aadsdasds  " + (20.643999099731445 - 9.687999725341797) / (-2.4720004501342787 - -5.150000137329112)) = 4.091113014977945;
+					//	console.log("aadsdasds**  " + (20.643999099731445 - -2.4720004501342787 * 4.091113014977945)) = 30.75723231430713;
+
+					this.text.position.copy(position);
+					this.text.position.x = (geometry.boundingBox.max.x - -36.656440243189024) / 4.624560364609999;
+					this.text.rotation.x = -0.5;
+					this.text.rotation.z = Math.PI;
+					this.text.scale.set(0.5, 0.5, 0.5);
+					this.scene.add(this.text);
+					resolve(this.text);
+				},
+				undefined,
+				reject,
+			);
+		});
 	}
 
 	createDebugPaddles() {

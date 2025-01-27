@@ -1,0 +1,46 @@
+- model: api.customuser
+  fields:
+      username: admin
+      password: pbkdf2_sha256$600000$THm8MpIw3Z3EBARsKHbUZq$kMwOPjElcUCbFYQTfiiqUPIr3T/xRZWh+UzE9XF/y7s=
+      is_admin: true
+      created_at: "2025-01-01T00:00:00Z"
+- model: api.customuser
+  fields:
+      username: user1
+      password: pbkdf2_sha256$600000$1KhwQjfzxnhiqP0WlEG0Uf$Ycu+CjFC6YqNVR7/ml42INNbddbsxCfkBxnD6vc12XU=
+      created_at: "2025-01-01T00:00:00Z"
+- model: api.customuser
+  fields:
+      username: user2
+      password: pbkdf2_sha256$600000$E80wKu5RJCEznR1qDscn5b$Z2SlKyLhFZ27REnA6xvlhNKwb7x+cbGHUJpkHngKDfE=
+      created_at: "2025-01-01T00:00:00Z"
+- model: api.customuser
+  fields:
+      username: user3
+      password: pbkdf2_sha256$600000$C4UK2HGGXIZyUiN6vIUnzu$HcmTzZ777NqbMue20BgqTqKZUPfd1wmg8OCC2Ums5O4=
+      created_at: "2025-01-01T00:00:00Z"
+- model: api.customuser
+  fields:
+      username: user4
+      password: pbkdf2_sha256$600000$1UA46BbtyaROQIu4XQLuQV$oZvSpECYzL3PuR5sxF/PzRRHQFTSxTeNCfy7LaVB9+g=
+      created_at: "2025-01-01T00:00:00Z"
+- model: api.customuser
+  fields:
+      username: user5
+      password: pbkdf2_sha256$600000$GmGrynXJojWSPj2p1LuWR4$jkxXKYFmi+/94C+AFA20BpZjyRp3qTM2lYt3JnamGYk=
+      created_at: "2025-01-01T00:00:00Z"
+- model: api.customuser
+  fields:
+      username: user6
+      password: pbkdf2_sha256$600000$xiZs0vJ4GahlaOq0A5DrqB$moGgt2PI9GB7DA89cOVH6XDZEgaN7ZYo/3pjtUWCGTc=
+      created_at: "2025-01-01T00:00:00Z"
+- model: api.customuser
+  fields:
+      username: user7
+      password: pbkdf2_sha256$600000$d6ofjtQBBKtgucI4JgBHtE$kUX37bM4WCuIxgEokuR3entEw1GCMLLmaG5muEHMjlw=
+      created_at: "2025-01-01T00:00:00Z"
+- model: api.customuser
+  fields:
+      username: user8
+      password: pbkdf2_sha256$600000$thQGAsFB3FGIrTWZyPtVgg$SwO1oXSYS6gQGWfauFuhTudKWwCabsOVciqeTV1c3Vc=
+      created_at: "2025-01-01T00:00:00Z"
