@@ -21,8 +21,8 @@ export default class SettingsView {
 	<div class ="content">
 		<div class="containerPrivate redHover">
 			<h3>Profile info i guess</h3>
-			<button id="changeUsernameBtn">Change your username</button>
-			<input type="text" id="newUsername">
+			<button id="changeNameBtn">Change your display name</button>
+			<input type="text" id="newName">
 			<button id="changePpBtn">Change your profile picture</button>
 			<button type="button" id="enable2FA">Enable 2FA</button>
 			<div class="modal fade" id="totpModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -135,7 +135,7 @@ export default class SettingsView {
 	
     addEventListeners() {
 		const	enable2FA = this.container.querySelector('#enable2FA');
-		const	changeUsernameBtn = document.getElementById('changeUsernameBtn');
+		const	changeNameBtn = document.getElementById('changeNameBtn');
         const	logoutBtn = document.getElementById('logoutBtn');
 		const	indexBtn = document.getElementById('indexBtn');
 		const	wipeBtn = document.getElementById('deleteAccBtn');
@@ -237,37 +237,35 @@ export default class SettingsView {
 					const data = await response.json();
 				
 					if (data.success) {
-						console.log("changing username success");
-						this.appState.username = newUsername.value;
+						console.log("changing pwd success");
 					} else {
-						console.log("changing username failed");
+						console.log("changing pwd failed");
 					}
 				} catch (error) {
 					console.error(error);
 				}
 			}
-		})
+		});
 		
-		newUsername.addEventListener('keydown', async (event) => {
+		newName.addEventListener('keydown', async (event) => {
 			if (event.key === "Enter") {
 				try {
-					const response = await fetch('/api/change/username', {
+					const response = await fetch('/api/settings/set/display', {
 						method: 'POST',
 						headers: {
 							'Content-Type': 'application/json',
 						},
 						body: JSON.stringify({
-							newUsername: newUsername.value,
+							'displayName': newName.value,
 						})
 					});
 				
 					const data = await response.json();
 				
 					if (data.success) {
-						console.log("changing username success");
-						this.appState.username = newUsername.value;
+						console.log("changing display name success");
 					} else {
-						console.log("changing username failed");
+						console.log("changing display name failed");
 					}
 				} catch (error) {
 					console.error(error);
@@ -275,11 +273,11 @@ export default class SettingsView {
 			}
 		});
 
-		changeUsernameBtn.addEventListener('click', async () => {
-			const newUsername = document.getElementById('newUsername');
-			changeUsernameBtn.style.display = 'none';
-			newUsername.style.display = 'inline-block';
-			newUsername.focus();
+		changeNameBtn.addEventListener('click', async () => {
+			const newName = document.getElementById('newName');
+			changeNameBtn.style.display = 'none';
+			newName.style.display = 'inline-block';
+			newName.focus();
 		});
 
 		wipeBtn.addEventListener('click', () => {
