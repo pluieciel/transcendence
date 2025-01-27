@@ -27,6 +27,7 @@ from api.consumers.signup import SignupConsumer
 from api.consumers.recaptcha import RecaptchaConsumer
 from api.consumers.preferences import getPreferences, setPreferences
 from api.consumers.remove import RemoveConsumer
+from api.consumers.display import setDisplay
 from django.contrib import admin
 from django.conf.urls.static import static
 from django.conf import settings
@@ -54,6 +55,7 @@ http_patterns = [
     path('api/del/user', RemoveConsumer.as_asgi()),
     path('api/get/oauth/redirect', OAuthConsumer.as_asgi()),
     path('api/get/recaptcha', RecaptchaConsumer.as_asgi()),
+	path('api/settings/set/display', setDisplay.as_asgi()), 
     path('admin/', get_asgi_application()),
 ]
 
