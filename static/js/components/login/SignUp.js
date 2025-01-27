@@ -13,42 +13,20 @@ export default class SignUp {
                     <div class="col-md-4">
                         <form id="signupForm" class="card p-4">
                             <div class="mb-3">
-                                <input 
-                                    type="text" 
-                                    id="usrnm-form" 
-                                    placeholder="Enter username"
-                                    class="form-control"
-                                    required
-                                >
+                                <input type="text" id="usrnm-form" placeholder="Enter username" class="form-control" required>
                             </div>
                             <div class="mb-3">
-                                <input 
-                                    type="password" 
-                                    id="pwd-form" 
-                                    placeholder="Enter password"
-                                    class="form-control"
-                                    required
-                                >
+                                <input type="password" id="pwd-form" placeholder="Enter password" class="form-control" required>
                             </div>
                             <div class="mb-3">
-                                <input 
-                                    type="password" 
-                                    id="cfm-pwd-form" 
-                                    placeholder="Confirm password"
-                                    class="form-control"
-                                    required
-                                >
+                                <input type="password" id="cfm-pwd-form" placeholder="Confirm password" class="form-control" required>
                             </div>
-
                             <div class="mb-3">
-                                Avatar:
-                                <input 
-                                    type="file" 
-                                    id="avatar" 
-                                    accept="image/*"
-                                >
+                                <span id="avatarSpan">
+                                    Avatar: <input type="file" id="avatar" accept="image/*">
+                                </span>
                             </div>
-                            <div id="recaptcha"></div>
+                            <div class="mb-3"id="recaptcha"></div>
                             <div id="formError" class="alert alert-danger d-none"></div>
                             <button id="signupBtn" type="submit" class="btn btn-primary w-100">Sign Up</button>
                         </form>
