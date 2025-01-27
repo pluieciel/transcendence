@@ -284,7 +284,12 @@ export class Game {
 					this.mode = "position";
 				} else if (event.code == "KeyO") {
 					objectToModify = this.sceneManager.text;
-					console.log("Object set : " + objectToModify);
+					if (objectToModify && objectToModify.geometry) {
+						objectToModify.geometry.computeBoundingBox();
+						const box = objectToModify.geometry.boundingBox;
+						const centerX = objectToModify.position.x + ((box.max.x + box.min.x) / 2) * objectToModify.scale.x;
+						console.log("Object set. Current center X: " + centerX);
+					}
 				} else if (event.code == "KeyS") {
 					this.mode = "scale";
 					console.log("Entering scale mode");
@@ -313,7 +318,14 @@ export class Game {
 					} else if (this.mode == "position") {
 						if (this.axis == "x") {
 							objectToModify.position.x += this.factor;
-							console.log("New x position is : " + objectToModify.position.x);
+							// Calculate and display center position
+							if (objectToModify.geometry) {
+								objectToModify.geometry.computeBoundingBox();
+								const box = objectToModify.geometry.boundingBox;
+								const centerX = objectToModify.position.x + ((box.max.x + box.min.x) / 2) * objectToModify.scale.x;
+								console.log("New position x: " + objectToModify.position.x);
+								console.log("Current center X: " + centerX);
+							}
 						} else if (this.axis == "y") {
 							objectToModify.position.y += this.factor;
 							console.log("New position y is : " + objectToModify.position.y);

@@ -42,6 +42,7 @@ export class SceneManager {
 		this.setupScene();
 
 		this.text = null;
+		this.geometry = null;
 
 		this.bloomParams = {
 			exposure: 1,
@@ -240,13 +241,26 @@ export class SceneManager {
 				this.createDebugBall(),
 				this.createDebugBounds(),
 				this.bonuses.createBonuses(),
-				this.createNameRight("valgrant", new THREE.Vector3(0, -23, -10.4), 0x00ffff, 2),
-				this.createNameLeft("jnunes42", new THREE.Vector3(0, -23, -10.4), 0x00ffff, 2),
-				this.createEloRight("[812]", new THREE.Vector3(0, -20.70, -11.90), 0x00ffff, 2),
-				this.createEloLeft("[1247]", new THREE.Vector3(0, -20.70, -11.90), 0x00ffff, 2),
-				this.createPlayerAvatar("/js/components/game/Textures/valgrant.jpeg", new THREE.Vector3(-14.7, -21.9, -11)),
-				this.createPlayerAvatar("/js/components/game/Textures/image.png", new THREE.Vector3(14.7, -21.9, -11)),
+
+				//Score Right
+				this.createText("10", new THREE.Vector3(-1.83, -21.1, -11.3), 0x00ffff, 1),
+				//Name Right
+				this.createText("Playeeeeeer", new THREE.Vector3(-8.8, -23, -10.4), 0x00ffff, 0.5),
+				//Elo Right
+				this.createText("[900]", new THREE.Vector3(-8.8, -20.7, -11.9), 0x00ffff, 0.5),
+
+				//Score Left
+				this.createText("9", new THREE.Vector3(2.27, -21.1, -11.3), 0x00ffff, 1),
+				//Name Left
+				this.createText("abc", new THREE.Vector3(9.1, -23, -10.4), 0x00ffff, 0.5),
+				//Elo Left
+				this.createText("[1200]", new THREE.Vector3(9.1, -20.7, -11.9), 0x00ffff, 0.5),
+
+				this.createPlayerAvatar("/js/components/game/Textures/valgrant.jpeg", new THREE.Vector3(17.3, -21.9, -11)),
+				this.createPlayerAvatar("/js/components/game/Textures/image.png", new THREE.Vector3(-16.8, -21.9, -11)),
 			]);
+			//14.7 to 17.3
+			//-14.7 to -16.8
 			this.bonuses.table.scale.set(4.14, 4.14, 4.14);
 			this.bonuses.table.position.x = 0;
 			this.bonuses.table.position.y = 1.59;
@@ -298,7 +312,7 @@ export class SceneManager {
 					avatar.position.copy(position);
 
 					// Ensure proper texture display
-					avatar.material.map.flipY = false; // Try with and without this
+					avatar.material.map.flipY = false;
 					avatar.material.needsUpdate = true;
 					avatar.rotation.x = -0.5;
 					avatar.scale.set(0.8, 0.8, 0.8);
@@ -314,7 +328,8 @@ export class SceneManager {
 			);
 		});
 	}
-	async createNameRight(text, position, color = 0xffffff, size = 1) {
+
+	async createText(text, position, color = 0xffffff, scale = 1) {
 		return new Promise((resolve, reject) => {
 			const loader = new FontLoader();
 
@@ -323,7 +338,7 @@ export class SceneManager {
 				(font) => {
 					const geometry = new TextGeometry(text, {
 						font: font,
-						size: size,
+						size: 2,
 						height: 0.2,
 						curveSegments: 12,
 						bevelEnabled: false,
@@ -336,169 +351,22 @@ export class SceneManager {
 					});
 
 					this.text = new THREE.Mesh(geometry, material);
+					this.geometry = geometry;
 					geometry.computeBoundingBox();
-					//-2.4720004501342787 x
-					//20.643999099731445  l
 
-					//-5.150000137329112 x
-					//9.687999725341797 l
-
-					//	console.log("aadsdasds  " + (20.643999099731445 - 9.687999725341797) / (-2.4720004501342787 - -5.150000137329112)) = 4.091113014977945;
-					//	console.log("aadsdasds**  " + (20.643999099731445 - -2.4720004501342787 * 4.091113014977945)) = 30.75723231430713;
-
-					this.text.position.copy(position);
-					this.text.position.x = (geometry.boundingBox.max.x - 30.75723231430713) / 4.091113014977945;
-					this.text.rotation.x = -0.5;
-					this.text.rotation.z = Math.PI;
-					this.text.scale.set(0.5, 0.5, 0.5);
-					this.scene.add(this.text);
-					resolve(this.text);
-				},
-				undefined,
-				reject,
-			);
-		});
-	}
-
-	async createNameLeft(text, position, color = 0xffffff, size = 1) {
-		return new Promise((resolve, reject) => {
-			const loader = new FontLoader();
-
-			loader.load(
-				"https://threejs.org/examples/fonts/helvetiker_regular.typeface.json",
-				(font) => {
-					const geometry = new TextGeometry(text, {
-						font: font,
-						size: size,
-						height: 0.2,
-						curveSegments: 12,
-						bevelEnabled: false,
-					});
-
-					const material = new THREE.MeshStandardMaterial({
-						color: color,
-						metalness: 0,
-						roughness: 1,
-					});
+					// Center the geometry by translating it
+					if (geometry.boundingBox) {
+						geometry.translate(-geometry.boundingBox.max.x / 2, 0, 0);
+					}
 
 					this.text = new THREE.Mesh(geometry, material);
-					geometry.computeBoundingBox();
-					//-2.4720004501342787 x
-					//20.643999099731445  l
-
-					//-5.150000137329112 x
-					//9.687999725341797 l
-
-					//9.03489994215556 x
-					//5.125999927520752 l
-
-					//11.335659155487376 x
-					//15.765999794006348 l
-
-					//	console.log("aadsdasds  " + (20.643999099731445 - 9.687999725341797) / (-2.4720004501342787 - -5.150000137329112)) = 4.091113014977945;
-					//	console.log("aadsdasds**  " + (20.643999099731445 - -2.4720004501342787 * 4.091113014977945)) = 30.75723231430713;
-
-
-					//console.log("aadsdasds  " + (5.125999927520752 - 15.765999794006348) / (9.03489994215556 - 11.335659155487376)) = 4.624560364609999
-					//console.log("aadsdasds**  " + (5.125999927520752 - 9.03489994215556 * 4.624560364609999)) = -36.656440243189024
+					this.geometry = geometry;
 
 					this.text.position.copy(position);
-					this.text.position.x = (geometry.boundingBox.max.x - -36.656440243189024) / 4.624560364609999;
+					this.text.scale.set(scale, scale, scale);
 					this.text.rotation.x = -0.5;
 					this.text.rotation.z = Math.PI;
-					this.text.scale.set(0.5, 0.5, 0.5);
-					this.scene.add(this.text);
-					resolve(this.text);
-				},
-				undefined,
-				reject,
-			);
-		});
-	}
 
-	async createEloRight(text, position, color = 0xffffff, size = 1) {
-		return new Promise((resolve, reject) => {
-			const loader = new FontLoader();
-
-			loader.load(
-				"https://threejs.org/examples/fonts/helvetiker_regular.typeface.json",
-				(font) => {
-					const geometry = new TextGeometry(text, {
-						font: font,
-						size: size,
-						height: 0.2,
-						curveSegments: 12,
-						bevelEnabled: false,
-					});
-
-					const material = new THREE.MeshStandardMaterial({
-						color: color,
-						metalness: 0,
-						roughness: 1,
-					});
-
-					this.text = new THREE.Mesh(geometry, material);
-					geometry.computeBoundingBox();
-					//-2.4720004501342787 x
-					//20.643999099731445  l
-
-					//-5.150000137329112 x
-					//9.687999725341797 l
-
-					//	console.log("aadsdasds  " + (20.643999099731445 - 9.687999725341797) / (-2.4720004501342787 - -5.150000137329112)) = 4.091113014977945;
-					//	console.log("aadsdasds**  " + (20.643999099731445 - -2.4720004501342787 * 4.091113014977945)) = 30.75723231430713;
-
-					this.text.position.copy(position);
-					this.text.position.x = (geometry.boundingBox.max.x - 30.75723231430713) / 4.091113014977945;
-					this.text.rotation.x = -0.5;
-					this.text.rotation.z = Math.PI;
-					this.text.scale.set(0.5, 0.5, 0.5);
-					this.scene.add(this.text);
-					resolve(this.text);
-				},
-				undefined,
-				reject,
-			);
-		});
-	}
-
-		async createEloLeft(text, position, color = 0xffffff, size = 1) {
-		return new Promise((resolve, reject) => {
-			const loader = new FontLoader();
-
-			loader.load(
-				"https://threejs.org/examples/fonts/helvetiker_regular.typeface.json",
-				(font) => {
-					const geometry = new TextGeometry(text, {
-						font: font,
-						size: size,
-						height: 0.2,
-						curveSegments: 12,
-						bevelEnabled: false,
-					});
-
-					const material = new THREE.MeshStandardMaterial({
-						color: color,
-						metalness: 0,
-						roughness: 1,
-					});
-
-					this.text = new THREE.Mesh(geometry, material);
-					geometry.computeBoundingBox();
-					//-2.4720004501342787 x
-					//20.643999099731445  l
-
-					//-5.150000137329112 x
-					//9.687999725341797 l
-
-					//	console.log("aadsdasds  " + (20.643999099731445 - 9.687999725341797) / (-2.4720004501342787 - -5.150000137329112)) = 4.091113014977945;
-					//	console.log("aadsdasds**  " + (20.643999099731445 - -2.4720004501342787 * 4.091113014977945)) = 30.75723231430713;
-
-					this.text.position.copy(position);
-					this.text.position.x = (geometry.boundingBox.max.x - -36.656440243189024) / 4.624560364609999;
-					this.text.rotation.x = -0.5;
-					this.text.rotation.z = Math.PI;
-					this.text.scale.set(0.5, 0.5, 0.5);
 					this.scene.add(this.text);
 					resolve(this.text);
 				},
