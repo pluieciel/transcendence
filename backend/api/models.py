@@ -43,6 +43,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
+    is_connected = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     elo = models.IntegerField(default=1000)
     wins = models.IntegerField(default=0)

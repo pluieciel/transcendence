@@ -3,7 +3,7 @@ from django.core.cache import cache
 from channels.generic.http import AsyncHttpConsumer
 from channels.db import database_sync_to_async
 from api.utils import generate_jwt_cookie
-from api.db_utils import get_user_exists
+from api.db_utils import get_user_exists, connect_user
 import json
 
 class LoginConsumer(AsyncHttpConsumer):
@@ -53,7 +53,14 @@ class LoginConsumer(AsyncHttpConsumer):
 				}
 				return await self.send_response(401, json.dumps(response_data).encode(),
 					headers=[(b"Content-Type", b"application/json")])
-
+			if not await connect_user(user=user):
+				response_data = {
+					'success': False,
+					'message': 'User is already connected'
+				}
+				return await self.send_response(401, json.dumps(response_data).encode(),
+					headers=[(b"Content-Type", b"application/json")])
+			
 			is_2fa_enabled = user.is_2fa_enabled
 
 			if not is_2fa_enabled:
@@ -69,6 +76,8 @@ class LoginConsumer(AsyncHttpConsumer):
 					'message': '2FA required',
 					'is_2fa_enabled': is_2fa_enabled,
 				}
+
+
 
 			return await self.send_response(200, json.dumps(response_data).encode(),
 				headers=[(b"Content-Type", b"application/json"), (b"Set-Cookie", generate_jwt_cookie(user))])

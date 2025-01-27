@@ -21,3 +21,26 @@ def get_user_by_name(username):
 def get_user(user_id):
 	User = get_user_model()
 	return User.objects.get(id=user_id)
+
+@database_sync_to_async
+def connect_user(user):
+	try:
+		if (user.is_connected):
+			return False
+		user.is_connected = True
+		user.save()
+		print("Connected", flush=True)
+		return True
+	except Exception as e:
+		return False
+
+@database_sync_to_async
+def disconnect_user(user):
+	try:
+		user.is_connected = False
+		user.save()
+		print("Disconnected", flush=True)
+		return True
+	except Exception as e:
+		print(e, flush=True)
+		return False

@@ -307,9 +307,16 @@ a {
 
 #row {
 	display: flex;
-	/* justify-content: space-between;
-	vertical-align: text-top; */
 	justify-content: center;
     align-items: center;
 }
 
+#changeHeader {
+	font-size: 2rem;
+	font-weight: bold;
+}
+
+#changeHeader {
+	align-items: center;
+	/* text-align: center; */
+}

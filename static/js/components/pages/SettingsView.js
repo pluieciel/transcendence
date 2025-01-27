@@ -74,10 +74,23 @@ export default class SettingsView {
 			<button id="deleteAccBtn">Delete my account</button>
 		</div>
 	</div>
-    <div id="passwordError" class="alert alert-danger d-none"></div>
-
-        `;
-    }
+	<div class="modal fade" id="changeModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+		<div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+					<h1 class="modal-title fs-5" id="changeHeader"></h1>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+                <div class="modal-body">
+					<h2 class="modal-title fs-5" id="changeDialog"></h2>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div id="passwordError" class="alert alert-danger d-none"></div>
+					
+					`;
+				}
 
 	add2FAEventListeners() {
         const submit = this.container.querySelector('#totpForm');
@@ -263,9 +276,9 @@ export default class SettingsView {
 					const data = await response.json();
 				
 					if (data.success) {
-						console.log("changing display name success");
+						this.message(true, 'Display name changed to \'' + data['displayName'] + '\'');
 					} else {
-						console.log("changing display name failed");
+						document.getElementById('changeDialog').innerHTML = 'Display name changed failed';
 					}
 				} catch (error) {
 					console.error(error);
@@ -314,12 +327,11 @@ export default class SettingsView {
 		}
 		return true;
 	}
-	
-	error(error) {
-		const errorDiv = this.container.querySelector('#passwordError');
 
-		errorDiv.textContent = 'error: ' + error;
-		errorDiv.classList.remove('d-none');
-		return;
+	message(good, message) {
+		let emoji = good ? "<i class=\"fa-solid fa-square-check\" style=\"color:green\"></i> " : "<i class=\"fa-solid fa-square-xmark\" style=\"color:red\"></i> ";
+		new bootstrap.Modal(this.container.querySelector('#changeModal')).show();
+		document.getElementById('changeHeader').innerHTML = emoji + "Success !";
+		document.getElementById('changeDialog').innerHTML = message;
 	}
 }
