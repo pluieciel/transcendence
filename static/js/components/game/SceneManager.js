@@ -19,6 +19,94 @@ import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js"
 // import { ShaderPass } from "three/addons/postprocessing/ShaderPass.js";
 import { SMAAPass } from "three/addons/postprocessing/SMAAPass.js";
 
+class TextManager {
+	constructor(scene) {
+		this.scene = scene;
+		this.font = null;
+		this.meshes = new Map(); // Store all text meshes with identifiers
+		this.positions = {
+			scoreLeft: new THREE.Vector3(2.27, -21.1, -11.3),
+			scoreRight: new THREE.Vector3(-1.83, -21.1, -11.3),
+			nameLeft: new THREE.Vector3(9.1, -23, -10.4),
+			nameRight: new THREE.Vector3(-8.8, -23, -10.4),
+			eloLeft: new THREE.Vector3(9.1, -20.7, -11.9),
+			eloRight: new THREE.Vector3(-8.8, -20.7, -11.9),
+		};
+	}
+
+	async initialize() {
+		await this.loadFont();
+		await this.createInitialTexts();
+	}
+
+	async loadFont() {
+		return new Promise((resolve, reject) => {
+			const loader = new FontLoader();
+			loader.load(
+				"https://threejs.org/examples/fonts/helvetiker_regular.typeface.json",
+				(font) => {
+					this.font = font;
+					resolve();
+				},
+				undefined,
+				reject,
+			);
+		});
+	}
+
+	createText(text, position, color = 0x00ffff, scale = 1) {
+		const geometry = new TextGeometry(text, {
+			font: this.font,
+			size: 2,
+			height: 0.2,
+			curveSegments: 12,
+			bevelEnabled: false,
+		});
+
+		geometry.computeBoundingBox();
+		geometry.translate(-geometry.boundingBox.max.x / 2, 0, 0);
+
+		const material = new THREE.MeshStandardMaterial({
+			color: color,
+			metalness: 0,
+			roughness: 1,
+		});
+
+		const mesh = new THREE.Mesh(geometry, material);
+		mesh.position.copy(position);
+		mesh.scale.set(scale, scale, scale);
+		mesh.rotation.x = -0.5;
+		mesh.rotation.z = Math.PI;
+
+		return mesh;
+	}
+
+	async createInitialTexts() {
+		// Create initial scores
+		this.updateScore("left", "0");
+		this.updateScore("right", "0");
+
+		// Create names and elos
+		this.updateText("nameLeft", "Player 1", 0.5);
+		this.updateText("nameRight", "Player 2", 0.5);
+		this.updateText("eloLeft", "[1200]", 0.5);
+		this.updateText("eloRight", "[900]", 0.5);
+	}
+
+	updateText(id, newText, scale = 1) {
+		if (this.meshes.has(id)) {
+			this.scene.remove(this.meshes.get(id));
+		}
+
+		const mesh = this.createText(newText, this.positions[id], 0x00ffff, scale);
+		this.scene.add(mesh);
+		this.meshes.set(id, mesh);
+	}
+
+	updateScore(side, score) {
+		this.updateText(`score${side.charAt(0).toUpperCase() + side.slice(1)}`, score, 1);
+	}
+}
 export class SceneManager {
 	constructor(loading, renderer, antialiasing, bloom) {
 		this.paddles = [];
@@ -41,8 +129,10 @@ export class SceneManager {
 		this.initializeComponents();
 		this.setupScene();
 
-		this.text = null;
-		this.geometry = null;
+		this.textManager = null;
+
+		this.scoreLeft = null;
+		this.scoreRight = null;
 
 		this.bloomParams = {
 			exposure: 1,
@@ -167,11 +257,13 @@ export class SceneManager {
 	// 	});
 	// }
 
-	initializeComponents() {
+	async initializeComponents() {
 		this.scene = new THREE.Scene();
 		this.createCamera();
 		this.bonuses = new Bonuses(this.scene);
 		this.UIManager = new UIManager();
+		this.textManager = new TextManager(this.scene);
+		await this.textManager.initialize();
 	}
 
 	setupScene() {
@@ -241,26 +333,10 @@ export class SceneManager {
 				this.createDebugBall(),
 				this.createDebugBounds(),
 				this.bonuses.createBonuses(),
-
-				//Score Right
-				this.createText("10", new THREE.Vector3(-1.83, -21.1, -11.3), 0x00ffff, 1),
-				//Name Right
-				this.createText("Playeeeeeer", new THREE.Vector3(-8.8, -23, -10.4), 0x00ffff, 0.5),
-				//Elo Right
-				this.createText("[900]", new THREE.Vector3(-8.8, -20.7, -11.9), 0x00ffff, 0.5),
-
-				//Score Left
-				this.createText("9", new THREE.Vector3(2.27, -21.1, -11.3), 0x00ffff, 1),
-				//Name Left
-				this.createText("abc", new THREE.Vector3(9.1, -23, -10.4), 0x00ffff, 0.5),
-				//Elo Left
-				this.createText("[1200]", new THREE.Vector3(9.1, -20.7, -11.9), 0x00ffff, 0.5),
-
 				this.createPlayerAvatar("/js/components/game/Textures/valgrant.jpeg", new THREE.Vector3(17.3, -21.9, -11)),
 				this.createPlayerAvatar("/js/components/game/Textures/image.png", new THREE.Vector3(-16.8, -21.9, -11)),
 			]);
-			//14.7 to 17.3
-			//-14.7 to -16.8
+
 			this.bonuses.table.scale.set(4.14, 4.14, 4.14);
 			this.bonuses.table.position.x = 0;
 			this.bonuses.table.position.y = 1.59;
@@ -282,7 +358,14 @@ export class SceneManager {
 			console.error("Failed to create game objects:", error);
 		}
 	}
+	updateScore(side, score) {
+		this.textManager.updateScore(side, score.toString());
+	}
 
+	updatePlayerInfo(side, name, elo) {
+		this.textManager.updateText(`name${side.charAt(0).toUpperCase() + side.slice(1)}`, name, 0.5);
+		this.textManager.updateText(`elo${side.charAt(0).toUpperCase() + side.slice(1)}`, `[${elo}]`, 0.5);
+	}
 	createPlayerAvatar(imageUrl, position) {
 		return new Promise((resolve, reject) => {
 			const textureLoader = new THREE.TextureLoader();
@@ -325,53 +408,6 @@ export class SceneManager {
 					console.error("Error loading avatar texture:", error);
 					reject(error);
 				},
-			);
-		});
-	}
-
-	async createText(text, position, color = 0xffffff, scale = 1) {
-		return new Promise((resolve, reject) => {
-			const loader = new FontLoader();
-
-			loader.load(
-				"https://threejs.org/examples/fonts/helvetiker_regular.typeface.json",
-				(font) => {
-					const geometry = new TextGeometry(text, {
-						font: font,
-						size: 2,
-						height: 0.2,
-						curveSegments: 12,
-						bevelEnabled: false,
-					});
-
-					const material = new THREE.MeshStandardMaterial({
-						color: color,
-						metalness: 0,
-						roughness: 1,
-					});
-
-					this.text = new THREE.Mesh(geometry, material);
-					this.geometry = geometry;
-					geometry.computeBoundingBox();
-
-					// Center the geometry by translating it
-					if (geometry.boundingBox) {
-						geometry.translate(-geometry.boundingBox.max.x / 2, 0, 0);
-					}
-
-					this.text = new THREE.Mesh(geometry, material);
-					this.geometry = geometry;
-
-					this.text.position.copy(position);
-					this.text.scale.set(scale, scale, scale);
-					this.text.rotation.x = -0.5;
-					this.text.rotation.z = Math.PI;
-
-					this.scene.add(this.text);
-					resolve(this.text);
-				},
-				undefined,
-				reject,
 			);
 		});
 	}
