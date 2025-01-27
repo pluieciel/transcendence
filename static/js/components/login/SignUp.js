@@ -3,6 +3,7 @@ export default class SignUp {
         this.container = container;
         this.render();
         this.addEventListeners();
+        this.loadReCaptcha();
     }
 
     render() {
@@ -44,14 +45,21 @@ export default class SignUp {
                                     accept="image/*"
                                 >
                             </div>
-
                             <div id="passwordError" class="alert alert-danger d-none"></div>
+                            <div id="recaptcha"></div>
                             <button id="signupBtn" type="submit" class="btn btn-primary w-100">Sign Up</button>
                         </form>
                     </div>
                 </div>
             </div>
         `;
+    }
+
+    loadReCaptcha() {
+        this.recaptchaWidgetId = grecaptcha.render('recaptcha', {
+            'sitekey' : '6LfelMQqAAAAAAAx7-xEMf7gg2mnmcPba7psj1Q1',
+            'theme' : 'dark',
+          });
     }
 
     addEventListeners() {
@@ -63,6 +71,7 @@ export default class SignUp {
             const username = this.container.querySelector('#usrnm-form').value;
             const password = this.container.querySelector('#pwd-form').value;
             const confirmPassword = this.container.querySelector('#cfm-pwd-form').value;
+            const recaptchaToken = grecaptcha.getResponse(this.recaptchaWidgetId);
             const errorDiv = this.container.querySelector('#passwordError');
 
 			if (!password || !confirmPassword || !username)
@@ -80,6 +89,7 @@ export default class SignUp {
             const hashedPassword = CryptoJS.SHA256(password).toString();
             formData.append('username', username);
             formData.append('password', hashedPassword);
+            formData.append('recaptcha_token', recaptchaToken);
             if (originalFile) {
                 if (originalFile.size > MAX_FILE_SIZE) {
                     errorDiv.textContent = 'File size exceeds the 2MB limit';
