@@ -315,11 +315,7 @@ a {
 #changeHeader {
 	font-size: 2rem;
 	font-weight: bold;
-}
-
-#changeHeader {
 	align-items: center;
-	/* text-align: center; */
 }
 
 .disabled {
