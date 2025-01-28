@@ -2,8 +2,6 @@ import { Renderer } from "./Renderer.js";
 import { SceneManager } from "./SceneManager.js";
 import { InputManager } from "./InputManager.js";
 import { ParticleSystem } from "./ParticleSystem.js";
-import { Loading } from "./Loading.js";
-//import * as THREE from 'three';
 import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
 
 export class Renderers {
@@ -29,73 +27,57 @@ export class Renderers {
 
 export class Game {
 	constructor(canvas, ws) {
-		this.antialiasing = true;
-		this.bloom = true;
-		this.renderer = new Renderers(canvas, this.antialiasing);
-		this.loading = new Loading();
-		//this.renderer = new Renderer(canvas);
-		this.sceneManager = new SceneManager(this.loading, this.renderer.renderer, this.antialiasing, this.bloom);
-		this.inputManager = new InputManager();
-		this.uiManager = this.sceneManager.UIManager;
 		this.ws = ws;
-
-		this.ball = null;
 		this.initialized = false;
-		this.gameStarted = false;
-		this.sceneInitialized = false;
+		this.antialiasing = false;
+		this.canvas = canvas;
+		this.bloom = true;
+		this.renderer = null;
 
-		this.onGameEnd = null;
-
-		this.uiManager.setOverlayVisibility(true);
-		this.uiManager.setOverText("Waiting for server...");
+		this.sceneManager = null;
+		this.inputManager = null;
 
 		this.setupWebSocket();
 
-		this.particleSystem = null;
 		this.lastTime = 0;
+
+		//DEBUG
+		this.enableDebugMode(true);
 		this.axis = "x";
 		this.mode = "position";
 		this.factor = 0.1;
-
-		this.enableDebugMode(true);
-		this.loading.onComplete = () => {
-			this.sendInitDone();
-			this.sceneManager.bonuses.displayPowerUp(0, new THREE.Vector3(0, 0, 0));
-		};
 	}
 
-	handleUnrecognizedToken() {}
+	async initialize(initData) {
+		try {
+			this.renderer = new Renderers(this.canvas, this.antialiasing);
+			this.sceneManager = new SceneManager(this.renderer.renderer, this.antialiasing, this.bloom);
+			this.inputManager = new InputManager(this.ws);
+			await this.sceneManager.initialize(initData);
+			this.particleSystem = new ParticleSystem(this.sceneManager.scene);
+
+			this.animate();
+			this.initialized = true;
+			this.sendInitDone();
+		} catch (error) {
+			console.error("Failed to initialize game:", error);
+		}
+	}
 
 	setupWebSocket() {
-		//const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-		//const host = window.location.host;
-		//const token = window.app.getToken();
-		//if (!token) this.handleUnrecognizedToken();
-		//const wsUrl = `${protocol}//${host}/ws/game/?token=${token}`;
-
-		//this.ws = new WebSocket(wsUrl);
-		this.inputManager.ws = this.ws;
-
 		this.ws.onmessage = (event) => {
 			const message = JSON.parse(event.data);
-			this.uiManager.setOverText(message.message);
-			if (message.type === "game_update") {
-				this.handleGameUpdate(message.data);
+			switch (message.type) {
+				case "init":
+					this.initialize(message.data);
+					break;
+				case "game_update":
+					if (this.initialized) {
+						this.handleGameUpdate(message.data);
+					}
+					break;
 			}
 		};
-	}
-
-	initialize(data, side) {
-		// this.sceneManager.setupLights();
-		// this.sceneManager.createObjects();
-		// this.sceneManager.hideObjects();
-		this.ball = this.sceneManager.ball;
-		this.sceneInitialized = this.validateSceneInitialization();
-		this.animate();
-
-		this.particleSystem = new ParticleSystem(this.sceneManager.scene);
-		this.handleInit(data, side);
-		this.sendInitDone();
 	}
 
 	emitParticles(position = new THREE.Vector3(0, 0, 0)) {
@@ -109,46 +91,6 @@ export class Game {
 		}
 	}
 
-	validateSceneInitialization() {
-		return (
-			this.sceneManager.paddles.length === 2 &&
-			this.sceneManager.ball !== null &&
-			this.sceneManager.topBorder !== null &&
-			this.sceneManager.bottomBorder !== null &&
-			this.sceneManager.leftBorder !== null &&
-			this.sceneManager.rightBorder !== null &&
-			this.sceneManager.playerLeftScore !== null &&
-			this.sceneManager.playerRightScore !== null &&
-			this.sceneManager.playerLeftName !== null &&
-			this.sceneManager.playerRightName !== null
-		);
-	}
-
-	handleInit(data) {
-		const positions = data.positions;
-		//this.sceneManager.paddles[0].position.set(positions.player_left.x, positions.player_left.y, positions.player_left.z);
-		//this.sceneManager.paddles[1].position.set(positions.player_right.x, positions.player_right.y, positions.player_right.z);
-		//this.sceneManager.paddles[0].visible = false;
-
-		//this.sceneManager.ball.position.set(positions.ball.x, positions.ball.y, positions.ball.z);
-
-		this.sceneManager.topBorder.position.set(positions.borders.top.x, positions.borders.top.y, positions.borders.top.z);
-		this.sceneManager.bottomBorder.position.set(positions.borders.bottom.x, positions.borders.bottom.y, positions.borders.bottom.z);
-		this.sceneManager.leftBorder.position.set(positions.borders.left.x, positions.borders.left.y, positions.borders.left.z);
-		this.sceneManager.rightBorder.position.set(positions.borders.right.x, positions.borders.right.y, positions.borders.right.z);
-		console.log("x " + positions.borders.left.x + " y : " + positions.borders.left.y + " z " + positions.borders.left.z);
-		this.uiManager.updateNameLeft(data.player.left.name + " [" + data.player.left.rank + "]");
-		this.uiManager.updateNameRight(data.player.right.name + " [" + data.player.right.rank + "]");
-
-		this.uiManager.updateScoreLeft(data.player.left.score);
-		this.uiManager.updateScoreRight(data.player.right.score);
-
-		//this.sceneManager.showObjects();
-
-		this.uiManager.setOverlayVisibility(true);
-		this.uiManager.setOverText("Waiting for game start...");
-	}
-
 	sendInitDone() {
 		if (this.ws && this.ws.readyState === WebSocket.OPEN) {
 			console.log(`Init sucessfull`); // Debug log
@@ -158,6 +100,14 @@ export class Game {
 				}),
 			);
 		}
+		this.printSceneObjects();
+	}
+
+	printSceneObjects() {
+		console.log("Scene Objects:");
+		this.sceneManager.scene.children.forEach((child, index) => {
+			console.log(`Object ${index}:`, child);
+		});
 	}
 
 	handleGameUpdate(data) {
@@ -165,80 +115,60 @@ export class Game {
 		if (data.player) {
 			const leftPos = data.positions.player_left;
 			const rightPos = data.positions.player_right;
-
 			if (this.sceneManager.debugMod) {
 				this.sceneManager.updateDebugPositions(data.positions);
-				this.sceneManager.bonuses.paddle.visible = false;
-				this.sceneManager.bonuses.paddleRed.visible = false;
-				this.sceneManager.bonuses.ball.visible = false;
+				this.sceneManager.leftPaddle.visible = false;
+				this.sceneManager.rightPaddle.visible = false;
+				this.sceneManager.ball.visible = false;
 			} else {
-				if (this.sceneManager.bonuses.paddle) {
-					this.sceneManager.bonuses.paddle.position.set(leftPos.x, leftPos.y - 0.2, leftPos.z);
-					this.sceneManager.bonuses.paddle.visible = true;
+				if (this.sceneManager.leftPaddle) {
+					this.sceneManager.leftPaddle.position.set(rightPos.x, rightPos.y - 0.2, rightPos.z);
+					this.sceneManager.leftPaddle.visible = true;
 				}
-				if (this.sceneManager.bonuses.paddleRed) {
-					this.sceneManager.bonuses.paddleRed.position.set(rightPos.x, rightPos.y - 0.2, rightPos.z);
-					this.sceneManager.bonuses.paddleRed.visible = true;
+				if (this.sceneManager.rightPaddle) {
+					this.sceneManager.rightPaddle.position.set(leftPos.x, leftPos.y - 0.2, leftPos.z);
+					this.sceneManager.rightPaddle.visible = true;
 				}
-
-				if (data.positions.ball && this.sceneManager.bonuses.ball) {
-					this.sceneManager.bonuses.ball.position.set(data.positions.ball.x, data.positions.ball.y, data.positions.ball.z);
-					this.sceneManager.bonuses.ball.visible = true;
+				if (data.positions.ball && this.sceneManager.ball) {
+					this.sceneManager.ball.position.set(data.positions.ball.x, data.positions.ball.y, data.positions.ball.z);
+					this.sceneManager.ball.visible = true;
 				}
 			}
 
-			this.uiManager.updateScoreLeft(data.player.left.score);
-			this.uiManager.updateScoreRight(data.player.right.score);
+			this.sceneManager.textManager.updateScore("left", data.player.left.score.toString());
+			this.sceneManager.textManager.updateScore("right", data.player.right.score.toString());
 		}
-
 		if (data.trajectory) {
 			this.sceneManager.updateTrajectory(data.trajectory);
 		}
-
 		if (data.events && data.events.length > 0) {
 			data.events.forEach((event) => {
 				if (event.type === "score" && event.position) {
 					const scorePosition = new THREE.Vector3(event.position.x, event.position.y, event.position.z);
 					this.emitParticles(scorePosition);
-					//this.sceneManager.hideBall();
 					console.log("Spawning particles at:", scorePosition);
 				}
 				if (event.type === "game_end" && event.winner) {
 					game_end = true;
-					this.uiManager.setOverText(event.winner + " wins");
-					this.uiManager.setOverlayVisibility(true);
+					//this.uiManager.setOverText(event.winner + " wins");
+					//	this.uiManager.setOverlayVisibility(true);
 					this.ws.close(1000);
 					console.log("Websocket closed");
 					this.handleGameEnd();
 				}
 				if (event.type == "ball_last_hitter") {
 					if (event.value == "RIGHT") {
-						this.sceneManager.bonuses.updateBallColor(0xff0000, 0xff0000);
+						this.sceneManager.updateBallColor(0xff0000, 0xff0000);
 					} else if (event.value == "LEFT") {
-						this.sceneManager.bonuses.updateBallColor(0x00ffff, 0x00ffff);
+						this.sceneManager.updateBallColor(0x00ffff, 0x00ffff);
 					} else {
-						this.sceneManager.bonuses.updateBallColor(0x676a6e, 0x676a6e);
+						this.sceneManager.updateBallColor(0x676a6e, 0x676a6e);
 					}
 				}
 			});
 		}
-
 		if (!this.gameStarted && game_end == false) {
 			this.gameStarted = true;
-			this.uiManager.setOverlayVisibility(false);
-		}
-	}
-
-	getScene() {
-		return this.sceneManager.scene;
-	}
-
-	handleGameEnd() {
-		// Your existing game end logic
-
-		// Call the callback if it exists
-		if (this.onGameEnd) {
-			this.onGameEnd();
 		}
 	}
 
@@ -247,28 +177,12 @@ export class Game {
 
 		const deltaTime = (currentTime - this.lastTime) / 1000;
 		this.lastTime = currentTime;
-		//console.log(1 / deltaTime);
 
 		if (this.particleSystem) {
 			this.particleSystem.update(deltaTime);
 		}
-		if (this.sceneManager.model) {
-			this.sceneManager.model.rotation.y += 0.02;
-			//this.sceneManager.model.rotation.z += 0.02;
-			//this.sceneManager.model.rotation.x += 0.02;
-		}
-		if (this.sceneManager.bonuses.ball) {
-			this.sceneManager.bonuses.ball.rotation.x += 0.02;
-			//this.sceneManager.bonuses.ball.rotation.z += 0.02;
-			this.sceneManager.bonuses.ball.rotation.y += 0.02;
-		}
-		/*if (this.sceneManager.camera) {
-			console.log(this.sceneManager.camera.position);
-			console.log(this.sceneManager.camera.rotation);
-			} else console.log("truc");*/
 
 		this.sceneManager.composer.render();
-		//this.renderer.render(this.sceneManager.scene, this.sceneManager.camera);
 	}
 
 	enableDebugMode(editor) {
@@ -284,7 +198,12 @@ export class Game {
 					this.mode = "position";
 				} else if (event.code == "KeyO") {
 					objectToModify = this.sceneManager.text;
-					console.log("Object set : " + objectToModify);
+					if (objectToModify && objectToModify.geometry) {
+						objectToModify.geometry.computeBoundingBox();
+						const box = objectToModify.geometry.boundingBox;
+						const centerX = objectToModify.position.x + ((box.max.x + box.min.x) / 2) * objectToModify.scale.x;
+						console.log("Object set. Current center X: " + centerX);
+					}
 				} else if (event.code == "KeyS") {
 					this.mode = "scale";
 					console.log("Entering scale mode");
@@ -313,7 +232,14 @@ export class Game {
 					} else if (this.mode == "position") {
 						if (this.axis == "x") {
 							objectToModify.position.x += this.factor;
-							console.log("New x position is : " + objectToModify.position.x);
+							// Calculate and display center position
+							if (objectToModify.geometry) {
+								objectToModify.geometry.computeBoundingBox();
+								const box = objectToModify.geometry.boundingBox;
+								const centerX = objectToModify.position.x + ((box.max.x + box.min.x) / 2) * objectToModify.scale.x;
+								console.log("New position x: " + objectToModify.position.x);
+								console.log("Current center X: " + centerX);
+							}
 						} else if (this.axis == "y") {
 							objectToModify.position.y += this.factor;
 							console.log("New position y is : " + objectToModify.position.y);

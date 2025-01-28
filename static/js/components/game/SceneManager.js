@@ -1,9 +1,6 @@
 import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
-import { UIManager } from "./UIManager.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { Bonuses } from "./BonusSystem.js";
-import { Loading } from "./Loading.js";
 
 //Text
 import { TextGeometry } from "three/addons/geometries/TextGeometry.js";
@@ -15,12 +12,10 @@ import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
 
 //Anti aliasing
-// import { FXAAShader } from "three/addons/shaders/FXAAShader.js";
-// import { ShaderPass } from "three/addons/postprocessing/ShaderPass.js";
 import { SMAAPass } from "three/addons/postprocessing/SMAAPass.js";
 
 export class SceneManager {
-	constructor(loading, renderer, antialiasing, bloom) {
+	constructor(renderer, antialiasing, bloom) {
 		this.paddles = [];
 		this.ball = null;
 		this.topBorder = null;
@@ -34,14 +29,15 @@ export class SceneManager {
 		this.debugMod = false;
 		this.light = null;
 
-		this.loading = loading;
-		this.loading.addComponent("scene");
+		this.leftPaddle = null;
+		this.rightPaddle = null;
 		this.antialiasing = antialiasing;
 		this.bloom = bloom;
-		this.initializeComponents();
-		this.setupScene();
 
-		this.text = null;
+		this.textManager = null;
+
+		this.scoreLeft = null;
+		this.scoreRight = null;
 
 		this.bloomParams = {
 			exposure: 1,
@@ -51,9 +47,77 @@ export class SceneManager {
 			enabled: this.bloom,
 		};
 		this.composer = null;
-		if (this.renderer) {
-			// Only setup post-processing if renderer exists
-			this.setupPostProcessing();
+
+		this.colorTextureMap = {
+			//Red
+			"#E71200": {
+				leftTexture: "/js/components/game/Textures/TextureLeftRed.png",
+				rightTexture: "/js/components/game/Textures/TextureRightRed.png",
+			},
+			//Green
+			"#00AD06": {
+				leftTexture: "/js/components/game/Textures/TextureLeftGreen.png",
+				rightTexture: "/js/components/game/Textures/TextureRightGreen.png",
+			},
+			//Cyan
+			"#00BDD1": {
+				leftTexture: "/js/components/game/Textures/TextureLeftCyan.png",
+				rightTexture: "/js/components/game/Textures/TextureRightCyan.png",
+			},
+			//Blue
+			"#0004cc": {
+				leftTexture: "/js/components/game/Textures/TextureLeftBlue.png",
+				rightTexture: "/js/components/game/Textures/TextureRightBlue.png",
+			},
+			//Orange
+			"#e67e00": {
+				leftTexture: "/js/components/game/Textures/TextureLeftOrange.png",
+				rightTexture: "/js/components/game/Textures/TextureRightOrange.png",
+			},
+			//SoftGreen
+			"#OEC384": {
+				leftTexture: "/js/components/game/Textures/TextureLeftSoftGreen.png",
+				rightTexture: "/js/components/game/Textures/TextureRightSoftGreen.png",
+			},
+			//White
+			"#E6E3E1": {
+				leftTexture: "/js/components/game/Textures/TextureLeftWhite.png",
+				rightTexture: "/js/components/game/Textures/TextureRightWhite.png",
+			},
+			//Pink
+			"#EC008F": {
+				leftTexture: "/js/components/game/Textures/TextureLeftPink.png",
+				rightTexture: "/js/components/game/Textures/TextureRightPink.png",
+			},
+			//Purple
+			"#6400C4": {
+				leftTexture: "/js/components/game/Textures/TextureLeftPurple.png",
+				rightTexture: "/js/components/game/Textures/TextureRightPurple.png",
+			},
+		};
+	}
+
+	async initialize(data) {
+		try {
+			//Create Scene Lights Camera
+			this.scene = new THREE.Scene();
+			this.setupLights();
+			this.createCamera();
+
+			//Create TextManager
+			this.textManager = new TextManager(this.scene);
+			await this.textManager.initialize(data);
+
+			await this.createGameObjects(data);
+
+			if (this.renderer) {
+				this.setupPostProcessing();
+			}
+
+			return true;
+		} catch (error) {
+			console.error("Failed to initialize scene:", error);
+			throw error;
 		}
 	}
 
@@ -118,66 +182,6 @@ export class SceneManager {
 		});
 	}
 
-	// setupPostProcessing() {
-	// 	if (!this.renderer) {
-	// 		console.error("Renderer is not initialized");
-	// 		return;
-	// 	}
-	// 	if (!this.scene || !this.camera) {
-	// 		console.error("Scene or camera not initialized");
-	// 		return;
-	// 	}
-
-	// 	const renderScene = new RenderPass(this.scene, this.camera);
-
-	// 	// Add FXAA
-	// 	const fxaaPass = new ShaderPass(FXAAShader);
-	// 	const pixelRatio = this.renderer.getPixelRatio();
-	// 	fxaaPass.material.uniforms["resolution"].value.x = 1 / (window.innerWidth * pixelRatio);
-	// 	fxaaPass.material.uniforms["resolution"].value.y = 1 / (window.innerHeight * pixelRatio);
-
-	// 	const bloomPass = new UnrealBloomPass(
-	// 		new THREE.Vector2(window.innerWidth, window.innerHeight),
-	// 		this.bloomParams.bloomStrength,
-	// 		this.bloomParams.bloomRadius,
-	// 		this.bloomParams.bloomThreshold,
-	// 	);
-
-	// 	this.composer = new EffectComposer(this.renderer);
-	// 	this.composer.addPass(renderScene);
-	// 	this.composer.addPass(bloomPass);
-	// 	this.composer.addPass(fxaaPass); // Add FXAA as the last pass
-
-	// 	// Handle window resize
-	// 	window.addEventListener("resize", () => {
-	// 		const width = window.innerWidth;
-	// 		const height = window.innerHeight;
-
-	// 		this.camera.aspect = width / height;
-	// 		this.camera.updateProjectionMatrix();
-
-	// 		this.renderer.setSize(width, height);
-	// 		this.composer.setSize(width, height);
-
-	// 		// Update FXAA resolution
-	// 		const newPixelRatio = this.renderer.getPixelRatio();
-	// 		fxaaPass.material.uniforms["resolution"].value.x = 1 / (width * newPixelRatio);
-	// 		fxaaPass.material.uniforms["resolution"].value.y = 1 / (height * newPixelRatio);
-	// 	});
-	// }
-
-	initializeComponents() {
-		this.scene = new THREE.Scene();
-		this.createCamera();
-		this.bonuses = new Bonuses(this.scene);
-		this.UIManager = new UIManager();
-	}
-
-	setupScene() {
-		this.setupLights();
-		this.createGameObjects();
-	}
-
 	toggleDebugMode() {
 		this.debugMod = !this.debugMod;
 
@@ -194,16 +198,8 @@ export class SceneManager {
 	createCamera() {
 		this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
 
-		// Set initial position and rotation
 		this.camera.position.set(0, -8, 50);
 		this.camera.rotation.z = -Math.PI;
-
-		/*this.controls = new OrbitControls(this.camera, document.querySelector("canvas"));
-		this.controls.enableDamping = true;
-		this.controls.dampingFactor = 0.05;
-		this.controls.minDistance = 10;
-		this.controls.maxDistance = 50;
-	this.controls.update();*/
 	}
 
 	updateTrajectory(trajectoryPoints) {
@@ -228,54 +224,43 @@ export class SceneManager {
 
 	setupLights() {
 		this.light = new THREE.DirectionalLight(0xfafafa, 9);
-		//this.light.position.set(0, 136, 96);
 		this.light.position.set(0, 255, 158);
 		this.light.castShadow = true;
 		this.scene.add(this.light);
 	}
 
-	async createGameObjects() {
+	async createGameObjects(data) {
 		try {
 			await Promise.all([
 				this.createDebugBall(),
-				this.createDebugBounds(),
-				this.bonuses.createBonuses(),
-				this.createNameRight("valgrant", new THREE.Vector3(0, -23, -10.4), 0x00ffff, 2),
-				this.createNameLeft("jnunes42", new THREE.Vector3(0, -23, -10.4), 0x00ffff, 2),
-				this.createEloRight("[812]", new THREE.Vector3(0, -20.70, -11.90), 0x00ffff, 2),
-				this.createEloLeft("[1247]", new THREE.Vector3(0, -20.70, -11.90), 0x00ffff, 2),
-				this.createPlayerAvatar("/js/components/game/Textures/valgrant.jpeg", new THREE.Vector3(-14.7, -21.9, -11)),
-				this.createPlayerAvatar("/js/components/game/Textures/image.png", new THREE.Vector3(14.7, -21.9, -11)),
+				this.createDebugBounds(data),
+				this.createModels(data),
+				//TODO LINK FROM DB AVATAR
+				//LEFT
+				this.createPlayerAvatar("/js/components/game/Textures/valgrant.jpeg", new THREE.Vector3(17.3, -21.9, -11), data.player.left.color),
+				//RIGHT
+				this.createPlayerAvatar("/js/components/game/Textures/image.png", new THREE.Vector3(-16.8, -21.9, -11), data.player.right.color),
 			]);
-			this.bonuses.table.scale.set(4.14, 4.14, 4.14);
-			this.bonuses.table.position.x = 0;
-			this.bonuses.table.position.y = 1.59;
-			this.bonuses.table.position.z = -30.72;
-			this.bonuses.paddle.scale.set(0.75, 0.25, 0.5);
-			this.bonuses.paddle.position.x = -18;
-			this.bonuses.paddle.position.y = -3.2;
-			this.bonuses.paddle.position.z = -15;
-			this.bonuses.paddleRed.scale.set(0.6, 0.25, 0.5);
-			this.bonuses.paddleRed.position.x = 17.94;
-			this.bonuses.paddleRed.position.y = -3.2;
-			this.bonuses.paddleRed.position.z = -15;
-			this.bonuses.ball.position.x = 0;
-			this.bonuses.ball.position.y = -3;
-			this.bonuses.ball.position.z = -15;
-			this.bonuses.ball.scale.set(0.44, 0.44, 0.44);
 			this.createDebugPaddles();
 		} catch (error) {
 			console.error("Failed to create game objects:", error);
 		}
 	}
+	updateScore(side, score) {
+		this.textManager.updateScore(side, score.toString());
+	}
 
-	createPlayerAvatar(imageUrl, position) {
+	updatePlayerInfo(side, name, elo) {
+		this.textManager.updateText(`name${side.charAt(0).toUpperCase() + side.slice(1)}`, name, 0.5);
+		this.textManager.updateText(`elo${side.charAt(0).toUpperCase() + side.slice(1)}`, `[${elo}]`, 0.5);
+	}
+
+	createPlayerAvatar(imageUrl, position, color) {
 		return new Promise((resolve, reject) => {
 			const textureLoader = new THREE.TextureLoader();
 			textureLoader.load(
 				imageUrl,
 				(texture) => {
-					// Ensure proper texture encoding
 					texture.encoding = THREE.sRGBEncoding;
 					texture.needsUpdate = true;
 
@@ -283,27 +268,45 @@ export class SceneManager {
 					const width = 5;
 					const height = width / aspectRatio;
 
-					const geometry = new THREE.PlaneGeometry(width, height);
-					const material = new THREE.MeshBasicMaterial({
+					// Create the avatar plane
+					const avatarGeometry = new THREE.PlaneGeometry(width, height);
+					const avatarMaterial = new THREE.MeshBasicMaterial({
 						map: texture,
 						transparent: true,
 						side: THREE.DoubleSide,
-						//color: 0xffffff, // White color to not affect texture
 						opacity: 1,
 						depthWrite: true,
 						depthTest: true,
 					});
 
-					const avatar = new THREE.Mesh(geometry, material);
+					const avatar = new THREE.Mesh(avatarGeometry, avatarMaterial);
 					avatar.position.copy(position);
-
-					// Ensure proper texture display
-					avatar.material.map.flipY = false; // Try with and without this
+					avatar.material.map.flipY = false;
 					avatar.material.needsUpdate = true;
 					avatar.rotation.x = -0.5;
 					avatar.scale.set(0.8, 0.8, 0.8);
-					this.avatar = avatar;
+
+					// Create the background plane
+					const backgroundGeometry = new THREE.PlaneGeometry(width * 1.12, height * 1.12); // Slightly larger
+					const backgroundMaterial = new THREE.MeshBasicMaterial({
+						color: color,
+						side: THREE.DoubleSide,
+						opacity: 1,
+						roughness: 1,
+						metalness: 0,
+						depthWrite: true,
+						depthTest: true,
+					});
+
+					const background = new THREE.Mesh(backgroundGeometry, backgroundMaterial);
+					background.position.copy(position);
+					background.position.z -= 0.1; // Slightly behind the avatar
+					background.rotation.x = -0.5;
+					background.scale.set(0.8, 0.8, 0.8);
+
+					this.scene.add(background);
 					this.scene.add(avatar);
+
 					resolve(avatar);
 				},
 				undefined,
@@ -314,204 +317,9 @@ export class SceneManager {
 			);
 		});
 	}
-	async createNameRight(text, position, color = 0xffffff, size = 1) {
-		return new Promise((resolve, reject) => {
-			const loader = new FontLoader();
-
-			loader.load(
-				"https://threejs.org/examples/fonts/helvetiker_regular.typeface.json",
-				(font) => {
-					const geometry = new TextGeometry(text, {
-						font: font,
-						size: size,
-						height: 0.2,
-						curveSegments: 12,
-						bevelEnabled: false,
-					});
-
-					const material = new THREE.MeshStandardMaterial({
-						color: color,
-						metalness: 0,
-						roughness: 1,
-					});
-
-					this.text = new THREE.Mesh(geometry, material);
-					geometry.computeBoundingBox();
-					//-2.4720004501342787 x
-					//20.643999099731445  l
-
-					//-5.150000137329112 x
-					//9.687999725341797 l
-
-					//	console.log("aadsdasds  " + (20.643999099731445 - 9.687999725341797) / (-2.4720004501342787 - -5.150000137329112)) = 4.091113014977945;
-					//	console.log("aadsdasds**  " + (20.643999099731445 - -2.4720004501342787 * 4.091113014977945)) = 30.75723231430713;
-
-					this.text.position.copy(position);
-					this.text.position.x = (geometry.boundingBox.max.x - 30.75723231430713) / 4.091113014977945;
-					this.text.rotation.x = -0.5;
-					this.text.rotation.z = Math.PI;
-					this.text.scale.set(0.5, 0.5, 0.5);
-					this.scene.add(this.text);
-					resolve(this.text);
-				},
-				undefined,
-				reject,
-			);
-		});
-	}
-
-	async createNameLeft(text, position, color = 0xffffff, size = 1) {
-		return new Promise((resolve, reject) => {
-			const loader = new FontLoader();
-
-			loader.load(
-				"https://threejs.org/examples/fonts/helvetiker_regular.typeface.json",
-				(font) => {
-					const geometry = new TextGeometry(text, {
-						font: font,
-						size: size,
-						height: 0.2,
-						curveSegments: 12,
-						bevelEnabled: false,
-					});
-
-					const material = new THREE.MeshStandardMaterial({
-						color: color,
-						metalness: 0,
-						roughness: 1,
-					});
-
-					this.text = new THREE.Mesh(geometry, material);
-					geometry.computeBoundingBox();
-					//-2.4720004501342787 x
-					//20.643999099731445  l
-
-					//-5.150000137329112 x
-					//9.687999725341797 l
-
-					//9.03489994215556 x
-					//5.125999927520752 l
-
-					//11.335659155487376 x
-					//15.765999794006348 l
-
-					//	console.log("aadsdasds  " + (20.643999099731445 - 9.687999725341797) / (-2.4720004501342787 - -5.150000137329112)) = 4.091113014977945;
-					//	console.log("aadsdasds**  " + (20.643999099731445 - -2.4720004501342787 * 4.091113014977945)) = 30.75723231430713;
-
-
-					//console.log("aadsdasds  " + (5.125999927520752 - 15.765999794006348) / (9.03489994215556 - 11.335659155487376)) = 4.624560364609999
-					//console.log("aadsdasds**  " + (5.125999927520752 - 9.03489994215556 * 4.624560364609999)) = -36.656440243189024
-
-					this.text.position.copy(position);
-					this.text.position.x = (geometry.boundingBox.max.x - -36.656440243189024) / 4.624560364609999;
-					this.text.rotation.x = -0.5;
-					this.text.rotation.z = Math.PI;
-					this.text.scale.set(0.5, 0.5, 0.5);
-					this.scene.add(this.text);
-					resolve(this.text);
-				},
-				undefined,
-				reject,
-			);
-		});
-	}
-
-	async createEloRight(text, position, color = 0xffffff, size = 1) {
-		return new Promise((resolve, reject) => {
-			const loader = new FontLoader();
-
-			loader.load(
-				"https://threejs.org/examples/fonts/helvetiker_regular.typeface.json",
-				(font) => {
-					const geometry = new TextGeometry(text, {
-						font: font,
-						size: size,
-						height: 0.2,
-						curveSegments: 12,
-						bevelEnabled: false,
-					});
-
-					const material = new THREE.MeshStandardMaterial({
-						color: color,
-						metalness: 0,
-						roughness: 1,
-					});
-
-					this.text = new THREE.Mesh(geometry, material);
-					geometry.computeBoundingBox();
-					//-2.4720004501342787 x
-					//20.643999099731445  l
-
-					//-5.150000137329112 x
-					//9.687999725341797 l
-
-					//	console.log("aadsdasds  " + (20.643999099731445 - 9.687999725341797) / (-2.4720004501342787 - -5.150000137329112)) = 4.091113014977945;
-					//	console.log("aadsdasds**  " + (20.643999099731445 - -2.4720004501342787 * 4.091113014977945)) = 30.75723231430713;
-
-					this.text.position.copy(position);
-					this.text.position.x = (geometry.boundingBox.max.x - 30.75723231430713) / 4.091113014977945;
-					this.text.rotation.x = -0.5;
-					this.text.rotation.z = Math.PI;
-					this.text.scale.set(0.5, 0.5, 0.5);
-					this.scene.add(this.text);
-					resolve(this.text);
-				},
-				undefined,
-				reject,
-			);
-		});
-	}
-
-		async createEloLeft(text, position, color = 0xffffff, size = 1) {
-		return new Promise((resolve, reject) => {
-			const loader = new FontLoader();
-
-			loader.load(
-				"https://threejs.org/examples/fonts/helvetiker_regular.typeface.json",
-				(font) => {
-					const geometry = new TextGeometry(text, {
-						font: font,
-						size: size,
-						height: 0.2,
-						curveSegments: 12,
-						bevelEnabled: false,
-					});
-
-					const material = new THREE.MeshStandardMaterial({
-						color: color,
-						metalness: 0,
-						roughness: 1,
-					});
-
-					this.text = new THREE.Mesh(geometry, material);
-					geometry.computeBoundingBox();
-					//-2.4720004501342787 x
-					//20.643999099731445  l
-
-					//-5.150000137329112 x
-					//9.687999725341797 l
-
-					//	console.log("aadsdasds  " + (20.643999099731445 - 9.687999725341797) / (-2.4720004501342787 - -5.150000137329112)) = 4.091113014977945;
-					//	console.log("aadsdasds**  " + (20.643999099731445 - -2.4720004501342787 * 4.091113014977945)) = 30.75723231430713;
-
-					this.text.position.copy(position);
-					this.text.position.x = (geometry.boundingBox.max.x - -36.656440243189024) / 4.624560364609999;
-					this.text.rotation.x = -0.5;
-					this.text.rotation.z = Math.PI;
-					this.text.scale.set(0.5, 0.5, 0.5);
-					this.scene.add(this.text);
-					resolve(this.text);
-				},
-				undefined,
-				reject,
-			);
-		});
-	}
 
 	createDebugPaddles() {
-		const paddleGeometry = new THREE.BoxGeometry(this.bonuses.paddle.scale.z * 1.6, this.bonuses.paddle.scale.x * 6.666666667, this.bonuses.paddle.scale.y * 1.6);
-		console.log("Thickness : " + this.bonuses.paddle.scale.z * 1.6);
-		console.log("Height : " + this.bonuses.paddle.scale.x * 6.666666667);
+		const paddleGeometry = new THREE.BoxGeometry(this.leftPaddle.scale.z * 1.6, this.leftPaddle.scale.x * 6.666666667, this.leftPaddle.scale.y * 1.6);
 		const edges = new THREE.EdgesGeometry(paddleGeometry);
 		const material = new THREE.LineBasicMaterial({ color: 0x00ff00 });
 		const paddle1 = new THREE.LineSegments(edges, material);
@@ -535,7 +343,9 @@ export class SceneManager {
 		this.scene.add(sphere);
 	}
 
-	createDebugBounds() {
+	createDebugBounds(data) {
+		const positions = data.positions;
+
 		const material = new THREE.LineBasicMaterial({ color: 0x00ff00 });
 		const sideMat = new THREE.LineBasicMaterial({ color: 0x00ff00 });
 
@@ -557,6 +367,11 @@ export class SceneManager {
 		this.leftBorder.visible = this.debugMod;
 		this.rightBorder.visible = this.debugMod;
 
+		this.topBorder.position.set(positions.borders.top.x, positions.borders.top.y, positions.borders.top.z);
+		this.bottomBorder.position.set(positions.borders.bottom.x, positions.borders.bottom.y, positions.borders.bottom.z);
+		this.leftBorder.position.set(positions.borders.left.x, positions.borders.left.y, positions.borders.left.z);
+		this.rightBorder.position.set(positions.borders.right.x, positions.borders.right.y, positions.borders.right.z);
+
 		this.scene.add(this.topBorder);
 		this.scene.add(this.bottomBorder);
 		this.scene.add(this.leftBorder);
@@ -564,15 +379,12 @@ export class SceneManager {
 	}
 
 	updateDebugPositions(positions) {
-		// Update ball position
 		if (this.ball && positions.ball) {
 			this.ball.position.set(positions.ball.x, positions.ball.y, positions.ball.z || 0);
 		}
-
 		if (positions.player_left) {
 			this.paddles[0].position.set(positions.player_left.x, positions.player_left.y, positions.player_left.z);
 		}
-		// Right paddle
 		if (positions.player_right) {
 			this.paddles[1].position.set(positions.player_right.x, positions.player_right.y, positions.player_right.z);
 		}
@@ -580,5 +392,280 @@ export class SceneManager {
 
 	createDecor() {
 		this.createDebugBounds();
+	}
+
+	async createModels(data) {
+		const loader = new GLTFLoader();
+
+		try {
+			const tableScale = new THREE.Vector3(4.14, 4.14, 4.14);
+			const tablePos = new THREE.Vector3(0, 1.59, -30.72);
+			const leftPaddleScale = new THREE.Vector3(0.75, 0.25, 0.5);
+			const rightPaddlePos = new THREE.Vector3(-18, -3.2, -15);
+			const rightPaddleScale = new THREE.Vector3(0.75, 0.25, 0.5);
+			const leftPaddlePos = new THREE.Vector3(17.94, -3.2, -15);
+			const ballScale = new THREE.Vector3(0.44, 0.44, 0.44);
+			const ballPos = new THREE.Vector3(0, -3, -15);
+			const leftColor = data.player.left.color;
+			const rightColor = data.player.right.color;
+
+			this.table = await this.loadModelTable("/js/components/game/Table.glb", loader, leftColor, rightColor, tableScale, tablePos, "Table");
+			this.leftPaddle = await this.loadModel("/js/components/game/Paddle.glb", loader, leftColor, leftPaddleScale, leftPaddlePos, "Left Paddle");
+			this.rightPaddle = await this.loadModel("/js/components/game/Paddle.glb", loader, rightColor, rightPaddleScale, rightPaddlePos, "Right Paddle");
+
+			//Ball defaulted to grey color
+			this.ball = await this.loadModel("/js/components/game/Ball.glb", loader, "#5c6169", ballScale, ballPos, "Ball");
+
+			this.scene.add(this.table);
+			this.scene.add(this.leftPaddle);
+			this.scene.add(this.rightPaddle);
+			this.scene.add(this.ball);
+		} catch (error) {
+			console.error("Failed to load bonus models:", error);
+			throw error;
+		}
+	}
+
+	updateBallColor(color, emissionColor) {
+		if (this.ball && this.ballMat) {
+			this.ballMat.color.set(color);
+			this.ballMat.emissive.set(emissionColor);
+		}
+	}
+
+	loadModelTable(path, loader, colorLeft, colorRight, scale, position, name) {
+		return new Promise((resolve, reject) => {
+			const textureLoader = new THREE.TextureLoader();
+
+			loader.load(
+				path,
+				(gltf) => {
+					const model = gltf.scene;
+					model.scale.set(scale.x, scale.y, scale.z);
+					model.rotation.x = Math.PI / 2;
+					model.rotation.y = Math.PI / 2;
+					model.position.set(position.x, position.y, position.z);
+					model.visible = true;
+					model.name = name;
+
+					model.traverse((obj) => {
+						if (obj.isMesh) {
+							switch (obj.material.name) {
+								case "LeftBG":
+									textureLoader.load(
+										this.colorTextureMap[colorLeft].leftTexture,
+										(texture) => {
+											texture.encoding = THREE.sRGBEncoding;
+											texture.flipY = false; // Might need to adjust this
+											obj.material.map = texture;
+											obj.material.needsUpdate = true;
+										},
+										undefined,
+										(error) => {
+											console.error("Error loading texture:", error);
+										},
+									);
+									break;
+								case "RightBG":
+									textureLoader.load(
+										this.colorTextureMap[colorRight].rightTexture,
+										(texture) => {
+											texture.encoding = THREE.sRGBEncoding;
+											texture.flipY = false;
+											obj.material.map = texture;
+											obj.material.needsUpdate = true;
+										},
+										undefined,
+										(error) => {
+											console.error("Error loading texture:", error);
+										},
+									);
+									break;
+								case "LeftColor":
+									obj.material.color.set(colorLeft);
+									obj.material.emissive.set(colorLeft);
+									obj.material.emissiveIntensity = 4;
+									break;
+								case "RightColor":
+									obj.material.color.set(colorRight);
+									obj.material.emissive.set(colorRight);
+									obj.material.emissiveIntensity = 4;
+									break;
+								case "ButtonLeftInner":
+									obj.material.color.set(colorLeft);
+									obj.material.emissive.set(colorLeft);
+									obj.material.emissiveIntensity = 4;
+									break;
+								case "ButtonLeftOuter":
+									obj.material.color.set(colorLeft);
+									obj.material.emissive.set(colorLeft);
+									obj.material.emissiveIntensity = 4;
+									break;
+								case "ButtonRightOuter":
+									obj.material.color.set(colorRight);
+									obj.material.emissive.set(colorRight);
+									obj.material.emissiveIntensity = 4;
+									break;
+								case "ButtonRightInner":
+									obj.material.color.set(colorRight);
+									obj.material.emissive.set(colorRight);
+									obj.material.emissiveIntensity = 4;
+									break;
+							}
+						}
+					});
+					resolve(model);
+				},
+				null,
+				reject,
+			);
+		});
+	}
+
+	loadModel(path, loader, color, scale, position, name) {
+		return new Promise((resolve, reject) => {
+			const textureLoader = new THREE.TextureLoader();
+
+			loader.load(
+				path,
+				(gltf) => {
+					const model = gltf.scene;
+					model.scale.set(scale.x, scale.y, scale.z);
+					model.rotation.x = Math.PI / 2;
+					model.rotation.y = Math.PI / 2;
+					model.position.set(position.x, position.y, position.z);
+					model.visible = true;
+					model.name = name;
+
+					model.traverse((obj) => {
+						if (obj.isMesh) {
+							switch (obj.material.name) {
+								case "PaddleLights":
+									obj.material.color.set(color);
+									obj.material.emissive.set(color);
+									obj.material.emissiveIntensity = 2;
+									break;
+								case "BallColor":
+									this.ballMat = obj.material;
+									obj.material.color.set(color);
+									obj.material.emissive.set(color);
+									obj.material.emissiveIntensity = 2;
+							}
+						}
+					});
+					resolve(model);
+				},
+				null,
+				reject,
+			);
+		});
+	}
+}
+
+class TextManager {
+	constructor(scene) {
+		this.scene = scene;
+		this.font = null;
+		this.meshes = new Map(); // Store all text meshes with identifiers
+		this.positions = {
+			scoreLeft: new THREE.Vector3(2.27, -21.1, -11.3),
+			scoreRight: new THREE.Vector3(-1.83, -21.1, -11.3),
+			nameLeft: new THREE.Vector3(9.1, -23, -10.4),
+			nameRight: new THREE.Vector3(-8.8, -23, -10.4),
+			eloLeft: new THREE.Vector3(9.1, -20.7, -11.9),
+			eloRight: new THREE.Vector3(-8.8, -20.7, -11.9),
+		};
+		this.colorLeft = null;
+		this.colorRight = null;
+	}
+
+	async initialize(data) {
+		await this.loadFont();
+		console.log(`Initializing texts with data: ${JSON.stringify(data)}`);
+		await this.createInitialTexts(
+			data.player.left.name,
+			data.player.right.name,
+			"[" + data.player.left.rank.toString() + "]",
+			"[" + data.player.right.rank.toString() + "]",
+			data.player.left.color,
+			data.player.right.color,
+		);
+	}
+
+	async loadFont() {
+		return new Promise((resolve, reject) => {
+			const loader = new FontLoader();
+			loader.load(
+				"https://threejs.org/examples/fonts/helvetiker_regular.typeface.json",
+				(font) => {
+					this.font = font;
+					resolve();
+				},
+				undefined,
+				reject,
+			);
+		});
+	}
+
+	createText(text, position, color = 0x00ffff, scale = 1) {
+		const geometry = new TextGeometry(text, {
+			font: this.font,
+			size: 2,
+			height: 0.2,
+			curveSegments: 12,
+			bevelEnabled: false,
+		});
+
+		geometry.computeBoundingBox();
+		geometry.translate(-geometry.boundingBox.max.x / 2, 0, 0);
+
+		const material = new THREE.MeshStandardMaterial({
+			color: color,
+			metalness: 0,
+			roughness: 1,
+		});
+
+		const mesh = new THREE.Mesh(geometry, material);
+		mesh.position.copy(position);
+		mesh.scale.set(scale, scale, scale);
+		mesh.rotation.x = -0.5;
+		mesh.rotation.z = Math.PI;
+
+		return mesh;
+	}
+
+	async createInitialTexts(nameLeft, nameRight, eloLeft, eloRight, colorLeft, colorRight) {
+		this.colorLeft = colorLeft;
+		this.colorRight = colorRight;
+		this.updateScore("left", "0");
+		this.updateScore("right", "0");
+
+		this.updateText("nameLeft", nameLeft, 0.5);
+		this.updateText("nameRight", nameRight, 0.5);
+		this.updateText("eloLeft", eloLeft, 0.5);
+		this.updateText("eloRight", eloRight, 0.5);
+	}
+
+	updateText(id, newText, scale = 1) {
+		console.log(`Updating text for id: ${id} with text: ${newText}`);
+		if (this.meshes.has(id)) {
+			this.scene.remove(this.meshes.get(id));
+		}
+
+		let color;
+		if (id.toLowerCase().includes("left")) {
+			color = this.colorLeft;
+		} else if (id.toLowerCase().includes("right")) {
+			color = this.colorRight;
+		} else {
+			color = 0x00ffff;
+		}
+		const mesh = this.createText(newText, this.positions[id], color, scale);
+		this.scene.add(mesh);
+		this.meshes.set(id, mesh);
+	}
+
+	updateScore(side, score) {
+		this.updateText(`score${side.charAt(0).toUpperCase() + side.slice(1)}`, score, 1);
 	}
 }

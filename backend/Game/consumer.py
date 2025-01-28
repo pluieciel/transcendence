@@ -251,7 +251,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 				p1 = query_params.get("p1", [None])[0]
 				p2 = query_params.get("p2", [None])[0]
 				game = query_params.get("game", [None])[0]
-				self.logger.info(game)
+				self.logger.info(f"Game : {game}")
 				game_db = await game_manager.get_tournament_game(await self.get_user(p1), await self.get_user(p2))
 				self.game = game_manager.games[game_db.id]
 				self.game.channel_layer = self.channel_layer
@@ -354,8 +354,27 @@ class GameConsumer(AsyncWebsocketConsumer):
 		except Exception as e:
 			self.logger.info(f"Crashed in update {e}")
 
+	def get_color(self, user):
+		color_map = {
+			0: '#0004cc',
+			1: "#00BDD1",
+			2: "#00AD06",
+			3: "#e67e00",
+			4: "#EC008F",
+			5: "#6400C4",
+			6: "#E71200",
+			7: "#OEC384",
+			8: "#E6E3E1"
+		}
+		try:
+			logging.getLogger('game').warn(f"color in settings is {color_map.get(user.color)}")
+			return color_map.get(user.color)
+		except:
+			logging.getLogger('game').warn(f"no color found in settings defaulting to cyan")
+			return "#00BDD1"
+
 	async def send_initial_game_state(self, instance):
-		self.logger.info(instance.game.player_left.position)
+		self.logger.info(f"PleftPos : {instance.game.player_left.position}")
 		init_response = {
 			"type": "init",
 			"data": {
@@ -375,12 +394,14 @@ class GameConsumer(AsyncWebsocketConsumer):
 						"left": {
 							"name": instance.player_left.user.username,
 							"rank": instance.player_left.user.elo,
-							"score": instance.game.player_left.score
+							"score": instance.game.player_left.score,
+							"color": "#e67e00"
 						},
 						"right": {
 							"name": instance.player_right.user.username,
 							"rank": instance.player_right.user.elo,
-							"score": instance.game.player_right.score
+							"score": instance.game.player_right.score,
+							"color" : "#EC008F"
 						}
 					}
 				}

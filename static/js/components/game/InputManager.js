@@ -1,8 +1,8 @@
 export class InputManager {
-	constructor() {
+	constructor(ws) {
 		this.keys = {};
 		this.lastKeyPressed = null;
-		this.ws = null;
+		this.ws = ws;
 		this.initListeners();
 	}
 

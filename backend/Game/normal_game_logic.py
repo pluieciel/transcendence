@@ -261,7 +261,6 @@ class NormalGameInstance:
 
 	def start(self):
 		self.is_running = True
-		self.logger.info(self)
 		self.ball.start(random.choice([LEFT_SIDE_DIR, RIGHT_SIDE_DIR]), DEFAULT_BALL_POS)
 		self.loop_task = asyncio.create_task(self.game_loop())
 
