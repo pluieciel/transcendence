@@ -34,17 +34,32 @@ export default class SettingsView {
                         </div>
                         <form id="totpForm">
 	                        <div class="modal-body">
-	                                <div class="mb-3">
-										<div id="qrCode"></div>
-										<div id="qrCodeError" class="alert alert-danger d-none"></div>
-									</div>
-	                                <div class="mb-3">
-	                                    <input id="totpInput" class="form-control" maxlength="6" required>
-	                                </div>
-	                                <div id="totpError" class="alert alert-danger d-none"></div>
+								<div class="mb-3">
+									<div id="qrCode"></div>
+									<div id="qrCodeError" class="alert alert-danger d-none"></div>
+								</div>
+								<div class="mb-3">
+									<input id="totpInput" class="form-control" maxlength="6" required>
+								</div>
+								<div id="totpError" class="alert alert-danger d-none"></div>
 	                        </div>
 	                        <div class="modal-footer">
 	                            <button type="submit" class="btn btn-primary" id="totpSubmit">Submit</button>
+	                        </div>
+                        </form>
+                	</div>
+            	</div>
+			</div>
+			<div class="modal fade" id="recoveryModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="staticBackdropLabel">Recovery codes</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <form id="totpForm">
+	                        <div class="modal-body">
+	                            
 	                        </div>
                         </form>
                 	</div>
@@ -100,7 +115,21 @@ export default class SettingsView {
 				if (data.success) {
 					const modal = bootstrap.Modal.getInstance(this.container.querySelector('#totpModal'));
 					if (modal)
+					{
 						modal.hide();
+						const response = await fetch('/api/settings/2fa/generate/recovery', {
+							method: 'POST',
+							headers: {
+								'Content-Type': 'application/json'
+							},
+						});
+
+						const data = await response.json();
+
+						console.log(data);
+
+						new bootstrap.Modal(this.container.querySelector('#recoveryModal')).show();
+					}
 				} else {
 					errorDiv.textContent = data.message || 'Login failed';
                     errorDiv.classList.remove('d-none');
@@ -197,7 +226,7 @@ export default class SettingsView {
 		enable2FA.addEventListener('click', async (e) => {
 			e.preventDefault();
 			try {
-				const response = await fetch('/api/settings/2fa/generate', {
+				const response = await fetch('/api/settings/2fa/generate/qr', {
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json',

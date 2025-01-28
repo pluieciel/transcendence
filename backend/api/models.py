@@ -118,3 +118,7 @@ class GameHistory(models.Model):
     tournament_count = models.IntegerField(default=0)
     tournament_round2_game_id = models.IntegerField(default=-1)
     tournament_round2_place = models.IntegerField(default=-1)
+
+class RecoveryCode(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, related_name='user')
+    recovery_code = models.CharField(max_length=16)

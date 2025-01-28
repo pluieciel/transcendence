@@ -20,7 +20,9 @@ class Generate2FAConsumer(AsyncHttpConsumer):
 				return await self.send_response(401, json.dumps(response_data).encode(),
 					headers=[(b"Content-Type", b"application/json")])
 
+			#TODO: fix totp being regenerate on docker restart django
 			if user.totp_secret is None:
+				print("REGEN", flush=True)
 				totp_secret = self.generate_totp_secret()
 				await self.update_totp_secret(user, totp_secret)
 
