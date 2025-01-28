@@ -29,14 +29,13 @@ export class Game {
 	constructor(canvas, ws) {
 		this.ws = ws;
 		this.initialized = false;
-		this.gameStarted = false;
-
 		this.antialiasing = false;
-		this.bloom = false;
-		this.renderer = new Renderers(canvas, this.antialiasing);
+		this.canvas = canvas;
+		this.bloom = true;
+		this.renderer = null;
 
-		this.sceneManager = new SceneManager(this.renderer.renderer, this.antialiasing, this.bloom);
-		this.inputManager = new InputManager(this.ws);
+		this.sceneManager = null;
+		this.inputManager = null;
 
 		this.setupWebSocket();
 
@@ -51,9 +50,11 @@ export class Game {
 
 	async initialize(initData) {
 		try {
-			await this.sceneManager.initialize();
+			this.renderer = new Renderers(this.canvas, this.antialiasing);
+			this.sceneManager = new SceneManager(this.renderer.renderer, this.antialiasing, this.bloom);
+			this.inputManager = new InputManager(this.ws);
+			await this.sceneManager.initialize(initData);
 			this.particleSystem = new ParticleSystem(this.sceneManager.scene);
-			await this.handleInit(initData);
 
 			this.animate();
 			this.initialized = true;
@@ -88,17 +89,6 @@ export class Game {
 		if (this.particleSystem) {
 			this.particleSystem.emit(particleCount, geometry, velocity, lifetime, size, position);
 		}
-	}
-
-	async handleInit(data) {
-		const positions = data.positions;
-
-		this.sceneManager.topBorder.position.set(positions.borders.top.x, positions.borders.top.y, positions.borders.top.z);
-		this.sceneManager.bottomBorder.position.set(positions.borders.bottom.x, positions.borders.bottom.y, positions.borders.bottom.z);
-		this.sceneManager.leftBorder.position.set(positions.borders.left.x, positions.borders.left.y, positions.borders.left.z);
-		this.sceneManager.rightBorder.position.set(positions.borders.right.x, positions.borders.right.y, positions.borders.right.z);
-
-		this.sceneManager.textManager.createInitialTexts(data.player.left.name, data.player.right.name, data.player.left.rank, data.player.right.rank, 0x005fff, 0x00ffff);
 	}
 
 	sendInitDone() {
@@ -144,6 +134,9 @@ export class Game {
 					this.sceneManager.ball.visible = true;
 				}
 			}
+
+			this.sceneManager.textManager.updateScore("left", data.player.left.score.toString());
+			this.sceneManager.textManager.updateScore("right", data.player.right.score.toString());
 		}
 		if (data.trajectory) {
 			this.sceneManager.updateTrajectory(data.trajectory);

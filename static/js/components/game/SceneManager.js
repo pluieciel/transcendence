@@ -97,20 +97,22 @@ export class SceneManager {
 		};
 	}
 
-	async initialize() {
+	async initialize(data) {
 		try {
+			//Create Scene Lights Camera
 			this.scene = new THREE.Scene();
+			this.setupLights();
 			this.createCamera();
+
+			//Create TextManager
 			this.textManager = new TextManager(this.scene);
-			await this.textManager.initialize();
+			await this.textManager.initialize(data);
+
+			await this.createGameObjects(data);
 
 			if (this.renderer) {
 				this.setupPostProcessing();
 			}
-
-			this.setupLights();
-			await this.createGameObjects();
-			this.leftPaddle.position.set(new THREE.Vector3(5, 5, 5));
 
 			return true;
 		} catch (error) {
@@ -198,13 +200,6 @@ export class SceneManager {
 
 		this.camera.position.set(0, -8, 50);
 		this.camera.rotation.z = -Math.PI;
-
-		/*this.controls = new OrbitControls(this.camera, document.querySelector("canvas"));
-		this.controls.enableDamping = true;
-		this.controls.dampingFactor = 0.05;
-		this.controls.minDistance = 10;
-		this.controls.maxDistance = 50;
-		this.controls.update();*/
 	}
 
 	updateTrajectory(trajectoryPoints) {
@@ -234,14 +229,17 @@ export class SceneManager {
 		this.scene.add(this.light);
 	}
 
-	async createGameObjects() {
+	async createGameObjects(data) {
 		try {
 			await Promise.all([
 				this.createDebugBall(),
-				this.createDebugBounds(),
-				this.createModels(),
-				this.createPlayerAvatar("/js/components/game/Textures/valgrant.jpeg", new THREE.Vector3(17.3, -21.9, -11)),
-				this.createPlayerAvatar("/js/components/game/Textures/image.png", new THREE.Vector3(-16.8, -21.9, -11)),
+				this.createDebugBounds(data),
+				this.createModels(data),
+				//TODO LINK FROM DB AVATAR
+				//LEFT
+				this.createPlayerAvatar("/js/components/game/Textures/valgrant.jpeg", new THREE.Vector3(17.3, -21.9, -11), data.player.left.color),
+				//RIGHT
+				this.createPlayerAvatar("/js/components/game/Textures/image.png", new THREE.Vector3(-16.8, -21.9, -11), data.player.right.color),
 			]);
 			this.createDebugPaddles();
 		} catch (error) {
@@ -257,7 +255,7 @@ export class SceneManager {
 		this.textManager.updateText(`elo${side.charAt(0).toUpperCase() + side.slice(1)}`, `[${elo}]`, 0.5);
 	}
 
-	createPlayerAvatar(imageUrl, position) {
+	createPlayerAvatar(imageUrl, position, color) {
 		return new Promise((resolve, reject) => {
 			const textureLoader = new THREE.TextureLoader();
 			textureLoader.load(
@@ -270,27 +268,45 @@ export class SceneManager {
 					const width = 5;
 					const height = width / aspectRatio;
 
-					const geometry = new THREE.PlaneGeometry(width, height);
-					const material = new THREE.MeshBasicMaterial({
+					// Create the avatar plane
+					const avatarGeometry = new THREE.PlaneGeometry(width, height);
+					const avatarMaterial = new THREE.MeshBasicMaterial({
 						map: texture,
 						transparent: true,
 						side: THREE.DoubleSide,
-						//color: 0xffffff, // White color to not affect texture
 						opacity: 1,
 						depthWrite: true,
 						depthTest: true,
 					});
 
-					const avatar = new THREE.Mesh(geometry, material);
+					const avatar = new THREE.Mesh(avatarGeometry, avatarMaterial);
 					avatar.position.copy(position);
-
-					// Ensure proper texture display
 					avatar.material.map.flipY = false;
 					avatar.material.needsUpdate = true;
 					avatar.rotation.x = -0.5;
 					avatar.scale.set(0.8, 0.8, 0.8);
-					this.avatar = avatar;
+
+					// Create the background plane
+					const backgroundGeometry = new THREE.PlaneGeometry(width * 1.12, height * 1.12); // Slightly larger
+					const backgroundMaterial = new THREE.MeshBasicMaterial({
+						color: color,
+						side: THREE.DoubleSide,
+						opacity: 1,
+						roughness: 1,
+						metalness: 0,
+						depthWrite: true,
+						depthTest: true,
+					});
+
+					const background = new THREE.Mesh(backgroundGeometry, backgroundMaterial);
+					background.position.copy(position);
+					background.position.z -= 0.1; // Slightly behind the avatar
+					background.rotation.x = -0.5;
+					background.scale.set(0.8, 0.8, 0.8);
+
+					this.scene.add(background);
 					this.scene.add(avatar);
+
 					resolve(avatar);
 				},
 				undefined,
@@ -327,7 +343,9 @@ export class SceneManager {
 		this.scene.add(sphere);
 	}
 
-	createDebugBounds() {
+	createDebugBounds(data) {
+		const positions = data.positions;
+
 		const material = new THREE.LineBasicMaterial({ color: 0x00ff00 });
 		const sideMat = new THREE.LineBasicMaterial({ color: 0x00ff00 });
 
@@ -349,6 +367,11 @@ export class SceneManager {
 		this.leftBorder.visible = this.debugMod;
 		this.rightBorder.visible = this.debugMod;
 
+		this.topBorder.position.set(positions.borders.top.x, positions.borders.top.y, positions.borders.top.z);
+		this.bottomBorder.position.set(positions.borders.bottom.x, positions.borders.bottom.y, positions.borders.bottom.z);
+		this.leftBorder.position.set(positions.borders.left.x, positions.borders.left.y, positions.borders.left.z);
+		this.rightBorder.position.set(positions.borders.right.x, positions.borders.right.y, positions.borders.right.z);
+
 		this.scene.add(this.topBorder);
 		this.scene.add(this.bottomBorder);
 		this.scene.add(this.leftBorder);
@@ -356,15 +379,12 @@ export class SceneManager {
 	}
 
 	updateDebugPositions(positions) {
-		// Update ball position
 		if (this.ball && positions.ball) {
 			this.ball.position.set(positions.ball.x, positions.ball.y, positions.ball.z || 0);
 		}
-
 		if (positions.player_left) {
 			this.paddles[0].position.set(positions.player_left.x, positions.player_left.y, positions.player_left.z);
 		}
-		// Right paddle
 		if (positions.player_right) {
 			this.paddles[1].position.set(positions.player_right.x, positions.player_right.y, positions.player_right.z);
 		}
@@ -374,11 +394,10 @@ export class SceneManager {
 		this.createDebugBounds();
 	}
 
-	async createModels() {
+	async createModels(data) {
 		const loader = new GLTFLoader();
 
 		try {
-			// Load each model individually
 			const tableScale = new THREE.Vector3(4.14, 4.14, 4.14);
 			const tablePos = new THREE.Vector3(0, 1.59, -30.72);
 			const leftPaddleScale = new THREE.Vector3(0.75, 0.25, 0.5);
@@ -387,13 +406,16 @@ export class SceneManager {
 			const leftPaddlePos = new THREE.Vector3(17.94, -3.2, -15);
 			const ballScale = new THREE.Vector3(0.44, 0.44, 0.44);
 			const ballPos = new THREE.Vector3(0, -3, -15);
+			const leftColor = data.player.left.color;
+			const rightColor = data.player.right.color;
 
-			this.table = await this.loadModelTable("/js/components/game/Table.glb", loader, "#e67e00", "#EC008F", tableScale, tablePos, "Table");
-			this.leftPaddle = await this.loadModel("/js/components/game/Paddle.glb", loader, "#e67e00", leftPaddleScale, leftPaddlePos, "Left Paddle");
-			this.rightPaddle = await this.loadModel("/js/components/game/Paddle.glb", loader, "#EC008F", rightPaddleScale, rightPaddlePos, "Right Paddle");
-			this.ball = await this.loadModel("/js/components/game/Ball.glb", loader, "#EC008F", ballScale, ballPos, "Ball");
+			this.table = await this.loadModelTable("/js/components/game/Table.glb", loader, leftColor, rightColor, tableScale, tablePos, "Table");
+			this.leftPaddle = await this.loadModel("/js/components/game/Paddle.glb", loader, leftColor, leftPaddleScale, leftPaddlePos, "Left Paddle");
+			this.rightPaddle = await this.loadModel("/js/components/game/Paddle.glb", loader, rightColor, rightPaddleScale, rightPaddlePos, "Right Paddle");
 
-			// Add models to scene
+			//Ball defaulted to grey color
+			this.ball = await this.loadModel("/js/components/game/Ball.glb", loader, "#5c6169", ballScale, ballPos, "Ball");
+
 			this.scene.add(this.table);
 			this.scene.add(this.leftPaddle);
 			this.scene.add(this.rightPaddle);
@@ -469,6 +491,26 @@ export class SceneManager {
 									obj.material.emissive.set(colorRight);
 									obj.material.emissiveIntensity = 4;
 									break;
+								case "ButtonLeftInner":
+									obj.material.color.set(colorLeft);
+									obj.material.emissive.set(colorLeft);
+									obj.material.emissiveIntensity = 4;
+									break;
+								case "ButtonLeftOuter":
+									obj.material.color.set(colorLeft);
+									obj.material.emissive.set(colorLeft);
+									obj.material.emissiveIntensity = 4;
+									break;
+								case "ButtonRightOuter":
+									obj.material.color.set(colorRight);
+									obj.material.emissive.set(colorRight);
+									obj.material.emissiveIntensity = 4;
+									break;
+								case "ButtonRightInner":
+									obj.material.color.set(colorRight);
+									obj.material.emissive.set(colorRight);
+									obj.material.emissiveIntensity = 4;
+									break;
 							}
 						}
 					});
@@ -537,8 +579,17 @@ class TextManager {
 		this.colorRight = null;
 	}
 
-	async initialize() {
+	async initialize(data) {
 		await this.loadFont();
+		console.log(`Initializing texts with data: ${JSON.stringify(data)}`);
+		await this.createInitialTexts(
+			data.player.left.name,
+			data.player.right.name,
+			"[" + data.player.left.rank.toString() + "]",
+			"[" + data.player.right.rank.toString() + "]",
+			data.player.left.color,
+			data.player.right.color,
+		);
 	}
 
 	async loadFont() {
@@ -596,6 +647,7 @@ class TextManager {
 	}
 
 	updateText(id, newText, scale = 1) {
+		console.log(`Updating text for id: ${id} with text: ${newText}`);
 		if (this.meshes.has(id)) {
 			this.scene.remove(this.meshes.get(id));
 		}
@@ -608,7 +660,6 @@ class TextManager {
 		} else {
 			color = 0x00ffff;
 		}
-
 		const mesh = this.createText(newText, this.positions[id], color, scale);
 		this.scene.add(mesh);
 		this.meshes.set(id, mesh);
