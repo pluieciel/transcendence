@@ -63,9 +63,6 @@ export default class Login {
 				const login42 = this.container.querySelector('#login42Btn');
 
 				login42.addEventListener("click", () => {
-                    // TODO: avoid setting isLoggedIn to true here
-                    window.app.state.isLoggedIn = true;
-					sessionStorage.setItem('isLoggedIn', 'true');
 					window.location.href = data.auth_url;
 		        });
 			}
