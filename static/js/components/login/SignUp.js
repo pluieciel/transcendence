@@ -92,7 +92,13 @@ export default class SignUp {
                     errorDiv.classList.remove('d-none');
                     return;
                 }
+                const allowed_extensions = ["jpg", "jpeg", "png"]
                 const extension = originalFile.name.split('.').pop();
+                if (!allowed_extensions.includes(extension)) {
+                    errorDiv.textContent = 'Avatar in jpg, jpeg, or png format only';
+                    errorDiv.classList.remove('d-none');
+                    return;
+                }
                 const newFilename = `${username}.${extension}`;
                 const modifiedFile = new File([originalFile], newFilename, {
                     type: originalFile.type,
