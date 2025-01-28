@@ -165,16 +165,16 @@ class Player:
 
 class GameBounds:
 	def __init__(self):
-		self.top = Vector2D(0, 10.56, -15)
-		self.bottom = Vector2D(0, -17.89, -15)
-		self.left = Vector2D(-20.45, -3.70, -15)
-		self.right = Vector2D(20.42, -3.70, -15)
+		self.top = Vector2D(0, 10.56+10.5, -15)
+		self.bottom = Vector2D(0, -17.89+10.5, -15)
+		self.left = Vector2D(-20.45, -3.70+10.5, -15)
+		self.right = Vector2D(20.42, -3.70+10.5, -15)
 
 class RumbleGameInstance:
 	def __init__(self, broadcast_fun, game_end_fun):
 		self.bounds = GameBounds()
-		self.player_left = Player(Vector2D(self.bounds.left.x + 2, -3, -15), 0,{"ArrowUp": False, "ArrowDown": False}, self.bounds)
-		self.player_right = Player(Vector2D(self.bounds.right.x - 2, -3, -15), 0,{"ArrowUp": False, "ArrowDown": False}, self.bounds)
+		self.player_left = Player(Vector2D(self.bounds.left.x + 2, -3+10.5, -15), 0,{"ArrowUp": False, "ArrowDown": False}, self.bounds)
+		self.player_right = Player(Vector2D(self.bounds.right.x - 2, -3+10.5, -15), 0,{"ArrowUp": False, "ArrowDown": False}, self.bounds)
 		self.ball = Ball()
 		self.paused = False
 		self.ended = False

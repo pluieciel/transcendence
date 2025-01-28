@@ -303,13 +303,17 @@ class GameBackend:
 	async def rumble_broadcast_state(self):
 		events = []
 		if self.game.scored:
-			events.append({"type": "score", "position": vars(self.game.scorePos)})
+			events.append({
+            "type": "score",
+            "position": vars(self.game.scorePos),
+            "score_left": self.game.player_left.score,
+            "score_right": self.game.player_right.score
+			})
 			self.game.scored = False
 		if self.game.ended:
 			self.logger.info(f"Appending winner info with {self.game.winner}")
 			events.append({"type": "game_end", "winner": self.game.winner})
 		if self.game.ball.lastHitter is not None:
-			self.logger.info(f"Last hitter : {self.game.ball.lastHitter}")
 			events.append({"type": "ball_last_hitter", "value": self.game.ball.lastHitter})
 
 		trajectory_points = self.game.ball.predict_trajectory()
@@ -322,27 +326,8 @@ class GameBackend:
 					"player_left": vars(self.game.player_left.position),
 					"player_right": vars(self.game.player_right.position),
 					"ball": vars(self.game.ball.position),
-					"borders": {
-						"top": vars(self.game.bounds.top),
-						"bottom": vars(self.game.bounds.bottom),
-						"left": vars(self.game.bounds.left),
-						"right": vars(self.game.bounds.right),
-					}
 				},
 				"trajectory": trajectory_data,
-				"player": {
-					"left": {
-						"name": self.player_left.user.username,
-						"rank": self.player_left.user.elo,
-						"score": self.game.player_left.score
-					},
-					"right": {
-						"name": self.player_right.user.username,
-						"rank": self.player_right.user.elo,
-						"score": self.game.player_right.score
-					}
-				},
-				"game_started": self.game.is_running,
 				"events": events
 			}
 		}

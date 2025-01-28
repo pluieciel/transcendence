@@ -1,53 +1,306 @@
 import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
-import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-
-//Text
-import { TextGeometry } from "three/addons/geometries/TextGeometry.js";
-import { FontLoader } from "three/addons/loaders/FontLoader.js";
-
-//Bloom
-import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
-import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
-import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
-
-//Anti aliasing
-import { SMAAPass } from "three/addons/postprocessing/SMAAPass.js";
+import { PostProcessing } from "./PostProcessing.js";
+import { TextManager } from "./TextManager.js";
 
 export class SceneManager {
 	constructor(renderer, antialiasing, bloom) {
-		this.paddles = [];
+		this.leftPaddle = null;
+		this.rightPaddle = null;
 		this.ball = null;
+
+		//Debug
+		this.debugMod = false;
+		this.paddles = [];
 		this.topBorder = null;
 		this.bottomBorder = null;
 		this.rightBorder = null;
 		this.leftBorder = null;
 		this.trajectoryLine = null;
-		this.trajVisible = false;
-		this.controls = null;
-		this.renderer = renderer;
-		this.debugMod = false;
-		this.light = null;
+		this.avatar = avatar;
 
-		this.leftPaddle = null;
-		this.rightPaddle = null;
-		this.antialiasing = antialiasing;
-		this.bloom = bloom;
-
-		this.textManager = null;
-
-		this.scoreLeft = null;
-		this.scoreRight = null;
-
-		this.bloomParams = {
-			exposure: 1,
-			bloomStrength: 0.5,
-			bloomThreshold: 0,
-			bloomRadius: 0.8,
-			enabled: this.bloom,
-		};
 		this.composer = null;
+		this.renderer = renderer;
+		this.light = null;
+		this.textManager = null;
+		this.colorTextureMap = this.getTextureMap();
+	}
 
+	async initialize(data) {
+		//Create Scene, Lights, Camera
+		this.scene = new THREE.Scene();
+		this.setupLights();
+		this.createCamera();
+
+		//Create TextManager
+		this.textManager = new TextManager(this.scene);
+		await this.textManager.initialize(data);
+
+		//Create Game Objects, Models
+		await this.createGameObjects(data);
+
+		//Setup Anti aliasing and bloom
+		this.postProcessing = new PostProcessing(this.renderer, 2, this.scene, this.camera);
+		this.composer = this.postProcessing.composer;
+		return true;
+	}
+
+	createCamera() {
+		this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+		this.camera.position.set(0, 12, 50);
+	}
+
+	setupLights() {
+		this.light = new THREE.DirectionalLight(0xfafafa, 8);
+		this.light.position.set(0, -255, 158);
+		this.light.castShadow = true;
+		this.scene.add(this.light);
+	}
+
+	async createGameObjects(data) {
+		await Promise.all([
+			this.createDebugBall(),
+			this.createDebugBounds(data),
+			this.createModels(data),
+			//TODO LINK FROM DB AVATAR
+			//RIGHT
+			this.createPlayerAvatar("/js/components/game/Textures/image.png", new THREE.Vector3(16.1, 25, -9.6), data.player.right.color),
+			//LEFT
+			this.createPlayerAvatar("/js/components/game/Textures/valgrant.jpeg", new THREE.Vector3(-16.7, 25, -9.6), data.player.left.color),
+		]);
+		this.createDebugPaddles();
+	}
+
+	updateScore(side, score) {
+		this.textManager.updateScore(side, score.toString());
+	}
+
+	updatePlayerInfo(side, name, elo) {
+		this.textManager.updateText(`name${side.charAt(0).toUpperCase() + side.slice(1)}`, name, 0.5);
+		this.textManager.updateText(`elo${side.charAt(0).toUpperCase() + side.slice(1)}`, `[${elo}]`, 0.5);
+	}
+
+	updateObjectPosition(positions) {
+		const leftPos = positions.player_left;
+		const rightPos = positions.player_right;
+
+		this.leftPaddle.position.set(leftPos.x, leftPos.y - 0.2, leftPos.z);
+		this.rightPaddle.position.set(rightPos.x, rightPos.y - 0.2, rightPos.z);
+		this.ball.position.set(positions.ball.x, positions.ball.y, positions.ball.z);
+	}
+
+	updateBallColor(color, emissionColor) {
+		if (this.ball && this.ballMat) {
+			this.ballMat.color.set(color);
+			this.ballMat.emissive.set(emissionColor);
+		}
+	}
+
+	async createModels(data) {
+		const loader = new GLTFLoader();
+
+		const tableScale = new THREE.Vector3(4.14, 4.14, 4.14);
+		const tablePos = new THREE.Vector3(0, 1.59, -30.72);
+		const leftPaddleScale = new THREE.Vector3(0.75, 0.25, 0.5);
+		const rightPaddlePos = new THREE.Vector3(-18, -3.2, -15);
+		const rightPaddleScale = new THREE.Vector3(0.75, 0.25, 0.5);
+		const leftPaddlePos = new THREE.Vector3(17.94, -3.2, -15);
+		const ballScale = new THREE.Vector3(0.44, 0.44, 0.44);
+		const ballPos = new THREE.Vector3(0, -3, -15);
+		const leftColor = data.player.left.color;
+		const rightColor = data.player.right.color;
+
+		this.table = await this.loadModelTable("/js/components/game/Table.glb", loader, leftColor, rightColor, tableScale, tablePos, "Table");
+		this.leftPaddle = await this.loadModel("/js/components/game/Paddle.glb", loader, leftColor, leftPaddleScale, leftPaddlePos, "Left Paddle");
+		this.rightPaddle = await this.loadModel("/js/components/game/Paddle.glb", loader, rightColor, rightPaddleScale, rightPaddlePos, "Right Paddle");
+
+		//Ball defaulted to grey color
+		this.ball = await this.loadModel("/js/components/game/Ball.glb", loader, "#5c6169", ballScale, ballPos, "Ball");
+
+		this.scene.add(this.table);
+		this.scene.add(this.leftPaddle);
+		this.scene.add(this.rightPaddle);
+		this.scene.add(this.ball);
+	}
+
+	loadModelTable(path, loader, colorLeft, colorRight, scale, position, name) {
+		return new Promise((resolve, reject) => {
+			const textureLoader = new THREE.TextureLoader();
+
+			loader.load(
+				path,
+				(gltf) => {
+					const model = gltf.scene;
+					model.scale.set(scale.x, scale.y, scale.z);
+					model.rotation.x = Math.PI / 2;
+					model.rotation.y = -Math.PI / 2;
+					model.position.set(position.x, position.y, position.z);
+					model.visible = true;
+					model.name = name;
+
+					model.traverse((obj) => {
+						if (obj.isMesh) {
+							switch (obj.material.name) {
+								case "LeftBG":
+									textureLoader.load(
+										this.colorTextureMap[colorLeft].leftTexture,
+										(texture) => {
+											texture.encoding = THREE.sRGBEncoding;
+											texture.flipY = false; // Might need to adjust this
+											obj.material.map = texture;
+											obj.material.needsUpdate = true;
+										},
+										undefined,
+										(error) => {
+											console.error("Error loading texture:", error);
+										},
+									);
+									break;
+								case "RightBG":
+									textureLoader.load(
+										this.colorTextureMap[colorRight].rightTexture,
+										(texture) => {
+											texture.encoding = THREE.sRGBEncoding;
+											texture.flipY = false;
+											obj.material.map = texture;
+											obj.material.needsUpdate = true;
+										},
+										undefined,
+										(error) => {
+											console.error("Error loading texture:", error);
+										},
+									);
+									break;
+								case "LeftColor":
+								case "ButtonLeftInner":
+								case "ButtonLeftOuter":
+									obj.material.color.set(colorLeft);
+									obj.material.emissive.set(colorLeft);
+									obj.material.emissiveIntensity = 4;
+									break;
+								case "RightColor":
+								case "ButtonRightOuter":
+								case "ButtonRightInner":
+									obj.material.color.set(colorRight);
+									obj.material.emissive.set(colorRight);
+									obj.material.emissiveIntensity = 4;
+									break;
+							}
+						}
+					});
+					resolve(model);
+				},
+				null,
+				reject,
+			);
+		});
+	}
+
+	createPlayerAvatar(imageUrl, position, color) {
+		return new Promise((resolve, reject) => {
+			const textureLoader = new THREE.TextureLoader();
+			textureLoader.load(
+				imageUrl,
+				(texture) => {
+					texture.encoding = THREE.sRGBEncoding;
+					texture.needsUpdate = true;
+
+					const aspectRatio = texture.image.width / texture.image.height;
+					const width = 5;
+					const height = width / aspectRatio;
+
+					// Create the avatar plane
+					const avatarGeometry = new THREE.PlaneGeometry(width, height);
+					const avatarMaterial = new THREE.MeshBasicMaterial({
+						map: texture,
+						transparent: true,
+						side: THREE.DoubleSide,
+						opacity: 1,
+						depthWrite: true,
+						depthTest: true,
+					});
+
+					const avatar = new THREE.Mesh(avatarGeometry, avatarMaterial);
+					avatar.position.copy(position);
+					avatar.material.map.flipY = false;
+					avatar.material.needsUpdate = true;
+					avatar.rotation.x = 0.5;
+					avatar.rotation.z = Math.PI;
+					avatar.scale.set(0.8, 0.8, 0.8);
+
+					// Create the background plane
+					const backgroundGeometry = new THREE.PlaneGeometry(width * 1.12, height * 1.12); // Slightly larger
+					const backgroundMaterial = new THREE.MeshBasicMaterial({
+						color: color,
+						side: THREE.DoubleSide,
+						opacity: 1,
+						roughness: 1,
+						metalness: 0,
+						depthWrite: true,
+						depthTest: true,
+					});
+
+					const background = new THREE.Mesh(backgroundGeometry, backgroundMaterial);
+					background.position.copy(position);
+					background.position.z -= 0.1; // Slightly behind the avatar
+					background.rotation.x = 0.5;
+					background.scale.set(0.8, 0.8, 0.8);
+
+					this.scene.add(background);
+					this.scene.add(avatar);
+					this.avatar = avatar;
+
+					resolve(avatar);
+				},
+				undefined,
+				(error) => {
+					console.error("Error loading avatar texture:", error);
+					reject(error);
+				},
+			);
+		});
+	}
+
+	loadModel(path, loader, color, scale, position, name) {
+		return new Promise((resolve, reject) => {
+			const textureLoader = new THREE.TextureLoader();
+
+			loader.load(
+				path,
+				(gltf) => {
+					const model = gltf.scene;
+					model.scale.set(scale.x, scale.y, scale.z);
+					model.rotation.x = Math.PI / 2;
+					model.rotation.y = Math.PI / 2;
+					model.position.set(position.x, position.y, position.z);
+					model.visible = true;
+					model.name = name;
+
+					model.traverse((obj) => {
+						if (obj.isMesh) {
+							switch (obj.material.name) {
+								case "PaddleLights":
+									obj.material.color.set(color);
+									obj.material.emissive.set(color);
+									obj.material.emissiveIntensity = 2;
+									break;
+								case "BallColor":
+									this.ballMat = obj.material;
+									obj.material.color.set(color);
+									obj.material.emissive.set(color);
+									obj.material.emissiveIntensity = 2;
+							}
+						}
+					});
+					resolve(model);
+				},
+				null,
+				reject,
+			);
+		});
+	}
+
+	getTextureMap() {
 		this.colorTextureMap = {
 			//Red
 			"#E71200": {
@@ -95,111 +348,25 @@ export class SceneManager {
 				rightTexture: "/js/components/game/Textures/TextureRightPurple.png",
 			},
 		};
+		return this.colorTextureMap;
 	}
 
-	async initialize(data) {
-		try {
-			//Create Scene Lights Camera
-			this.scene = new THREE.Scene();
-			this.setupLights();
-			this.createCamera();
-
-			//Create TextManager
-			this.textManager = new TextManager(this.scene);
-			await this.textManager.initialize(data);
-
-			await this.createGameObjects(data);
-
-			if (this.renderer) {
-				this.setupPostProcessing();
-			}
-
-			return true;
-		} catch (error) {
-			console.error("Failed to initialize scene:", error);
-			throw error;
-		}
-	}
-
-	setupPostProcessing() {
-		if (!this.renderer || !this.scene || !this.camera) {
-			console.error("Required components not initialized");
-			return;
-		}
-
-		const renderTarget = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight, {
-			type: THREE.HalfFloatType,
-			samples: this.antialiasing ? 8 : 0,
-			format: THREE.RGBAFormat,
-			colorSpace: THREE.SRGBColorSpace,
-			stencilBuffer: false,
-		});
-
-		this.composer = new EffectComposer(this.renderer, renderTarget);
-
-		const renderPass = new RenderPass(this.scene, this.camera);
-		renderPass.clearColor = new THREE.Color(0x000000);
-		renderPass.clearAlpha = 0;
-		this.composer.addPass(renderPass);
-
-		if (this.bloom) {
-			const bloomPass = new UnrealBloomPass(
-				new THREE.Vector2(window.innerWidth, window.innerHeight),
-				this.bloomParams.bloomStrength,
-				this.bloomParams.bloomRadius,
-				this.bloomParams.bloomThreshold,
-			);
-			bloomPass.threshold = 0;
-			bloomPass.strength = 0.5;
-			bloomPass.radius = 0.8;
-			bloomPass.quality = 5;
-			this.bloomPass = bloomPass; // Store reference for later toggling
-			this.composer.addPass(bloomPass);
-		}
-
-		if (this.antialiasing) {
-			const smaaPass = new SMAAPass(window.innerWidth * this.renderer.getPixelRatio(), window.innerHeight * this.renderer.getPixelRatio());
-			this.smaaPass = smaaPass; // Store reference for later toggling
-			this.composer.addPass(smaaPass);
-		}
-
-		// Handle resize with optimal quality settings
-		window.addEventListener("resize", () => {
-			const width = window.innerWidth;
-			const height = window.innerHeight;
-			const pixelRatio = Math.min(window.devicePixelRatio, 2);
-
-			this.camera.aspect = width / height;
-			this.camera.updateProjectionMatrix();
-
-			this.renderer.setSize(width, height);
-			this.renderer.setPixelRatio(pixelRatio);
-
-			renderTarget.setSize(width * pixelRatio, height * pixelRatio);
-
-			this.composer.setSize(width, height);
-			this.composer.setPixelRatio(pixelRatio);
-		});
-	}
+	/************************DEBUG************************ */
 
 	toggleDebugMode() {
 		this.debugMod = !this.debugMod;
 
-		// Toggle visibility of debug elements
 		this.paddles.forEach((paddle) => (paddle.visible = this.debugMod));
-		if (this.ball) this.ball.visible = this.debugMod;
-		if (this.topBorder) this.topBorder.visible = this.debugMod;
-		if (this.bottomBorder) this.bottomBorder.visible = this.debugMod;
-		if (this.leftBorder) this.leftBorder.visible = this.debugMod;
-		if (this.rightBorder) this.rightBorder.visible = this.debugMod;
-		if (this.trajectoryLine) this.trajectoryLine.visible = this.debugMod;
-	}
+		this.ball.visible = this.debugMod;
+		this.topBorder.visible = this.debugMod;
+		this.bottomBorder.visible = this.debugMod;
+		this.leftBorder.visible = this.debugMod;
+		this.rightBorder.visible = this.debugMod;
+		this.trajectoryLine.visible = this.debugMod;
 
-	createCamera() {
-		this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-
-		this.camera.position.set(0, -8, 50);
-		this.camera.rotation.z = -Math.PI;
+		this.leftPaddle.visible = !this.debugMod;
+		this.rightPaddle.visible = !this.debugMod;
+		this.ball.visible = !this.debugMod;
 	}
 
 	updateTrajectory(trajectoryPoints) {
@@ -222,102 +389,6 @@ export class SceneManager {
 		this.trajectoryLine.visible = this.debugMod;
 	}
 
-	setupLights() {
-		this.light = new THREE.DirectionalLight(0xfafafa, 9);
-		this.light.position.set(0, 255, 158);
-		this.light.castShadow = true;
-		this.scene.add(this.light);
-	}
-
-	async createGameObjects(data) {
-		try {
-			await Promise.all([
-				this.createDebugBall(),
-				this.createDebugBounds(data),
-				this.createModels(data),
-				//TODO LINK FROM DB AVATAR
-				//LEFT
-				this.createPlayerAvatar("/js/components/game/Textures/valgrant.jpeg", new THREE.Vector3(17.3, -21.9, -11), data.player.left.color),
-				//RIGHT
-				this.createPlayerAvatar("/js/components/game/Textures/image.png", new THREE.Vector3(-16.8, -21.9, -11), data.player.right.color),
-			]);
-			this.createDebugPaddles();
-		} catch (error) {
-			console.error("Failed to create game objects:", error);
-		}
-	}
-	updateScore(side, score) {
-		this.textManager.updateScore(side, score.toString());
-	}
-
-	updatePlayerInfo(side, name, elo) {
-		this.textManager.updateText(`name${side.charAt(0).toUpperCase() + side.slice(1)}`, name, 0.5);
-		this.textManager.updateText(`elo${side.charAt(0).toUpperCase() + side.slice(1)}`, `[${elo}]`, 0.5);
-	}
-
-	createPlayerAvatar(imageUrl, position, color) {
-		return new Promise((resolve, reject) => {
-			const textureLoader = new THREE.TextureLoader();
-			textureLoader.load(
-				imageUrl,
-				(texture) => {
-					texture.encoding = THREE.sRGBEncoding;
-					texture.needsUpdate = true;
-
-					const aspectRatio = texture.image.width / texture.image.height;
-					const width = 5;
-					const height = width / aspectRatio;
-
-					// Create the avatar plane
-					const avatarGeometry = new THREE.PlaneGeometry(width, height);
-					const avatarMaterial = new THREE.MeshBasicMaterial({
-						map: texture,
-						transparent: true,
-						side: THREE.DoubleSide,
-						opacity: 1,
-						depthWrite: true,
-						depthTest: true,
-					});
-
-					const avatar = new THREE.Mesh(avatarGeometry, avatarMaterial);
-					avatar.position.copy(position);
-					avatar.material.map.flipY = false;
-					avatar.material.needsUpdate = true;
-					avatar.rotation.x = -0.5;
-					avatar.scale.set(0.8, 0.8, 0.8);
-
-					// Create the background plane
-					const backgroundGeometry = new THREE.PlaneGeometry(width * 1.12, height * 1.12); // Slightly larger
-					const backgroundMaterial = new THREE.MeshBasicMaterial({
-						color: color,
-						side: THREE.DoubleSide,
-						opacity: 1,
-						roughness: 1,
-						metalness: 0,
-						depthWrite: true,
-						depthTest: true,
-					});
-
-					const background = new THREE.Mesh(backgroundGeometry, backgroundMaterial);
-					background.position.copy(position);
-					background.position.z -= 0.1; // Slightly behind the avatar
-					background.rotation.x = -0.5;
-					background.scale.set(0.8, 0.8, 0.8);
-
-					this.scene.add(background);
-					this.scene.add(avatar);
-
-					resolve(avatar);
-				},
-				undefined,
-				(error) => {
-					console.error("Error loading avatar texture:", error);
-					reject(error);
-				},
-			);
-		});
-	}
-
 	createDebugPaddles() {
 		const paddleGeometry = new THREE.BoxGeometry(this.leftPaddle.scale.z * 1.6, this.leftPaddle.scale.x * 6.666666667, this.leftPaddle.scale.y * 1.6);
 		const edges = new THREE.EdgesGeometry(paddleGeometry);
@@ -332,6 +403,7 @@ export class SceneManager {
 		this.scene.add(paddle2);
 		this.paddles.push(paddle1, paddle2);
 	}
+
 	createDebugBall() {
 		const sphereGeometry = new THREE.SphereGeometry(0.5, 8, 4);
 		const edges = new THREE.EdgesGeometry(sphereGeometry);
@@ -388,284 +460,5 @@ export class SceneManager {
 		if (positions.player_right) {
 			this.paddles[1].position.set(positions.player_right.x, positions.player_right.y, positions.player_right.z);
 		}
-	}
-
-	createDecor() {
-		this.createDebugBounds();
-	}
-
-	async createModels(data) {
-		const loader = new GLTFLoader();
-
-		try {
-			const tableScale = new THREE.Vector3(4.14, 4.14, 4.14);
-			const tablePos = new THREE.Vector3(0, 1.59, -30.72);
-			const leftPaddleScale = new THREE.Vector3(0.75, 0.25, 0.5);
-			const rightPaddlePos = new THREE.Vector3(-18, -3.2, -15);
-			const rightPaddleScale = new THREE.Vector3(0.75, 0.25, 0.5);
-			const leftPaddlePos = new THREE.Vector3(17.94, -3.2, -15);
-			const ballScale = new THREE.Vector3(0.44, 0.44, 0.44);
-			const ballPos = new THREE.Vector3(0, -3, -15);
-			const leftColor = data.player.left.color;
-			const rightColor = data.player.right.color;
-
-			this.table = await this.loadModelTable("/js/components/game/Table.glb", loader, leftColor, rightColor, tableScale, tablePos, "Table");
-			this.leftPaddle = await this.loadModel("/js/components/game/Paddle.glb", loader, leftColor, leftPaddleScale, leftPaddlePos, "Left Paddle");
-			this.rightPaddle = await this.loadModel("/js/components/game/Paddle.glb", loader, rightColor, rightPaddleScale, rightPaddlePos, "Right Paddle");
-
-			//Ball defaulted to grey color
-			this.ball = await this.loadModel("/js/components/game/Ball.glb", loader, "#5c6169", ballScale, ballPos, "Ball");
-
-			this.scene.add(this.table);
-			this.scene.add(this.leftPaddle);
-			this.scene.add(this.rightPaddle);
-			this.scene.add(this.ball);
-		} catch (error) {
-			console.error("Failed to load bonus models:", error);
-			throw error;
-		}
-	}
-
-	updateBallColor(color, emissionColor) {
-		if (this.ball && this.ballMat) {
-			this.ballMat.color.set(color);
-			this.ballMat.emissive.set(emissionColor);
-		}
-	}
-
-	loadModelTable(path, loader, colorLeft, colorRight, scale, position, name) {
-		return new Promise((resolve, reject) => {
-			const textureLoader = new THREE.TextureLoader();
-
-			loader.load(
-				path,
-				(gltf) => {
-					const model = gltf.scene;
-					model.scale.set(scale.x, scale.y, scale.z);
-					model.rotation.x = Math.PI / 2;
-					model.rotation.y = Math.PI / 2;
-					model.position.set(position.x, position.y, position.z);
-					model.visible = true;
-					model.name = name;
-
-					model.traverse((obj) => {
-						if (obj.isMesh) {
-							switch (obj.material.name) {
-								case "LeftBG":
-									textureLoader.load(
-										this.colorTextureMap[colorLeft].leftTexture,
-										(texture) => {
-											texture.encoding = THREE.sRGBEncoding;
-											texture.flipY = false; // Might need to adjust this
-											obj.material.map = texture;
-											obj.material.needsUpdate = true;
-										},
-										undefined,
-										(error) => {
-											console.error("Error loading texture:", error);
-										},
-									);
-									break;
-								case "RightBG":
-									textureLoader.load(
-										this.colorTextureMap[colorRight].rightTexture,
-										(texture) => {
-											texture.encoding = THREE.sRGBEncoding;
-											texture.flipY = false;
-											obj.material.map = texture;
-											obj.material.needsUpdate = true;
-										},
-										undefined,
-										(error) => {
-											console.error("Error loading texture:", error);
-										},
-									);
-									break;
-								case "LeftColor":
-									obj.material.color.set(colorLeft);
-									obj.material.emissive.set(colorLeft);
-									obj.material.emissiveIntensity = 4;
-									break;
-								case "RightColor":
-									obj.material.color.set(colorRight);
-									obj.material.emissive.set(colorRight);
-									obj.material.emissiveIntensity = 4;
-									break;
-								case "ButtonLeftInner":
-									obj.material.color.set(colorLeft);
-									obj.material.emissive.set(colorLeft);
-									obj.material.emissiveIntensity = 4;
-									break;
-								case "ButtonLeftOuter":
-									obj.material.color.set(colorLeft);
-									obj.material.emissive.set(colorLeft);
-									obj.material.emissiveIntensity = 4;
-									break;
-								case "ButtonRightOuter":
-									obj.material.color.set(colorRight);
-									obj.material.emissive.set(colorRight);
-									obj.material.emissiveIntensity = 4;
-									break;
-								case "ButtonRightInner":
-									obj.material.color.set(colorRight);
-									obj.material.emissive.set(colorRight);
-									obj.material.emissiveIntensity = 4;
-									break;
-							}
-						}
-					});
-					resolve(model);
-				},
-				null,
-				reject,
-			);
-		});
-	}
-
-	loadModel(path, loader, color, scale, position, name) {
-		return new Promise((resolve, reject) => {
-			const textureLoader = new THREE.TextureLoader();
-
-			loader.load(
-				path,
-				(gltf) => {
-					const model = gltf.scene;
-					model.scale.set(scale.x, scale.y, scale.z);
-					model.rotation.x = Math.PI / 2;
-					model.rotation.y = Math.PI / 2;
-					model.position.set(position.x, position.y, position.z);
-					model.visible = true;
-					model.name = name;
-
-					model.traverse((obj) => {
-						if (obj.isMesh) {
-							switch (obj.material.name) {
-								case "PaddleLights":
-									obj.material.color.set(color);
-									obj.material.emissive.set(color);
-									obj.material.emissiveIntensity = 2;
-									break;
-								case "BallColor":
-									this.ballMat = obj.material;
-									obj.material.color.set(color);
-									obj.material.emissive.set(color);
-									obj.material.emissiveIntensity = 2;
-							}
-						}
-					});
-					resolve(model);
-				},
-				null,
-				reject,
-			);
-		});
-	}
-}
-
-class TextManager {
-	constructor(scene) {
-		this.scene = scene;
-		this.font = null;
-		this.meshes = new Map(); // Store all text meshes with identifiers
-		this.positions = {
-			scoreLeft: new THREE.Vector3(2.27, -21.1, -11.3),
-			scoreRight: new THREE.Vector3(-1.83, -21.1, -11.3),
-			nameLeft: new THREE.Vector3(9.1, -23, -10.4),
-			nameRight: new THREE.Vector3(-8.8, -23, -10.4),
-			eloLeft: new THREE.Vector3(9.1, -20.7, -11.9),
-			eloRight: new THREE.Vector3(-8.8, -20.7, -11.9),
-		};
-		this.colorLeft = null;
-		this.colorRight = null;
-	}
-
-	async initialize(data) {
-		await this.loadFont();
-		console.log(`Initializing texts with data: ${JSON.stringify(data)}`);
-		await this.createInitialTexts(
-			data.player.left.name,
-			data.player.right.name,
-			"[" + data.player.left.rank.toString() + "]",
-			"[" + data.player.right.rank.toString() + "]",
-			data.player.left.color,
-			data.player.right.color,
-		);
-	}
-
-	async loadFont() {
-		return new Promise((resolve, reject) => {
-			const loader = new FontLoader();
-			loader.load(
-				"https://threejs.org/examples/fonts/helvetiker_regular.typeface.json",
-				(font) => {
-					this.font = font;
-					resolve();
-				},
-				undefined,
-				reject,
-			);
-		});
-	}
-
-	createText(text, position, color = 0x00ffff, scale = 1) {
-		const geometry = new TextGeometry(text, {
-			font: this.font,
-			size: 2,
-			height: 0.2,
-			curveSegments: 12,
-			bevelEnabled: false,
-		});
-
-		geometry.computeBoundingBox();
-		geometry.translate(-geometry.boundingBox.max.x / 2, 0, 0);
-
-		const material = new THREE.MeshStandardMaterial({
-			color: color,
-			metalness: 0,
-			roughness: 1,
-		});
-
-		const mesh = new THREE.Mesh(geometry, material);
-		mesh.position.copy(position);
-		mesh.scale.set(scale, scale, scale);
-		mesh.rotation.x = -0.5;
-		mesh.rotation.z = Math.PI;
-
-		return mesh;
-	}
-
-	async createInitialTexts(nameLeft, nameRight, eloLeft, eloRight, colorLeft, colorRight) {
-		this.colorLeft = colorLeft;
-		this.colorRight = colorRight;
-		this.updateScore("left", "0");
-		this.updateScore("right", "0");
-
-		this.updateText("nameLeft", nameLeft, 0.5);
-		this.updateText("nameRight", nameRight, 0.5);
-		this.updateText("eloLeft", eloLeft, 0.5);
-		this.updateText("eloRight", eloRight, 0.5);
-	}
-
-	updateText(id, newText, scale = 1) {
-		console.log(`Updating text for id: ${id} with text: ${newText}`);
-		if (this.meshes.has(id)) {
-			this.scene.remove(this.meshes.get(id));
-		}
-
-		let color;
-		if (id.toLowerCase().includes("left")) {
-			color = this.colorLeft;
-		} else if (id.toLowerCase().includes("right")) {
-			color = this.colorRight;
-		} else {
-			color = 0x00ffff;
-		}
-		const mesh = this.createText(newText, this.positions[id], color, scale);
-		this.scene.add(mesh);
-		this.meshes.set(id, mesh);
-	}
-
-	updateScore(side, score) {
-		this.updateText(`score${side.charAt(0).toUpperCase() + side.slice(1)}`, score, 1);
 	}
 }

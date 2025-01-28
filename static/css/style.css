@@ -1,7 +1,7 @@
 /* Navigation styles */
 .nav-container {
-    padding: 30px;
-    text-align: center;
+	padding: 30px;
+	text-align: center;
 	color: var(--secondary-color);
 }
 
@@ -86,10 +86,10 @@
 }
 
 .offline-indicator {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background-color: #b94242;
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background-color: #b94242;
 }
 
 .user-item {
@@ -273,18 +273,37 @@
 	color: var(--secondary-color);
 }
 
-#loginForm, #signupForm {
+#loginForm,
+#signupForm {
 	background-color: var(--accent-color);
 }
 
 .new-message-dot {
-    display: inline-block;
-    width: 10px; /* Size of the dot */
-    height: 10px; /* Size of the dot */
-    background-color: red; /* Color of the dot */
-    border-radius: 50%; /* Make it circular */
-    position: absolute; /* Position it absolutely */
-    top: 2px; /* Adjust as needed */
-    left: 2px; /* Adjust as needed */
-    border: 2px solid white; /* Optional: add a white border for better visibility */
+	display: inline-block;
+	width: 10px; /* Size of the dot */
+	height: 10px; /* Size of the dot */
+	background-color: red; /* Color of the dot */
+	border-radius: 50%; /* Make it circular */
+	position: absolute; /* Position it absolutely */
+	top: 2px; /* Adjust as needed */
+	left: 2px; /* Adjust as needed */
+	border: 2px solid white; /* Optional: add a white border for better visibility */
+}
+
+/* Custom styles for the modal background */
+.modal-backdrop {
+	background-color: rgba(
+		50,
+		50,
+		50,
+		1
+	); /* Change the background color and opacity */
+}
+
+.modal-content-game {
+	background-color: #dcdede; /* Change the background color of the modal content */
+	border-radius: 10px; /* Add rounded corners */
+	padding: 20px; /* Add padding */
+	border: 5px solid #00bdd1; /* Add a border with a specific color */
+	box-shadow: 0 0 50px rgba(0, 189, 209, 5); /* Add a shadow effect *//
 }
