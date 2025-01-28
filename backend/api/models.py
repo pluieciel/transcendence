@@ -8,11 +8,13 @@ from channels.db import database_sync_to_async
 ######################## USER ###########################
 
 class CustomUserManager(BaseUserManager):
-    def create_user(self, username, password=None, avatar=None):
+    def create_user(self, username, password=None, avatar=None, totp_secret=None):
         if not username:
             raise ValueError('Users must have a username')
+        if not totp_secret:
+            raise ValueError('Users must have a totp_secret')
 
-        user = self.model(username=username, avatar=avatar)
+        user = self.model(username=username, avatar=avatar, totp_secret=totp_secret)
         user.set_password(password)
         user.save(using=self._db)
         return user
@@ -30,8 +32,6 @@ class CustomUserManager(BaseUserManager):
             password=password,
         )
         user.is_admin = True
-        user.is_staff = True
-        user.is_superuser = True
         user.save(using=self._db)
         return user
     
@@ -55,7 +55,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     friends = models.ManyToManyField('self', symmetrical=False, related_name='friend_set', blank=True)
     avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
     avatar42 = models.CharField(null=True)
-    totp_secret = models.CharField(max_length=64, unique=True, null=True)
+    totp_secret = models.CharField(max_length=64, unique=True)
     is_2fa_enabled = models.BooleanField(default=False)
     invites = models.ManyToManyField('self', symmetrical=False, related_name='invite_set', blank=True)
     color = models.IntegerField(default=1)
