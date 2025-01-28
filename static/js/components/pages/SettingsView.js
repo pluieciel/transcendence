@@ -57,7 +57,7 @@ export default class SettingsView {
                             <h1 class="modal-title fs-5" id="staticBackdropLabel">Recovery codes</h1>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
-                        <form id="totpForm">
+                        <form id="recoveryForm">
 	                        <div class="modal-body">
 	                            
 	                        </div>
