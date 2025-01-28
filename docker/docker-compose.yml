@@ -36,12 +36,16 @@ services:
             JWT_SECRET_KEY_FILE: /run/secrets/jwt-secret-key
             OAUTH_CLIENT_ID_FILE: /run/secrets/oauth-client-id
             OAUTH_CLIENT_SECRET_FILE: /run/secrets/oauth-client-secret
+            RECAPTCHA_CLIENT_ID_FILE: /run/secrets/recaptcha-client-id
+            RECAPTCHA_CLIENT_SECRET_FILE: /run/secrets/recaptcha-client-secret
         env_file: .env
         secrets:
             - postgres-passwd
             - jwt-secret-key
             - oauth-client-id
             - oauth-client-secret
+            - recaptcha-client-id
+            - recaptcha-client-secret
         volumes:
             - django_data:/usr/src/app
         networks:
@@ -61,6 +65,8 @@ services:
             DEEPSEEK_API_KEY_FILE: /run/secrets/deepseek-api-key
             OAUTH_CLIENT_ID_FILE: /run/secrets/oauth-client-id
             OAUTH_CLIENT_SECRET_FILE: /run/secrets/oauth-client-secret
+            RECAPTCHA_CLIENT_ID_FILE: /run/secrets/recaptcha-client-id
+            RECAPTCHA_CLIENT_SECRET_FILE: /run/secrets/recaptcha-client-secret
         env_file: .env
         secrets:
             - postgres-passwd
@@ -68,6 +74,8 @@ services:
             - deepseek-api-key
             - oauth-client-id
             - oauth-client-secret
+            - recaptcha-client-id
+            - recaptcha-client-secret
         volumes:
             - django_data:/usr/src/app
         networks:
@@ -302,5 +310,9 @@ secrets:
         file: ${PWD}/docker/secrets/oauth-client-id.txt
     oauth-client-secret:
         file: ${PWD}/docker/secrets/oauth-client-secret.txt
+    recaptcha-client-id:
+        file: ${PWD}/docker/secrets/recaptcha-client-id.txt
+    recaptcha-client-secret:
+        file: ${PWD}/docker/secrets/recaptcha-client-secret.txt
     deepseek-api-key:
         file: ${PWD}/docker/secrets/deepseek-api-key.txt

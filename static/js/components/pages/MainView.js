@@ -183,6 +183,10 @@ export default class MainView {
 			if (avatarUrl) {
 				name_div.innerHTML = `<img id="avatarImg" src=${avatarUrl} alt="User Avatar" width="30" height="30"></img> ` + this.username;
 			}
+			if (data['display']) {
+				let toInsert = " (" + data['display'] + ")";
+				name_div.insertAdjacentHTML('beforeend', toInsert);
+			}
 		} catch (error) {
 			elo_div.innerHTML = "Failed to load elo";
 			winrate_div.innerHTML = "Failed to load winrate";
