@@ -15,21 +15,21 @@ export default class GameComponent {
 	render() {
 		this.container.innerHTML = `
 			<!-- Quick Match Timer container -->
-			<div class="modal fade" id="matchSearch" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-				<div class="modal-dialog modal-dialog-centered">
-					<div class="modal-content modal-content-game d-flex flex-column align-items-center justify-content-center text-center">
-						<h5 class="modal-title w-70 mt-3 mb-3" id="staticBackdropLabel">Searching for a game</h5>
-						<h2 id="timer">0s</h2> <!-- Timer below the header -->
-						<button type="button" class="btn btn-secondary m-3" id="gameSearchCancel" data-bs-dismiss="modal">Cancel</button>
+				<div class="modal fade" id="matchSearch" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+					<div class="modal-dialog modal-dialog-centered">
+						<div class="modal-content modal-content-game d-flex flex-column align-items-center justify-content-center text-center">
+							<h5 class="modal-title w-70 mt-3 mb-3" id="staticBackdropLabel">Searching for a game</h5>
+							<h2 id="timer">0s</h2> <!-- Timer below the header -->
+							<button type="button" class="btn btn-secondary m-3" id="gameSearchCancel" data-bs-dismiss="modal">Cancel</button>
+						</div>
 					</div>
 				</div>
-			</div>
-			<div id=gameDiv style="display :none:">
-				<div id="overlay">
-				    <button id="returnButton" style="display: none;">Return to Main Menu</button>
+				<div id="gameDiv" style="display: none;">
+					<div id="overlay">
+						<button id="returnButton" style="display: none;">Return to Main Menu</button>
+					</div>
+					<canvas id="gameCanvas"></canvas>
 				</div>
-		        <canvas id="gameCanvas"></canvas>
-			</div>
 			`;
 
 		const button = document.getElementById("quickMatch");

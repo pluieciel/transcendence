@@ -301,9 +301,28 @@
 }
 
 .modal-content-game {
-	background-color: #dcdede; /* Change the background color of the modal content */
+	background-color: black; /* Set the background color to black */
 	border-radius: 10px; /* Add rounded corners */
 	padding: 20px; /* Add padding */
-	border: 5px solid #00bdd1; /* Add a border with a specific color */
-	box-shadow: 0 0 50px rgba(0, 189, 209, 5); /* Add a shadow effect *//
+	border: 5px solid var(--user-color); /* Add a border with a specific color */
+	box-shadow: 0 0 50px var(--user-color); /* Add a shadow effect */
+	color: var(--user-color); /* Set the text color to user color */
+}
+
+/* Ensure buttons inside the modal also use the user color */
+.modal-content-game .btn {
+	color: var(--user-color);
+	border-color: var(--user-color);
+}
+
+.modal-content-game .btn:hover {
+	background-color: var(--user-color);
+	color: white; /* Optional: change text color on hover */
+}
+
+/* Ensure the modal title is visible */
+.modal-content-game .modal-title {
+	color: var(--user-color) !important; /* Set the text color to user color */
+	font-size: 1.5rem; /* Adjust the font size as needed */
+	margin-bottom: 1rem; /* Add some margin below the title */
 }
