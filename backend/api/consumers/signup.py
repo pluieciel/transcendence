@@ -99,9 +99,8 @@ class SignupConsumer(AsyncHttpConsumer):
 			if avatar:
 				image_bytes = avatar.file.read()
 				image = Image.open(io.BytesIO(image_bytes))
-				resized_image = image.resize((60, 60), Image.Resampling.LANCZOS)
 				img_byte_arr = io.BytesIO()
-				resized_image.save(img_byte_arr, format=image.format or 'PNG')
+				image.save(img_byte_arr, format=image.format or 'PNG')
 				img_byte_arr.seek(0)
 				avatar.file = img_byte_arr 
 
