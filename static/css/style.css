@@ -13,8 +13,9 @@
 }
 
 .btn-primary {
-	background-color: #42b983;
-	border-color: #42b983;
+	background-color: var(--accent-color);
+	border-color: var(--accent-color);
+	transition: all 0.2s;
 }
 
 .btn-primary:disabled {
@@ -24,8 +25,9 @@
 }
 
 .btn-primary:hover {
-	background-color: #3aa876;
-	border-color: #3aa876;
+	background-color: var(--accent-color);
+	border-color: var(--user-color);
+	box-shadow: 0 0 20px var(--user-color);
 }
 
 /* Chat styles */
@@ -100,7 +102,7 @@
 }
 
 .user-item:hover {
-	background-color: rgba(255, 255, 255, 0.1);
+	/* background-color: rgba(255, 255, 255, 0.1); */
 	cursor: pointer;
 }
 
@@ -109,14 +111,14 @@
 }
 
 .custom-tabs {
-	border-right: 1px solid #dee2e6;
+	border-right: 1px solid var(--user-color);
 	border-top: none;
 }
 
 .custom-tabs .chat-nav-link {
 	display: block;
 	padding: 0.5rem 1rem;
-	border: 1px solid #ddd;
+	border: 1px solid var(--user-color);
 	border-radius: 0.25rem;
 	text-align: center;
 	cursor: pointer;
@@ -141,7 +143,7 @@
 
 .custom-tabs .chat-nav-link.active {
 	background-color: rgba(255, 255, 255, 0.3);
-	border-color: #dee2e6 transparent #dee2e6 #dee2e6;
+	border-color: var(--user-color) transparent var(--user-color) var(--user-color);
 	color: white;
 }
 
@@ -218,7 +220,9 @@
 }
 
 .right .message-content {
-	background-color: #42b983;
+	background-color: var(--accent-color);
+	box-shadow: 0 0 5px var(--user-color);
+	border: 1px solid var(--user-color);
 	color: white;
 	text-align: left;
 }
@@ -287,4 +291,8 @@
     top: 2px; /* Adjust as needed */
     left: 2px; /* Adjust as needed */
     border: 2px solid white; /* Optional: add a white border for better visibility */
+}
+
+#chatTabs {
+	border-bottom: 0;
 }

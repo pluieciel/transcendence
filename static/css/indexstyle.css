@@ -179,8 +179,9 @@ a {
 }
 
 .containerSensitive > button {
-	border: 2px solid #f74f5f;
-	background-color: #f74f5f;
+	border: 1px solid var(--user-color);
+	background-color: var(--primary-color);
+	color: var(--user-color);
 }
 
 .containerSensitive > button:hover {
@@ -290,11 +291,11 @@ a {
 	border-radius: 5px;
 }
 
-#colorDiv {
+#colorDiv, #qualityDiv {
 	padding: 10px 20px;
 	font-size: 16px;
 	margin: 5px;
-	width: 128px;
+	width: 196px;
 	background-color: var(--primary-color);
 	color: var(--secondary-color);
 	border-radius: 5px;
@@ -319,4 +320,14 @@ a {
 #changeHeader {
 	align-items: center;
 	/* text-align: center; */
+}
+
+.disabled {
+	border: 0 !important;
+	background-color: var(--hover-color) !important;
+}
+
+.disabled:hover {
+	box-shadow: 0 0 0;
+	background-color: var(--hover-color);
 }
