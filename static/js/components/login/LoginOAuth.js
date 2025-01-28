@@ -47,11 +47,10 @@ class LoginOAuth {
 
             const data = await response.json();
 
-            if (data.success) {
+            if (data.success)
 				window.app.login(data);
-            } else {
+            else
                 this.showError(data.message || 'Sign up || Log in failed.');
-            }
         } catch (error) {
             console.error("Error during fetch:", error);
             this.showError("An error occurred during authentication.");

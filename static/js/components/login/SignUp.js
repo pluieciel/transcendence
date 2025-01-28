@@ -13,13 +13,13 @@ export default class SignUp {
                     <div class="col-md-4">
                         <form id="signupForm" class="card p-4">
                             <div class="mb-3">
-                                <input type="text" id="usrnm-form" placeholder="Enter username" class="form-control" required>
+                                <input type="text" id="usrnm-form" placeholder="Enter username" class="form-control" maxlength="16" required>
                             </div>
                             <div class="mb-3">
-                                <input type="password" id="pwd-form" placeholder="Enter password" class="form-control" required>
+                                <input type="password" id="pwd-form" placeholder="Enter password" class="form-control" maxlength="32" required>
                             </div>
                             <div class="mb-3">
-                                <input type="password" id="cfm-pwd-form" placeholder="Confirm password" class="form-control" required>
+                                <input type="password" id="cfm-pwd-form" placeholder="Confirm password" class="form-control" maxlength="32" required>
                             </div>
                             <div class="mb-3">
                                 <span id="avatarSpan">
@@ -82,9 +82,9 @@ export default class SignUp {
 
             const formData = new FormData();
             const originalFile = this.container.querySelector('#avatar').files[0];
-            const hashedPassword = CryptoJS.SHA256(password).toString();
             formData.append('username', username);
-            formData.append('password', hashedPassword);
+            formData.append('password', password);
+            formData.append('confirm_password', confirmPassword);
             formData.append('recaptcha_token', recaptchaToken);
             if (originalFile) {
                 if (originalFile.size > MAX_FILE_SIZE) {
@@ -92,11 +92,8 @@ export default class SignUp {
                     errorDiv.classList.remove('d-none');
                     return;
                 }
-                // Get file extension
                 const extension = originalFile.name.split('.').pop();
-                // Create new filename with timestamp
                 const newFilename = `${username}.${extension}`;
-                // Create new File object with custom name
                 const modifiedFile = new File([originalFile], newFilename, {
                     type: originalFile.type,
                     lastModified: originalFile.lastModified
@@ -115,6 +112,7 @@ export default class SignUp {
                 if (data.success) {
                     window.app.router.navigateTo('/login');
                 } else {
+                    grecaptcha.reset(this.recaptchaWidgetId);
                     errorDiv.textContent = data.message || 'Signup failed';
                     errorDiv.classList.remove('d-none');
                 }
