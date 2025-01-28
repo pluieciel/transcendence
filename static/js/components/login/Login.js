@@ -12,10 +12,10 @@ export default class Login {
                     <div class="col-md-4">
                         <form id="loginForm" class="card p-4">
                             <div class="mb-3">
-                                <input type="text" id="usrnm-form" placeholder="Enter username" class="form-control" required>
+                                <input type="text" id="usrnm-form" placeholder="Enter username" class="form-control" maxlength="16" required>
                             </div>
                             <div class="mb-3">
-                                <input type="password" id="pwd-form" placeholder="Enter password" class="form-control" required>
+                                <input type="password" id="pwd-form" placeholder="Enter password" class="form-control" maxlength="32" required>
                             </div>
                             <div id="loginError" class="alert alert-danger d-none"></div>
                             <button id="loginBtn" type="submit" class="btn btn-primary w-100">Log In</button>
@@ -63,9 +63,6 @@ export default class Login {
 				const login42 = this.container.querySelector('#login42Btn');
 
 				login42.addEventListener("click", () => {
-                    // TODO: avoid setting isLoggedIn to true here
-					window.app.state.isLoggedIn = true;
-					sessionStorage.setItem('isLoggedIn', 'true');
 					window.location.href = data.auth_url;
 		        });
 			}
@@ -118,9 +115,7 @@ export default class Login {
             const username = this.container.querySelector('#usrnm-form').value;
             const password = this.container.querySelector('#pwd-form').value;
             const errorDiv = this.container.querySelector('#loginError');
-            const hashedPassword = CryptoJS.SHA256(password).toString();
 
-            // Handle login logic here
             try {
                 const response = await fetch('/api/login/', {
                     method: 'POST',
@@ -129,18 +124,16 @@ export default class Login {
                     },
                     body: JSON.stringify({
                         username: username,
-                        password: hashedPassword
+                        password: password
                     })
                 });
                 const data = await response.json();
 				
-                // This code runs only after getting response from server
                 if (data.success) {
-                    if (data.is_2fa_enabled) {
+                    if (data.is_2fa_enabled)
 						new bootstrap.Modal(this.container.querySelector('#totpModal')).show();
-                    } else {
+                    else
                         window.app.login(data);
-                    }
                 } else {
                     errorDiv.textContent = data.message || 'Login failed';
                     errorDiv.classList.remove('d-none');

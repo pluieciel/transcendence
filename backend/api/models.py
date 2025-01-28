@@ -38,10 +38,9 @@ class CustomUserManager(BaseUserManager):
             
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
-    username = models.CharField(max_length=30, unique=True)
+    username = models.CharField(max_length=16, unique=True)
     oauthlog = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
-    is_staff = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     elo = models.IntegerField(default=1000)
@@ -49,11 +48,10 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     looses = models.IntegerField(default=0)
     language = models.CharField(max_length=4, unique=False, default="en")
     is_playing = models.BooleanField(default=False)
-    is_bot = models.BooleanField(default=False)
     current_game_id = models.IntegerField(default=-1)
     tourn_win = models.IntegerField(default=0)
     tourn_joined = models.IntegerField(default=0)
-    theme = models.CharField(default="light", max_length=5)
+    theme = models.CharField(default="dark", max_length=5)
     friends = models.ManyToManyField('self', symmetrical=False, related_name='friend_set', blank=True)
     avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
     avatar42 = models.CharField(null=True)
