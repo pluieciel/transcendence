@@ -258,6 +258,28 @@ class GameBackend:
 		if not self.is_bot_game:
 			await self.update_user_elo(self.player_right.user, new_elo_pright)
 
+	def get_color(self, user):
+		color_map = {
+			0: '#3E27F8',
+			1: "#00BDD1",
+			2: "#00AD06",
+			3: "#e67e00",
+			4: "#EC008F",
+			5: "#6400C4",
+			6: "#E71200",
+			7: "#OEC384",
+			8: "#E6E3E1"
+		}
+		try:
+			color = color_map.get(user.color)
+			if (color is None):
+				return "#00BDD1"
+			else:
+				return color
+		except:
+			logging.getLogger('game').warn(f"no color found in settings defaulting to cyan")
+			return "#00BDD1"
+
 	async def broadcast_state(self):
 		events = []
 		if self.game.scored:
@@ -274,8 +296,14 @@ class GameBackend:
 				"eloChange": self.elo_change
     	})
 		if self.game.ball.lastHitter is not None:
-			self.logger.info(f"Last hitter : {self.game.ball.lastHitter}")
-			events.append({"type": "ball_last_hitter", "value": self.game.ball.lastHitter})
+			self.logger.info(self.game.ball.lastHitter)
+			if (self.game.ball.lastHitter == "LEFT"):
+				color = self.get_color(self.player_left.user)
+			elif self.game.ball.lastHitter == "RIGHT":
+				color = self.get_color(self.player_right.user)
+			else:
+				color = '#676a6e'
+			events.append({"type": "ball_last_hitter", "color": color})
 
 		trajectory_points = self.game.ball.predict_trajectory()
 		trajectory_data = [vars(point) for point in trajectory_points]
@@ -337,7 +365,14 @@ class GameBackend:
 				"eloChange": self.elo_change
     	})
 		if self.game.ball.lastHitter is not None:
-			events.append({"type": "ball_last_hitter", "value": self.game.ball.lastHitter})
+			self.logger.info(self.game.ball.lastHitter)
+			if (self.game.ball.lastHitter == "LEFT"):
+				color = self.get_color(self.player_left.user)
+			elif self.game.ball.lastHitter == "RIGHT":
+				color = self.get_color(self.player_right.user)
+			else:
+				color = '#676a6e'
+			events.append({"type": "ball_last_hitter", "color": color})
 
 		trajectory_points = self.game.ball.predict_trajectory()
 		trajectory_data = [vars(point) for point in trajectory_points]

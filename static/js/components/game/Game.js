@@ -30,8 +30,10 @@ export class Game {
 	}
 
 	async initialize(initData) {
+		if (!window.app.settings.fetched)
+			await window.app.getPreferences();
 		this.renderer = new Renderer(this.canvas);
-		this.sceneManager = new SceneManager(this.renderer.renderer, this.antialiasing, this.bloom);
+		this.sceneManager = new SceneManager(this.renderer.renderer, window.app.settings.quality);
 		this.inputManager = new InputManager(this.ws);
 		await this.sceneManager.initialize(initData);
 		this.particleSystem = new ParticleSystem(this.sceneManager.scene);
@@ -108,13 +110,7 @@ export class Game {
 					console.log("Websocket closed");
 				}
 				if (event.type == "ball_last_hitter") {
-					if (event.value == "RIGHT") {
-						this.sceneManager.updateBallColor(0xff0000, 0xff0000);
-					} else if (event.value == "LEFT") {
-						this.sceneManager.updateBallColor(0x00ffff, 0x00ffff);
-					} else {
-						this.sceneManager.updateBallColor(0x676a6e, 0x676a6e);
-					}
+						this.sceneManager.updateBallColor(event.color, event.color);
 				}
 			});
 		}

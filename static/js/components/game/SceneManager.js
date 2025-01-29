@@ -4,10 +4,11 @@ import { PostProcessing } from "./PostProcessing.js";
 import { TextManager } from "./TextManager.js";
 
 export class SceneManager {
-	constructor(renderer, antialiasing, bloom) {
+	constructor(renderer, quality){
 		this.leftPaddle = null;
 		this.rightPaddle = null;
 		this.ball = null;
+		this.quality = quality
 
 		//Debug
 		this.debugMod = false;
@@ -40,7 +41,7 @@ export class SceneManager {
 		await this.createGameObjects(data);
 
 		//Setup Anti aliasing and bloom
-		this.postProcessing = new PostProcessing(this.renderer, 2, this.scene, this.camera);
+		this.postProcessing = new PostProcessing(this.renderer, this.quality, this.scene, this.camera);
 		this.composer = this.postProcessing.composer;
 		return true;
 	}
@@ -318,7 +319,7 @@ export class SceneManager {
 				rightTexture: "/js/components/game/Textures/TextureRightCyan.png",
 			},
 			//Blue
-			"#0004cc": {
+			"#3E27F8": {
 				leftTexture: "/js/components/game/Textures/TextureLeftBlue.png",
 				rightTexture: "/js/components/game/Textures/TextureRightBlue.png",
 			},

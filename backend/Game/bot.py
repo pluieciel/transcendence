@@ -5,13 +5,18 @@ import math
 import logging
 from .normal_game_logic import Vector2D
 
+
+class BotUser:
+    def __init__(self, username, elo, color, user_id):
+        self.username = username
+        self.elo = elo
+        self.color = color
+        self.id = user_id
+
+
 class Bot:
 	def __init__(self, difficulty, game):
-		self.user = type('BotUser', (), {
-			'username': f'Bot (Level {difficulty})',
-			'elo': 1000,
-			'id': -1
-		})()
+		self.user = BotUser(f'Bot (Level {difficulty})', 1000, 1, -1)
 		self.channel = None
 		self.state = "Ready"
 		self.game = game
