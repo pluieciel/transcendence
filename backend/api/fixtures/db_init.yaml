@@ -5,7 +5,7 @@
       password: pbkdf2_sha256$600000$THm8MpIw3Z3EBARsKHbUZq$kMwOPjElcUCbFYQTfiiqUPIr3T/xRZWh+UzE9XF/y7s=
       is_admin: true
       is_2fa_enabled: true
-      is_recovery_code_enabled: true
+      recovery_codes_generated: true
       totp_secret: YCMP4DRPDR3Z64BIHRW47HTMHRTZT5CV
       created_at: "2025-01-01T00:00:00Z"
 - model: api.customuser
