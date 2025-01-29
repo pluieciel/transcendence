@@ -1,7 +1,7 @@
 from channels.generic.http import AsyncHttpConsumer
 from channels.db import database_sync_to_async
 from api.utils import jwt_to_user, verify_totp
-from api.db_utils import user_update_is_2fa_enabled
+from api.db_utils import update_is_2fa_enabled
 import json
 
 class Enable2FAConsumer(AsyncHttpConsumer):
@@ -37,7 +37,7 @@ class Enable2FAConsumer(AsyncHttpConsumer):
 				return await self.send_response(401, json.dumps(response_data).encode(),
 					headers=[(b"Content-Type", b"application/json")])
 
-			await user_update_is_2fa_enabled(user, True)
+			await update_is_2fa_enabled(user, True)
 
 			response_data = {
 				'success': True,

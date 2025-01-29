@@ -115,6 +115,10 @@ export default class SettingsView {
 				});
 				const data = await response.json();
 				if (data.success) {
+					const	enable2FA = this.container.querySelector('#enable2FA');
+					const	disable2FA = this.container.querySelector('#disable2FA');
+					enable2FA.style.display = "none";
+					disable2FA.style.display = "block";
 					const modal = bootstrap.Modal.getInstance(this.container.querySelector('#totpModal'));
 					if (modal)
 					{
@@ -157,6 +161,18 @@ export default class SettingsView {
 		const	colorDiv = document.getElementById('colorDiv');
 		const	colorIndex = window.app.settings.color;
 		const	quality = window.app.settings.quality;
+		const 	is_2fa_enabled = window.app.settings.is_2fa_enabled;
+		const	enable2FA = this.container.querySelector('#enable2FA');
+		const	disable2FA = this.container.querySelector('#disable2FA');
+
+		if (is_2fa_enabled) {
+			enable2FA.style.display = "none";
+			disable2FA.style.display = "block";
+		}
+		else {
+			enable2FA.style.display = "blon";
+			disable2FA.style.display = "none";
+		}
 		let colorArray = {
 			0: 'Blue',
 			1: 'Cyan',
@@ -273,7 +289,10 @@ export default class SettingsView {
 
 				const data = await response.json();
 				if (data.success) {
-					
+					const	enable2FA = this.container.querySelector('#enable2FA');
+					const	disable2FA = this.container.querySelector('#disable2FA');
+					enable2FA.style.display = "block";
+					disable2FA.style.display = "none";
 				} else if (response.status == 409) {
 					alert(data.message);
 				} else {

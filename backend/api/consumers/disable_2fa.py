@@ -1,7 +1,7 @@
 from channels.generic.http import AsyncHttpConsumer
 from channels.db import database_sync_to_async
 from api.utils import jwt_to_user
-from api.db_utils import user_update_is_2fa_enabled
+from api.db_utils import update_is_2fa_enabled, update_recovery_codes_generated
 import json
 
 class Disable2FAConsumer(AsyncHttpConsumer):
@@ -24,7 +24,9 @@ class Disable2FAConsumer(AsyncHttpConsumer):
 				return await self.send_response(409, json.dumps(response_data).encode(),
 					headers=[(b"Content-Type", b"application/json")])
 			
-			await user_update_is_2fa_enabled(user, False)
+			await update_is_2fa_enabled(user, False)
+			await update_recovery_codes_generated(user, False)
+			await self.remove_recovery_codes(user)
 
 			response_data = {
 				'success': True,
@@ -39,3 +41,8 @@ class Disable2FAConsumer(AsyncHttpConsumer):
 			}
 			return await self.send_response(500, json.dumps(response_data).encode(),
 					headers=[(b"Content-Type", b"application/json")])
+
+	@database_sync_to_async
+	def remove_recovery_codes(self, user):
+		from api.models import RecoveryCode
+		RecoveryCode.objects.filter(user=user).delete()

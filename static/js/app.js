@@ -66,6 +66,7 @@ class App {
 			return;
 		this.settings.color = data['color'];
 		this.settings.quality = data['quality'];
+		this.settings.is_2fa_enabled = data['is_2fa_enabled'];
 		this.settings.fetched = true;
 		this.setColor();
 	}
