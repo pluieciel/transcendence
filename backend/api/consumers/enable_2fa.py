@@ -15,6 +15,14 @@ class Enable2FAConsumer(AsyncHttpConsumer):
 				return await self.send_response(401, json.dumps(response_data).encode(),
 					headers=[(b"Content-Type", b"application/json")])
 
+			if user.is_2fa_enabled:
+				response_data = {
+					'success': False,
+					'message': '2FA already enabled'
+				}
+				return await self.send_response(409, json.dumps(response_data).encode(),
+					headers=[(b"Content-Type", b"application/json")])
+
 			data = json.loads(body.decode())
 			totp_input = data.get('totp')
 

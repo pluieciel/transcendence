@@ -1,55 +1,93 @@
 - model: api.customuser
+  pk: 1
   fields:
       username: admin
       password: pbkdf2_sha256$600000$THm8MpIw3Z3EBARsKHbUZq$kMwOPjElcUCbFYQTfiiqUPIr3T/xRZWh+UzE9XF/y7s=
       is_admin: true
-      totp_secret: VMWF2LG344JQRQXO4I2CCT4LU5TZRYKA
+      is_2fa_enabled: true
+      totp_secret: YCMP4DRPDR3Z64BIHRW47HTMHRTZT5CV
       created_at: "2025-01-01T00:00:00Z"
 - model: api.customuser
+  pk: 2
   fields:
       username: user1
       password: pbkdf2_sha256$600000$1KhwQjfzxnhiqP0WlEG0Uf$Ycu+CjFC6YqNVR7/ml42INNbddbsxCfkBxnD6vc12XU=
-      totp_secret: VMWF2LG344JQRQXO4I2CCT4LU5TZRYK1
       created_at: "2025-01-01T00:00:00Z"
 - model: api.customuser
+  pk: 3
   fields:
       username: user2
       password: pbkdf2_sha256$600000$E80wKu5RJCEznR1qDscn5b$Z2SlKyLhFZ27REnA6xvlhNKwb7x+cbGHUJpkHngKDfE=
-      totp_secret: VMWF2LG344JQRQXO4I2CCT4LU5TZRYK2
       created_at: "2025-01-01T00:00:00Z"
 - model: api.customuser
+  pk: 4
   fields:
       username: user3
       password: pbkdf2_sha256$600000$C4UK2HGGXIZyUiN6vIUnzu$HcmTzZ777NqbMue20BgqTqKZUPfd1wmg8OCC2Ums5O4=
-      totp_secret: VMWF2LG344JQRQXO4I2CCT4LU5TZRYK3
       created_at: "2025-01-01T00:00:00Z"
 - model: api.customuser
+  pk: 5
   fields:
       username: user4
       password: pbkdf2_sha256$600000$1UA46BbtyaROQIu4XQLuQV$oZvSpECYzL3PuR5sxF/PzRRHQFTSxTeNCfy7LaVB9+g=
-      totp_secret: VMWF2LG344JQRQXO4I2CCT4LU5TZRYK4
       created_at: "2025-01-01T00:00:00Z"
 - model: api.customuser
+  pk: 6
   fields:
       username: user5
       password: pbkdf2_sha256$600000$GmGrynXJojWSPj2p1LuWR4$jkxXKYFmi+/94C+AFA20BpZjyRp3qTM2lYt3JnamGYk=
-      totp_secret: VMWF2LG344JQRQXO4I2CCT4LU5TZRYK5
       created_at: "2025-01-01T00:00:00Z"
 - model: api.customuser
+  pk: 7
   fields:
       username: user6
       password: pbkdf2_sha256$600000$xiZs0vJ4GahlaOq0A5DrqB$moGgt2PI9GB7DA89cOVH6XDZEgaN7ZYo/3pjtUWCGTc=
-      totp_secret: VMWF2LG344JQRQXO4I2CCT4LU5TZRYK6
       created_at: "2025-01-01T00:00:00Z"
 - model: api.customuser
+  pk: 8
   fields:
       username: user7
       password: pbkdf2_sha256$600000$d6ofjtQBBKtgucI4JgBHtE$kUX37bM4WCuIxgEokuR3entEw1GCMLLmaG5muEHMjlw=
-      totp_secret: VMWF2LG344JQRQXO4I2CCT4LU5TZRYK7
       created_at: "2025-01-01T00:00:00Z"
 - model: api.customuser
+  pk: 9
   fields:
       username: user8
       password: pbkdf2_sha256$600000$thQGAsFB3FGIrTWZyPtVgg$SwO1oXSYS6gQGWfauFuhTudKWwCabsOVciqeTV1c3Vc=
-      totp_secret: VMWF2LG344JQRQXO4I2CCT4LU5TZRYK8
+      created_at: "2025-01-01T00:00:00Z"
+- model: api.recoverycode
+  pk: 1
+  fields:
+      recovery_code: baa857872a815fdc
+      user_id: 1
+      created_at: "2025-01-01T00:00:00Z"
+- model: api.recoverycode
+  pk: 2
+  fields:
+      recovery_code: 8483cc85e20cfee4
+      user_id: 1
+      created_at: "2025-01-01T00:00:00Z"
+- model: api.recoverycode
+  pk: 3
+  fields:
+      recovery_code: 881f62440fcec335
+      user_id: 1
+      created_at: "2025-01-01T00:00:00Z"
+- model: api.recoverycode
+  pk: 4
+  fields:
+      recovery_code: fa08ca2073c8d332
+      user_id: 1
+      created_at: "2025-01-01T00:00:00Z"
+- model: api.recoverycode
+  pk: 5
+  fields:
+      recovery_code: d1c3971f95d9f821
+      user_id: 1
+      created_at: "2025-01-01T00:00:00Z"
+- model: api.recoverycode
+  pk: 6
+  fields:
+      recovery_code: 2e4e41ddfd0c3bc2
+      user_id: 1
       created_at: "2025-01-01T00:00:00Z"

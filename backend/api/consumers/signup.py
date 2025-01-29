@@ -4,11 +4,8 @@ from django.core.files.base import ContentFile
 from django.core.cache import cache
 from channels.generic.http import AsyncHttpConsumer
 from channels.db import database_sync_to_async
-from secrets import token_bytes
 from api.db_utils import get_user_exists
 from api.utils import get_secret_from_file, hash_password
-import time
-import base64
 import json
 import re
 import io
@@ -160,19 +157,13 @@ class SignupConsumer(AsyncHttpConsumer):
 		regex = r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,32}$'
 		return bool(re.match(regex, password))
 
-	def generate_totp_secret(self):
-		current_time = int(time.time())
-		time_bytes = current_time.to_bytes(4, 'big')
-		return base64.b32encode(token_bytes(16) + time_bytes).decode()
-
 	@database_sync_to_async
 	def create_user(self, username, password, avatar):
 		User = get_user_model()
 		user = User.objects.create_user(
 			username=username,
 			password=password,
-			avatar=avatar,
-			totp_secret=self.generate_totp_secret(),
+			avatar=avatar
 		)
 		return user
 

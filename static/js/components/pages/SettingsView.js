@@ -59,7 +59,8 @@ export default class SettingsView {
                         </div>
                         <form id="recoveryForm">
 	                        <div class="modal-body">
-	                            
+	                            <ul id="recoveryCodes">
+								</ul>
 	                        </div>
                         </form>
                 	</div>
@@ -126,10 +127,18 @@ export default class SettingsView {
 
 						const data = await response.json();
 
-						console.log(data);
+						const recoveryCodes = this.container.querySelector('#recoveryCodes');
+						recoveryCodes.append(Object.assign(document.createElement('li'), {textContent: data.recovery_code_1}));
+						recoveryCodes.append(Object.assign(document.createElement('li'), {textContent: data.recovery_code_2}));
+						recoveryCodes.append(Object.assign(document.createElement('li'), {textContent: data.recovery_code_3}));
+						recoveryCodes.append(Object.assign(document.createElement('li'), {textContent: data.recovery_code_4}));
+						recoveryCodes.append(Object.assign(document.createElement('li'), {textContent: data.recovery_code_5}));
+						recoveryCodes.append(Object.assign(document.createElement('li'), {textContent: data.recovery_code_6}));
 
 						new bootstrap.Modal(this.container.querySelector('#recoveryModal')).show();
 					}
+				} else if (response.status == 409) {
+					alert(response.message);
 				} else {
 					errorDiv.textContent = data.message || 'Login failed';
                     errorDiv.classList.remove('d-none');
@@ -234,11 +243,12 @@ export default class SettingsView {
 				});
 
 				const data = await response.json();
-
 				if (data.success) {
 					new bootstrap.Modal(this.container.querySelector('#totpModal')).show();
 					const qrCode = this.container.querySelector('#qrCode');
 					qrCode.innerHTML = data.qr_code;
+				} else if (response.status == 409) {
+					alert(data.message);
 				} else {
 					errorDiv.textContent = data.message;
                     errorDiv.classList.remove('d-none');
