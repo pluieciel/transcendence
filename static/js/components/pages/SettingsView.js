@@ -25,6 +25,7 @@ export default class SettingsView {
 			<input type="text" id="newName">
 			<button id="changePpBtn">Change your profile picture</button>
 			<button type="button" id="enable2FA">Enable 2FA</button>
+			<button type="button" id="disable2FA">Disable 2FA</button>
 			<div class="modal fade" id="totpModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
@@ -34,17 +35,33 @@ export default class SettingsView {
                         </div>
                         <form id="totpForm">
 	                        <div class="modal-body">
-	                                <div class="mb-3">
-										<div id="qrCode"></div>
-										<div id="qrCodeError" class="alert alert-danger d-none"></div>
-									</div>
-	                                <div class="mb-3">
-	                                    <input id="totpInput" class="form-control" maxlength="6" required>
-	                                </div>
-	                                <div id="totpError" class="alert alert-danger d-none"></div>
+								<div class="mb-3">
+									<div id="qrCode"></div>
+									<div id="qrCodeError" class="alert alert-danger d-none"></div>
+								</div>
+								<div class="mb-3">
+									<input id="totpInput" class="form-control" maxlength="6" required>
+								</div>
+								<div id="totpError" class="alert alert-danger d-none"></div>
 	                        </div>
 	                        <div class="modal-footer">
 	                            <button type="submit" class="btn btn-primary" id="totpSubmit">Submit</button>
+	                        </div>
+                        </form>
+                	</div>
+            	</div>
+			</div>
+			<div class="modal fade" id="recoveryModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="staticBackdropLabel">Recovery codes</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <form id="recoveryForm">
+	                        <div class="modal-body">
+	                            <ul id="recoveryCodes">
+								</ul>
 	                        </div>
                         </form>
                 	</div>
@@ -109,9 +126,35 @@ export default class SettingsView {
 				});
 				const data = await response.json();
 				if (data.success) {
+					const	enable2FA = this.container.querySelector('#enable2FA');
+					const	disable2FA = this.container.querySelector('#disable2FA');
+					enable2FA.style.display = "none";
+					disable2FA.style.display = "block";
 					const modal = bootstrap.Modal.getInstance(this.container.querySelector('#totpModal'));
 					if (modal)
+					{
 						modal.hide();
+						const response = await fetch('/api/settings/2fa/generate/recovery', {
+							method: 'POST',
+							headers: {
+								'Content-Type': 'application/json'
+							},
+						});
+
+						const data = await response.json();
+
+						const recoveryCodes = this.container.querySelector('#recoveryCodes');
+						recoveryCodes.append(Object.assign(document.createElement('li'), {textContent: data.recovery_code_1}));
+						recoveryCodes.append(Object.assign(document.createElement('li'), {textContent: data.recovery_code_2}));
+						recoveryCodes.append(Object.assign(document.createElement('li'), {textContent: data.recovery_code_3}));
+						recoveryCodes.append(Object.assign(document.createElement('li'), {textContent: data.recovery_code_4}));
+						recoveryCodes.append(Object.assign(document.createElement('li'), {textContent: data.recovery_code_5}));
+						recoveryCodes.append(Object.assign(document.createElement('li'), {textContent: data.recovery_code_6}));
+
+						new bootstrap.Modal(this.container.querySelector('#recoveryModal')).show();
+					}
+				} else if (response.status == 409) {
+					alert(response.message);
 				} else {
 					errorDiv.textContent = data.message || 'Login failed';
                     errorDiv.classList.remove('d-none');
@@ -132,6 +175,18 @@ export default class SettingsView {
         const	rightQuality = document.getElementById('rightQuality');
 		const	colorIndex = window.app.settings.color;
 		const	qualityIndex = window.app.settings.quality;
+		const 	is_2fa_enabled = window.app.settings.is_2fa_enabled;
+		const	enable2FA = this.container.querySelector('#enable2FA');
+		const	disable2FA = this.container.querySelector('#disable2FA');
+
+		if (is_2fa_enabled) {
+			enable2FA.style.display = "none";
+			disable2FA.style.display = "block";
+		}
+		else {
+			enable2FA.style.display = "blon";
+			disable2FA.style.display = "none";
+		}
 		let colorArray = {
 			0: 'Blue',
 			1: 'Cyan',
@@ -162,6 +217,7 @@ export default class SettingsView {
 	
     addEventListeners() {
 		const	enable2FA = this.container.querySelector('#enable2FA');
+		const	disable2FA = this.container.querySelector('#disable2FA');
 		const	changeNameBtn = document.getElementById('changeNameBtn');
         const	logoutBtn = document.getElementById('logoutBtn');
 		const	indexBtn = document.getElementById('indexBtn');
@@ -240,7 +296,7 @@ export default class SettingsView {
 		enable2FA.addEventListener('click', async (e) => {
 			e.preventDefault();
 			try {
-				const response = await fetch('/api/settings/2fa/generate', {
+				const response = await fetch('/api/settings/2fa/generate/qr', {
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json',
@@ -248,11 +304,40 @@ export default class SettingsView {
 				});
 
 				const data = await response.json();
-
 				if (data.success) {
 					new bootstrap.Modal(this.container.querySelector('#totpModal')).show();
 					const qrCode = this.container.querySelector('#qrCode');
 					qrCode.innerHTML = data.qr_code;
+				} else if (response.status == 409) {
+					alert(data.message);
+				} else {
+					errorDiv.textContent = data.message;
+                    errorDiv.classList.remove('d-none');
+				}
+			} catch (error) {
+				errorDiv.textContent = 'An error occurred:' + error;
+                errorDiv.classList.remove('d-none');
+			}
+		});
+
+		disable2FA.addEventListener('click', async (e) => {
+			e.preventDefault();
+			try {
+				const response = await fetch('/api/settings/2fa/disable', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+				});
+
+				const data = await response.json();
+				if (data.success) {
+					const	enable2FA = this.container.querySelector('#enable2FA');
+					const	disable2FA = this.container.querySelector('#disable2FA');
+					enable2FA.style.display = "block";
+					disable2FA.style.display = "none";
+				} else if (response.status == 409) {
+					alert(data.message);
 				} else {
 					errorDiv.textContent = data.message;
                     errorDiv.classList.remove('d-none');

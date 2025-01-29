@@ -16,7 +16,7 @@ class CustomUserManager(BaseUserManager):
         user.set_password(password)
         user.save(using=self._db)
         return user
-    
+
     def	create_user_oauth(self, username, avatarUrl):
         if not username:
             raise ValueError('Users must have a username')
@@ -30,12 +30,8 @@ class CustomUserManager(BaseUserManager):
             password=password,
         )
         user.is_admin = True
-        user.is_staff = True
-        user.is_superuser = True
         user.save(using=self._db)
         return user
-    
-            
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=16, unique=True)
@@ -56,8 +52,9 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     friends = models.ManyToManyField('self', symmetrical=False, related_name='friend_set', blank=True)
     avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
     avatar42 = models.CharField(null=True)
-    totp_secret = models.CharField(max_length=64, unique=True, null=True)
+    totp_secret = models.CharField(max_length=32, unique=True, null=True)
     is_2fa_enabled = models.BooleanField(default=False)
+    recovery_codes_generated = models.BooleanField(default=False)
     invites = models.ManyToManyField('self', symmetrical=False, related_name='invite_set', blank=True)
     color = models.IntegerField(default=1)
     quality = models.IntegerField(default=1)
@@ -76,8 +73,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     def has_module_perms(self, app_label):
         return True
-    
-    
+
+
 ######################## GAME INVITE ###########################
 
 class GameInvite(models.Model):
@@ -119,3 +116,8 @@ class GameHistory(models.Model):
     tournament_count = models.IntegerField(default=0)
     tournament_round2_game_id = models.IntegerField(default=-1)
     tournament_round2_place = models.IntegerField(default=-1)
+
+class RecoveryCode(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, related_name='user')
+    recovery_code = models.CharField(max_length=128)
+    created_at = models.DateTimeField(auto_now_add=True)

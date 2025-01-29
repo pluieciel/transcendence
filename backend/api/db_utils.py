@@ -23,6 +23,16 @@ def get_user(user_id):
 	return User.objects.get(id=user_id)
 
 @database_sync_to_async
+def update_is_2fa_enabled(user, is_2fa_enabled):
+	user.is_2fa_enabled = is_2fa_enabled
+	user.save()
+
+@database_sync_to_async
+def update_recovery_codes_generated(user, recovery_codes_generated):
+	user.recovery_codes_generated = recovery_codes_generated
+	user.save()
+
+@database_sync_to_async
 def connect_user(user):
 	try:
 		if (user.is_connected):
