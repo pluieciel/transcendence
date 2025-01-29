@@ -83,6 +83,7 @@ export default class MainView {
 						<h3 id="p-name">${this.username}</h3>
 						<h3 id="p-elo">Loading...</h3>
 						<h3 id="p-winrate">Loading...</h3>
+						<h3 id="p-wl">Loading...</h3>
 						<h3 id="p-tourn">Loading...</h3>
 					</div>
 				</div>
@@ -152,13 +153,12 @@ export default class MainView {
 		});
 	}
 
-
-	
 	async setProfileFields() {
-		var elo_div = document.getElementById("p-elo");
-		var winrate_div = document.getElementById("p-winrate");
-		var tourn_div = document.getElementById("p-tourn");
-		var name_div = document.getElementById("p-name");
+		var name = document.getElementById("p-name");
+		var elo = document.getElementById("p-elo");
+		var ratio = document.getElementById("p-wl");
+		var winrate = document.getElementById("p-winrate");
+		var tourn = document.getElementById("p-tourn");
 
 		try {
 			const response = await fetch("/api/get/profile", {
@@ -170,27 +170,24 @@ export default class MainView {
 			const data = await response.json();
 
             const avatarUrl = await window.app.getAvatar(this.username);
+			if (avatarUrl)
+				name.innerHTML = `<img id="avatarImg" src=${avatarUrl} alt="User Avatar" width="30" height="30"></img> ` + this.username;
 
 			if (data.success) {
-				elo_div.innerHTML = "Elo: " + data["elo"];
-				winrate_div.innerHTML = "Winrate: " + data["winrate"];
-				tourn_div.innerHTML = "Tournaments won: " + data["tourn"];
-			} else {
-				elo_div.innerHTML = "Failed to load elo";
-				winrate_div.innerHTML = "Failed to load winrate";
-				tourn_div.innerHTML = "Failed to load tournaments";
-			}
-			if (avatarUrl) {
-				name_div.innerHTML = `<img id="avatarImg" src=${avatarUrl} alt="User Avatar" width="30" height="30"></img> ` + this.username;
-			}
-			if (data['display']) {
-				let toInsert = " (" + data['display'] + ")";
-				name_div.insertAdjacentHTML('beforeend', toInsert);
-			}
+				elo.innerHTML = "Elo: " + data["elo"];
+				winrate.innerHTML = "Winrate: " + data["winrate"];
+				ratio.innerHTML = "Ratio: " + data["wins"] + "/" + data["looses"];
+				tourn.innerHTML = "Tournaments won: " + data["tourn_won"] + " played: " + data["tourn_joined"];
+				if (data['display']) {
+					let toInsert = " (" + data['display'] + ")";
+					name.insertAdjacentHTML('beforeend', toInsert);
+				}
+			} else
+				throw new Error("Request failure");
 		} catch (error) {
-			elo_div.innerHTML = "Failed to load elo";
-			winrate_div.innerHTML = "Failed to load winrate";
-			tourn_div.innerHTML = "Failed to load tournaments";
+			elo.innerHTML = "Failed to load elo";
+			winrate.innerHTML = "Failed to load winrate";
+			tourn.innerHTML = "Failed to load tournaments";
 			console.error("An error occurred: ", error);
 		}
 	}

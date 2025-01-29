@@ -54,16 +54,14 @@ export default class SettingsView {
 		<div class="containerGame redHover">
 			<h3>Game customization</h3>
 			<div id="row">
-			<button id="leftArrow" class="arrow"><</button>
-			<div id="colorDiv"></div>
-			<button id="rightArrow"class="arrow">></button>
+				<button id="leftColor" class="arrow"><</button>
+				<div id="colorDiv"></div>
+				<button id="rightColor"class="arrow">></button>
 			</div>
 			<div id="row">
-			<button>High Quality</button>
-			<label class="switch">
-			<input type="checkbox">
-			<span class="slider round"></span>
-			</label>
+				<button id="leftQuality" class="arrow"><</button>
+				<div id="qualityDiv"></div>
+				<button id="rightQuality"class="arrow">></button>
 			</div>
 			<button id="savebtn">Save changes</button>
 		</div>
@@ -74,10 +72,23 @@ export default class SettingsView {
 			<button id="deleteAccBtn">Delete my account</button>
 		</div>
 	</div>
-    <div id="passwordError" class="alert alert-danger d-none"></div>
-
-        `;
-    }
+	<div class="modal fade" id="changeModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+		<div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+					<h1 class="modal-title fs-5" id="changeHeader"></h1>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+                <div class="modal-body">
+					<h2 class="modal-title fs-5" id="changeDialog"></h2>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div id="passwordError" class="alert alert-danger d-none"></div>
+					
+					`;
+				}
 
 	add2FAEventListeners() {
         const submit = this.container.querySelector('#totpForm');
@@ -116,8 +127,11 @@ export default class SettingsView {
 		if (!window.app.settings.fetched)
 			await window.app.getPreferences();
 		const	colorDiv = document.getElementById('colorDiv');
+		const	qualityDiv = document.getElementById('qualityDiv');
+        const	leftQuality = document.getElementById('leftQuality');
+        const	rightQuality = document.getElementById('rightQuality');
 		const	colorIndex = window.app.settings.color;
-		const	quality = window.app.settings.quality;
+		const	qualityIndex = window.app.settings.quality;
 		let colorArray = {
 			0: 'Blue',
 			1: 'Cyan',
@@ -129,8 +143,21 @@ export default class SettingsView {
 			7: 'Soft Green',
 			8: 'White'
 		};
-		colorDiv.innerHTML = colorArray[colorIndex];
-		document.querySelector('.switch input').checked = quality
+		let qualityArray = {
+			0: 'Low',
+			1: 'Medium',
+			2: 'High',
+		};
+		if (qualityIndex == 0)
+			leftQuality.classList.add("disabled");
+		else
+			leftQuality.classList.remove("disabled");
+		if (qualityIndex == 2)
+			rightQuality.classList.add("disabled")
+		else
+			rightQuality.classList.remove("disabled")
+		colorDiv.innerHTML = "Color: " + colorArray[colorIndex];
+		qualityDiv.innerHTML = "Quality: " + qualityArray[qualityIndex];
 	}
 	
     addEventListeners() {
@@ -141,11 +168,13 @@ export default class SettingsView {
 		const	wipeBtn = document.getElementById('deleteAccBtn');
 		const	passwdBtn = document.getElementById('passwordButton');
         const	newpwd = document.getElementById('newPasswordInput');
-        const	leftArrow = document.getElementById('leftArrow');
-        const	rightArrow = document.getElementById('rightArrow');
+        const	leftColor = document.getElementById('leftColor');
+        const	rightColor = document.getElementById('rightColor');
+        const	leftQuality = document.getElementById('leftQuality');
+        const	rightQuality = document.getElementById('rightQuality');
 		const	saveChanges = document.getElementById('savebtn');
 		
-		leftArrow.addEventListener('click', () => {
+		leftColor.addEventListener('click', () => {
 			if (window.app.settings.color == 0)
 				window.app.settings.color = 8;
 			else
@@ -154,12 +183,26 @@ export default class SettingsView {
 			window.app.setColor();
 		});
 		
-		rightArrow.addEventListener('click', () => {
+		rightColor.addEventListener('click', () => {
 			if (window.app.settings.color == 8)
 				window.app.settings.color = 0;
 			else
 				window.app.settings.color += 1;
 			window.app.setColor();
+			this.addUserData();
+		});
+
+		leftQuality.addEventListener('click', () => {
+			if (window.app.settings.quality == 0)
+				return ;
+			window.app.settings.quality -= 1;
+			this.addUserData();
+		});
+		
+		rightQuality.addEventListener('click', () => {
+			if (window.app.settings.quality == 2)
+				return ;
+			window.app.settings.quality += 1;
 			this.addUserData();
 		});
 
@@ -172,7 +215,7 @@ export default class SettingsView {
 					},
 					body: JSON.stringify({
 						'newColor': window.app.settings.color,
-						'newQuality': document.querySelector('.switch input').checked,
+						'newQuality': window.app.settings.quality,
 						}),			
 					});
 
@@ -263,9 +306,9 @@ export default class SettingsView {
 					const data = await response.json();
 				
 					if (data.success) {
-						console.log("changing display name success");
+						this.message(true, 'Display name changed to \'' + data['displayName'] + '\'');
 					} else {
-						console.log("changing display name failed");
+						document.getElementById('changeDialog').innerHTML = 'Display name changed failed';
 					}
 				} catch (error) {
 					console.error(error);
@@ -314,12 +357,11 @@ export default class SettingsView {
 		}
 		return true;
 	}
-	
-	error(error) {
-		const errorDiv = this.container.querySelector('#passwordError');
 
-		errorDiv.textContent = 'error: ' + error;
-		errorDiv.classList.remove('d-none');
-		return;
+	message(good, message) {
+		let header = good ? "<i class=\"fa-solid fa-square-check\" style=\"color:green\"></i> Success !" : "<i class=\"fa-solid fa-square-xmark\" style=\"color:red\"></i> Failure.";
+		new bootstrap.Modal(this.container.querySelector('#changeModal')).show();
+		document.getElementById('changeHeader').innerHTML = header;
+		document.getElementById('changeDialog').innerHTML = message;
 	}
 }

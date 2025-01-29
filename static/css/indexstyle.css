@@ -179,8 +179,9 @@ a {
 }
 
 .containerSensitive > button {
-	border: 2px solid #f74f5f;
-	background-color: #f74f5f;
+	border: 1px solid var(--user-color);
+	background-color: var(--primary-color);
+	color: var(--user-color);
 }
 
 .containerSensitive > button:hover {
@@ -245,8 +246,22 @@ a {
 	color: #000;
 }
 
+input[type="file"]::file-selector-button {
+	border-radius: 4px;
+	padding: 0 16px;
+	height: 35px;
+	cursor: pointer;
+	color: var(--secondary-color);
+	background-color: var(--hover-color);
+	border: 1px solid rgba(0, 0, 0, 0.16);
+	box-shadow: 0px 1px 0px rgba(0, 0, 0, 0.05);
+}
+
+#avatarSpan {
+	color: var(--secondary-color);
+}
+
 #usrnm-form, #pwd-form, #cfm-pwd-form {
-	text-align: center;
 	border: none;
 	color: var(--secondary-color);
 	background-color: var(--hover-color);
@@ -290,11 +305,11 @@ a {
 	border-radius: 5px;
 }
 
-#colorDiv {
+#colorDiv, #qualityDiv {
 	padding: 10px 20px;
 	font-size: 16px;
 	margin: 5px;
-	width: 128px;
+	width: 196px;
 	background-color: var(--primary-color);
 	color: var(--secondary-color);
 	border-radius: 5px;
@@ -307,9 +322,22 @@ a {
 
 #row {
 	display: flex;
-	/* justify-content: space-between;
-	vertical-align: text-top; */
 	justify-content: center;
     align-items: center;
 }
 
+#changeHeader {
+	font-size: 2rem;
+	font-weight: bold;
+	align-items: center;
+}
+
+.disabled {
+	border: 0 !important;
+	background-color: var(--hover-color) !important;
+}
+
+.disabled:hover {
+	box-shadow: 0 0 0;
+	background-color: var(--hover-color);
+}

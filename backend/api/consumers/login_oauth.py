@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from channels.generic.http import AsyncHttpConsumer
 from channels.db import database_sync_to_async
 from api.utils import generate_jwt_cookie, get_secret_from_file
-from api.db_utils import get_user_by_name
+from api.db_utils import get_user_by_name, connect_user
 import json
 import os
 import requests
@@ -11,7 +11,15 @@ class LoginOAuthConsumer(AsyncHttpConsumer):
 	async def handle(self, body):
 		try:
 			data = json.loads(body.decode())
-			code = data.get('token')
+			code = data.get('code')
+
+			if not code:
+				response_data = {
+					'success': False,
+					'message': 'Code required'
+				}
+				return await self.send_response(400, json.dumps(response_data).encode(),
+					headers=[(b"Content-Type", b"application/json")])
 
 			client_id = get_secret_from_file('OAUTH_CLIENT_ID_FILE')
 			client_secret = get_secret_from_file('OAUTH_CLIENT_SECRET_FILE')
@@ -49,7 +57,13 @@ class LoginOAuthConsumer(AsyncHttpConsumer):
 				user = await get_user_by_name(username)
 				if not user:
 					user = await self.create_user_oauth(username=username, avatarUrl=user_data['image']['link'])
-
+				if not await connect_user(user=user):
+					response_data = {
+						'success': False,
+						'message': 'User is already connected'
+					}
+					return await self.send_response(401, json.dumps(response_data).encode(),
+						headers=[(b"Content-Type", b"application/json")])
 				response_data = {
 					'success': True,
 					'message': 'Login successful',
