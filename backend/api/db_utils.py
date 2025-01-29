@@ -31,3 +31,26 @@ def update_is_2fa_enabled(user, is_2fa_enabled):
 def update_recovery_codes_generated(user, recovery_codes_generated):
 	user.recovery_codes_generated = recovery_codes_generated
 	user.save()
+
+@database_sync_to_async
+def connect_user(user):
+	try:
+		if (user.is_connected):
+			return False
+		user.is_connected = True
+		user.save()
+		print("Connected", flush=True)
+		return True
+	except Exception as e:
+		return False
+
+@database_sync_to_async
+def disconnect_user(user):
+	try:
+		user.is_connected = False
+		user.save()
+		print("Disconnected", flush=True)
+		return True
+	except Exception as e:
+		print(e, flush=True)
+		return False

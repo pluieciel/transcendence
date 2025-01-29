@@ -23,8 +23,11 @@ class ProfileConsumer(AsyncHttpConsumer):
 			response_data = {
 				'success': True,
 				'elo': user.elo,
+				'wins': user.wins,
+				'looses': user.looses,
 				'winrate': winrate,
-				'tourn': user.tourn_win,
+				'tourn_won': user.tourn_win,
+				'tourn_joined': user.tourn_win, #need to fix this
 				'display': user.display,
 			}
 			return await self.send_response(200, json.dumps(response_data).encode(),

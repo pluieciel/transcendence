@@ -66,7 +66,7 @@ class Vector2D:
 		self.y = y
 		self.z = z
 
-DEFAULT_BALL_POS = Vector2D(0, -3, -15)
+DEFAULT_BALL_POS = Vector2D(0, 7.8, -15)
 
 class Ball:
 	def __init__(self):
@@ -165,16 +165,16 @@ class Player:
 
 class GameBounds:
 	def __init__(self):
-		self.top = Vector2D(0, 10.56, -15)
-		self.bottom = Vector2D(0, -17.89, -15)
-		self.left = Vector2D(-20.45, -3.70, -15)
-		self.right = Vector2D(20.42, -3.70, -15)
+		self.top = Vector2D(0, 10.56+10.5, -15)
+		self.bottom = Vector2D(0, -17.89+10.5, -15)
+		self.left = Vector2D(-20.45, -3.70+10.5, -15)
+		self.right = Vector2D(20.42, -3.70+10.5, -15)
 
 class RumbleGameInstance:
 	def __init__(self, broadcast_fun, game_end_fun):
 		self.bounds = GameBounds()
-		self.player_left = Player(Vector2D(self.bounds.left.x + 2, -3, -15), 0,{"ArrowUp": False, "ArrowDown": False}, self.bounds)
-		self.player_right = Player(Vector2D(self.bounds.right.x - 2, -3, -15), 0,{"ArrowUp": False, "ArrowDown": False}, self.bounds)
+		self.player_left = Player(Vector2D(self.bounds.left.x + 2, -3+10.5, -15), 0,{"ArrowUp": False, "ArrowDown": False}, self.bounds)
+		self.player_right = Player(Vector2D(self.bounds.right.x - 2, -3+10.5, -15), 0,{"ArrowUp": False, "ArrowDown": False}, self.bounds)
 		self.ball = Ball()
 		self.paused = False
 		self.ended = False
@@ -189,8 +189,6 @@ class RumbleGameInstance:
 		self.broadcast_function = broadcast_fun
 		self.game_end_fun = game_end_fun
 		self.logger = logging.getLogger('game')
-		self.event = InvertedControlsEvent(self)
-		self.event.apply()
 
 	async def check_collisions(self):
 		ball = self.ball
@@ -245,14 +243,6 @@ class RumbleGameInstance:
 		self.ball.is_moving = False
 		self.ball.countdown = 1
 		self.scored = True
-		self.event.revert()
-		# if isinstance(self.player_right.movement_method, NormalMovements):
-		# 	self.player_right.movement_method = InvertedMovements()
-		# 	self.player_left.movement_method = InvertedMovements()
-		# else:
-		# 	self.player_right.movement_method = NormalMovements()
-		# 	self.player_left.movement_method = NormalMovements()
-
 
 		if (self.check_winner(winner)):
 			await self.on_game_end(winner)

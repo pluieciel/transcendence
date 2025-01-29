@@ -356,7 +356,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 
 	def get_color(self, user):
 		color_map = {
-			0: '#0004cc',
+			0: '#3E27F8',
 			1: "#00BDD1",
 			2: "#00AD06",
 			3: "#e67e00",
@@ -367,14 +367,16 @@ class GameConsumer(AsyncWebsocketConsumer):
 			8: "#E6E3E1"
 		}
 		try:
-			logging.getLogger('game').warn(f"color in settings is {color_map.get(user.color)}")
-			return color_map.get(user.color)
+			color = color_map.get(user.color)
+			if (color is None):
+				return "#00BDD1"
+			else:
+				return color
 		except:
 			logging.getLogger('game').warn(f"no color found in settings defaulting to cyan")
 			return "#00BDD1"
 
 	async def send_initial_game_state(self, instance):
-		self.logger.info(f"PleftPos : {instance.game.player_left.position}")
 		init_response = {
 			"type": "init",
 			"data": {
@@ -395,13 +397,13 @@ class GameConsumer(AsyncWebsocketConsumer):
 							"name": instance.player_left.user.username,
 							"rank": instance.player_left.user.elo,
 							"score": instance.game.player_left.score,
-							"color": "#e67e00"
+							"color": self.get_color(instance.player_left.user)
 						},
 						"right": {
 							"name": instance.player_right.user.username,
 							"rank": instance.player_right.user.elo,
 							"score": instance.game.player_right.score,
-							"color" : "#EC008F"
+							"color" :self.get_color(instance.player_right.user)
 						}
 					}
 				}

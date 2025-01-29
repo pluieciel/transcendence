@@ -26,16 +26,16 @@ class App {
 
 	setColor() {
 		switch (this.settings.color) {
-			default: document.documentElement.style.setProperty("--user-color", "#00BDD1");break;
-			case 0: document.documentElement.style.setProperty("--user-color", "#0004CC");break;
-			case 1: document.documentElement.style.setProperty("--user-color", "#00BDD1");break;
-			case 2: document.documentElement.style.setProperty("--user-color", "#00AD06");break;
-			case 3: document.documentElement.style.setProperty("--user-color", "#E67E00");break;
-			case 4: document.documentElement.style.setProperty("--user-color", "#E6008F");break;
-			case 5: document.documentElement.style.setProperty("--user-color", "#6400C4");break;
-			case 6: document.documentElement.style.setProperty("--user-color", "#E71200");break;
-			case 7: document.documentElement.style.setProperty("--user-color", "#0EC384");break;
-			case 8: document.documentElement.style.setProperty("--user-color", "#E6E3E1");break;
+			default: document.documentElement.style.setProperty("--user-color", "#00BDD1");break; 
+			case 0: document.documentElement.style.setProperty("--user-color", "#3E27F8");break; //Blue
+			case 1: document.documentElement.style.setProperty("--user-color", "#00BDD1");break; //Cyan
+			case 2: document.documentElement.style.setProperty("--user-color", "#00AD06");break; //Green
+			case 3: document.documentElement.style.setProperty("--user-color", "#E67E00");break; //Orrange
+			case 4: document.documentElement.style.setProperty("--user-color", "#E6008F");break; //Pink
+			case 5: document.documentElement.style.setProperty("--user-color", "#6400C4");break; //Purple
+			case 6: document.documentElement.style.setProperty("--user-color", "#E71200");break; //Red
+			case 7: document.documentElement.style.setProperty("--user-color", "#0EC384");break; //Pink
+			case 8: document.documentElement.style.setProperty("--user-color", "#E6E3E1");break; //White
 		}
 	}
 
@@ -93,6 +93,5 @@ class App {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-	console.log("DOMContentLoaded");
 	window.app = new App();
 });
