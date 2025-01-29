@@ -27,7 +27,7 @@ class Generate2FARecoveryConsumer(AsyncHttpConsumer):
 
 			recovery_codes = [token_hex(8) for _ in range(6)]
 			for code in recovery_codes:
-				await self.ucreate_recovery_code(user, hash_password(code))
+				await self.create_recovery_code(user, hash_password(code))
 
 			await update_recovery_codes_generated(user, True)
 
