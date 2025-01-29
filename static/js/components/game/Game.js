@@ -16,8 +16,11 @@ export class Game {
 		this.sceneManager = null;
 		this.inputManager = null;
 
+		this.onGameEnd = null
 		this.setupWebSocket();
 		this.lastTime = 0;
+
+		
 
 		//DEBUG
 		this.enableDebugMode(true);
@@ -95,7 +98,12 @@ export class Game {
 						console.log(e);
 					}
 				}
-				if (event.type === "game_end" && event.winner) {
+				if (event.type === "game_end") {
+					console.log('game end');
+					if (this.onGameEnd) {
+						console.log('calling game end fun');
+						this.onGameEnd(event.winnerName, event.winnerAvatar, event.scoreLeft, event.scoreRight, event.eloChange);
+					}
 					this.ws.close(1000);
 					console.log("Websocket closed");
 				}

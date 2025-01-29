@@ -29,9 +29,11 @@ class GameBackend:
 		self.manager = manager
 		self.player_left = None
 		self.player_right = None
+		self.elo_change = 0
 
 		self.elo_k_factor = 40
 		self.is_bot_game = bot and bot > 0
+
 		if (self.is_bot_game):
 			self.player_right = Bot(bot, self.game)
 		self.logger.info(f"{self.is_bot_game} and {bot}")
@@ -135,7 +137,10 @@ class GameBackend:
 				winner = self.player_right.user
 				self.game.winner = winner.username
 
-			await self.broadcast_state()
+			if self.game_type == "vanilla":
+				await self.broadcast_state()
+			else:
+				await self.rumble_broadcast_state()
 
 			if self.player_left:
 				self.logger.info(f"Resetting left player: {self.player_left.user.username}")
@@ -245,6 +250,9 @@ class GameBackend:
 		new_elo_pleft = elo_pleft + self.elo_k_factor * (actual_score_pleft - expected_score_pleft)
 		new_elo_pright = elo_pright + self.elo_k_factor * (actual_score_pright - expected_score_pright)
 
+		elo_change = abs(new_elo_pleft - elo_pleft)
+		self.elo_change = round(elo_change)
+
 		await self.update_user_elo(self.player_left.user, new_elo_pleft)
 		if not self.is_bot_game:
 			await self.update_user_elo(self.player_right.user, new_elo_pright)
@@ -256,7 +264,14 @@ class GameBackend:
 			self.game.scored = False
 		if self.game.ended:
 			self.logger.info(f"Appending winner info with {self.game.winner}")
-			events.append({"type": "game_end", "winner": self.game.winner})
+			events.append({
+				"type": "game_end",
+				"winnerName": self.game.winner,
+				"winnerAvatar": '/js/components/game/Textures/image.png', #TODO BACKEND
+				"scoreLeft": self.game.player_left.score,
+				"scoreRight": self.game.player_right.score,
+				"eloChange": self.elo_change
+    	})
 		if self.game.ball.lastHitter is not None:
 			self.logger.info(f"Last hitter : {self.game.ball.lastHitter}")
 			events.append({"type": "ball_last_hitter", "value": self.game.ball.lastHitter})
@@ -312,7 +327,14 @@ class GameBackend:
 			self.game.scored = False
 		if self.game.ended:
 			self.logger.info(f"Appending winner info with {self.game.winner}")
-			events.append({"type": "game_end", "winner": self.game.winner})
+			events.append({
+				"type": "game_end",
+				"winnerName": self.game.winner,
+				"winnerAvatar": '/js/components/game/Textures/image.png', #TODO BACKEND
+				"scoreLeft": self.game.player_left.score,
+				"scoreRight": self.game.player_right.score,
+				"eloChange": self.elo_change
+    	})
 		if self.game.ball.lastHitter is not None:
 			events.append({"type": "ball_last_hitter", "value": self.game.ball.lastHitter})
 
