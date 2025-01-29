@@ -7,11 +7,11 @@ if [ ! -f "$INIT_FLAG" ]; then
   ELASTIC_PASSWORD=$(cat $ELASTICSEARCH_PASSWORD_FILE)
 
   curl -s -u "$ELASTIC_USERNAME:$ELASTIC_PASSWORD" \
-    -X POST "$ELASTIC_HOST/_security/user/kibana_system/_password" \
-    -H "Content-Type: application/json" \
-    -d "{
-      \"password\": \"$ELASTICSEARCH_PASSWORD\"
-    }"
+	-X POST "$ELASTIC_HOST/_security/user/kibana_system/_password" \
+	-H "Content-Type: application/json" \
+	-d "{
+	  \"password\": \"$ELASTICSEARCH_PASSWORD\"
+	}"
 
   echo "xpack.security.encryptionKey: \"$(openssl rand -base64 32)\"" >> /usr/share/kibana/config/kibana.yml
   echo "xpack.encryptedSavedObjects.encryptionKey: \"$(openssl rand -base64 32)\"" >> /usr/share/kibana/config/kibana.yml

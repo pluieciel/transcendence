@@ -5,8 +5,8 @@ WORKDIR /var/lib/postgresql/data
 COPY ./conf/ /var/lib/postgresql/config
 
 RUN mkdir -p /var/log/postgres && \
-    chown -R postgres:postgres /var/log/postgres && \
-    chmod -R 750 /var/log/postgres
+	chown -R postgres:postgres /var/log/postgres && \
+	chmod -R 750 /var/log/postgres
 
 EXPOSE 5432
 
