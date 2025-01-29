@@ -42,6 +42,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     oauthlog = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
+    is_connected = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     elo = models.IntegerField(default=1000)
     wins = models.IntegerField(default=0)
@@ -59,7 +60,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_2fa_enabled = models.BooleanField(default=False)
     invites = models.ManyToManyField('self', symmetrical=False, related_name='invite_set', blank=True)
     color = models.IntegerField(default=1)
-    quality = models.BooleanField(default=False)
+    quality = models.IntegerField(default=1)
     display = models.CharField(max_length=30, null=True)
 
     objects = CustomUserManager()

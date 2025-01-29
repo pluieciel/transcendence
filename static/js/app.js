@@ -92,6 +92,5 @@ class App {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-	console.log("DOMContentLoaded");
 	window.app = new App();
 });

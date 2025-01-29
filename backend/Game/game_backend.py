@@ -82,6 +82,7 @@ class GameBackend:
 		return False
 
 	async def disconnect_user(self, user):
+		print("WATATATATATA", flush=True)
 		old_channel = None
 		if (self.player_left and self.player_left.user.id == user.id):
 			old_channel = self.player_left.channel
