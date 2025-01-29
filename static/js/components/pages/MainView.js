@@ -15,6 +15,8 @@ export default class MainView {
 		this.render();
 		this.initComponents();
 		this.setProfileFields();
+		if (!window.app.settings.fetched)
+			window.app.getPreferences();
 
         this.addEventListeners();
         if (window.app.ingame) {

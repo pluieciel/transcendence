@@ -27,7 +27,7 @@ class App {
 	setColor() {
 		switch (this.settings.color) {
 			default: document.documentElement.style.setProperty("--user-color", "#00BDD1");break;
-			case 0: document.documentElement.style.setProperty("--user-color", "#0004CC");break;
+			case 0: document.documentElement.style.setProperty("--user-color", "#3E27F8");break;
 			case 1: document.documentElement.style.setProperty("--user-color", "#00BDD1");break;
 			case 2: document.documentElement.style.setProperty("--user-color", "#00AD06");break;
 			case 3: document.documentElement.style.setProperty("--user-color", "#E67E00");break;

@@ -228,9 +228,16 @@ a {
 	font-size: 16px;
 	border: 2px solid var(--primary-color);
 	background-color: var(--primary-color);
+	border-radius: 5px;
 	margin: 5px;
 	display: none;
 	color: #FFF;
+}
+
+#newName:focus {
+	border: 1px solid var(--user-color);
+	box-shadow: 0 0 5px var(--user-color);
+	outline: none;
 }
 
 #avatarImg {
@@ -262,9 +269,17 @@ input[type="file"]::file-selector-button {
 }
 
 #usrnm-form, #pwd-form, #cfm-pwd-form {
-	border: none;
 	color: var(--secondary-color);
 	background-color: var(--hover-color);
+}
+
+.form-control {
+	border: 1px solid var(--hover-color);
+}
+
+.form-control:focus {
+	border: 1px solid var(--user-color);
+	box-shadow: 0 0 5px var(--user-color);
 }
 
 #usrnm-form::placeholder, #pwd-form::placeholder, #cfm-pwd-form::placeholder{
@@ -277,7 +292,7 @@ input[type="file"]::file-selector-button {
 	transition: all 0.5s;
 }
 
-#loginBtn:hover, #login42Btn:hover, #signupBtn:hover {
+#loginBtn:hover, #loginBtn:focus, #login42Btn:hover, #login42Btn:focus, #signupBtn:hover, #signupBtn:focus {
 	border: 1px solid var(--user-color);
 	box-shadow: 0 0 15px var(--user-color);
 }
@@ -326,10 +341,27 @@ input[type="file"]::file-selector-button {
     align-items: center;
 }
 
-#changeHeader {
+.modal-content {
+	border: 1px solid var(--user-color);
+	border-radius: 5px;
+	box-shadow: 0 0 15px var(--user-color);
+	color: var(--secondary-color);
+	background-color: var(--primary-color);
+}
+
+.modal-header {
+	border-bottom-color: var(--accent-color);
+}
+
+#modalDialog {
+	text-shadow: none;
+}
+
+#modalHeader {
 	font-size: 2rem;
 	font-weight: bold;
 	align-items: center;
+	text-shadow: none;
 }
 
 .disabled {
@@ -340,4 +372,24 @@ input[type="file"]::file-selector-button {
 .disabled:hover {
 	box-shadow: 0 0 0;
 	background-color: var(--hover-color);
+}
+
+.btn-close {
+	background-color: rgba(255, 0, 0, 0.5);
+}
+
+.btn-close:focus {
+    --bs-btn-close-focus-shadow: 0 0 0 0;
+}
+
+.avatar-selector {
+	display: inline-block;
+	padding: 10px 20px;
+	background-color: #007bff;
+	color: white;
+	cursor: pointer;
+	border-radius: 5px;
+}
+.avatar-selector:hover {
+	background-color: #0056b3;
 }

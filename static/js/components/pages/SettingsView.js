@@ -76,11 +76,11 @@ export default class SettingsView {
 		<div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-					<h1 class="modal-title fs-5" id="changeHeader"></h1>
+					<h1 class="modal-title fs-5" id="modalHeader"></h1>
 					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 				</div>
                 <div class="modal-body">
-					<h2 class="modal-title fs-5" id="changeDialog"></h2>
+					<h2 class="modal-title fs-5" id="modalDialog"></h2>
 				</div>
 			</div>
 		</div>
@@ -160,14 +160,7 @@ export default class SettingsView {
 		qualityDiv.innerHTML = "Quality: " + qualityArray[qualityIndex];
 	}
 	
-    addEventListeners() {
-		const	enable2FA = this.container.querySelector('#enable2FA');
-		const	changeNameBtn = document.getElementById('changeNameBtn');
-        const	logoutBtn = document.getElementById('logoutBtn');
-		const	indexBtn = document.getElementById('indexBtn');
-		const	wipeBtn = document.getElementById('deleteAccBtn');
-		const	passwdBtn = document.getElementById('passwordButton');
-        const	newpwd = document.getElementById('newPasswordInput');
+	addCustomizationEventListeners() {
         const	leftColor = document.getElementById('leftColor');
         const	rightColor = document.getElementById('rightColor');
         const	leftQuality = document.getElementById('leftQuality');
@@ -222,14 +215,25 @@ export default class SettingsView {
 				const data = await response.json();
 
 				if (data.success)
-					console.log("color change success");
+					this.message(true, 'Theme and quality changes saved!');
 				else
 					throw new Error(data['message']);
 			}
 			catch (error) {
 				console.error(error);
 			};
-		});		
+		});
+	}
+
+    addEventListeners() {
+		this.addCustomizationEventListeners();
+		const	enable2FA = this.container.querySelector('#enable2FA');
+		const	changeNameBtn = document.getElementById('changeNameBtn');
+        const	logoutBtn = document.getElementById('logoutBtn');
+		const	indexBtn = document.getElementById('indexBtn');
+		const	wipeBtn = document.getElementById('deleteAccBtn');
+		const	passwdBtn = document.getElementById('passwordButton');
+        const	newpwd = document.getElementById('newPasswordInput');
 
 		passwdBtn.addEventListener('click', () => {
 			passwdBtn.style.display = 'none';
@@ -307,11 +311,14 @@ export default class SettingsView {
 				
 					if (data.success) {
 						this.message(true, 'Display name changed to \'' + data['displayName'] + '\'');
-					} else {
-						document.getElementById('changeDialog').innerHTML = 'Display name changed failed';
+						const newName = document.getElementById('newName');
+						changeNameBtn.style.display = 'inline-block';
+						newName.style.display = 'none';
 					}
+					else
+						throw new Error("Failed to change the display name");
 				} catch (error) {
-					console.error(error);
+					this.message(false, e);
 				}
 			}
 		});
@@ -361,7 +368,7 @@ export default class SettingsView {
 	message(good, message) {
 		let header = good ? "<i class=\"fa-solid fa-square-check\" style=\"color:green\"></i> Success !" : "<i class=\"fa-solid fa-square-xmark\" style=\"color:red\"></i> Failure.";
 		new bootstrap.Modal(this.container.querySelector('#changeModal')).show();
-		document.getElementById('changeHeader').innerHTML = header;
-		document.getElementById('changeDialog').innerHTML = message;
+		document.getElementById('modalHeader').innerHTML = header;
+		document.getElementById('modalDialog').innerHTML = message;
 	}
 }
