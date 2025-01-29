@@ -1,13 +1,14 @@
 from channels.generic.http import AsyncHttpConsumer
-from api.utils import generate_jwt_cookie, verify_totp
+from channels.db import database_sync_to_async
+from api.utils import generate_jwt_cookie, hash_password
 from api.db_utils import get_user_by_name
 import json
 
-class Login2FAConsumer(AsyncHttpConsumer):
+class Login2FARecoveryConsumer(AsyncHttpConsumer):
 	async def handle(self, body):
 		try:
 			data = json.loads(body.decode())
-			totp_input = data.get('totp')
+			recovery_code = data.get('recovery_code')
 			username = data.get('username')
 
 			user = await get_user_by_name(username)
@@ -20,15 +21,19 @@ class Login2FAConsumer(AsyncHttpConsumer):
 				return await self.send_response(401, json.dumps(response_data).encode(),
 					headers=[(b"Content-Type", b"application/json")])
 
-			is_totp_valid = verify_totp(user.totp_secret, totp_input)
+			hashed_recovery_code = hash_password(recovery_code)
 
-			if not is_totp_valid:
+			is_recovery_code_valid = await self.verify_recovery_code(user, hashed_recovery_code)
+
+			if not is_recovery_code_valid:
 				response_data = {
 					'success': False,
-					'message': 'Invalid totp code'
+					'message': 'Invalid recovery code'
 				}
 				return await self.send_response(401, json.dumps(response_data).encode(),
 					headers=[(b"Content-Type", b"application/json")])
+
+			await self.remove_recovery_code(user, hashed_recovery_code)
 
 			response_data = {
 				'success': True,
@@ -44,3 +49,13 @@ class Login2FAConsumer(AsyncHttpConsumer):
 			}
 			return await self.send_response(500, json.dumps(response_data).encode(),
 				headers=[(b"Content-Type", b"application/json")])
+
+	@database_sync_to_async
+	def verify_recovery_code(self, user, recovery_code):
+		from api.models import RecoveryCode
+		return RecoveryCode.objects.filter(user=user, recovery_code=recovery_code).exists()
+
+	@database_sync_to_async
+	def remove_recovery_code(self, user, recovery_code):
+		from api.models import RecoveryCode
+		RecoveryCode.objects.filter(user=user, recovery_code=recovery_code).delete()

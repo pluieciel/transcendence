@@ -15,6 +15,7 @@ from Chat.routing import websocket_urlpatterns as chat_websocket_patterns
 from Game.routing import websocket_urlpatterns as game_websocket_patterns
 from django.urls import path, re_path
 from api.consumers.login_2fa import Login2FAConsumer
+from api.consumers.login_2fa_recovery import Login2FARecoveryConsumer
 from api.consumers.enable_2fa import Enable2FAConsumer
 from api.consumers.disable_2fa import Disable2FAConsumer
 from api.consumers.generate_2fa_qr import Generate2FAQRConsumer
@@ -46,6 +47,7 @@ http_patterns = [
     path('api/signup/', SignupConsumer.as_asgi()),
     path('api/login/', LoginConsumer.as_asgi()),
     path('api/login/2fa/', Login2FAConsumer.as_asgi()),
+    path('api/login/2fa/recovery', Login2FARecoveryConsumer.as_asgi()),
     path('api/login/oauth', LoginOAuthConsumer.as_asgi()),
     path('api/settings/2fa/generate/qr', Generate2FAQRConsumer.as_asgi()),
     path('api/settings/2fa/generate/recovery', Generate2FARecoveryConsumer.as_asgi()),
