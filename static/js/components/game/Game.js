@@ -4,27 +4,6 @@ import { InputManager } from "./InputManager.js";
 import { ParticleSystem } from "./ParticleSystem.js";
 import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
 
-export class Renderers {
-	constructor(canvas, antialiasing) {
-		this.renderer = new THREE.WebGLRenderer({
-			canvas: canvas,
-			antialias: antialiasing, // Make this configurable
-			alpha: true,
-			powerPreference: "high-performance",
-			stencil: false,
-			samples: antialiasing ? 8 : 0, // Only use MSAA if anti-aliasing is enabled
-		});
-
-		this.renderer.setSize(window.innerWidth, window.innerHeight);
-		this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-		this.renderer.shadowMap.enabled = true;
-		this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-		this.renderer.outputColorSpace = THREE.SRGBColorSpace;
-		this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-		this.renderer.toneMappingExposure = 1;
-	}
-}
-
 export class Game {
 	constructor(canvas, ws) {
 		this.ws = ws;
@@ -37,9 +16,11 @@ export class Game {
 		this.sceneManager = null;
 		this.inputManager = null;
 
+		this.onGameEnd = null
 		this.setupWebSocket();
-
 		this.lastTime = 0;
+
+		
 
 		//DEBUG
 		this.enableDebugMode(true);
@@ -49,19 +30,16 @@ export class Game {
 	}
 
 	async initialize(initData) {
-		try {
-			this.renderer = new Renderers(this.canvas, this.antialiasing);
-			this.sceneManager = new SceneManager(this.renderer.renderer, this.antialiasing, this.bloom);
-			this.inputManager = new InputManager(this.ws);
-			await this.sceneManager.initialize(initData);
-			this.particleSystem = new ParticleSystem(this.sceneManager.scene);
-
-			this.animate();
-			this.initialized = true;
-			this.sendInitDone();
-		} catch (error) {
-			console.error("Failed to initialize game:", error);
-		}
+		if (!window.app.settings.fetched)
+			await window.app.getPreferences();
+		this.renderer = new Renderer(this.canvas);
+		this.sceneManager = new SceneManager(this.renderer.renderer, window.app.settings.quality);
+		this.inputManager = new InputManager(this.ws);
+		await this.sceneManager.initialize(initData);
+		this.particleSystem = new ParticleSystem(this.sceneManager.scene);
+		this.animate();
+		this.initialized = true;
+		this.sendInitDone();
 	}
 
 	setupWebSocket() {
@@ -93,50 +71,19 @@ export class Game {
 
 	sendInitDone() {
 		if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-			console.log(`Init sucessfull`); // Debug log
 			this.ws.send(
 				JSON.stringify({
 					type: "init_confirm",
 				}),
 			);
 		}
-		this.printSceneObjects();
-	}
-
-	printSceneObjects() {
-		console.log("Scene Objects:");
-		this.sceneManager.scene.children.forEach((child, index) => {
-			console.log(`Object ${index}:`, child);
-		});
 	}
 
 	handleGameUpdate(data) {
-		let game_end = false;
-		if (data.player) {
-			const leftPos = data.positions.player_left;
-			const rightPos = data.positions.player_right;
-			if (this.sceneManager.debugMod) {
-				this.sceneManager.updateDebugPositions(data.positions);
-				this.sceneManager.leftPaddle.visible = false;
-				this.sceneManager.rightPaddle.visible = false;
-				this.sceneManager.ball.visible = false;
-			} else {
-				if (this.sceneManager.leftPaddle) {
-					this.sceneManager.leftPaddle.position.set(rightPos.x, rightPos.y - 0.2, rightPos.z);
-					this.sceneManager.leftPaddle.visible = true;
-				}
-				if (this.sceneManager.rightPaddle) {
-					this.sceneManager.rightPaddle.position.set(leftPos.x, leftPos.y - 0.2, leftPos.z);
-					this.sceneManager.rightPaddle.visible = true;
-				}
-				if (data.positions.ball && this.sceneManager.ball) {
-					this.sceneManager.ball.position.set(data.positions.ball.x, data.positions.ball.y, data.positions.ball.z);
-					this.sceneManager.ball.visible = true;
-				}
-			}
-
-			this.sceneManager.textManager.updateScore("left", data.player.left.score.toString());
-			this.sceneManager.textManager.updateScore("right", data.player.right.score.toString());
+		if (this.sceneManager.debugMod) {
+			this.sceneManager.updateDebugPositions(data.positions);
+		} else {
+			this.sceneManager.updateObjectPosition(data.positions);
 		}
 		if (data.trajectory) {
 			this.sceneManager.updateTrajectory(data.trajectory);
@@ -146,43 +93,45 @@ export class Game {
 				if (event.type === "score" && event.position) {
 					const scorePosition = new THREE.Vector3(event.position.x, event.position.y, event.position.z);
 					this.emitParticles(scorePosition);
-					console.log("Spawning particles at:", scorePosition);
-				}
-				if (event.type === "game_end" && event.winner) {
-					game_end = true;
-					//this.uiManager.setOverText(event.winner + " wins");
-					//	this.uiManager.setOverlayVisibility(true);
-					this.ws.close(1000);
-					console.log("Websocket closed");
-					this.handleGameEnd();
-				}
-				if (event.type == "ball_last_hitter") {
-					if (event.value == "RIGHT") {
-						this.sceneManager.updateBallColor(0xff0000, 0xff0000);
-					} else if (event.value == "LEFT") {
-						this.sceneManager.updateBallColor(0x00ffff, 0x00ffff);
-					} else {
-						this.sceneManager.updateBallColor(0x676a6e, 0x676a6e);
+					try {
+						this.sceneManager.textManager.updateScore("left", event.score_left.toString());
+						this.sceneManager.textManager.updateScore("right", event.score_right.toString());
+					} catch (e) {
+						console.log(e);
 					}
 				}
+				if (event.type === "game_end") {
+					console.log('game end');
+					if (this.onGameEnd) {
+						console.log('calling game end fun');
+						this.onGameEnd(event.winnerName, event.winnerAvatar, event.scoreLeft, event.scoreRight, event.eloChange);
+					}
+					this.ws.close(1000);
+					console.log("Websocket closed");
+				}
+				if (event.type == "ball_last_hitter") {
+						this.sceneManager.updateBallColor(event.color, event.color);
+				}
 			});
-		}
-		if (!this.gameStarted && game_end == false) {
-			this.gameStarted = true;
 		}
 	}
 
 	animate(currentTime) {
 		requestAnimationFrame(this.animate.bind(this));
-
 		const deltaTime = (currentTime - this.lastTime) / 1000;
 		this.lastTime = currentTime;
-
 		if (this.particleSystem) {
 			this.particleSystem.update(deltaTime);
 		}
-
 		this.sceneManager.composer.render();
+	}
+
+	/******************************DEBUG************************************/
+	printSceneObjects() {
+		console.log("Scene Objects:");
+		this.sceneManager.scene.children.forEach((child, index) => {
+			console.log(`Object ${index}:`, child);
+		});
 	}
 
 	enableDebugMode(editor) {
@@ -197,7 +146,7 @@ export class Game {
 					console.log(objectToModify);
 					this.mode = "position";
 				} else if (event.code == "KeyO") {
-					objectToModify = this.sceneManager.text;
+					objectToModify = this.sceneManager.textManager.object;
 					if (objectToModify && objectToModify.geometry) {
 						objectToModify.geometry.computeBoundingBox();
 						const box = objectToModify.geometry.boundingBox;
