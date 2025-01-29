@@ -1,6 +1,6 @@
 from channels.generic.http import AsyncHttpConsumer
 from channels.db import database_sync_to_async
-from api.utils import jwt_to_user
+from api.utils import jwt_to_user, hash_password
 from secrets import token_hex
 import json
 
@@ -26,7 +26,7 @@ class Generate2FARecoveryConsumer(AsyncHttpConsumer):
 
 			recovery_codes = [token_hex(8) for _ in range(6)]
 			for code in recovery_codes:
-				await self.create_recovery_code(user, code)
+				await self.create_recovery_code(user, hash_password(code))
 
 			await self.update_recovery_codes_generated(user, True)
 

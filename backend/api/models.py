@@ -118,5 +118,5 @@ class GameHistory(models.Model):
 
 class RecoveryCode(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, related_name='user')
-    recovery_code = models.CharField(max_length=16)
+    recovery_code = models.CharField(max_length=128)
     created_at = models.DateTimeField(auto_now_add=True)

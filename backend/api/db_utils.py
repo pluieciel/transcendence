@@ -21,3 +21,8 @@ def get_user_by_name(username):
 def get_user(user_id):
 	User = get_user_model()
 	return User.objects.get(id=user_id)
+
+@database_sync_to_async
+def user_update_is_2fa_enabled(user, is_2fa_enabled):
+	user.is_2fa_enabled = is_2fa_enabled
+	user.save()

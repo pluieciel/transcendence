@@ -25,6 +25,7 @@ export default class SettingsView {
 			<input type="text" id="newName">
 			<button id="changePpBtn">Change your profile picture</button>
 			<button type="button" id="enable2FA">Enable 2FA</button>
+			<button type="button" id="disable2FA">Disable 2FA</button>
 			<div class="modal fade" id="totpModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
@@ -173,6 +174,7 @@ export default class SettingsView {
 	
     addEventListeners() {
 		const	enable2FA = this.container.querySelector('#enable2FA');
+		const	disable2FA = this.container.querySelector('#disable2FA');
 		const	changeNameBtn = document.getElementById('changeNameBtn');
         const	logoutBtn = document.getElementById('logoutBtn');
 		const	indexBtn = document.getElementById('indexBtn');
@@ -247,6 +249,31 @@ export default class SettingsView {
 					new bootstrap.Modal(this.container.querySelector('#totpModal')).show();
 					const qrCode = this.container.querySelector('#qrCode');
 					qrCode.innerHTML = data.qr_code;
+				} else if (response.status == 409) {
+					alert(data.message);
+				} else {
+					errorDiv.textContent = data.message;
+                    errorDiv.classList.remove('d-none');
+				}
+			} catch (error) {
+				errorDiv.textContent = 'An error occurred:' + error;
+                errorDiv.classList.remove('d-none');
+			}
+		});
+
+		disable2FA.addEventListener('click', async (e) => {
+			e.preventDefault();
+			try {
+				const response = await fetch('/api/settings/2fa/disable', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+				});
+
+				const data = await response.json();
+				if (data.success) {
+					
 				} else if (response.status == 409) {
 					alert(data.message);
 				} else {
