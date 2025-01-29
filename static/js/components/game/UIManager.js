@@ -114,10 +114,6 @@ export class UIManager {
 		}
 	}
 
-	updateScoreLeft(score) {
-		this.playerLeftScore.innerHTML = score;
-	}
-
 	updateScoreRight(score) {
 		this.playerRightScore.innerHTML = score;
 	}

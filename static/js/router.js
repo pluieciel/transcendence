@@ -14,9 +14,9 @@ export default class Router {
     handleRoute() {
         const path = window.location.pathname;
         let route;
-        
-        if (window.app.getIsLoggedIn() || path.substring(0, 13) === "/signup/oauth")
-            route = this.routes.find(r => {return (r.path === path || r.path === path.substring(0, 8))});
+
+        if (window.app.getIsLoggedIn() || path === "/login/oauth")
+            route = this.routes.find(r => {return (r.path === path)});
         else
             route = this.routes.find(r => r.path === '*');
         

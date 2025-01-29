@@ -43,7 +43,7 @@ def generate_jwt(user, iat, exp):
 	return jwt.encode({
 		'id': user.id,
 		'username': user.username,
-		'is_admin': True,
+		'is_admin': user.is_admin,
 		'iat': iat,
 		'exp': exp
 	}, jwt_secret, algorithm='HS256')
@@ -85,3 +85,6 @@ def get_secret_from_file(env_var):
 		raise ValueError(f'{env_var} environment variable not set')
 	with open(file_path, 'r') as file:
 		return file.read().strip()
+
+def hash_password(password):
+	return hashlib.sha256(password.encode()).hexdigest()

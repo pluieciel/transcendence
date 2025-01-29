@@ -246,8 +246,22 @@ a {
 	color: #000;
 }
 
+input[type="file"]::file-selector-button {
+	border-radius: 4px;
+	padding: 0 16px;
+	height: 35px;
+	cursor: pointer;
+	color: var(--secondary-color);
+	background-color: var(--hover-color);
+	border: 1px solid rgba(0, 0, 0, 0.16);
+	box-shadow: 0px 1px 0px rgba(0, 0, 0, 0.05);
+}
+
+#avatarSpan {
+	color: var(--secondary-color);
+}
+
 #usrnm-form, #pwd-form, #cfm-pwd-form {
-	text-align: center;
 	border: none;
 	color: var(--secondary-color);
 	background-color: var(--hover-color);

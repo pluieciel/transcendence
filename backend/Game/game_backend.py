@@ -56,8 +56,6 @@ class GameBackend:
 
 
 	def is_full(self):
-		self.logger.info(self.player_left is not None and self.player_right is not None)
-		self.logger.info(self.player_right)
 		return (self.player_left is not None and self.player_right is not None)
 
 	def start_game(self):
@@ -260,8 +258,8 @@ class GameBackend:
 		if self.game.ended:
 			self.logger.info(f"Appending winner info with {self.game.winner}")
 			events.append({"type": "game_end", "winner": self.game.winner})
-		if self.game.ball.lastHitter:
-			self.logger.info(self.game.ball.lastHitter)
+		if self.game.ball.lastHitter is not None:
+			self.logger.info(f"Last hitter : {self.game.ball.lastHitter}")
 			events.append({"type": "ball_last_hitter", "value": self.game.ball.lastHitter})
 
 		trajectory_points = self.game.ball.predict_trajectory()
@@ -311,8 +309,8 @@ class GameBackend:
 		if self.game.ended:
 			self.logger.info(f"Appending winner info with {self.game.winner}")
 			events.append({"type": "game_end", "winner": self.game.winner})
-		if self.game.ball.lastHitter:
-			self.logger.info(self.game.ball.lastHitter)
+		if self.game.ball.lastHitter is not None:
+			self.logger.info(f"Last hitter : {self.game.ball.lastHitter}")
 			events.append({"type": "ball_last_hitter", "value": self.game.ball.lastHitter})
 
 		trajectory_points = self.game.ball.predict_trajectory()

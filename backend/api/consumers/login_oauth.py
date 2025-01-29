@@ -11,7 +11,15 @@ class LoginOAuthConsumer(AsyncHttpConsumer):
 	async def handle(self, body):
 		try:
 			data = json.loads(body.decode())
-			code = data.get('token')
+			code = data.get('code')
+
+			if not code:
+				response_data = {
+					'success': False,
+					'message': 'Code required'
+				}
+				return await self.send_response(400, json.dumps(response_data).encode(),
+					headers=[(b"Content-Type", b"application/json")])
 
 			client_id = get_secret_from_file('OAUTH_CLIENT_ID_FILE')
 			client_secret = get_secret_from_file('OAUTH_CLIENT_SECRET_FILE')
