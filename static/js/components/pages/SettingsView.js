@@ -541,8 +541,13 @@ export default class SettingsView {
 		const	qualityDiv = document.getElementById('qualityDiv');
 		const	leftQuality = document.getElementById('leftQuality');
 		const	rightQuality = document.getElementById('rightQuality');
+		const	enable2FA = this.container.querySelector('#enable2FA');
+		const	disable2FA = this.container.querySelector('#disable2FA');
+		const 	is_2fa_enabled = window.app.settings.is_2fa_enabled;
 		const	colorIndex = this.settings.color;
 		const	qualityIndex = this.settings.quality;
+
+		
 		let colorArray = {
 			0: 'Blue',
 			1: 'Cyan',
@@ -559,14 +564,15 @@ export default class SettingsView {
 			1: 'Medium',
 			2: 'High',
 		};
-		if (qualityIndex == 0)
-			leftQuality.classList.add("disabled");
-		else
-			leftQuality.classList.remove("disabled");
-		if (qualityIndex == 2)
-			rightQuality.classList.add("disabled");
-		else
-			rightQuality.classList.remove("disabled");
+		if (qualityIndex == 0) leftQuality.classList.add("disabled");
+		else leftQuality.classList.remove("disabled");
+
+		if (qualityIndex == 2) rightQuality.classList.add("disabled");
+		else rightQuality.classList.remove("disabled");
+
+		if (is_2fa_enabled) {enable2FA.style.display = "none";disable2FA.style.display = "block";}
+		else {enable2FA.style.display = "blon";disable2FA.style.display = "none";}
+
 		colorDiv.innerHTML = "Color: " + colorArray[colorIndex];
 		qualityDiv.innerHTML = "Quality: " + qualityArray[qualityIndex];
 	}
