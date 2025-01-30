@@ -20,7 +20,7 @@ class CustomUserManager(BaseUserManager):
     def	create_user_oauth(self, username, avatarUrl):
         if not username:
             raise ValueError('Users must have a username')
-        user = self.model(username=username, oauthlog=True, avatar42=avatarUrl)
+        user = self.model(username=username, oauthlog=True, avatar42=avatarUrl, is42avatarused=True)
         user.save(using=self._db)
         return user
 
@@ -44,6 +44,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_connected = models.BooleanField(default=False)
     is_playing = models.BooleanField(default=False)
     is_2fa_enabled = models.BooleanField(default=False)
+    is42avatarused = models.BooleanField(default=False)
     username = models.CharField(max_length=16, unique=True)
     language = models.CharField(max_length=4, unique=False, default="en")
     theme = models.CharField(default="dark", max_length=5)
