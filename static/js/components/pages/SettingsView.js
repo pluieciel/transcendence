@@ -54,7 +54,7 @@ export default class SettingsView {
 										<div id="qrCodeError" class="alert alert-danger d-none"></div>
 									</div>
 	                                <div class="mb-3">
-	                                    <input id="totpInput" class="form-control" maxlength="6" required>
+	                                    <input id="totpInput" class="form-control" maxlength="6" placeholder="scan the qr code and enter the code you receive" required>
 	                                </div>
 	                                <div id="totpError" class="alert alert-danger d-none"></div>
 	                        </div>
@@ -192,7 +192,7 @@ export default class SettingsView {
 			if (this.settings.color == 0)
 				this.settings.color = 8;
 			else
-			this.settings.color -= 1;
+				this.settings.color -= 1;
 			this.addUserData();
 			window.app.setColor(this.settings.color);
 		});
@@ -228,7 +228,7 @@ export default class SettingsView {
 			await this.saveChanges(true);
 		});
 
-		gotomainbtn.addEventListener('click', () => {
+		gotomain.addEventListener('click', () => {
 			window.app.getPreferences();
 			var myModal = new bootstrap.Modal(document.getElementById('changeModal'), {
 				backdrop: false

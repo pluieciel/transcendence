@@ -36,6 +36,7 @@ header {
 	overflow: hidden;
     box-sizing: border-box;
 	box-shadow: 0 0 5px var(--user-color);
+	border-bottom: 1px solid var(--user-color);
 }
 
 h1, h2 {
@@ -250,7 +251,13 @@ a {
 }
 
 #staticBackdropLabel {
-	color: #000;
+	color: var(--secondary-color);
+	text-shadow: none;
+}
+
+#qr-path {
+	fill: var(--secondary-color);
+
 }
 
 input[type="file"]::file-selector-button {
@@ -353,13 +360,16 @@ input[type="file"]::file-selector-button {
 	border-bottom-color: var(--accent-color);
 }
 
+.modal-footer {
+	border-top-color: var(--accent-color);
+}
+
 #modalDialog {
 	text-shadow: none;
 }
 
 #modalFooter {
 	justify-content: space-between;
-	border-top-color: var(--accent-color);
 }
 
 #modalHeader {
@@ -406,8 +416,7 @@ input[type="file"]::file-selector-button {
 	visibility: hidden !important;
 }
 
-/* .modal-backdrop {
-	display: none !important;
-	opacity: 0 !important;
-	visibility: hidden !important;
-} */
+.btn-primary:active {
+	background-color: var(--hover-color) !important;
+	border-color: var(--user-color) !important;
+}

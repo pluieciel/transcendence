@@ -258,15 +258,10 @@
 }
 
 .sendButton {
-	background-color: #42b983;
 	color: white;
 	border: none;
 	border-radius: 4px;
 	cursor: pointer;
-}
-
-.sendButton:hover {
-	background-color: #3aa876;
 }
 
 .OAuth {
