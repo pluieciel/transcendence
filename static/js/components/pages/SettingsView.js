@@ -11,7 +11,7 @@ export default class SettingsView {
     render() {
         this.container.innerHTML = `
     <header>
-        <h1>PONG</h1>
+        <h1 id="pong">PONG</h1>
 			<button id="adminBtn">Admin</button>
 			<button id="indexBtn">Main</button>
 			<button id="logoutBtn">Log out</button>
@@ -103,8 +103,7 @@ export default class SettingsView {
 			</div>
 		</div>
 	</div>
-	<div id="passwordError" class="alert alert-danger d-none"></div>
-					
+	<div id="passwordError" class="alert alert-danger d-none"></div>		
 					`;
 				}
 
