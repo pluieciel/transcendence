@@ -4,11 +4,13 @@ import { PostProcessing } from "./PostProcessing.js";
 import { TextManager } from "./TextManager.js";
 
 export class SceneManager {
-	constructor(renderer, quality){
+	constructor(renderer, quality) {
 		this.leftPaddle = null;
 		this.rightPaddle = null;
 		this.ball = null;
-		this.quality = quality
+		this.base_paddle_height = 0.75;
+		this.base_debug_height = 0;
+		this.quality = quality;
 
 		//Debug
 		this.debugMod = false;
@@ -47,8 +49,8 @@ export class SceneManager {
 	}
 
 	createCamera() {
-		this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-		this.camera.position.set(0, 12, 50);
+		this.camera = new THREE.PerspectiveCamera(38, window.innerWidth / window.innerHeight, 0.1, 1000);
+		this.camera.position.set(0, 9.3, 50);
 	}
 
 	setupLights() {
@@ -102,9 +104,9 @@ export class SceneManager {
 
 		const tableScale = new THREE.Vector3(4.14, 4.14, 4.14);
 		const tablePos = new THREE.Vector3(0, 1.59, -30.72);
-		const leftPaddleScale = new THREE.Vector3(0.75, 0.25, 0.5);
+		const leftPaddleScale = new THREE.Vector3(this.base_paddle_height, 0.25, 0.5);
 		const rightPaddlePos = new THREE.Vector3(-18, -3.2, -15);
-		const rightPaddleScale = new THREE.Vector3(0.75, 0.25, 0.5);
+		const rightPaddleScale = new THREE.Vector3(this.base_paddle_height, 0.25, 0.5);
 		const leftPaddlePos = new THREE.Vector3(17.94, -3.2, -15);
 		const ballScale = new THREE.Vector3(0.44, 0.44, 0.44);
 		const ballPos = new THREE.Vector3(0, -3, -15);
@@ -363,7 +365,7 @@ export class SceneManager {
 		this.bottomBorder.visible = this.debugMod;
 		this.leftBorder.visible = this.debugMod;
 		this.rightBorder.visible = this.debugMod;
-		this.trajectoryLine.visible = this.debugMod;
+		if (this.trajectoryLine) this.trajectoryLine.visible = this.debugMod;
 
 		this.leftPaddle.visible = !this.debugMod;
 		this.rightPaddle.visible = !this.debugMod;
@@ -402,6 +404,7 @@ export class SceneManager {
 
 		this.scene.add(paddle1);
 		this.scene.add(paddle2);
+		this.base_debug_height = paddle1.scale.y;
 		this.paddles.push(paddle1, paddle2);
 	}
 

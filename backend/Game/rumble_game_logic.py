@@ -18,11 +18,67 @@ class BounceMethods(ABC):
 	def BouncePaddle(self, ball, paddle_x, paddle_y):
 		pass
 
+class MirrorBounce(BounceMethods):
+	def BounceWall(self, ball, is_top):
+		if is_top:
+			ball.position.y = ball.bounds.bottom.y + ball.radius
+		else:
+			ball.position.y = ball.bounds.top.y - ball.radius
+
+	def BouncePaddle(self, ball, paddle_x, paddle_y):
+		relative_intersect_y = paddle_y - ball.position.y
+		normalized_intersect = relative_intersect_y / (4.0/2)
+		bounce_angle = normalized_intersect * math.radians(45)
+
+		if paddle_x < ball.position.x:  # Right paddle
+			ball.velocity.x = ball.speed * math.cos(bounce_angle)
+		else:  # Left paddle
+			ball.velocity.x = -ball.speed * math.cos(bounce_angle)
+		ball.velocity.y = -ball.speed * math.sin(bounce_angle)
+
+		ball.speed += ball.acceleration
+		if (ball.speed >= ball.maxSpeed):
+			ball.speed = ball.maxSpeed
+
 class RandomBounce(BounceMethods):
 	def BounceWall(self, ball, is_top):
-		pass
+		# Introduce randomness to the bounce angle
+		random_angle = random.uniform(-80, 80)  # Random angle between -80 and 80 degrees
+		random_angle_rad = math.radians(random_angle)
+
+		# Reverse the y-velocity and add randomness to the x-velocity
+		ball.velocity.y *= -1
+		directionX = (ball.velocity.x > 0) * 2 - 1
+		ball.velocity.x = abs(ball.speed * math.tan(random_angle_rad)) * directionX
+		ball.velocity.normalize()
+		ball.velocity.x *= ball.speed
+		ball.velocity.y *= ball.speed
+
+		# Ensure the ball stays within bounds
+		if is_top:
+			ball.position.y = ball.bounds.top.y - ball.radius
+		else:
+			ball.position.y = ball.bounds.bottom.y + ball.radius
+
 	def BouncePaddle(self, ball, paddle_x, paddle_y):
-		pass
+	 # Introduce randomness to the bounce angle
+		random_angle = random.uniform(-80, 80)  # Random angle between -80 and 80 degrees
+		random_angle_rad = math.radians(random_angle)
+
+		# Determine the direction of the bounce
+		if paddle_x < ball.position.x:
+			ball.velocity.x = ball.speed * math.cos(random_angle_rad)
+		else:  # Left paddle
+			ball.velocity.x = -ball.speed * math.cos(random_angle_rad)
+		ball.velocity.y = ball.speed * math.sin(random_angle_rad)
+		ball.velocity.normalize()
+		ball.velocity.x *= ball.speed
+		ball.velocity.y *= ball.speed
+
+		# Increase the ball's speed with acceleration, ensuring it does not exceed the maximum speed
+		ball.speed += ball.acceleration
+		if ball.speed >= ball.maxSpeed:
+			ball.speed = ball.maxSpeed
 
 class NormalBounce(BounceMethods):
 	def BounceWall(self, ball, is_top):
@@ -66,22 +122,33 @@ class Vector2D:
 		self.y = y
 		self.z = z
 
+	def get_magnitude(self):
+		return math.sqrt(self.x**2 + self.y**2 + self.z**2)
+
+	def normalize(self):
+		magnitude = self.get_magnitude()
+		self.x /= magnitude
+		self.y /= magnitude
+		self.z /= magnitude
+
 DEFAULT_BALL_POS = Vector2D(0, 7.8, -15)
+DEFAULT_BALL_ACCELERATION = 1.2
+DEFAULT_BALL_BASE_SPEED = 30
 
 class Ball:
 	def __init__(self):
 		self.position = DEFAULT_BALL_POS
 		self.velocity = Vector2D()
-		self.baseSpeed = 30
+		self.baseSpeed = DEFAULT_BALL_BASE_SPEED
 		self.speed = self.baseSpeed
 		self.maxSpeedMult = 0.7
 		self.maxSpeed = self.calculate_max_safe_speed(self.maxSpeedMult)
 		self.radius = 0.5
 		self.bounds = GameBounds()
-		self.countdown = 5
+		self.countdown = 6
 		self.visible = False
 		self.is_moving = False
-		self.acceleration = 1.2
+		self.acceleration = DEFAULT_BALL_ACCELERATION
 		self.bounce_methods = NormalBounce()
 		self.lastHitter = "NONE"
 
@@ -137,6 +204,8 @@ class Ball:
 			if self.countdown <= 0:
 				self.start_movement()
 
+DEFAULT_PLAYER_SPEED = 35
+
 class Player:
 	def __init__(self, position, score, keys, game_bounds):
 		self.position = position
@@ -171,11 +240,13 @@ class GameBounds:
 		self.right = Vector2D(20.42, -3.70+10.5, -15)
 
 class RumbleGameInstance:
-	def __init__(self, broadcast_fun, game_end_fun):
+	def __init__(self, broadcast_fun, revert_event_fun, game_end_fun):
 		self.bounds = GameBounds()
 		self.player_left = Player(Vector2D(self.bounds.left.x + 2, -3+10.5, -15), 0,{"ArrowUp": False, "ArrowDown": False}, self.bounds)
 		self.player_right = Player(Vector2D(self.bounds.right.x - 2, -3+10.5, -15), 0,{"ArrowUp": False, "ArrowDown": False}, self.bounds)
 		self.ball = Ball()
+		self.event = ShrinkingPaddleEvent(self)
+		self.event.apply()
 		self.paused = False
 		self.ended = False
 		self.winner = None
@@ -189,6 +260,8 @@ class RumbleGameInstance:
 		self.broadcast_function = broadcast_fun
 		self.game_end_fun = game_end_fun
 		self.logger = logging.getLogger('game')
+		self.announceEvent = True
+		self.revert_event_fun = revert_event_fun
 
 	async def check_collisions(self):
 		ball = self.ball
@@ -208,6 +281,10 @@ class RumbleGameInstance:
 					if ball.velocity.x > 0:
 						ball.position.x = right_paddle.position.x - right_paddle.paddle_thickness/2 - ball.radius
 						ball.bounce_methods.BouncePaddle(ball, right_paddle.position.x, right_paddle.position.y)
+						if (self.event.name == 'Shrinking Paddles' and self.player_right.paddle_height > 1.4):
+							self.player_right.paddle_height *= 0.9
+							self.logger.info(self.player_right.paddle_height)
+							self.event.action = 'shrink'
 						ball.lastHitter = "RIGHT"  # Add this line
 						paddle_hit = True
 
@@ -219,6 +296,10 @@ class RumbleGameInstance:
 					if ball.velocity.x < 0:
 						ball.position.x = left_paddle.position.x + left_paddle.paddle_thickness/2 + ball.radius
 						ball.bounce_methods.BouncePaddle(ball, left_paddle.position.x, left_paddle.position.y)
+						if (self.event.name == 'Shrinking Paddles' and self.player_left.paddle_height > 1.4):
+							self.player_left.paddle_height *= 0.9
+							self.logger.info(self.player_left.paddle_height)
+							self.event.action = 'shrink'
 						ball.lastHitter = "LEFT"  # Add this line
 						paddle_hit = True
 
@@ -232,16 +313,21 @@ class RumbleGameInstance:
 		if winner == "LEFT":
 			self.player_left.score += 1
 			self.scorePos = Vector2D(self.bounds.right.x, self.ball.position.y, self.ball.position.z)
-			self.ball.start(LEFT_SIDE_DIR, Vector2D(self.player_right.position.x - 1, self.player_right.position.y, -15))
+			self.ball.start(LEFT_SIDE_DIR, DEFAULT_BALL_POS)
 			self.ball.lastHitter = "RIGHT"
 		elif winner == "RIGHT":
 			self.player_right.score += 1
 			self.scorePos = Vector2D(self.bounds.left.x, self.ball.position.y, self.ball.position.z)
-			self.ball.start(RIGHT_SIDE_DIR, Vector2D(self.player_left.position.x + 1, self.player_left.position.y, -15))
+			self.ball.start(RIGHT_SIDE_DIR, DEFAULT_BALL_POS)
 			self.ball.lastHitter = "LEFT"
+		self.event.revert()
+		await self.revert_event_fun()
+		self.event = self.get_event()
+		self.event.apply()
+		self.announceEvent = True
 		self.ball.visible = False
 		self.ball.is_moving = False
-		self.ball.countdown = 1
+		self.ball.countdown = 5
 		self.scored = True
 
 		if (self.check_winner(winner)):
@@ -297,10 +383,9 @@ class RumbleGameInstance:
 						current_step = min(step_size, remaining_time)
 						#accumulated_step += current_step
 
-						if self.ball.is_moving: #and accumulated_step >= 0.016:
-							self.ball.position.x += self.ball.velocity.x * current_step #* accumulated_step
-							self.ball.position.y += self.ball.velocity.y * current_step #* accumulated_step
-							#accumulated_step = 0
+						if self.ball.is_moving:
+							self.ball.position.x += self.ball.velocity.x * current_step
+							self.ball.position.y += self.ball.velocity.y * current_step
 
 						await (self.check_collisions())
 
@@ -318,32 +403,285 @@ class RumbleGameInstance:
 		except Exception as e:
 			print(f"Error in game loop: {e}")
 
+	def get_event(self):
+		events = [
+			# InvertedControlsEvent(self),
+			# RandomBouncesEvent(self),
+			# MirrorBallEvent(self),
+			# LightsOutEvent(self),
+			# SmokeCloudEvent(self),
+			# InfiniteSpeedEvent(self),
+			# ReverseBallEvent(self),
+			ShrinkingPaddleEvent(self)
+		]
+		return random.choice(events)
 
 class GameEvent(ABC):
 	def __init__(self, game : RumbleGameInstance):
 		self.name = None
 		self.description = None
 		self.game = game
+		self.ball_accel_mult = 1
+		self.ball_basespeed_mult = 0.9
+		self.player_speed_mult = 1.1
 		self.is_active = False
+		self.action = 'none'
 
-		@abstractmethod
-		def apply(self):
-			pass
+	def apply(self):
+		self.apply_common()
+		self.apply_specific()
 
-		@abstractmethod
-		def revert(self):
-			pass
+	def apply_common(self):
+		self.game.ball.acceleration *= self.ball_accel_mult
+		self.game.ball.baseSpeed *= self.ball_basespeed_mult
+		self.game.player_left.paddle_speed *= self.player_speed_mult
+		self.game.player_right.paddle_speed *= self.player_speed_mult
+
+	@abstractmethod
+	def apply_specific(self):
+		pass
+
+	def revert(self):
+		self.revert_common()
+		self.revert_specific()
+
+	def revert_common(self):
+		self.game.ball.acceleration = DEFAULT_BALL_ACCELERATION
+		self.game.ball.baseSpeed = DEFAULT_BALL_BASE_SPEED
+		self.game.player_left.paddle_speed = DEFAULT_PLAYER_SPEED
+		self.game.player_right.paddle_speed = DEFAULT_PLAYER_SPEED
+
+	@abstractmethod
+	def revert_specific(self):
+		pass
 
 class InvertedControlsEvent(GameEvent):
 	def __init__(self, game: RumbleGameInstance):
 		self.game = game
 		self.name = "Inverted Controls"
 		self.description = "Controls are inverted !"
+		self.ball_accel_mult = 1
+		self.ball_basespeed_mult = 1
+		self.player_speed_mult = 1
+		self.action = 'none'
 
-	def apply(self):
+	def apply_specific(self):
 		self.game.player_left.movement_method = InvertedMovements()
 		self.game.player_right.movement_method = InvertedMovements()
 
-	def revert(self):
+	def revert_specific(self):
 		self.game.player_left.movement_method = NormalMovements()
 		self.game.player_right.movement_method = NormalMovements()
+
+
+class RandomBouncesEvent(GameEvent):
+	def __init__(self, game: RumbleGameInstance):
+		self.game = game
+		self.name = "Random Bounces"
+		self.description = "All bounces from the ball are random !"
+		self.ball_accel_mult = 1
+		self.ball_basespeed_mult = 0.9
+		self.player_speed_mult = 1.1
+		self.action = 'none'
+
+	def apply_specific(self):
+		self.game.ball.bounce_methods = RandomBounce()
+
+	def revert_specific(self):
+		self.game.ball.bounce_methods = NormalBounce()
+
+class MirrorBallEvent(GameEvent):
+	def __init__(self, game: RumbleGameInstance):
+		self.game = game
+		self.name = "Mirror Ball"
+		self.description = "The ball teleports to the opposite wall instead of bouncing"
+		self.ball_accel_mult = 1
+		self.ball_basespeed_mult = 1
+		self.player_speed_mult = 1
+		self.action = 'none'
+
+	def apply_specific(self):
+		self.game.ball.bounce_methods = MirrorBounce()
+
+	def revert_specific(self):
+		self.game.ball.bounce_methods = NormalBounce()
+
+class LightsOutEvent(GameEvent):
+	def __init__(self, game: RumbleGameInstance):
+		self.game = game
+		self.name = "Lights Out"
+		self.description = "The lights turned off"
+		self.ball_accel_mult = 1
+		self.ball_basespeed_mult = 1
+		self.player_speed_mult = 1
+
+	def apply_specific(self):
+		self.action = 'off'
+
+	def revert_specific(self):
+		self.action = 'on'
+
+
+class SmokeCloudEvent(GameEvent):
+	def __init__(self, game: RumbleGameInstance):
+		self.game = game
+		self.name = "SmokeCloud"
+		self.action = 'none'
+		self.description = "The ball disappears when in the middle of the field !"
+		self.ball_accel_mult = 1
+		self.ball_basespeed_mult = 1
+		self.player_speed_mult = 1
+
+	#Send wrong pos in the middle area
+	def apply_specific(self):
+		pass
+
+	def revert_specific(self):
+		pass
+
+class InfiniteSpeedEvent(GameEvent):
+	def __init__(self, game: RumbleGameInstance):
+		self.game = game
+		self.name = "Random Bounces"
+		self.description = "All bounces from the ball are random !"
+		self.action = 'none'
+		self.ball_accel_mult = 1
+		self.ball_basespeed_mult = 1.2
+		self.player_speed_mult = 1.1
+		self.base_max_speed = self.game.ball.maxSpeed
+
+	def apply_specific(self):
+		self.game.ball.maxSpeed = 500
+
+	def revert_specific(self):
+		self.game.ball.maxSpeed = self.base_max_speed
+
+class ReverseBallEvent(GameEvent):
+	def __init__(self, game: RumbleGameInstance):
+		self.game = game
+		self.name = "Reverse Ball"
+		self.description = "The ball can randomly reverse its direction"
+		self.action = 'none'
+		self.ball_accel_mult = 1
+		self.ball_basespeed_mult = 1
+		self.player_speed_mult = 1
+		self.base_max_speed = self.game.ball.maxSpeed
+		self.reverse_task = None
+		self.reverse_interval = random.randint(2, 8)
+
+	async def reverse_ball_direction(self):
+		try:
+			while True:
+				await asyncio.sleep(self.reverse_interval)
+				self.game.ball.velocity.x *= -1.5
+				self.game.ball.velocity.y *= -1.5
+				self.reverse_interval = random.randint(2, 8)
+				self.game.logger.info("Ball direction reversed!")
+		except asyncio.CancelledError:
+			self.game.logger.info("Reverse ball direction task cancelled")
+
+	def apply_specific(self):
+		self.reverse_task = asyncio.create_task(self.reverse_ball_direction())
+
+	def revert_specific(self):
+		if self.reverse_task:
+			self.reverse_task.cancel()
+			self.reverse_task = None
+
+
+class ShrinkingPaddleEvent(GameEvent):
+	def __init__(self, game: RumbleGameInstance):
+		self.game = game
+		self.name = "Shrinking Paddles"
+		self.action = 'none'
+		self.description = "Each hit will shrink your paddle !"
+		self.ball_accel_mult = 0.9
+		self.ball_basespeed_mult = 0.9
+		self.player_speed_mult = 1
+		self.paddle_height = self.game.player_left.paddle_height
+
+	def apply_specific(self):
+		pass
+
+	def revert_specific(self):
+		self.action = 'reset'
+		self.game.player_left.paddle_height = self.paddle_height
+		self.game.player_right.paddle_height = self.paddle_height
+
+
+# class SwitchSideEvent(GameEvent):
+# 	def __init__(self, game: RumbleGameInstance):
+# 		self.game = game
+# 		self.name = "Random Bounces"
+# 		self.description = "All bounces from the ball are random !"
+# 		self.ball_accel_mult = 1
+# 		self.ball_basespeed_mult = 0.9
+# 		self.player_speed_mult = 1.1
+
+# 	def apply_specific(self):
+# 		self.game.ball.bounce_methods = RandomBounce()
+
+# 	def revert_specific(self):
+# 		self.game.ball.bounce_methods = NormalBounce()
+
+
+# class KillerBallEvent(GameEvent):
+# 	def __init__(self, game: RumbleGameInstance):
+# 		self.game = game
+# 		self.name = "Random Bounces"
+# 		self.description = "All bounces from the ball are random !"
+# 		self.ball_accel_mult = 1
+# 		self.ball_basespeed_mult = 0.9
+# 		self.player_speed_mult = 1.1
+
+# 	def apply_specific(self):
+# 		self.game.ball.bounce_methods = RandomBounce()
+
+# 	def revert_specific(self):
+# 		self.game.ball.bounce_methods = NormalBounce()
+
+
+# class IcyPaddlesEvent(GameEvent):
+# 	def __init__(self, game: RumbleGameInstance):
+# 		self.game = game
+# 		self.name = "Random Bounces"
+# 		self.description = "All bounces from the ball are random !"
+# 		self.ball_accel_mult = 1
+# 		self.ball_basespeed_mult = 0.9
+# 		self.player_speed_mult = 1.1
+
+# 	def apply_specific(self):
+# 		self.game.ball.bounce_methods = RandomBounce()
+
+# 	def revert_specific(self):
+# 		self.game.ball.bounce_methods = NormalBounce()
+
+# class VisibleTrajectoryEvent(GameEvent):
+# 	def __init__(self, game: RumbleGameInstance):
+# 		self.game = game
+# 		self.name = "Random Bounces"
+# 		self.description = "All bounces from the ball are random !"
+# 		self.ball_accel_mult = 1
+# 		self.ball_basespeed_mult = 0.9
+# 		self.player_speed_mult = 1.1
+
+# 	def apply_specific(self):
+# 		self.game.ball.bounce_methods = RandomBounce()
+
+# 	def revert_specific(self):
+# 		self.game.ball.bounce_methods = NormalBounce()
+
+# class CameraShakeEvent(GameEvent):
+# 	def __init__(self, game: RumbleGameInstance):
+# 		self.game = game
+# 		self.name = "Random Bounces"
+# 		self.description = "All bounces from the ball are random !"
+# 		self.ball_accel_mult = 1
+# 		self.ball_basespeed_mult = 0.9
+# 		self.player_speed_mult = 1.1
+
+# 	def apply_specific(self):
+# 		self.game.ball.bounce_methods = RandomBounce()
+
+# 	def revert_specific(self):
+# 		self.game.ball.bounce_methods = NormalBounce()

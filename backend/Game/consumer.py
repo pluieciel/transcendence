@@ -162,7 +162,6 @@ class GameConsumer(AsyncWebsocketConsumer):
 		recipient = query_params.get("recipient", [None])[0]
 		#for tournament
 		round = query_params.get("round", [None])[0]
-
 		user = await jwt_to_user(self.scope['headers'])
 		self.logger.info(f"User : {user}")
 		self.user = user
@@ -369,12 +368,12 @@ class GameConsumer(AsyncWebsocketConsumer):
 		try:
 			color = color_map.get(user.color)
 			if (color is None):
-				return "#00BDD1"
+				return "#00BDD1" #Cyan
 			else:
 				return color
 		except:
 			logging.getLogger('game').warn(f"no color found in settings defaulting to cyan")
-			return "#00BDD1"
+			return "#00BDD1" #Cyan
 
 	async def send_initial_game_state(self, instance):
 		init_response = {
