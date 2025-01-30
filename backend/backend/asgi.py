@@ -24,7 +24,7 @@ from api.consumers.oauth import OAuthConsumer
 from api.consumers.login_oauth import LoginOAuthConsumer
 from api.consumers.profile import ProfileConsumer
 from api.consumers.profile2 import ProfileConsumer2
-from api.consumers.avatar import AvatarConsumer
+from api.consumers.avatar import AvatarConsumer, setAvatar
 from api.consumers.login import LoginConsumer
 from api.consumers.signup import SignupConsumer
 from api.consumers.recaptcha import RecaptchaConsumer
@@ -61,7 +61,8 @@ http_patterns = [
     path('api/del/user', RemoveConsumer.as_asgi()),
     path('api/get/oauth/redirect', OAuthConsumer.as_asgi()),
     path('api/get/recaptcha', RecaptchaConsumer.as_asgi()),
-	path('api/settings/set/display', setDisplay.as_asgi()), 
+	path('api/settings/set/display', setDisplay.as_asgi()),
+	path('api/settings/set/avatar', setAvatar.as_asgi()),
     path('admin/', get_asgi_application()),
 ]
 

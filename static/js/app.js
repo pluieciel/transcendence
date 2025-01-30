@@ -40,9 +40,9 @@ class App {
 	}
 
 	async getAvatar(username) {
-		if (this.avatarCache[username]) {
-			return this.avatarCache[username];
-		}
+		// if (this.avatarCache[username]) {
+		// 	return this.avatarCache[username];
+		// }
 		const response = await fetch(`/api/get/avatar/${username}`, {
 			method: "POST",
 			headers: {
@@ -68,7 +68,7 @@ class App {
 		this.settings.quality = data['quality'];
 		this.settings.is_2fa_enabled = data['is_2fa_enabled'];
 		this.settings.fetched = true;
-		this.setColor();
+		this.setColor(this.settings.color);
 	}
 
 	login(data) {

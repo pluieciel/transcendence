@@ -1,11 +1,10 @@
 from PIL import Image
 from django.contrib.auth import get_user_model
-from django.core.files.base import ContentFile
 from django.core.cache import cache
 from channels.generic.http import AsyncHttpConsumer
 from channels.db import database_sync_to_async
 from api.db_utils import get_user_exists
-from api.utils import get_secret_from_file, hash_password
+from api.utils import get_secret_from_file, hash_password, parse_multipart_form_data
 import json
 import re
 import io
@@ -27,7 +26,7 @@ class SignupConsumer(AsyncHttpConsumer):
 		cache.set(ip_addr, current_usage + 1, timeout=time_window)
 
 		try:
-			data = await self.parse_multipart_form_data(body)
+			data = await parse_multipart_form_data(body=body)
 			username = data.get('username')
 			password = data.get('password')
 			confirm_password = data.get('confirm_password')
@@ -166,39 +165,3 @@ class SignupConsumer(AsyncHttpConsumer):
 			avatar=avatar
 		)
 		return user
-
-	async def parse_multipart_form_data(self, body):
-		"""Parse multipart form data and return a dictionary."""
-		from django.http import QueryDict
-		#from djangoapi.utils.datastructures import MultiValueDict
-
-		# Create a QueryDict to hold the parsed data
-		data = QueryDict(mutable=True)
-
-		# Split the body into parts
-		boundary = body.split(b'\r\n')[0]
-		parts = body.split(boundary)[1:-1]  # Ignore the first and last parts (which are empty)
-
-		for part in parts:
-			if b'Content-Disposition' in part:
-				# Split the part into headers and content
-				headers, content = part.split(b'\r\n\r\n', 1)
-				headers = headers.decode('utf-8')
-				content = content.rstrip(b'\r\n')  # Remove trailing newlines
-
-				# Extract the name from the headers
-				name = None
-				filename = None
-				for line in headers.splitlines():
-					if 'name="' in line:
-						name = line.split('name="')[1].split('"')[0]
-					if 'filename="' in line:
-						filename = line.split('filename="')[1].split('"')[0]
-
-				# If it's a file, save it to the QueryDict
-				if filename:
-					data[name] = ContentFile(content, name=filename)
-				else:
-					data[name] = content.decode('utf-8')
-
-		return data

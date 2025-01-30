@@ -1,3 +1,5 @@
+from django.http import QueryDict
+from django.core.files.base import ContentFile
 from django.contrib.auth import get_user_model
 from channels.db import database_sync_to_async
 import os
@@ -88,3 +90,38 @@ def get_secret_from_file(env_var):
 
 def hash_password(password):
 	return hashlib.sha256(password.encode()).hexdigest()
+
+async def parse_multipart_form_data(body):
+	"""Parse multipart form data and return a dictionary."""
+	#from djangoapi.utils.datastructures import MultiValueDict
+
+	# Create a QueryDict to hold the parsed data
+	data = QueryDict(mutable=True)
+
+	# Split the body into parts
+	boundary = body.split(b'\r\n')[0]
+	parts = body.split(boundary)[1:-1]  # Ignore the first and last parts (which are empty)
+
+	for part in parts:
+		if b'Content-Disposition' in part:
+			# Split the part into headers and content
+			headers, content = part.split(b'\r\n\r\n', 1)
+			headers = headers.decode('utf-8')
+			content = content.rstrip(b'\r\n')  # Remove trailing newlines
+
+			# Extract the name from the headers
+			name = None
+			filename = None
+			for line in headers.splitlines():
+				if 'name="' in line:
+					name = line.split('name="')[1].split('"')[0]
+				if 'filename="' in line:
+					filename = line.split('filename="')[1].split('"')[0]
+
+			# If it's a file, save it to the QueryDict
+			if filename:
+				data[name] = ContentFile(content, name=filename)
+			else:
+				data[name] = content.decode('utf-8')
+
+	return data
