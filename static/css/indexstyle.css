@@ -98,7 +98,7 @@ a {
 	margin-right: 20px;
 }
 
-#settingsBtn, #indexBtn, #logoutBtn {
+#adminBtn, #settingsBtn, #indexBtn, #logoutBtn {
 	display: block;
 	padding: 10px 20px;
 	font-size: 1rem;
@@ -113,7 +113,7 @@ a {
 	transition: all 0.2s;
 }
 
-#settingsBtn:hover, #indexBtn:hover, #logoutBtn:hover {
+#adminBtn:hover, #settingsBtn:hover, #indexBtn:hover, #logoutBtn:hover {
     transform: scale(1.1);
 }
 
@@ -123,12 +123,20 @@ a {
     border: #ddd solid 1px;
 }
 
-#settingsBtn, #indexBtn {
+#adminBtn, #settingsBtn, #indexBtn {
 	color: var(--user-color);
 	right: 150px;
 	border: 0.5px solid var(--user-color);
 	background-color: var(--header-color);
 	box-shadow: 0 4px 15px var(--user-color);
+}
+
+#adminBtn {
+    right: 260px;
+}
+
+#settingsBtn {
+    right: 150px;
 }
 
 #logoutBtn {
