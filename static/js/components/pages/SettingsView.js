@@ -26,6 +26,7 @@ export default class SettingsView {
         this.container.innerHTML = `
     <header>
         <h1 id="pong">PONG</h1>
+			<button id="adminBtn">Admin</button>
 			<button id="indexBtn">Main</button>
 			<button id="logoutBtn">Log out</button>
 	</header>
@@ -455,7 +456,8 @@ export default class SettingsView {
 	addNavigationEventListeners() {
 		const	logoutBtn = document.getElementById('logoutBtn');
 		const	indexBtn = document.getElementById('indexBtn');
-	
+		const	adminBtn = document.getElementById('adminBtn');
+
 		logoutBtn.addEventListener('click', () => {
 			window.app.logout();
 		});
@@ -466,6 +468,10 @@ export default class SettingsView {
 				return ;
 			}
 			window.app.router.navigateTo('/index');
+		});
+
+		adminBtn.addEventListener('click', () => {
+			window.app.router.navigateTo('/admin');
 		});
 	}
 	

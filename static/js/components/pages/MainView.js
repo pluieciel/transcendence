@@ -125,6 +125,10 @@ export default class MainView {
         const settingsBtn = this.container.querySelector("#settingsBtn");
         const logoutBtn = this.container.querySelector("#logoutBtn");
 
+		adminBtn.addEventListener("click", () => {
+			window.app.router.navigateTo("/admin");
+		});
+
 		logoutBtn.addEventListener("click", () => {
 			window.app.chatBox.disconnect();
 			window.app.logout();
@@ -134,9 +138,10 @@ export default class MainView {
 			window.app.router.navigateTo("/settings");
 		});
 
-		adminBtn.addEventListener("click", () => {
-			window.app.router.navigateTo("/admin");
-		});
+        logoutBtn.addEventListener("click", () => {
+            window.app.chatBox.disconnect();
+            window.app.logout();
+        });
 	}
 
 	async setProfileFields() {
