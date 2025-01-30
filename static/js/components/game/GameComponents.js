@@ -1,101 +1,105 @@
 import { Game } from "./Game.js";
 
 export default class GameComponent {
-    constructor(container) {
-        this.container = container;
+	constructor(container) {
+		this.container = container;
 
-        //Search game timer
-        this.countdownTime = 0;
-        this.timerInterval = null;
-        this.render();
-        this.addEventListeners();
-        this.timerElement = document.getElementById("timer");
-    }
+		//Search game timer
+		this.countdownTime = 0;
+		this.timerInterval = null;
 
-    render() {
-        this.container.innerHTML = `
+		this.render();
+		this.addEventListeners();
+		//this.timerElement = document.getElementById("timer");
+	}
+
+	render() {
+		this.container.innerHTML = `
 			<!-- Quick Match Timer container -->
-			<div class="modal fade" id="matchSearch" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-				<div class="modal-dialog modal-dialog-centered">
-					<div class="modal-content modal-content-game d-flex flex-column align-items-center justify-content-center text-center">
-						<h5 class="modal-title w-70 mt-3 mb-3" id="staticBackdropLabel">Searching for a game</h5>
-						<h2 id="timer">0s</h2> <!-- Timer below the header -->
-						<button type="button" class="btn btn-secondary m-3" id="gameSearchCancel" data-bs-dismiss="modal">Cancel</button>
+				<div class="modal fade" id="matchSearch" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+					<div class="modal-dialog modal-dialog-centered">
+						<div class="modal-content modal-content-game d-flex flex-column align-items-center justify-content-center text-center">
+							<h5 class="modal-title w-70 mt-3 mb-3" id="staticBackdropLabel">Searching for a game</h5>
+							<h2 id="timer">0s</h2> <!-- Timer below the header -->
+							<button type="button" class="btn btn-secondary m-3" id="gameSearchCancel" data-bs-dismiss="modal">Cancel</button>
+						</div>
 					</div>
 				</div>
-			</div>
-			<div id=gameDiv style="display :none:">
-				<div id="nameLeft"></div>
-				<div id="scoreLeft"></div>
-				<div id="nameRight"></div>
-				<div id="scoreRight"></div>
-				<div id="overlay">
-				    <button id="returnButton" style="display: none;">Return to Main Menu</button>
-				</div>
-		        <canvas id="gameCanvas"></canvas>
-			</div>
+				<div id="gameDiv" style="display: none; position: relative;">
+                    <div id="overlay">
+                        <h2 id="winner-name">Winner</h2>
+                        <img id="winner-avatar" src="" alt="Winner's Avatar" width="100" height="100">
+                        <p id="score-text">Score</p>
+                        <p id="elo-text">Elo</p>
+                        <button id="returnButton">Return to Main Menu</button>
+                    </div>
+                    <canvas id="gameCanvas"></canvas>
+                </div>
 			`;
 
-        const button = document.getElementById("quickMatch");
-        button.setAttribute("data-bs-toggle", "modal");
-        button.setAttribute("data-bs-target", "#matchSearch");
-    }
+		const button = document.getElementById("quickMatch");
+		button.setAttribute("data-bs-toggle", "modal");
+		button.setAttribute("data-bs-target", "#matchSearch");
+	}
 
-    addEventListeners() {
-        const quickMatch = document.getElementById("quickMatch");
-        const playAI = document.getElementById("playAI");
+	addEventListeners() {
+		const quickMatch = document.getElementById("quickMatch");
+		const playAI = document.getElementById("playAI");
+		const matchSearchModal = document.getElementById("matchSearch");
+        const cancelGameSearch = document.getElementById("gameSearchCancel");
+		const returnButton = document.getElementById("returnButton");
+		const gameDiv = document.getElementById("gameDiv");
 
-        quickMatch.addEventListener("click", () => {
-            this.searchGame();
-        });
+		if (quickMatch) {
+            quickMatch.setAttribute("data-bs-toggle", "modal");
+            quickMatch.setAttribute("data-bs-target", "#matchSearch");
+            quickMatch.addEventListener("click", () => this.searchGame());
+        }
 
-        playAI.addEventListener("click", () => {
-            this.playBot(1); //TODO Choose difficulty
-        });
-    }
+        if (playAI) {
+            playAI.addEventListener("click", () => this.playBot(1)); // TODO: Select difficulty
+        }
 
-    searchGame() {
+        if (matchSearchModal) {
+            matchSearchModal.addEventListener("hidden.bs.modal", () => {
+                this.stopTimerAndDismissModal();
+            });
+        }
+
+        if (cancelGameSearch) {
+            cancelGameSearch.addEventListener("click", () => {
+                this.stopTimerAndDismissModal();
+            });
+        }
+
+		if (returnButton) {
+            returnButton.addEventListener("click", () => {
+                this.returnToMainMenu(gameDiv, returnButton);
+            });
+        }
+	}
+
+	searchGame() {
         const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
         const host = window.location.host;
         const wsUrl = `${protocol}//${host}/ws/game/`;
 
-        window.app.gamews = new WebSocket(wsUrl);
+        this.initializeWebSocket(wsUrl);
         this.startSearchGameTimer();
-
-        window.app.gamews.onmessage = (event) => {
-            console.log(event.data);
-            setTimeout(() => {
-                this.stopTimerAndDismissModal();
-            }, 1000);
-
-            const events = JSON.parse(event.data);
-            if (events.message_type === "init") {
-                this.displayGame(events);
-            }
-        };
-
-        window.app.gamews.onopen = () => {
-            console.log("Connected to server");
-            window.app.ingame = true;
-            sessionStorage.setItem("ingame", "true");
-        };
-
-        window.app.gamews.onclose = () => {
-            console.log("Disconnected from server");
-            window.app.ingame = false;
-            sessionStorage.setItem("ingame", "false");
-        };
-
-        window.app.gamews.onerror = (error) => {
-            console.error("WebSocket error:", error);
-        };
     }
 
     playBot(difficulty) {
         const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
         const host = window.location.host;
+        const wsUrl = `${protocol}//${host}/ws/game/?bot=${difficulty}`;
 
-        const wsUrl = `${protocol}//${host}/ws/game/?bot=` + difficulty;
+        this.initializeWebSocket(wsUrl);
+    }
+
+    initializeWebSocket(wsUrl) {
+        if (window.app.gamews) {
+            window.app.gamews.close(); // Ensure previous connection is closed
+        }
 
         window.app.gamews = new WebSocket(wsUrl);
 
@@ -120,6 +124,7 @@ export default class GameComponent {
 
         window.app.gamews.onerror = (error) => {
             console.error("WebSocket error:", error);
+            alert("Connection error! Please try again.");
         };
     }
 
@@ -127,32 +132,58 @@ export default class GameComponent {
         setTimeout(() => {
             const canvas = document.querySelector("#gameCanvas");
             const game = new Game(canvas, window.app.gamews);
+            game.onGameEnd = this.onGameEnd
             const gameDiv = document.querySelector("#gameDiv");
+            const mainPage = document.querySelector("#mainPage");
+
             gameDiv.style.display = "block";
-            console.log("Game initialization");
-
-            // Pass onGameEnd callback to Game
-            game.onGameEnd = () => {
-                const returnButton = document.querySelector("#returnButton");
-                returnButton.style.display = "block";
-
-                returnButton.onclick = () => {
-                    gameDiv.style.display = "none";
-                    returnButton.style.display = "none";
-                    document.querySelector("#mainPage").style.display = "block";
-                    document.querySelector("#overlay").style.display = "none";
-                    gameDiv.style.display = "none";
-                    if (window.app.gamews) {
-                        window.app.gamews.close();
-                    }
-                    window.app.ingame = false;
-                    sessionStorage.setItem("ingame", "false");
-                };
-                window.app.router.currentComponent.setProfileFields().then();
-            };
-
+            mainPage.style.display = "none";
             game.initialize(events.data);
-            document.querySelector("#mainPage").style.display = "none";
+        }, 1000);
+    }
+
+    onGameEnd(winnerName, winnerAvatar, scoreLeft, scoreRight, eloChange)
+    {
+        console.log("game end called");
+        const overlay = document.querySelector("#overlay");
+        let username = sessionStorage.getItem("username");
+        overlay.style.display = "flex"; 
+        document.querySelector("#winner-name").textContent = `Winner: ${winnerName}`;
+        document.querySelector("#winner-avatar").src = winnerAvatar;
+        document.querySelector("#score-text").textContent = `Final Score: ${scoreLeft} - ${scoreRight}`;
+        document.querySelector("#elo-text").textContent = `ELO Change: ${winnerName == username ? "+" : "-"}${eloChange}`; 
+        const returnButton = document.querySelector("#returnButton");
+                returnButton.style.display = "block";
+                returnButton.onclick = () => {
+                    this.returnToMainMenu(gameDiv, returnButton);
+                };
+
+    }
+
+    returnToMainMenu(gameDiv, returnButton) {
+        gameDiv.style.display = "none";
+        returnButton.style.display = "none";
+        document.querySelector("#overlay").style.display = "none";
+        document.querySelector("#mainPage").style.display = "block";
+
+        if (window.app.gamews) {
+            window.app.gamews.close();
+        }
+
+        window.app.ingame = false;
+        sessionStorage.setItem("ingame", "false");
+        window.app.router.currentComponent.setProfileFields().then();
+    }
+
+    startSearchGameTimer() {
+        this.countdownTime = 0;
+        this.timerElement = document.getElementById("timer");
+        this.timerElement.innerText = "0s";
+
+        clearInterval(this.timerInterval);
+        this.timerInterval = setInterval(() => {
+            this.countdownTime++;
+            this.timerElement.innerText = `${this.countdownTime}s`;
         }, 1000);
     }
 
@@ -160,42 +191,9 @@ export default class GameComponent {
         clearInterval(this.timerInterval);
         this.timerElement.innerText = "0s";
 
-        const matchSearchModal = bootstrap.Modal.getInstance(
-            document.getElementById("matchSearch"),
-        );
-        matchSearchModal.hide();
-    }
-
-    startSearchGameTimer() {
-        this.countdownTime = 0; // Reset countdown time
-        this.timerElement.innerText = this.countdownTime + "s"; // Reset display
-
-        // Clear any existing interval before starting a new one
-        clearInterval(this.timerInterval);
-
-        // Start the timer
-        this.timerInterval = setInterval(() => {
-            this.countdownTime++; // Increment time
-            this.timerElement.innerText = this.countdownTime + "s"; // Update display
-        }, 1000); // Update every second
-
-        // Event listener for when the modal is shown (Bootstrap 5 uses 'shown.bs.modal')
-        const matchSearchModal = document.getElementById("matchSearch");
-        matchSearchModal.addEventListener("shown.bs.modal", () => {
-            this.startSearchGameTimer(); // Start timer when modal is shown
-        });
-
-        // Event listener for when the modal is hidden (clear the timer)
-        matchSearchModal.addEventListener("hidden.bs.modal", () => {
-            clearInterval(this.timerInterval); // Clear interval when modal is closed
-            this.timerElement.innerText = "0s"; // Reset timer display
-        });
-
-        // Event listener for cancel button (stop timer and hide modal)
-        const cancelGameSearch =
-            this.container.querySelector("#gameSearchCancel");
-        cancelGameSearch.addEventListener("click", () => {
-            this.stopTimerAndDismissModal(); // Stop timer and dismiss modal
-        });
+        const matchSearchModal = bootstrap.Modal.getInstance(document.getElementById("matchSearch"));
+        if (matchSearchModal) {
+            matchSearchModal.hide();
+        }
     }
 }

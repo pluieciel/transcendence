@@ -1,10 +1,11 @@
 from channels.generic.http import AsyncHttpConsumer
 from channels.db import database_sync_to_async
-from api.utils import jwt_to_user, verify_totp
-from api.db_utils import update_is_2fa_enabled
+from api.utils import jwt_to_user, hash_password
+from api.db_utils import update_recovery_codes_generated
+from secrets import token_hex
 import json
 
-class Enable2FAConsumer(AsyncHttpConsumer):
+class Generate2FARecoveryConsumer(AsyncHttpConsumer):
 	async def handle(self, body):
 		try:
 			user = await jwt_to_user(self.scope['headers'])
@@ -16,33 +17,26 @@ class Enable2FAConsumer(AsyncHttpConsumer):
 				return await self.send_response(401, json.dumps(response_data).encode(),
 					headers=[(b"Content-Type", b"application/json")])
 
-			if user.is_2fa_enabled:
+			if user.recovery_codes_generated:
 				response_data = {
 					'success': False,
-					'message': '2FA already enabled'
+					'message': '2FA recovery codes already generated once'
 				}
 				return await self.send_response(409, json.dumps(response_data).encode(),
 					headers=[(b"Content-Type", b"application/json")])
 
-			data = json.loads(body.decode())
-			totp_input = data.get('totp')
+			recovery_codes = [token_hex(8) for _ in range(6)]
+			for code in recovery_codes:
+				await self.create_recovery_code(user, hash_password(code))
 
-			is_totp_valid = verify_totp(user.totp_secret, totp_input)
-
-			if not is_totp_valid:
-				response_data = {
-					'success': False,
-					'message': 'Invalid totp code'
-				}
-				return await self.send_response(401, json.dumps(response_data).encode(),
-					headers=[(b"Content-Type", b"application/json")])
-
-			await update_is_2fa_enabled(user, True)
+			await update_recovery_codes_generated(user, True)
 
 			response_data = {
 				'success': True,
-				'message': '2FA enabled',
 			}
+			for i in range(6):
+				response_data["recovery_code_" + str(i + 1)] = recovery_codes[i]
+
 			return await self.send_response(200, json.dumps(response_data).encode(),
 				headers=[(b"Content-Type", b"application/json")])
 		except Exception as e:
@@ -52,3 +46,8 @@ class Enable2FAConsumer(AsyncHttpConsumer):
 			}
 			return await self.send_response(500, json.dumps(response_data).encode(),
 					headers=[(b"Content-Type", b"application/json")])
+
+	@database_sync_to_async
+	def create_recovery_code(self, user, recovery_code):
+		from api.models import RecoveryCode
+		return RecoveryCode.objects.create(user=user, recovery_code=recovery_code)
