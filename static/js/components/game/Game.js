@@ -148,6 +148,7 @@ export class Game {
 					console.log("Before shrink - Left Paddle Scale:", this.sceneManager.leftPaddle.scale.x);
 					console.log("Before shrink - Right Paddle Scale:", this.sceneManager.rightPaddle.scale.x);
 
+					//TODO PAS SHRINK LES DEUX
 					// Apply shrink factor
 					this.sceneManager.leftPaddle.scale.x *= 0.9;
 					this.sceneManager.rightPaddle.scale.x *= 0.9;
