@@ -357,6 +357,11 @@ input[type="file"]::file-selector-button {
 	text-shadow: none;
 }
 
+#modalFooter {
+	justify-content: space-between;
+	border-top-color: var(--accent-color);
+}
+
 #modalHeader {
 	font-size: 2rem;
 	font-weight: bold;
@@ -390,6 +395,19 @@ input[type="file"]::file-selector-button {
 	cursor: pointer;
 	border-radius: 5px;
 }
+
 .avatar-selector:hover {
 	background-color: #0056b3;
 }
+
+.disable-backdrop {
+	display: none !important;
+	opacity: 0 !important;
+	visibility: hidden !important;
+}
+
+/* .modal-backdrop {
+	display: none !important;
+	opacity: 0 !important;
+	visibility: hidden !important;
+} */

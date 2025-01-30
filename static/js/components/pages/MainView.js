@@ -6,7 +6,6 @@ export default class MainView {
     constructor(container) {
         this.container = container;
 
-        //Search game timer
         this.countdownTime = 0;
         this.timerInterval = null;
 		
@@ -17,6 +16,8 @@ export default class MainView {
 		this.setProfileFields();
 		if (!window.app.settings.fetched)
 			window.app.getPreferences();
+		this.checkForBackdrop();
+
 
         this.addEventListeners();
         if (window.app.ingame) {
@@ -192,5 +193,11 @@ export default class MainView {
 			tourn.innerHTML = "Failed to load tournaments";
 			console.error("An error occurred: ", error);
 		}
+	}
+	
+	checkForBackdrop() {
+		const el = document.querySelector(".modal-backdrop");
+		if (el)
+			el.remove();
 	}
 }

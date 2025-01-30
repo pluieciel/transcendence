@@ -2,16 +2,31 @@ export default class SettingsView {
     constructor(container) {
 		this.container = container;
         this.username = window.app.state.username;
-        this.render();
-        this.add2FAEventListeners();
-        this.addEventListeners();
-		this.addUserData();
+		this.init()
     }
+	
+	async init() {
+		this.render();
+		this.add2FAEventListeners();
+		this.addEventListeners();
+		await this.getSettings();
+		await this.addUserData();
+	}
+	
+	async getSettings() {
+		if (!window.app.settings.fetched)
+			await window.app.getPreferences();
+		this.settings = {
+			color: window.app.settings.color,
+			quality: window.app.settings.quality
+		};
+		return ;
+	}
 
-    render() {
+	render() {
         this.container.innerHTML = `
     <header>
-        <h1>PONG</h1>
+        <h1 id="pong">PONG</h1>
 			<button id="indexBtn">Main</button>
 			<button id="logoutBtn">Log out</button>
 	</header>
@@ -82,6 +97,10 @@ export default class SettingsView {
                 <div class="modal-body">
 					<h2 class="modal-title fs-5" id="modalDialog"></h2>
 				</div>
+				<div id="modalFooter" class="modal-footer d-none">
+					<button class="btn btn-primary" id="modalsavebtn">Save changes</button>
+					<button class="btn btn-primary" id="gotomainbtn">Go to main without saving</button>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -122,16 +141,16 @@ export default class SettingsView {
             }
         });
 	}
-
+	
 	async addUserData() {
-		if (!window.app.settings.fetched)
-			await window.app.getPreferences();
+		console.log(this.settings.color);
+		console.log(window.app.settings.color);
 		const	colorDiv = document.getElementById('colorDiv');
 		const	qualityDiv = document.getElementById('qualityDiv');
         const	leftQuality = document.getElementById('leftQuality');
         const	rightQuality = document.getElementById('rightQuality');
-		const	colorIndex = window.app.settings.color;
-		const	qualityIndex = window.app.settings.quality;
+		const	colorIndex = this.settings.color;
+		const	qualityIndex = this.settings.quality;
 		let colorArray = {
 			0: 'Blue',
 			1: 'Cyan',
@@ -153,76 +172,105 @@ export default class SettingsView {
 		else
 			leftQuality.classList.remove("disabled");
 		if (qualityIndex == 2)
-			rightQuality.classList.add("disabled")
+			rightQuality.classList.add("disabled");
 		else
-			rightQuality.classList.remove("disabled")
+			rightQuality.classList.remove("disabled");
 		colorDiv.innerHTML = "Color: " + colorArray[colorIndex];
 		qualityDiv.innerHTML = "Quality: " + qualityArray[qualityIndex];
 	}
-	
+
 	addCustomizationEventListeners() {
         const	leftColor = document.getElementById('leftColor');
         const	rightColor = document.getElementById('rightColor');
         const	leftQuality = document.getElementById('leftQuality');
         const	rightQuality = document.getElementById('rightQuality');
 		const	saveChanges = document.getElementById('savebtn');
+		const	saveChanges2 = document.getElementById('modalsavebtn');
+		const	gotomain = document.getElementById('gotomainbtn');
 		
 		leftColor.addEventListener('click', () => {
-			if (window.app.settings.color == 0)
-				window.app.settings.color = 8;
+			if (this.settings.color == 0)
+				this.settings.color = 8;
 			else
-			window.app.settings.color -= 1;
+			this.settings.color -= 1;
 			this.addUserData();
-			window.app.setColor();
+			window.app.setColor(this.settings.color);
 		});
 		
 		rightColor.addEventListener('click', () => {
-			if (window.app.settings.color == 8)
-				window.app.settings.color = 0;
+			if (this.settings.color == 8)
+				this.settings.color = 0;
 			else
-				window.app.settings.color += 1;
-			window.app.setColor();
+				this.settings.color += 1;
+			window.app.setColor(this.settings.color);
 			this.addUserData();
 		});
 
 		leftQuality.addEventListener('click', () => {
-			if (window.app.settings.quality == 0)
+			if (this.settings.quality == 0)
 				return ;
-			window.app.settings.quality -= 1;
+			this.settings.quality -= 1;
 			this.addUserData();
 		});
 		
 		rightQuality.addEventListener('click', () => {
-			if (window.app.settings.quality == 2)
+			if (this.settings.quality == 2)
 				return ;
-			window.app.settings.quality += 1;
+			this.settings.quality += 1;
 			this.addUserData();
 		});
-
+		
 		saveChanges.addEventListener('click', async () => {
-			try {
-				const response = await fetch('/api/settings/set/preferences', {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify({
-						'newColor': window.app.settings.color,
-						'newQuality': window.app.settings.quality,
-						}),			
-					});
-
-				const data = await response.json();
-
-				if (data.success)
-					this.message(true, 'Theme and quality changes saved!');
-				else
-					throw new Error(data['message']);
-			}
-			catch (error) {
-				console.error(error);
-			};
+			await this.saveChanges(false);
 		});
+
+		saveChanges2.addEventListener('click', async () => {
+			await this.saveChanges(true);
+		});
+
+		gotomainbtn.addEventListener('click', () => {
+			window.app.getPreferences();
+			var myModal = new bootstrap.Modal(document.getElementById('changeModal'), {
+				backdrop: false
+			});
+			myModal.show();
+			window.app.router.navigateTo('/index');
+		});
+	}
+	
+	async saveChanges(main) {
+		try {
+			const response = await fetch('/api/settings/set/preferences', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					'newColor': this.settings.color,
+					'newQuality': this.settings.quality,
+					}),			
+				});
+	
+			const data = await response.json();
+	
+			if (data.success) {
+				window.app.settings.color = this.settings.color;
+				window.app.settings.quality = this.settings.quality;
+				if (!main)
+					this.message(true, 'Theme and quality changes saved!');
+				else {
+					window.app.router.navigateTo('/index');
+					const modal = bootstrap.Modal.getInstance(this.container.querySelector('#changeModal'));
+					if (modal)
+						modal.hide();
+				}
+			}
+			else
+				throw new Error(data['message']);
+		}
+		catch (error) {
+			console.error(error);
+		};
 	}
 
     addEventListeners() {
@@ -262,7 +310,7 @@ export default class SettingsView {
                     errorDiv.classList.remove('d-none');
 				}
 			} catch (error) {
-				errorDiv.textContent = 'An error occurred:' + error;
+				errorDiv.textContent = 'An error occurred: ' + error;
                 errorDiv.classList.remove('d-none');
 			}
 		});
@@ -340,7 +388,11 @@ export default class SettingsView {
         });
         
 		indexBtn.addEventListener('click', () => {
-            window.app.router.navigateTo('/index');
+			if (this.settings.color != window.app.settings.color || this.settings.quality != window.app.settings.quality) {
+				this.message2("You have unsaved changes", "Click the save changes button to proceed");
+				return ;
+			}
+			window.app.router.navigateTo('/index');
         });
     }
 
@@ -368,6 +420,13 @@ export default class SettingsView {
 	message(good, message) {
 		let header = good ? "<i class=\"fa-solid fa-square-check\" style=\"color:green\"></i> Success !" : "<i class=\"fa-solid fa-square-xmark\" style=\"color:red\"></i> Failure.";
 		new bootstrap.Modal(this.container.querySelector('#changeModal')).show();
+		document.getElementById('modalFooter').classList.add("d-none");
+		document.getElementById('modalHeader').innerHTML = header;
+		document.getElementById('modalDialog').innerHTML = message;
+	}
+	message2(header, message) {
+		new bootstrap.Modal(this.container.querySelector('#changeModal')).show();
+		document.getElementById('modalFooter').classList.remove("d-none");
 		document.getElementById('modalHeader').innerHTML = header;
 		document.getElementById('modalDialog').innerHTML = message;
 	}

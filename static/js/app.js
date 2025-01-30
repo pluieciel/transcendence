@@ -24,8 +24,8 @@ class App {
 		this.router = new Router(this.routes);
 	}
 
-	setColor() {
-		switch (this.settings.color) {
+	setColor(color) {
+		switch (color) {
 			default: document.documentElement.style.setProperty("--user-color", "#00BDD1");break;
 			case 0: document.documentElement.style.setProperty("--user-color", "#3E27F8");break;
 			case 1: document.documentElement.style.setProperty("--user-color", "#00BDD1");break;
@@ -67,7 +67,7 @@ class App {
 		this.settings.color = data['color'];
 		this.settings.quality = data['quality'];
 		this.settings.fetched = true;
-		this.setColor();
+		this.setColor(this.settings.color);
 	}
 
 	login(data) {
