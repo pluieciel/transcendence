@@ -106,6 +106,7 @@ class setAvatar(AsyncHttpConsumer):
 				user.avatar.delete(save=False)
 			if user.oauthlog:
 				user.is42avatarused = False
+			user.avatar = avatar
 			user.save()
 			return True
 		except Exception as e:

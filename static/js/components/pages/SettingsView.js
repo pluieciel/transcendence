@@ -313,7 +313,7 @@ export default class SettingsView {
 				type: file.type,
 				lastModified: file.lastModified
 			});
-			formData.append('avatar', modifiedFile);
+			formData.append('newAvatar', modifiedFile);
 			try {
 				const response = await fetch('/api/settings/set/avatar', {
 					method: 'POST',
