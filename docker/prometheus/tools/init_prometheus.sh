@@ -14,7 +14,7 @@ fi
 exec /bin/prometheus \
     --web.config.file=/etc/prometheus/config/web-config.yml \
     --config.file=/etc/prometheus/config/prometheus.yml \
-    --web.external-url=/admin/prometheus/ \
-    --web.route-prefix=/admin/prometheus/ \
+    --web.external-url=/admin/services/prometheus/ \
+    --web.route-prefix=/admin/services/prometheus/ \
     --storage.tsdb.path=/etc/prometheus/data \
     --storage.tsdb.retention.time=90d
