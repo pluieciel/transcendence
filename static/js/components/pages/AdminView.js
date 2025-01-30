@@ -9,7 +9,8 @@ export default class MainView {
         this.container.innerHTML = `
 			<header>
 				<h1 id="pong">PONG</h1>
-				<button id="indexBtn">Main</button>
+				<button id="indexAdminBtn">Main</button>
+				<button id="settingsBtn">Settings</button>
 				<button id="logoutBtn">Log out</button>
 			</header>
 
@@ -34,7 +35,8 @@ export default class MainView {
     }
 
     addEventListeners() {
-        const indexBtn = this.container.querySelector("#indexBtn");
+        const indexAdminBtn = this.container.querySelector("#indexAdminBtn");
+		const settingsBtn = this.container.querySelector("#settingsBtn");
         const logoutBtn = this.container.querySelector("#logoutBtn");
 
         logoutBtn.addEventListener("click", () => {
@@ -42,7 +44,11 @@ export default class MainView {
             window.app.logout();
         });
 
-		indexBtn.addEventListener('click', () => {
+		settingsBtn.addEventListener('click', () => {
+            window.app.router.navigateTo('/settings');
+        });
+
+		indexAdminBtn.addEventListener('click', () => {
             window.app.router.navigateTo('/index');
         });
 	}

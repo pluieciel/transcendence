@@ -12,6 +12,7 @@ export default class SettingsView {
         this.container.innerHTML = `
     <header>
         <h1>PONG</h1>
+			<button id="adminBtn">Admin</button>
 			<button id="indexBtn">Main</button>
 			<button id="logoutBtn">Log out</button>
 	</header>
@@ -221,6 +222,7 @@ export default class SettingsView {
 		const	changeNameBtn = document.getElementById('changeNameBtn');
         const	logoutBtn = document.getElementById('logoutBtn');
 		const	indexBtn = document.getElementById('indexBtn');
+		const	adminBtn = document.getElementById('adminBtn');
 		const	wipeBtn = document.getElementById('deleteAccBtn');
 		const	passwdBtn = document.getElementById('passwordButton');
         const	newpwd = document.getElementById('newPasswordInput');
@@ -420,6 +422,10 @@ export default class SettingsView {
 		indexBtn.addEventListener('click', () => {
             window.app.router.navigateTo('/index');
         });
+
+		adminBtn.addEventListener('click', () => {
+			window.app.router.navigateTo('/admin');
+		});
     }
 
 	async eraseInDB() {
