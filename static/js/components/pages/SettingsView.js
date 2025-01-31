@@ -217,8 +217,7 @@ export default class SettingsView {
 				this.settings.color = 8;
 			else
 			this.settings.color -= 1;
-		this.addUserData();
-			window.app.setColor(this.settings.color);
+			this.addUserData();
 		});
 		
 		rightColor.addEventListener('click', () => {
@@ -226,7 +225,6 @@ export default class SettingsView {
 				this.settings.color = 0;
 			else
 				this.settings.color += 1;
-			window.app.setColor(this.settings.color);
 			this.addUserData();
 		});
 
@@ -546,7 +544,6 @@ export default class SettingsView {
 		const 	is_2fa_enabled = window.app.settings.is_2fa_enabled;
 		const	colorIndex = this.settings.color;
 		const	qualityIndex = this.settings.quality;
-
 		
 		let colorArray = {
 			0: 'Blue',
@@ -574,6 +571,7 @@ export default class SettingsView {
 		else {enable2FA.style.display = "blon";disable2FA.style.display = "none";}
 
 		colorDiv.innerHTML = "Color: " + colorArray[colorIndex];
+		window.app.setColor(colorIndex);
 		qualityDiv.innerHTML = "Quality: " + qualityArray[qualityIndex];
 	}
 }
