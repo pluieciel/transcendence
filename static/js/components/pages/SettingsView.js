@@ -1,3 +1,5 @@
+import {addUserData, message, message2, saveUserChanges, eraseInDB} from "../utils/settingsUtils.js"
+
 export default class SettingsView {
     constructor(container) {
 		this.container = container;
@@ -9,7 +11,7 @@ export default class SettingsView {
 		this.render();
 		this.addEventListeners();
 		await this.getSettings();
-		await this.addUserData();
+		await addUserData(this.settings);
 	}
 	
 	async getSettings() {
@@ -127,21 +129,6 @@ export default class SettingsView {
 					
 					`;
 				}
-	
-	message(good, message) {
-		let header = good ? "<i class=\"fa-solid fa-square-check\" style=\"color:green\"></i> Success !" : "<i class=\"fa-solid fa-square-xmark\" style=\"color:red\"></i> Failure.";
-		new bootstrap.Modal(this.container.querySelector('#changeModal')).show();
-		document.getElementById('modalFooter').classList.add("d-none");
-		document.getElementById('modalHeader').innerHTML = header;
-		document.getElementById('modalDialog').innerHTML = message;
-	}
-
-	message2(header, message) {
-		new bootstrap.Modal(this.container.querySelector('#changeModal')).show();
-		document.getElementById('modalFooter').classList.remove("d-none");
-		document.getElementById('modalHeader').innerHTML = header;
-		document.getElementById('modalDialog').innerHTML = message;
-	}
 			
 
 	add2FAEventListeners() {
@@ -217,7 +204,7 @@ export default class SettingsView {
 				this.settings.color = 8;
 			else
 			this.settings.color -= 1;
-			this.addUserData();
+			addUserData(this.settings);
 		});
 		
 		rightColor.addEventListener('click', () => {
@@ -225,29 +212,29 @@ export default class SettingsView {
 				this.settings.color = 0;
 			else
 				this.settings.color += 1;
-			this.addUserData();
+			addUserData(this.settings);
 		});
 
 		leftQuality.addEventListener('click', () => {
 			if (this.settings.quality == 0)
 				return ;
 			this.settings.quality -= 1;
-			this.addUserData();
+			addUserData(this.settings);
 		});
 		
 		rightQuality.addEventListener('click', () => {
 			if (this.settings.quality == 2)
 				return ;
 			this.settings.quality += 1;
-			this.addUserData();
+			addUserData(this.settings);
 		});
 		
 		saveChanges.addEventListener('click', async () => {
-			await this.saveChanges(false);
+			await saveUserChanges(false, this.settings);
 		});
 
 		saveChanges2.addEventListener('click', async () => {
-			await this.saveChanges(true);
+			await saveUserChanges(true, this.settings);
 		});
 		
 		gotomain.addEventListener('click', () => {
@@ -266,6 +253,7 @@ export default class SettingsView {
 		const	enable2FA = this.container.querySelector('#enable2FA');
 		const	changeNameBtn = document.getElementById('changeNameBtn');
 		const	avatar = this.container.querySelector('.avatar-selector-settings');
+		const	newName = document.getElementById('newName');
 		
 		enable2FA.addEventListener('click', async (e) => {
 			e.preventDefault();
@@ -338,16 +326,12 @@ export default class SettingsView {
 				
 					const data = await response.json();
 					
-					if (data.success) {
-						this.message(true, 'Display name changed to \'' + data['displayName'] + '\'');
-						const newName = document.getElementById('newName');
-						changeNameBtn.style.display = 'inline-block';
-						newName.style.display = 'none';
-					}
-					else
-					throw new Error("Failed to change the display name");
-			} catch (error) {
-				this.message(false, e);
+					message(data.success, data['message']);
+					
+					changeNameBtn.style.display = 'inline-block';
+					newName.style.display = 'none';
+			} catch (e) {
+				console.error(e);
 			}
 		}
 		});
@@ -356,6 +340,7 @@ export default class SettingsView {
 			const newName = document.getElementById('newName');
 			changeNameBtn.style.display = 'none';
 			newName.style.display = 'inline-block';
+			newName.value = "";
 			newName.focus();
 		});
 		
@@ -371,12 +356,12 @@ export default class SettingsView {
 			if (!file)
 				return ;
 			if (file.size > MAX_FILE_SIZE) {
-				this.message(false, 'File size exceeds the 2MB limit');
+				message(false, 'File size exceeds the 2MB limit');
 				return ;
 			}
 			extension = file.name.split('.').pop();
 			if (!allowed_extensions.includes(extension)) {
-				this.message(false, 'Avatar in jpg, jpeg, or png format only');
+				message(false, 'Avatar in jpg, jpeg, or png format only');
 				return ;
 			}
 			newFilename = `${this.username}.${extension}`;
@@ -393,13 +378,9 @@ export default class SettingsView {
 			
 				const data = await response.json();
 				
-				if (data.success)
-					this.message(true, 'Avatar changed!');
-				else
-					throw new Error(data['message']);
+				message(data.success, data['message'])
 			} catch (e) {
-				console.log(e);
-				// this.message(false, e);
+				console.error(e);
 			}
 		});
 		
@@ -434,20 +415,16 @@ export default class SettingsView {
 					});
 				
 					const data = await response.json();
-				
-					if (data.success) {
-						console.log("changing pwd success");
-					} else {
-						console.log("changing pwd failed");
-					}
-				} catch (error) {
-					console.error(error);
+
+					message(data.success, data['message']);
+				} catch (e) {
+					console.error(e);
 				}
 			}
 		});
 	
 		wipeBtn.addEventListener('click', () => {
-			if (this.eraseInDB())
+			if (eraseInDB())
 				window.app.logout();
 		});
 	}
@@ -462,7 +439,7 @@ export default class SettingsView {
 		
 		indexBtn.addEventListener('click', () => {
 			if (this.settings.color != window.app.settings.color || this.settings.quality != window.app.settings.quality) {
-				this.message2("You have unsaved changes", "Click the save changes button to proceed");
+				message2("You have unsaved changes", "Click the save changes button to proceed");
 				return ;
 			}
 			window.app.router.navigateTo('/index');
@@ -476,102 +453,4 @@ export default class SettingsView {
 		this.addSecurityEventListeners();
 		this.addNavigationEventListeners();
     }
-	
-	async eraseInDB() {
-		try {
-			const response = await fetch('/api/del/user', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-			});
-
-			const data = await response.json();
-			
-			if (data.success)
-				alert("deleted user successfully");
-			else
-				throw new Error(data.message);
-		} catch (error) {
-			console.error('An error occurred: ', error);
-			return false;
-		}
-		return true;
-	}
-
-	async saveChanges(main) {
-		try {
-			const response = await fetch('/api/settings/set/preferences', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					'newColor': this.settings.color,
-					'newQuality': this.settings.quality,
-				}),			
-				});
-				
-				const data = await response.json();
-				
-				if (data.success) {
-					window.app.settings.color = this.settings.color;
-				window.app.settings.quality = this.settings.quality;
-				if (!main)
-					this.message(true, 'Theme and quality changes saved!');
-				else {
-					window.app.router.navigateTo('/index');
-					const modal = bootstrap.Modal.getInstance(this.container.querySelector('#changeModal'));
-					if (modal)
-						modal.hide();
-				}
-			}
-			else
-				throw new Error(data['message']);
-		}
-		catch (error) {
-			console.error(error);
-		};
-	}
-	
-	async addUserData() {
-		const	colorDiv = document.getElementById('colorDiv');
-		const	qualityDiv = document.getElementById('qualityDiv');
-		const	leftQuality = document.getElementById('leftQuality');
-		const	rightQuality = document.getElementById('rightQuality');
-		const	enable2FA = this.container.querySelector('#enable2FA');
-		const	disable2FA = this.container.querySelector('#disable2FA');
-		const 	is_2fa_enabled = window.app.settings.is_2fa_enabled;
-		const	colorIndex = this.settings.color;
-		const	qualityIndex = this.settings.quality;
-		
-		let colorArray = {
-			0: 'Blue',
-			1: 'Cyan',
-			2: 'Green',
-			3: 'Orange',
-			4: 'Pink',
-			5: 'Purple',
-			6: 'Red',
-			7: 'Soft Green',
-			8: 'White'
-		};
-		let qualityArray = {
-			0: 'Low',
-			1: 'Medium',
-			2: 'High',
-		};
-		if (qualityIndex == 0) leftQuality.classList.add("disabled");
-		else leftQuality.classList.remove("disabled");
-
-		if (qualityIndex == 2) rightQuality.classList.add("disabled");
-		else rightQuality.classList.remove("disabled");
-
-		if (is_2fa_enabled) {enable2FA.style.display = "none";disable2FA.style.display = "block";}
-		else {enable2FA.style.display = "blon";disable2FA.style.display = "none";}
-
-		window.app.setColor(colorIndex);
-		colorDiv.innerHTML = "Color: " + colorArray[colorIndex];
-		qualityDiv.innerHTML = "Quality: " + qualityArray[qualityIndex];
-	}
 }

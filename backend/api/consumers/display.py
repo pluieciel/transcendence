@@ -27,7 +27,7 @@ class setDisplay(AsyncHttpConsumer):
 			response_data = {
 				'success': True,
 				'displayName': user.display,
-				'message': 'Display name set successfully'
+				'message': 'Display name changed to \'' + user.display + '\''
 			}
 			return await self.send_response(200, json.dumps(response_data).encode(),
 				headers=[(b"Content-Type", b"application/json")])
