@@ -121,16 +121,33 @@ services:
         build: ${PWD}/docker/vault
         image: vault
         container_name: vault
+        cap_add:
+            - IPC_LOCK
+        depends_on:
+            vault-init:
+                condition: service_completed_successfully
         environment:
-            VAULT_ADDR: http://0.0.0.0:8200
+            VAULT_ADDR: http://127.0.0.1:8200
         volumes:
             - vault_data:/vault/file
             - vault_logs:/vault/logs
+            - vault_config:/vault/config.d
         expose:
             - 8200
+        ports:
+            - "8200:8200"
         networks:
             - transcendence
         restart: unless-stopped
+    vault-init:
+        build: ${PWD}/docker/vault-init
+        image: vault-init
+        container_name: vault-init
+        volumes:
+            - vault_config:/etc/vault/certs
+        networks:
+            - transcendence
+        restart: "no"
     elasticsearch:
         build: ${PWD}/docker/elasticsearch
         image: elasticsearch
@@ -288,6 +305,12 @@ volumes:
             type: none
             o: bind
             device: ${PWD}/static
+    vault_config:
+        name: vault_config
+        driver_opts:
+            type: none
+            o: bind
+            device: ${PWD}/docker/vault/conf
     django_logs:
         name: django_logs
     postgres_data:
