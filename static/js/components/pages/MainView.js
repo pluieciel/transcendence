@@ -13,9 +13,6 @@ export default class MainView {
 
 		this.render();
 		this.initComponents();
-		this.setProfileFields();
-		if (!window.app.settings.fetched)
-			window.app.getPreferences();
 		this.checkForBackdrop();
 
         this.addEventListeners();
@@ -54,28 +51,8 @@ export default class MainView {
 					<p>Welcome to Pong! Get ready to play!</p>
 				</div>
 				<div class ="content">
-					<div class="credits redHover">
-						<h2>Credits</h2>
-						<p>
-							Welcome to <strong>ft_transcendence</strong>,<br>
-							the final project of the 42 common core curriculum!<br>
-							This project is our version of the classic <b>Pong</b> game<br><br>
-							Ressources used:<br>
-							The whole project is running in docker <i class="fab fa-docker"></i><br>
-							We're using nginx as our webserv <i class="fas fa-server"></i><br>
-							Javascript <i class="fab fa-js"></i> is used for the Frontend<br>
-							The backend is built in python <i class="fa-brands fa-python"></i> with Django<br>
-							PostgreSQL for the Database <i class="fas fa-database"></i><br><br>
-							Created by:<br>
-							<a href="https://github.com/jlefonde" target="_blank" rel="noopener noreferrer">Joris Lefondeur</a><br>
-							<a href="https://github.com/pluieciel" target="_blank" rel="noopener noreferrer">Yue Zhao</a><br>
-							<a href="https://github.com/siul008" target="_blank" rel="noopener noreferrer">Julien Nunes</a><br>
-							<a href="https://github.com/neutrou" target="_blank" rel="noopener noreferrer">Victor Algranti</a><br><br>
-							We hope you enjoy exploring our project!
-						</p>
-					</div>
 					<div class="game-buttons redHover">
-						<h2>PLAY!</h2>
+						<h2 id="play">PLAY!</h2>
 						<div class="row game-selector">
 							<button id="classic" class="game-btn">classic</button>
 							<button id="rumble" class="disabled game-btn">rumble</button>
@@ -84,14 +61,7 @@ export default class MainView {
 						<button id="quickMatch" class="nav-link" data-view="game" data-bs-toggle="modal" data-bs-target="#matchSearch">Ranked</button>
 						<button id="tournamentButton" data-bs-toggle="modal" data-bs-target="#tournamentModal">Tournament</button>
 					</div>
-					<div class="profile redHover">
-						<h2>Profile</h2>
-						<h3 id="p-name">${this.username}</h3>
-						<h3 id="p-elo">Loading...</h3>
-						<h3 id="p-winrate">Loading...</h3>
-						<h3 id="p-wl">Loading...</h3>
-						<h3 id="p-tourn">Loading...</h3>
-					</div>
+
 				</div>
 			</div>
 			<!-- ChatBox container -->
@@ -178,46 +148,6 @@ export default class MainView {
 		else {
 			selectorRumble.classList.add("disabled");
 			selectorClassic.classList.remove("disabled");
-		}
-	}
-
-	async setProfileFields() {
-		var name = document.getElementById("p-name");
-		var elo = document.getElementById("p-elo");
-		var ratio = document.getElementById("p-wl");
-		var winrate = document.getElementById("p-winrate");
-		var tourn = document.getElementById("p-tourn");
-
-		try {
-			const response = await fetch("/api/get/profile", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-			});
-			const data = await response.json();
-
-            const avatarUrl = await window.app.getAvatar(this.username);
-			if (avatarUrl)
-				name.innerHTML = `<img id="avatarImg" src=${avatarUrl} alt="User Avatar" width="30" height="30"></img> ` + this.username;
-
-			if (data.success) {
-				elo.innerHTML = "Elo: " + data["elo"];
-				winrate.innerHTML = "Winrate: " + data["winrate"];
-				ratio.innerHTML = "Ratio: " + data["wins"] + "/" + data["looses"];
-				tourn.innerHTML = "Tournaments won: " + data["tourn_won"] + " played: " + data["tourn_joined"];
-				if (data['display']) {
-					let toInsert = " (" + data['display'] + ")";
-					name.insertAdjacentHTML('beforeend', toInsert);
-				}
-			} else
-				throw new Error("Request failure");
-		} catch (error) {
-			elo.innerHTML = "Failed to load elo";
-			winrate.innerHTML = "Failed to load winrate";
-			ratio.innerHTML = "Failed to load ratio";
-			tourn.innerHTML = "Failed to load tournaments";
-			console.error("An error occurred: ", error);
 		}
 	}
 	

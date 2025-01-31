@@ -10,7 +10,6 @@ export default class GameComponent {
 
 		this.render();
 		this.addEventListeners();
-		//this.timerElement = document.getElementById("timer");
 	}
 
 	render() {
