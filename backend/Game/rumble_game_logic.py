@@ -284,7 +284,7 @@ class RumbleGameInstance:
 
 						if (self.event.name == 'Shrinking Paddles' and self.player_right.paddle_height > 2.25):
 							self.player_right.paddle_height *= 0.9
-							self.event.action = 'shrink'
+							self.event.action = 'shrinkRight'
 						ball.lastHitter = "RIGHT"  # Add this line
 						paddle_hit = True
 
@@ -299,7 +299,7 @@ class RumbleGameInstance:
 
 						if (self.event.name == 'Shrinking Paddles' and self.player_left.paddle_height > 2.25):
 							self.player_left.paddle_height *= 0.9
-							self.event.action = 'shrink'
+							self.event.action = 'shrinkLeft'
 						ball.lastHitter = "LEFT"  # Add this line
 						paddle_hit = True
 

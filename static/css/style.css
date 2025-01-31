@@ -54,6 +54,13 @@
 	border-radius: 8px;
 }
 
+#gameCanvas {
+	width: 100%;
+	height: auto;
+	display: block;
+	margin: 0 auto;
+}
+
 .chat-message.admin .message-header {
 	display: none; /* Hide the header for admin messages if needed */
 }

@@ -143,18 +143,12 @@ export class Game {
 				}
 				break;
 			case "Shrinking Paddles":
-				if (event.action == "shrink") {
-					console.log("Shrinking paddles");
-					console.log("Before shrink - Left Paddle Scale:", this.sceneManager.leftPaddle.scale.x);
-					console.log("Before shrink - Right Paddle Scale:", this.sceneManager.rightPaddle.scale.x);
-
-					//TODO PAS SHRINK LES DEUX
-					// Apply shrink factor
+				if (event.action == "shrinkLeft") {
 					this.sceneManager.leftPaddle.scale.x *= 0.9;
+					this.sceneManager.paddles[0].scale.y *= 0.9;
+				} else if (event.action == "shrinkRight") {
 					this.sceneManager.rightPaddle.scale.x *= 0.9;
-
-					console.log("After shrink - Left Paddle Scale:", this.sceneManager.leftPaddle.scale.x);
-					console.log("After shrink - Right Paddle Scale:", this.sceneManager.rightPaddle.scale.x);
+					this.sceneManager.paddles[1].scale.y *= 0.9;
 				} else if (event.action == "reset") {
 					this.sceneManager.leftPaddle.scale.x = this.sceneManager.base_paddle_height;
 					this.sceneManager.rightPaddle.scale.x = this.sceneManager.base_paddle_height;
@@ -187,8 +181,7 @@ export class Game {
 		let objectToModify = null;
 		window.addEventListener("keydown", (event) => {
 			if (event.code === "Space") {
-				//this.sceneManager.toggleDebugMode();
-				this.sceneManager.leftPaddle.scale.x *= 0.9;
+				this.sceneManager.toggleDebugMode();
 			}
 			if (editor) {
 				if (event.code == "KeyG") {
