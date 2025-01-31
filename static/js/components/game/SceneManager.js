@@ -67,9 +67,9 @@ export class SceneManager {
 			this.createModels(data),
 			//TODO LINK FROM DB AVATAR
 			//RIGHT
-			this.createPlayerAvatar("/js/components/game/Textures/image.png", new THREE.Vector3(16.1, 25, -9.6), data.player.right.color),
+			this.createPlayerAvatar(data.player.right.avatar, new THREE.Vector3(16.1, 25, -9.6), data.player.right.color),
 			//LEFT
-			this.createPlayerAvatar("/js/components/game/Textures/valgrant.jpeg", new THREE.Vector3(-16.7, 25, -9.6), data.player.left.color),
+			this.createPlayerAvatar(data.player.left.avatar, new THREE.Vector3(-16.7, 25, -9.6), data.player.left.color),
 		]);
 		this.createDebugPaddles();
 	}
@@ -225,10 +225,13 @@ export class SceneManager {
 
 					const avatar = new THREE.Mesh(avatarGeometry, avatarMaterial);
 					avatar.position.copy(position);
+					avatar.material.map.flipX = false;
 					avatar.material.map.flipY = false;
+					avatar.material.map.flipZ = false;
 					avatar.material.needsUpdate = true;
 					avatar.rotation.x = 0.5;
 					avatar.rotation.z = Math.PI;
+					avatar.rotation.y = Math.PI;
 					avatar.scale.set(0.8, 0.8, 0.8);
 
 					// Create the background plane

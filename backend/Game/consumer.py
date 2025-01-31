@@ -376,6 +376,25 @@ class GameConsumer(AsyncWebsocketConsumer):
 			return "#00BDD1" #Cyan
 
 	async def send_initial_game_state(self, instance):
+		if (instance.player_right.user.avatar42):
+			self.logger.info("Avatar 42 found")
+			avatarRight = instance.player_right.user.avatar42
+		elif (instance.player_right.user.avatar):
+			avatarRight = instance.player_right.user.avatar.url
+			self.logger.info("Avatar found")
+		else:
+			avatarRight = '/default_avatar.png'
+
+		if (instance.player_left.user.avatar42):
+			self.logger.info("Avatar 42 found")
+			avatarLeft = instance.player_left.user.avatar42
+		elif (instance.player_left.user.avatar):
+			avatarLeft = instance.player_left.user.avatar.url
+			self.logger.info("Avatar found")
+		else:
+			avatarLeft = '/default_avatar.png'
+
+
 		init_response = {
 			"type": "init",
 			"data": {
@@ -396,12 +415,14 @@ class GameConsumer(AsyncWebsocketConsumer):
 							"name": instance.player_left.user.username,
 							"rank": instance.player_left.user.elo,
 							"score": instance.game.player_left.score,
+							"avatar" : avatarLeft,
 							"color": self.get_color(instance.player_left.user)
 						},
 						"right": {
 							"name": instance.player_right.user.username,
 							"rank": instance.player_right.user.elo,
 							"score": instance.game.player_right.score,
+							"avatar" : avatarRight,
 							"color" :self.get_color(instance.player_right.user)
 						}
 					}
