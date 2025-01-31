@@ -422,7 +422,7 @@ class GameBackend:
 			events.append({
 				"type": "event",
 				"name": self.game.event.name,
-				"announce" : self.game.announceEvent,
+				"announce" : False,
 				"description": self.game.event.description,
 				"action": action,
 			})

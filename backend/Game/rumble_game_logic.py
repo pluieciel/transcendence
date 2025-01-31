@@ -281,9 +281,9 @@ class RumbleGameInstance:
 					if ball.velocity.x > 0:
 						ball.position.x = right_paddle.position.x - right_paddle.paddle_thickness/2 - ball.radius
 						ball.bounce_methods.BouncePaddle(ball, right_paddle.position.x, right_paddle.position.y)
+
 						if (self.event.name == 'Shrinking Paddles' and self.player_right.paddle_height > 2.25):
 							self.player_right.paddle_height *= 0.9
-							self.logger.info(self.player_right.paddle_height)
 							self.event.action = 'shrink'
 						ball.lastHitter = "RIGHT"  # Add this line
 						paddle_hit = True
@@ -296,9 +296,9 @@ class RumbleGameInstance:
 					if ball.velocity.x < 0:
 						ball.position.x = left_paddle.position.x + left_paddle.paddle_thickness/2 + ball.radius
 						ball.bounce_methods.BouncePaddle(ball, left_paddle.position.x, left_paddle.position.y)
+
 						if (self.event.name == 'Shrinking Paddles' and self.player_left.paddle_height > 2.25):
 							self.player_left.paddle_height *= 0.9
-							self.logger.info(self.player_left.paddle_height)
 							self.event.action = 'shrink'
 						ball.lastHitter = "LEFT"  # Add this line
 						paddle_hit = True

@@ -20,7 +20,7 @@ export class SceneManager {
 		this.rightBorder = null;
 		this.leftBorder = null;
 		this.trajectoryLine = null;
-		this.avatar = avatar;
+		this.avatar = null;
 
 		this.composer = null;
 		this.renderer = renderer;

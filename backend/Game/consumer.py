@@ -69,7 +69,7 @@ class GameManager:
 			game_id = (await self.create_game_history(user)).id
 		else:
 			game_id = (await self.create_game_history(user, game_category='AI')).id
-		self.games[game_id] = GameBackend(game_id, bot, self, True) #TODO Ranked Mode
+		self.games[game_id] = GameBackend(game_id, bot, self, bot == 0) #TODO Ranked Mode
 		return self.games[game_id]
 
 	async def create_tournament_empty_games(self, tournament_info):
@@ -82,9 +82,9 @@ class GameManager:
 		game_id3 = (await self.create_game_history(None, None, game_category='Tournament2', tournament_count=self.tournament_count)).id
 		game_id1 = (await self.create_game_history(await self.get_user(p1), await self.get_user(p2), game_category='Tournament1', tournament_count=self.tournament_count, tournament_round2_game_id=game_id3, tournament_round2_place=1)).id
 		game_id2 = (await self.create_game_history(await self.get_user(p3), await self.get_user(p4), game_category='Tournament1', tournament_count=self.tournament_count, tournament_round2_game_id=game_id3, tournament_round2_place=2)).id
-		self.games[game_id1] = GameBackend(game_id1, 0, self, True)
-		self.games[game_id2] = GameBackend(game_id2, 0, self, True)
-		self.games[game_id3] = GameBackend(game_id3, 0, self, True)
+		self.games[game_id1] = GameBackend(game_id1, 0, self, False)
+		self.games[game_id2] = GameBackend(game_id2, 0, self, False)
+		self.games[game_id3] = GameBackend(game_id3, 0, self, False)
 		print(f"3games created {game_id1}, {game_id2}, {game_id3}, players: {p1}, {p2}, {p3}, {p4}", flush=True)
 
 	@database_sync_to_async
@@ -205,7 +205,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 				self.logger.info(f"Invalid invitation from {sender} to {self.user.username}")
 				return # invalid invitation
 			game_db = await game_manager.create_game_history(user, player_b=await self.get_user(sender), game_category='Invite')
-			self.game = GameBackend(game_db.id, 0, game_manager, True) #TODO Ranked mode
+			self.game = GameBackend(game_db.id, 0, game_manager, False) #TODO Ranked mode
 			game_manager.games[game_db.id] = self.game
 			self.game.channel_layer = self.channel_layer
 			self.game.assign_player(user, self.channel_name)
