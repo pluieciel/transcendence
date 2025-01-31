@@ -16,5 +16,9 @@ if [ ! -f /etc/vault/certs/vault.key ] || [ ! -f /etc/vault/certs/vault.crt ]; t
 		-out /etc/vault/certs/vault.crt \
 		-config /etc/vault/conf/openssl.conf
 
+    rm /etc/vault/certs/vault.csr
+    chmod 644 /etc/vault/certs/vault.crt
+    chmod 644 /etc/vault/certs/vault.key
+
     echo "TLS certificates generated successfully"
 fi

@@ -117,15 +117,24 @@ services:
             interval: 5s
             timeout: 3s
             retries: 3
+    vault-init:
+        build: ${PWD}/docker/vault-init
+        image: vault-init
+        container_name: vault-init
+        volumes:
+            - vault_config:/etc/vault/certs
+        networks:
+            - transcendence
+        restart: "no"
     vault:
         build: ${PWD}/docker/vault
         image: vault
         container_name: vault
-        cap_add:
-            - IPC_LOCK
         depends_on:
             vault-init:
                 condition: service_completed_successfully
+        cap_add:
+            - IPC_LOCK
         environment:
             VAULT_ADDR: http://127.0.0.1:8200
             SKIP_CHOWN: true
@@ -140,15 +149,6 @@ services:
         networks:
             - transcendence
         restart: unless-stopped
-    vault-init:
-        build: ${PWD}/docker/vault-init
-        image: vault-init
-        container_name: vault-init
-        volumes:
-            - vault_config:/etc/vault/certs
-        networks:
-            - transcendence
-        restart: "no"
     elasticsearch:
         build: ${PWD}/docker/elasticsearch
         image: elasticsearch
