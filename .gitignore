@@ -5,3 +5,6 @@ todo
 avatars
 staticfiles
 .vs*
+*.crt
+*.key
+*.csr
