@@ -24,8 +24,8 @@ class App {
 		this.router = new Router(this.routes);
 	}
 
-	setColor() {
-		switch (this.settings.color) {
+	setColor(color) {
+		switch (color) {
 			default: document.documentElement.style.setProperty("--user-color", "#00BDD1");break; 
 			case 0: document.documentElement.style.setProperty("--user-color", "#3E27F8");break; //Blue
 			case 1: document.documentElement.style.setProperty("--user-color", "#00BDD1");break; //Cyan

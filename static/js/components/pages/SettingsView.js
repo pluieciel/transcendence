@@ -570,8 +570,8 @@ export default class SettingsView {
 		if (is_2fa_enabled) {enable2FA.style.display = "none";disable2FA.style.display = "block";}
 		else {enable2FA.style.display = "blon";disable2FA.style.display = "none";}
 
-		colorDiv.innerHTML = "Color: " + colorArray[colorIndex];
 		window.app.setColor(colorIndex);
+		colorDiv.innerHTML = "Color: " + colorArray[colorIndex];
 		qualityDiv.innerHTML = "Quality: " + qualityArray[qualityIndex];
 	}
 }
