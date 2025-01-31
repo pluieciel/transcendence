@@ -36,6 +36,7 @@ header {
 	overflow: hidden;
     box-sizing: border-box;
 	box-shadow: 0 0 5px var(--user-color);
+	border-bottom: 1px solid var(--user-color);
 }
 
 h1, h2 {
@@ -148,6 +149,16 @@ a {
 	margin: 5px;
 }
 
+.avatar-selector-settings {
+	padding: 10px 20px;
+	font-size: 16px;
+	cursor: pointer;
+	border-radius: 5px;
+	transition: all 0.2s;
+	margin: 5px;
+	background-color: var(--primary-color);
+}
+
 .game-buttons > button {
 	padding: 10px 20px;
     margin: 10px 0;
@@ -168,10 +179,11 @@ a {
 	background-color: #000;
 }
 
-.containerPrivate > button, .containerGame > button, #row > button {
+.containerPrivate > button, .containerGame > button, #row > button, .avatar-selector-settings {
 	color: var(--secondary-color);
 	border: 2px solid var(--primary-color);
 	background-color: var(--primary-color);
+	transition: all 0.5s !important;
 }
 
 .containerPrivate > button:hover, .containerGame > button:hover, .arrow:hover {
@@ -184,7 +196,7 @@ a {
 	color: var(--user-color);
 }
 
-.containerSensitive > button:hover {
+.containerSensitive > button:hover, .avatar-selector-settings:hover {
 	box-shadow: 0 0 15px var(--user-color);
 }
 
@@ -228,9 +240,16 @@ a {
 	font-size: 16px;
 	border: 2px solid var(--primary-color);
 	background-color: var(--primary-color);
+	border-radius: 5px;
 	margin: 5px;
 	display: none;
 	color: #FFF;
+}
+
+#newName:focus {
+	border: 1px solid var(--user-color);
+	box-shadow: 0 0 5px var(--user-color);
+	outline: none;
 }
 
 #avatarImg {
@@ -243,7 +262,13 @@ a {
 }
 
 #staticBackdropLabel {
-	color: #000;
+	color: var(--secondary-color);
+	text-shadow: none;
+}
+
+#qr-path {
+	fill: var(--secondary-color);
+
 }
 
 input[type="file"]::file-selector-button {
@@ -262,9 +287,17 @@ input[type="file"]::file-selector-button {
 }
 
 #usrnm-form, #pwd-form, #cfm-pwd-form {
-	border: none;
 	color: var(--secondary-color);
 	background-color: var(--hover-color);
+}
+
+.form-control {
+	border: 1px solid var(--hover-color);
+}
+
+.form-control:focus {
+	border: 1px solid var(--user-color);
+	box-shadow: 0 0 5px var(--user-color);
 }
 
 #usrnm-form::placeholder, #pwd-form::placeholder, #cfm-pwd-form::placeholder{
@@ -277,7 +310,7 @@ input[type="file"]::file-selector-button {
 	transition: all 0.5s;
 }
 
-#loginBtn:hover, #login42Btn:hover, #signupBtn:hover {
+#loginBtn:hover, #loginBtn:focus, #login42Btn:hover, #login42Btn:focus, #signupBtn:hover, #signupBtn:focus {
 	border: 1px solid var(--user-color);
 	box-shadow: 0 0 15px var(--user-color);
 }
@@ -326,10 +359,35 @@ input[type="file"]::file-selector-button {
     align-items: center;
 }
 
-#changeHeader {
+.modal-content {
+	border: 1px solid var(--user-color);
+	border-radius: 5px;
+	box-shadow: 0 0 15px var(--user-color);
+	color: var(--secondary-color);
+	background-color: var(--primary-color);
+}
+
+.modal-header {
+	border-bottom-color: var(--accent-color);
+}
+
+.modal-footer {
+	border-top-color: var(--accent-color);
+}
+
+#modalDialog {
+	text-shadow: none;
+}
+
+#modalFooter {
+	justify-content: space-between;
+}
+
+#modalHeader {
 	font-size: 2rem;
 	font-weight: bold;
 	align-items: center;
+	text-shadow: none;
 }
 
 .disabled {
@@ -340,4 +398,36 @@ input[type="file"]::file-selector-button {
 .disabled:hover {
 	box-shadow: 0 0 0;
 	background-color: var(--hover-color);
+}
+
+.btn-close {
+	background-color: rgba(255, 0, 0, 0.5);
+}
+
+.btn-close:focus {
+    --bs-btn-close-focus-shadow: 0 0 0 0;
+}
+
+.avatar-selector {
+	display: inline-block;
+	padding: 10px 20px;
+	background-color: #007bff;
+	color: white;
+	cursor: pointer;
+	border-radius: 5px;
+}
+
+.avatar-selector:hover {
+	background-color: #0056b3;
+}
+
+.disable-backdrop {
+	display: none !important;
+	opacity: 0 !important;
+	visibility: hidden !important;
+}
+
+.btn-primary:active {
+	background-color: var(--hover-color) !important;
+	border-color: var(--user-color) !important;
 }

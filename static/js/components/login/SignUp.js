@@ -23,7 +23,8 @@ export default class SignUp {
                             </div>
                             <div class="mb-3">
                                 <span id="avatarSpan">
-                                    Avatar: <input type="file" id="avatar" accept="image/*">
+									<label class="avatar-selector">Upload your avatar</label>
+                                    <input type="file" id="fileInput" accept="image/*" hidden>
                                 </span>
                             </div>
                             <div class="mb-3"id="recaptcha"></div>
@@ -50,7 +51,6 @@ export default class SignUp {
 			if (data.success) {
                 this.recaptchaWidgetId = grecaptcha.render('recaptcha', {
                     'sitekey' : data.client_id,
-                    'theme' : 'dark',
                 });
 			}
 		} catch (error) {
@@ -61,7 +61,21 @@ export default class SignUp {
 
     addEventListeners() {
 		const form = this.container.querySelector('#signupForm');
-        const MAX_FILE_SIZE = 1 * 1024 * 1024;
+		const avatar = this.container.querySelector('.avatar-selector');
+		const fileInput = document.getElementById('fileInput');
+		let	file;
+        
+		const MAX_FILE_SIZE = 1 * 1024 * 1024;
+		
+		avatar.addEventListener('click', function() {
+			document.getElementById('fileInput').click();
+		});
+
+		fileInput.addEventListener('change', function(event) {
+			file = event.target.files[0];
+			if (file)
+				avatar.textContent = "Avatar selected: " + file.name;
+		});
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -81,28 +95,27 @@ export default class SignUp {
             }
 
             const formData = new FormData();
-            const originalFile = this.container.querySelector('#avatar').files[0];
             formData.append('username', username);
             formData.append('password', password);
             formData.append('confirm_password', confirmPassword);
             formData.append('recaptcha_token', recaptchaToken);
-            if (originalFile) {
-                if (originalFile.size > MAX_FILE_SIZE) {
+            if (file) {
+                if (file.size > MAX_FILE_SIZE) {
                     errorDiv.textContent = 'File size exceeds the 2MB limit';
                     errorDiv.classList.remove('d-none');
                     return;
                 }
                 const allowed_extensions = ["jpg", "jpeg", "png"]
-                const extension = originalFile.name.split('.').pop();
+                const extension = file.name.split('.').pop();
                 if (!allowed_extensions.includes(extension)) {
                     errorDiv.textContent = 'Avatar in jpg, jpeg, or png format only';
                     errorDiv.classList.remove('d-none');
                     return;
                 }
                 const newFilename = `${username}.${extension}`;
-                const modifiedFile = new File([originalFile], newFilename, {
-                    type: originalFile.type,
-                    lastModified: originalFile.lastModified
+                const modifiedFile = new File([file], newFilename, {
+                    type: file.type,
+                    lastModified: file.lastModified
                 });
                 formData.append('avatar', modifiedFile);
             }
