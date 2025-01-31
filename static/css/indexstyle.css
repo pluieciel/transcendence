@@ -392,6 +392,8 @@ input[type="file"]::file-selector-button {
 
 .disabled {
 	border: 0 !important;
+	box-shadow: 0 0 0 !important;
+	color: var(--secondary-color) !important;
 	background-color: var(--hover-color) !important;
 }
 
@@ -430,4 +432,16 @@ input[type="file"]::file-selector-button {
 .btn-primary:active {
 	background-color: var(--hover-color) !important;
 	border-color: var(--user-color) !important;
+}
+
+.game-selector > button {
+	padding: 5px 10px;
+	font-size: 16px;
+	margin: 5px;
+	width: 96px;
+	background-color: var(--primary-color);
+	color: var(--secondary-color);
+	border-radius: 5px;
+	border: 1px solid var(--user-color);
+	color: var(--user-color);
 }

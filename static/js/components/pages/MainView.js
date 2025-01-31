@@ -18,7 +18,6 @@ export default class MainView {
 			window.app.getPreferences();
 		this.checkForBackdrop();
 
-
         this.addEventListeners();
         if (window.app.ingame) {
             console.log("Reconnecting to game");
@@ -65,6 +64,7 @@ export default class MainView {
 							The whole project is running in docker <i class="fab fa-docker"></i><br>
 							We're using nginx as our webserv <i class="fas fa-server"></i><br>
 							Javascript <i class="fab fa-js"></i> is used for the Frontend<br>
+							The backend is built in python <i class="fa-brands fa-python"></i> with Django<br>
 							PostgreSQL for the Database <i class="fas fa-database"></i><br><br>
 							Created by:<br>
 							<a href="https://github.com/jlefonde" target="_blank" rel="noopener noreferrer">Joris Lefondeur</a><br>
@@ -73,13 +73,16 @@ export default class MainView {
 							<a href="https://github.com/neutrou" target="_blank" rel="noopener noreferrer">Victor Algranti</a><br><br>
 							We hope you enjoy exploring our project!
 						</p>
-
 					</div>
-							<div class="game-buttons redHover">
-							<h2>PLAY!</h2>
-							<button id="playAI">AI</button>
-							<button id="quickMatch" class="nav-link" data-view="game" data-bs-toggle="modal" data-bs-target="#matchSearch">Quick Match</button>
-							<button id="tournamentButton" data-bs-toggle="modal" data-bs-target="#tournamentModal">Tournament</button>
+					<div class="game-buttons redHover">
+						<h2>PLAY!</h2>
+						<div class="row game-selector">
+							<button id="classic">classic</button>
+							<button id="rumble" class="disabled">rumble</button>
+						</div>
+						<button id="playAI">AI</button>
+						<button id="quickMatch" class="nav-link" data-view="game" data-bs-toggle="modal" data-bs-target="#matchSearch">Ranked</button>
+						<button id="tournamentButton" data-bs-toggle="modal" data-bs-target="#tournamentModal">Tournament</button>
 					</div>
 					<div class="profile redHover">
 						<h2>Profile</h2>
@@ -106,11 +109,9 @@ export default class MainView {
     showLeaderboard() {
         const mainContent = this.container.querySelector("#mainContent");
         mainContent.innerHTML = "<h2>Leaderboard View</h2>";
-        // Add any additional logic to initialize the leaderboard view
     }
 
     initComponents() {
-        // Initialize Tournament
         const tournamentContainer = this.container.querySelector("#tournamentContainer",);
         if (!window.app.tournament) {
             window.app.tournament = new Tournament(tournamentContainer);
@@ -121,7 +122,6 @@ export default class MainView {
 			window.app.tournament.updateContent();
         }
 
-        // Initialize ChatBox
         const chatBoxContainer = this.container.querySelector("#chatBoxContainer");
         if (!window.app.chatBox) {
             window.app.chatBox = new ChatBox(chatBoxContainer);
@@ -142,9 +142,10 @@ export default class MainView {
     }
 
     addEventListeners() {
-        // Logout button
         const logoutBtn = this.container.querySelector("#logoutBtn");
         const settings = this.container.querySelector("#settingsBtn");
+        const selectorRumble = document.getElementById("rumble");
+        const selectorClassic = document.getElementById("classic");
 
         logoutBtn.addEventListener("click", () => {
             window.app.chatBox.disconnect();
@@ -154,6 +155,30 @@ export default class MainView {
 		settings.addEventListener("click", () => {
 			window.app.router.navigateTo("/settings");
 		});
+
+		selectorRumble.addEventListener("click", () => {
+			window.app.settings['game-selector'] = "rumble"
+			this.addSelector();
+		});
+		
+		selectorClassic.addEventListener("click", () => {
+			window.app.settings['game-selector'] = "classic"
+			this.addSelector();
+		});
+	}
+
+	addSelector() {
+		const selectorRumble = document.getElementById("rumble");
+        const selectorClassic = document.getElementById("classic");
+
+		if (window.app.settings['game-selector'] == "rumble") {
+			selectorRumble.classList.remove("disabled");
+			selectorClassic.classList.add("disabled");
+		}
+		else {
+			selectorRumble.classList.add("disabled");
+			selectorClassic.classList.remove("disabled");
+		}
 	}
 
 	async setProfileFields() {
@@ -190,6 +215,7 @@ export default class MainView {
 		} catch (error) {
 			elo.innerHTML = "Failed to load elo";
 			winrate.innerHTML = "Failed to load winrate";
+			ratio.innerHTML = "Failed to load ratio";
 			tourn.innerHTML = "Failed to load tournaments";
 			console.error("An error occurred: ", error);
 		}
