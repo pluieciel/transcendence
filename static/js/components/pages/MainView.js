@@ -77,8 +77,8 @@ export default class MainView {
 					<div class="game-buttons redHover">
 						<h2>PLAY!</h2>
 						<div class="row game-selector">
-							<button id="classic">classic</button>
-							<button id="rumble" class="disabled">rumble</button>
+							<button id="classic" class="game-btn">classic</button>
+							<button id="rumble" class="disabled game-btn">rumble</button>
 						</div>
 						<button id="playAI">AI</button>
 						<button id="quickMatch" class="nav-link" data-view="game" data-bs-toggle="modal" data-bs-target="#matchSearch">Ranked</button>
