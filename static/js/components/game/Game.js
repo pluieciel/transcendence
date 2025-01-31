@@ -16,11 +16,10 @@ export class Game {
 		this.sceneManager = null;
 		this.inputManager = null;
 
-		this.onGameEnd = null
+		this.onGameEnd = null;
+		this.showBanner = null;
 		this.setupWebSocket();
 		this.lastTime = 0;
-
-		
 
 		//DEBUG
 		this.enableDebugMode(true);
@@ -30,8 +29,7 @@ export class Game {
 	}
 
 	async initialize(initData) {
-		if (!window.app.settings.fetched)
-			await window.app.getPreferences();
+		if (!window.app.settings.fetched) await window.app.getPreferences();
 		this.renderer = new Renderer(this.canvas);
 		this.sceneManager = new SceneManager(this.renderer.renderer, window.app.settings.quality);
 		this.inputManager = new InputManager(this.ws);
@@ -80,9 +78,9 @@ export class Game {
 	}
 
 	handleGameUpdate(data) {
-		if (this.sceneManager.debugMod) {
+		if (data.positions && this.sceneManager.debugMod) {
 			this.sceneManager.updateDebugPositions(data.positions);
-		} else {
+		} else if (data.positions) {
 			this.sceneManager.updateObjectPosition(data.positions);
 		}
 		if (data.trajectory) {
@@ -101,18 +99,69 @@ export class Game {
 					}
 				}
 				if (event.type === "game_end") {
-					console.log('game end');
+					console.log("game end");
 					if (this.onGameEnd) {
-						console.log('calling game end fun');
+						console.log("calling game end fun");
 						this.onGameEnd(event.winnerName, event.winnerAvatar, event.scoreLeft, event.scoreRight, event.eloChange);
 					}
 					this.ws.close(1000);
 					console.log("Websocket closed");
 				}
 				if (event.type == "ball_last_hitter") {
-						this.sceneManager.updateBallColor(event.color, event.color);
+					this.sceneManager.updateBallColor(event.color, event.color);
+				}
+				if (event.type == "event") {
+					try {
+						console.log(event);
+						if (event.announce) {
+							this.showBanner(event.name, event.description);
+						}
+						if (event.action != "none") {
+							console.log("Activating event");
+							this.activateEvent(event);
+						}
+					} catch (e) {
+						console.log("Error showing banner" + e.message);
+					}
 				}
 			});
+		}
+	}
+
+	activateEvent(event) {
+		console.log(event.name);
+		switch (event.name) {
+			case "Lights Out":
+				if (event.action == "on") {
+					console.log("lights turned on");
+					this.sceneManager.light.visible = true;
+					this.sceneManager.light.intensity = 8;
+				} else {
+					console.log("lights turned off");
+					this.sceneManager.light.visible = false;
+					this.sceneManager.light.intensity = 0;
+				}
+				break;
+			case "Shrinking Paddles":
+				if (event.action == "shrink") {
+					console.log("Shrinking paddles");
+					console.log("Before shrink - Left Paddle Scale:", this.sceneManager.leftPaddle.scale.x);
+					console.log("Before shrink - Right Paddle Scale:", this.sceneManager.rightPaddle.scale.x);
+
+					//TODO PAS SHRINK LES DEUX
+					// Apply shrink factor
+					this.sceneManager.leftPaddle.scale.x *= 0.9;
+					this.sceneManager.rightPaddle.scale.x *= 0.9;
+
+					console.log("After shrink - Left Paddle Scale:", this.sceneManager.leftPaddle.scale.x);
+					console.log("After shrink - Right Paddle Scale:", this.sceneManager.rightPaddle.scale.x);
+				} else if (event.action == "reset") {
+					this.sceneManager.leftPaddle.scale.x = this.sceneManager.base_paddle_height;
+					this.sceneManager.rightPaddle.scale.x = this.sceneManager.base_paddle_height;
+					this.sceneManager.paddles[0].scale.y = this.sceneManager.base_debug_height;
+					this.sceneManager.paddles[1].scale.y = this.sceneManager.base_debug_height;
+				}
+				break;
 		}
 	}
 
@@ -138,7 +187,8 @@ export class Game {
 		let objectToModify = null;
 		window.addEventListener("keydown", (event) => {
 			if (event.code === "Space") {
-				this.sceneManager.toggleDebugMode();
+				//this.sceneManager.toggleDebugMode();
+				this.sceneManager.leftPaddle.scale.x *= 0.9;
 			}
 			if (editor) {
 				if (event.code == "KeyG") {
@@ -146,7 +196,7 @@ export class Game {
 					console.log(objectToModify);
 					this.mode = "position";
 				} else if (event.code == "KeyO") {
-					objectToModify = this.sceneManager.textManager.object;
+					objectToModify = this.sceneManager.camera;
 					if (objectToModify && objectToModify.geometry) {
 						objectToModify.geometry.computeBoundingBox();
 						const box = objectToModify.geometry.boundingBox;
@@ -156,6 +206,9 @@ export class Game {
 				} else if (event.code == "KeyS") {
 					this.mode = "scale";
 					console.log("Entering scale mode");
+				} else if (event.code == "KeyZ") {
+					this.mode = "zoom";
+					console.log("Entering zoom mode");
 				} else if (event.code == "KeyR") {
 					this.mode = "rotate";
 					console.log("Entering rotate mode");
@@ -207,6 +260,14 @@ export class Game {
 							objectToModify.rotation.z += this.factor;
 							console.log("New rotation z is : " + objectToModify.rotation.z);
 						}
+					} else if (this.mode == "zoom") {
+						if (objectToModify.fov) {
+							objectToModify.fov -= this.factor * 10;
+							objectToModify.updateProjectionMatrix();
+							console.log("Zooming in, new FOV is : " + objectToModify.fov);
+						} else {
+							console.log("Object cannot zoom");
+						}
 					}
 				} else if (event.code == "NumpadSubtract") {
 					if (this.mode == "scale") {
@@ -248,6 +309,14 @@ export class Game {
 						} else if (this.axis == "z") {
 							objectToModify.rotation.z -= this.factor;
 							console.log("New rotation z is : " + objectToModify.rotation.z);
+						}
+					} else if (this.mode == "zoom") {
+						if (objectToModify.fov) {
+							objectToModify.fov += this.factor * 10;
+							objectToModify.updateProjectionMatrix();
+							console.log("Zooming in, new FOV is : " + objectToModify.fov);
+						} else {
+							console.log("Object cannot zoom");
 						}
 					}
 				} else if (event.code == "KeyX") {
