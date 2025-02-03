@@ -51,7 +51,7 @@ export default class MainView {
 					<p>Welcome to Pong! Get ready to play!</p>
 				</div>
 				<div class ="content">
-					<div class="game-buttons redHover">
+					<div class="game-buttons userOutline">
 						<h2 id="play">PLAY!</h2>
 						<div class="row game-selector">
 							<button id="classic" class="game-btn">classic</button>

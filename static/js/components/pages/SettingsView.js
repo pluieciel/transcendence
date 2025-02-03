@@ -35,7 +35,7 @@ export default class SettingsView {
         <p>Welcome to your settings, you can change everything here!</p>
     </div>
 	<div class ="content">
-		<div class="containerPrivate redHover">
+		<div class="containerPrivate userOutline">
 			<h3>Profile info i guess</h3>
 			<button id="changeNameBtn">Change your display name</button>
 			<input type="text" id="newName">
@@ -87,7 +87,7 @@ export default class SettingsView {
             	</div>
 			</div>
 		</div>
-		<div class="containerGame redHover">
+		<div class="containerGame userOutline">
 			<h3>Game customization</h3>
 			<div id="row">
 				<button id="leftColor" class="arrow"><</button>
@@ -101,7 +101,7 @@ export default class SettingsView {
 			</div>
 			<button id="savebtn">Save changes</button>
 		</div>
-		<div class="containerSensitive redHover">
+		<div class="containerSensitive userOutline">
 			<h3>Be careful with those</h3>
 			<button id="passwordButton">Set New Password</button>
         	<input type="password" id="newPasswordInput" placeholder="">

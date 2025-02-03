@@ -17,11 +17,8 @@ export default class ProfileView {
 			</header>
 
 			<div id="mainPage">
-				<div class="welcome">
-					<p>Welcome to Pong! Get ready to play!</p>
-				</div>
 				<div class ="content">
-					<div class="profile redHover">
+					<div class="profile userOutline">
 						<h2>Profile</h2>
 						<h3 id="p-name">${this.username}</h3>
 						<h3 id="p-elo">Loading...</h3>
@@ -60,7 +57,7 @@ export default class ProfileView {
 				elo.innerHTML = "Elo: " + data["elo"];
 				winrate.innerHTML = "Winrate: " + data["winrate"];
 				ratio.innerHTML = "Ratio: " + data["wins"] + "/" + data["looses"];
-				tourn.innerHTML = "Tournaments won: " + data["tourn_won"] + " played: " + data["tourn_joined"];
+				tourn.innerHTML = "Trophies: " + data["tourn_won"] + "<br>Tournaments played: " + data["tourn_joined"];
 				if (data['display']) {
 					let toInsert = " (" + data['display'] + ")";
 					name.insertAdjacentHTML('beforeend', toInsert);

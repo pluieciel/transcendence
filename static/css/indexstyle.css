@@ -45,16 +45,15 @@ h1, h2 {
     margin: 0;
 }
 
-h3 {
-	font-size: 1.5rem;
-	margin: 0;
-}
-
 a {
-	font-size: 0.9rem;
+	font-size: 1.1rem;
 	color: var(--secondary-color);
 	text-shadow: 0 2px 10px var(--user-color);
 	text-decoration: none;
+}
+
+p {
+	margin-bottom: 0;
 }
 
 #pong {
@@ -76,18 +75,11 @@ a {
     gap: 20px;
 }
 
-/* .content > div {
-    flex: 1;
-    min-width: 250px;
-    max-width: 400px;
-    padding: 15px;
-} */
-
 #play {
 	margin-bottom: 10px;
 }
 
-.game-buttons {
+.game-buttons, .profile, .credits {
 	flex: 1;
 	max-width: 500px;
 	height: 400px;
@@ -103,7 +95,34 @@ a {
 	margin-right: 20px;
 }
 
-.credits, .profile, .containerSensitive, .containerPrivate, .containerGame {
+.profile {
+    margin-top: 100px;
+	font-size: 2rem;
+}
+
+.credits, .github-links {
+	margin-top: 120px;
+	font-size: 1.2rem;
+	max-width: 600px;
+}
+
+.github-links {
+	flex: 1;
+	max-width: 320px;
+	height: 280px;
+	color: var(--secondary-color);
+    background-color: var(--accent-color);
+	text-align: center;
+	margin-left: 20px;
+	margin-right: 20px;
+	font-size: 2rem;
+}
+
+#tooltip-github {
+	font-size: 0.8rem;
+}
+
+.credits, .containerSensitive, .containerPrivate, .containerGame {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -242,7 +261,7 @@ a {
 	box-shadow: 0 0 15px var(--user-color);
 }
 
-.redHover {
+.userOutline {
 	border: 1px solid var(--user-color);
 	box-shadow: 0 0 15px var(--user-color);
 }
