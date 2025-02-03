@@ -76,6 +76,16 @@ class GameBackend:
 	def stop_game(self):
 		self.game.stop()
 
+	async def player_disc(self, user):
+		if (self.player_left and self.player_left.user.id == user.id):
+			self.logger.info("Player left disconnected, calling forfeit")
+			await self.game.forfeit("LEFT")
+		elif (self.player_right and self.player_right.user.id == user.id):
+			self.logger.info("Player right disconnected, calling forfeit")
+			await self.game.forfeit("RIGHT")
+		else:
+			self.logger.warning("Player disc called but user not found")
+
 	def player_in_game(self, user):
 		if (self.player_left and self.player_left.user.id == user.id):
 			return True
@@ -84,7 +94,6 @@ class GameBackend:
 		return False
 
 	async def disconnect_user(self, user):
-		print("WATATATATATA", flush=True)
 		old_channel = None
 		if (self.player_left and self.player_left.user.id == user.id):
 			old_channel = self.player_left.channel

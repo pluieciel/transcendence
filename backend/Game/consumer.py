@@ -324,7 +324,10 @@ class GameConsumer(AsyncWebsocketConsumer):
 
 
 	async def disconnect(self, close_code):
+		await self.channel_layer.group_add(str(self.game.game_id), self.channel_name)
+		self.logger.info(f"Disconnecting user {self.user.username}")
 		await user_update_game(self.user, isplaying=False, game_id=-1)
+		await self.game.player_disc(self.user)
 		self.logger.info(f"WebSocket disconnected with code: {close_code}")
 
 	async def chat_message(self, event):
