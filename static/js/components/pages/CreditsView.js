@@ -14,7 +14,7 @@ export default class CreditsView {
 			</header>
 
 			<div id="mainPage">
-				<div class ="content">
+				<div class="credits-container">
 					<div class="credits userOutline">
 						<h2>Credits</h2>
 						<p>
@@ -32,19 +32,26 @@ export default class CreditsView {
 							We hope you enjoy exploring our project!
 						</p>
 					</div>
-					<div class="github-links userOutline">
+					<div class="col-container">
+						<div class="github-links userOutline">
 							Created by:<br>
 							<p id="tooltip-github">click on the links to check out our own githubs profiles<p>
 							<a href="https://github.com/jlefonde" target="_blank" rel="noopener noreferrer">Joris Lefondeur</a><br>
 							<a href="https://github.com/pluieciel" target="_blank" rel="noopener noreferrer">Yue Zhao</a><br>
 							<a href="https://github.com/siul008" target="_blank" rel="noopener noreferrer">Julien Nunes</a><br>
-							<a href="https://github.com/neutrou" target="_blank" rel="noopener noreferrer">Victor Algranti</a><br><br>
+							<a href="https://github.com/neutrou" target="_blank" rel="noopener noreferrer">Victor Algranti</a><br>
+						</div>
+						<div class="pdf-container userOutline">
+						    <embed id="pdf" 
+							src=
+							"https://cdn.intra.42.fr/pdf/pdf/134058/en.subject.pdf#toolbar=0&navpanes=0">
+						</object>
+						</div>
 					</div>
-					
-
 				</div>
 			</div>
-
-        `;
-    }
-}
+`;
+						}
+					}
+					
+					// "https://media.geeksforgeeks.org/wp-content/cdn-uploads/20210101201653/PDF.pdf"

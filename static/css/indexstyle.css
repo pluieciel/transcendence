@@ -100,8 +100,27 @@ p {
 	font-size: 2rem;
 }
 
-.credits, .github-links {
+.credits-container {
 	margin-top: 120px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 20px;
+}
+
+.col-container {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+}
+
+#pdf {
+	width: 400px;
+	height: 510px;
+}
+
+
+.credits, .github-links, .pdf-container {
 	font-size: 1.2rem;
 	max-width: 600px;
 }
