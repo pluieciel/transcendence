@@ -155,8 +155,6 @@ class GameConsumer(AsyncWebsocketConsumer):
 
 		query_string = self.scope["query_string"].decode()
 		query_params = parse_qs(query_string)
-		#for reconnect
-		reconnect = query_params.get("reconnect", [None])[0]
 		#for invitation
 		sender = query_params.get("sender", [None])[0]
 		recipient = query_params.get("recipient", [None])[0]
@@ -174,18 +172,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 			return
 		game_manager._get_game_history_model()
 
-		if reconnect: # reconnect to game
-			self.logger.info("Reconnecting to game")
-			self.game = game_manager.get_player_current_game(user)
-			if self.game:
-				self.game.channel_layer = self.channel_layer
-				self.game.assign_player(user, self.channel_name)
-				await self.accept()
-				await self.channel_layer.group_add(str(self.game.game_id), self.channel_name)
-				await self.send_initial_game_state(self.game)
-			return
-
-		elif sender: # invitation: WS msg from B, A invite B, sender is A
+		if sender: # invitation: WS msg from B, A invite B, sender is A
 			#print(f"groupname: user_{user.username}", flush=True)
 			if user.is_playing or (await self.get_user(sender)).is_playing:
 				for group in [f"user_{user.username}", f"user_{sender}"]:
@@ -337,7 +324,10 @@ class GameConsumer(AsyncWebsocketConsumer):
 
 
 	async def disconnect(self, close_code):
+		await self.channel_layer.group_add(str(self.game.game_id), self.channel_name)
+		self.logger.info(f"Disconnecting user {self.user.username}")
 		await user_update_game(self.user, isplaying=False, game_id=-1)
+		await self.game.player_disc(self.user)
 		self.logger.info(f"WebSocket disconnected with code: {close_code}")
 
 	async def chat_message(self, event):

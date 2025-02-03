@@ -136,6 +136,9 @@ export default class GameComponent {
 		setTimeout(() => {
 			const canvas = document.querySelector("#gameCanvas");
 			const game = new Game(canvas, window.app.gamews);
+			window.addEventListener('beforeunload', () => {
+				game.dispose();
+			});
 			game.onGameEnd = this.onGameEnd.bind(this);
 			game.showBanner = this.showBanner.bind(this);
 			console.log("game.showBanner assigned:", game.showBanner); // Verify assignment

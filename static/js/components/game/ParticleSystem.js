@@ -1,5 +1,5 @@
 //import * as THREE from 'three';
-import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
 
 export class ParticleSystem {
 	constructor(scene, position = new THREE.Vector3(0, 0, 0)) {
@@ -7,27 +7,27 @@ export class ParticleSystem {
 		this.particles = [];
 	}
 
-	getSphere(size = 0.1) {
+	getSphere(size = 0.1, color) {
 		const geometry = new THREE.SphereGeometry(size, 4, 4);
 		const material = new THREE.MeshBasicMaterial({
-			color: 0xffffff,
+			color: color,
 			transparent: true,
 			opacity: 1,
 		});
 		return new THREE.Mesh(geometry, material);
 	}
 
-	getSquare(size = 0.1) {
+	getSquare(size = 0.1, color) {
 		const geometry = new THREE.BoxGeometry(size, size, size);
 		const material = new THREE.MeshBasicMaterial({
-			color: 0xffffff,
+			color: color,
 			transparent: true,
 			opacity: 1,
 		});
 		return new THREE.Mesh(geometry, material);
 	}
 
-	getTriangle(size = 0.2) {
+	getTriangle(size = 0.2, color) {
 		// Create triangle geometry
 		const geometry = new THREE.BufferGeometry();
 		const vertices = new Float32Array([
@@ -44,7 +44,7 @@ export class ParticleSystem {
 		geometry.setAttribute("position", new THREE.BufferAttribute(vertices, 3));
 
 		const material = new THREE.MeshBasicMaterial({
-			color: 0xffffff,
+			color: color,
 			transparent: true,
 			opacity: 1,
 			side: THREE.DoubleSide, // Make triangle visible from both sides
@@ -53,23 +53,26 @@ export class ParticleSystem {
 		return new THREE.Mesh(geometry, material);
 	}
 
-	createParticle(geometry, velocity, lifetime, size, position) {
+	createParticle(geometry, velocity, lifetime, size, position, color) {
 		let particle;
 		switch (geometry) {
 			case "triangle":
-				particle = this.getTriangle(size);
+				particle = this.getTriangle(size, color);
 				break;
 			case "square":
-				particle = this.getSquare(size);
+				particle = this.getSquare(size, color);
 				break;
 			case "sphere":
-				particle = this.getSphere(size);
+				particle = this.getSphere(size, color);
 				break;
 			default:
 				console.error("Unrecognized particle");
 		}
 
-		particle.velocity = new THREE.Vector3((Math.random() - 0.5) * velocity, (Math.random() - 0.5) * velocity, (Math.random() - 0.5) * velocity);
+		let angle = Math.random() * Math.PI * 2;
+		let length = Math.random() * 0.5;
+		particle.velocity = new THREE.Vector3(Math.cos(angle) * velocity * length, Math.sin(angle) * velocity * length, 0);
+		console.log(particle.velocity);
 		particle.lifetime = lifetime;
 		particle.position.copy(position);
 
@@ -77,9 +80,10 @@ export class ParticleSystem {
 		this.scene.add(particle);
 	}
 
-	emit(count, geometry, velocity, lifetime, size, position) {
+	emit(count, geometry, velocity, lifetime, size, position, color) {
 		for (let i = 0; i < count; i++) {
-			this.createParticle(geometry, velocity, lifetime, size, position);
+			if (i % 2 == 0) this.createParticle(geometry, velocity, lifetime, size, position, color);
+			else this.createParticle(geometry, velocity, lifetime, size, position, 0xffffff);
 		}
 	}
 

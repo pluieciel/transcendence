@@ -29,6 +29,29 @@ export class SceneManager {
 		this.colorTextureMap = this.getTextureMap();
 	}
 
+	dispose() {
+		if (this.scene) {
+			this.scene.traverse((object) => {
+				if (object.geometry) {
+					object.geometry.dispose();
+				}
+				if (object.material) {
+					if (Array.isArray(object.material)) {
+						object.material.forEach((material) => material.dispose());
+					} else {
+						object.material.dispose();
+					}
+				}
+			});
+		}
+		if (this.renderer) {
+			this.renderer.dispose();
+		}
+		if (this.composer) {
+			this.composer.dispose();
+		}
+	}
+
 	async initialize(data) {
 		//Create Scene, Lights, Camera
 		this.scene = new THREE.Scene();

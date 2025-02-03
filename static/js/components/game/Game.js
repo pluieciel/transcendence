@@ -22,10 +22,33 @@ export class Game {
 		this.lastTime = 0;
 
 		//DEBUG
-		this.enableDebugMode(true);
 		this.axis = "x";
 		this.mode = "position";
 		this.factor = 0.1;
+		this.editor = true;
+
+		this.keydownListener = this.enableDebugMode.bind(this);
+		window.addEventListener('keydown', this.keydownListener);
+	}
+
+	dispose() {
+		console.warn("Disposing game");
+		if (this.ws) {
+			this.ws.close();
+		}
+		
+	}
+
+	clean() {
+		if (this.sceneManager) {
+			this.sceneManager.dispose();
+		}
+		if (this.renderer) {
+			this.renderer.renderer.dispose();
+		}
+		this.initialized = false;
+		window.removeEventListener('keydown', this.keydownListener);
+		this.inputManager.dispose();
 	}
 
 	async initialize(initData) {
@@ -54,16 +77,23 @@ export class Game {
 					break;
 			}
 		};
+
+		this.ws.onclose = () => {
+			console.log("WebSocket closed");
+			this.clean();
+		};
 	}
 
 	emitParticles(position = new THREE.Vector3(0, 0, 0)) {
-		const particleCount = 40;
-		const geometry = "square";
-		const velocity = 0.2;
+		const particleCount = 170;
+		const geometry = "sphere";
+		const velocity = 0.3;
 		const lifetime = 0.5;
 		const size = 0.1;
+		//orange 0xe67e00
+		//cyan 0x00BDD1
 		if (this.particleSystem) {
-			this.particleSystem.emit(particleCount, geometry, velocity, lifetime, size, position);
+			this.particleSystem.emit(particleCount, geometry, velocity, lifetime, size, position, 0x00bdd1);
 		}
 	}
 
@@ -103,6 +133,7 @@ export class Game {
 					if (this.onGameEnd) {
 						console.log("calling game end fun");
 						this.onGameEnd(event.winnerName, event.winnerAvatar, event.scoreLeft, event.scoreRight, event.eloChange);
+                        this.dispose();
 					}
 					this.ws.close(1000);
 					console.log("Websocket closed");
@@ -143,18 +174,12 @@ export class Game {
 				}
 				break;
 			case "Shrinking Paddles":
-				if (event.action == "shrink") {
-					console.log("Shrinking paddles");
-					console.log("Before shrink - Left Paddle Scale:", this.sceneManager.leftPaddle.scale.x);
-					console.log("Before shrink - Right Paddle Scale:", this.sceneManager.rightPaddle.scale.x);
-
-					//TODO PAS SHRINK LES DEUX
-					// Apply shrink factor
+				if (event.action == "shrinkLeft") {
 					this.sceneManager.leftPaddle.scale.x *= 0.9;
+					this.sceneManager.paddles[0].scale.y *= 0.9;
+				} else if (event.action == "shrinkRight") {
 					this.sceneManager.rightPaddle.scale.x *= 0.9;
-
-					console.log("After shrink - Left Paddle Scale:", this.sceneManager.leftPaddle.scale.x);
-					console.log("After shrink - Right Paddle Scale:", this.sceneManager.rightPaddle.scale.x);
+					this.sceneManager.paddles[1].scale.y *= 0.9;
 				} else if (event.action == "reset") {
 					this.sceneManager.leftPaddle.scale.x = this.sceneManager.base_paddle_height;
 					this.sceneManager.rightPaddle.scale.x = this.sceneManager.base_paddle_height;
@@ -183,156 +208,155 @@ export class Game {
 		});
 	}
 
-	enableDebugMode(editor) {
+	enableDebugMode(event) {
 		let objectToModify = null;
-		window.addEventListener("keydown", (event) => {
-			if (event.code === "Space") {
-				//this.sceneManager.toggleDebugMode();
-				this.sceneManager.leftPaddle.scale.x *= 0.9;
-			}
-			if (editor) {
-				if (event.code == "KeyG") {
-					console.log("Entering position mode");
-					console.log(objectToModify);
-					this.mode = "position";
-				} else if (event.code == "KeyO") {
-					objectToModify = this.sceneManager.camera;
-					if (objectToModify && objectToModify.geometry) {
-						objectToModify.geometry.computeBoundingBox();
-						const box = objectToModify.geometry.boundingBox;
-						const centerX = objectToModify.position.x + ((box.max.x + box.min.x) / 2) * objectToModify.scale.x;
-						console.log("Object set. Current center X: " + centerX);
-					}
-				} else if (event.code == "KeyS") {
-					this.mode = "scale";
-					console.log("Entering scale mode");
-				} else if (event.code == "KeyZ") {
-					this.mode = "zoom";
-					console.log("Entering zoom mode");
-				} else if (event.code == "KeyR") {
-					this.mode = "rotate";
-					console.log("Entering rotate mode");
-				} else if (event.code == "NumpadAdd") {
-					if (this.mode == "scale") {
-						if (this.axis == "x") {
-							objectToModify.scale.x += this.factor;
-							console.log("New x scale is : " + objectToModify.scale.x);
-						} else if (this.axis == "y") {
-							objectToModify.scale.y += this.factor;
-							console.log("New scale y is : " + objectToModify.scale.y);
-						} else if (this.axis == "z") {
-							objectToModify.scale.z += this.factor;
-							console.log("New scale z is : " + objectToModify.scale.z);
-						} else if (this.axis == "all") {
-							objectToModify.scale.x += this.factor;
-							objectToModify.scale.y += this.factor;
-							objectToModify.scale.z += this.factor;
-							console.log("New scale x is : " + objectToModify.scale.x);
-							console.log("New scale y is : " + objectToModify.scale.y);
-							console.log("New scale z is : " + objectToModify.scale.z);
-						}
-					} else if (this.mode == "position") {
-						if (this.axis == "x") {
-							objectToModify.position.x += this.factor;
-							// Calculate and display center position
-							if (objectToModify.geometry) {
-								objectToModify.geometry.computeBoundingBox();
-								const box = objectToModify.geometry.boundingBox;
-								const centerX = objectToModify.position.x + ((box.max.x + box.min.x) / 2) * objectToModify.scale.x;
-								console.log("New position x: " + objectToModify.position.x);
-								console.log("Current center X: " + centerX);
-							}
-						} else if (this.axis == "y") {
-							objectToModify.position.y += this.factor;
-							console.log("New position y is : " + objectToModify.position.y);
-						} else if (this.axis == "z") {
-							objectToModify.position.z += this.factor;
-							console.log("New position z is : " + objectToModify.position.z);
-						}
-					} else if (this.mode == "rotate") {
-						if (this.axis == "x") {
-							objectToModify.rotation.x += this.factor;
-							console.log("New x rotation is : " + objectToModify.rotation.x);
-						} else if (this.axis == "y") {
-							objectToModify.rotation.y += this.factor;
-							console.log("New rotation y is : " + objectToModify.rotation.y);
-						} else if (this.axis == "z") {
-							objectToModify.rotation.z += this.factor;
-							console.log("New rotation z is : " + objectToModify.rotation.z);
-						}
-					} else if (this.mode == "zoom") {
-						if (objectToModify.fov) {
-							objectToModify.fov -= this.factor * 10;
-							objectToModify.updateProjectionMatrix();
-							console.log("Zooming in, new FOV is : " + objectToModify.fov);
-						} else {
-							console.log("Object cannot zoom");
-						}
-					}
-				} else if (event.code == "NumpadSubtract") {
-					if (this.mode == "scale") {
-						if (this.axis == "x") {
-							objectToModify.scale.x -= this.factor;
-							console.log("New x scale is : " + objectToModify.scale.x);
-						} else if (this.axis == "y") {
-							objectToModify.scale.y -= this.factor;
-							console.log("New scale y is : " + objectToModify.scale.y);
-						} else if (this.axis == "z") {
-							objectToModify.scale.z -= this.factor;
-							console.log("New scale z is : " + objectToModify.scale.z);
-						} else if (this.axis == "all") {
-							objectToModify.scale.x -= this.factor;
-							objectToModify.scale.y -= this.factor;
-							objectToModify.scale.z -= this.factor;
-							console.log("New scale x is : " + objectToModify.scale.x);
-							console.log("New scale y is : " + objectToModify.scale.y);
-							console.log("New scale z is : " + objectToModify.scale.z);
-						}
-					} else if (this.mode == "position") {
-						if (this.axis == "x") {
-							objectToModify.position.x -= this.factor;
-							console.log("New x position is : " + objectToModify.position.x);
-						} else if (this.axis == "y") {
-							objectToModify.position.y -= this.factor;
-							console.log("New y position is : " + objectToModify.position.y);
-						} else if (this.axis == "z") {
-							objectToModify.position.z -= this.factor;
-							console.log("New z position is : " + objectToModify.position.z);
-						}
-					} else if (this.mode == "rotate") {
-						if (this.axis == "x") {
-							objectToModify.rotation.x -= this.factor;
-							console.log("New x rotation is : " + objectToModify.rotation.x);
-						} else if (this.axis == "y") {
-							objectToModify.rotation.y -= this.factor;
-							console.log("New rotation y is : " + objectToModify.rotation.y);
-						} else if (this.axis == "z") {
-							objectToModify.rotation.z -= this.factor;
-							console.log("New rotation z is : " + objectToModify.rotation.z);
-						}
-					} else if (this.mode == "zoom") {
-						if (objectToModify.fov) {
-							objectToModify.fov += this.factor * 10;
-							objectToModify.updateProjectionMatrix();
-							console.log("Zooming in, new FOV is : " + objectToModify.fov);
-						} else {
-							console.log("Object cannot zoom");
-						}
-					}
-				} else if (event.code == "KeyX") {
-					this.axis = "x";
-					console.log("Axis set to x");
-				} else if (event.code == "KeyY") {
-					this.axis = "y";
-					console.log("Axis set to y");
-				} else if (event.code == "KeyZ") {
-					this.axis = "z";
-					console.log("Axis set to z");
-				} else if (event.code == "KeyA") {
-					this.axis = "all";
-					console.log("Axis set to all");
+		if (event.code === "Space") {
+			this.sceneManager.toggleDebugMode();
+			this.emitParticles();
+		}
+		if (this.editor) {
+			if (event.code == "KeyG") {
+				console.log("Entering position mode");
+				console.log(objectToModify);
+				this.mode = "position";
+			} else if (event.code == "KeyO") {
+				objectToModify = this.sceneManager.camera;
+				if (objectToModify && objectToModify.geometry) {
+					objectToModify.geometry.computeBoundingBox();
+					const box = objectToModify.geometry.boundingBox;
+					const centerX = objectToModify.position.x + ((box.max.x + box.min.x) / 2) * objectToModify.scale.x;
+					console.log("Object set. Current center X: " + centerX);
 				}
+			} else if (event.code == "KeyS") {
+				this.mode = "scale";
+				console.log("Entering scale mode");
+			} else if (event.code == "KeyZ") {
+				this.mode = "zoom";
+				console.log("Entering zoom mode");
+			} else if (event.code == "KeyR") {
+				this.mode = "rotate";
+				console.log("Entering rotate mode");
+			} else if (event.code == "NumpadAdd") {
+				if (this.mode == "scale") {
+					if (this.axis == "x") {
+						objectToModify.scale.x += this.factor;
+						console.log("New x scale is : " + objectToModify.scale.x);
+					} else if (this.axis == "y") {
+						objectToModify.scale.y += this.factor;
+						console.log("New scale y is : " + objectToModify.scale.y);
+					} else if (this.axis == "z") {
+						objectToModify.scale.z += this.factor;
+						console.log("New scale z is : " + objectToModify.scale.z);
+					} else if (this.axis == "all") {
+						objectToModify.scale.x += this.factor;
+						objectToModify.scale.y += this.factor;
+						objectToModify.scale.z += this.factor;
+						console.log("New scale x is : " + objectToModify.scale.x);
+						console.log("New scale y is : " + objectToModify.scale.y);
+						console.log("New scale z is : " + objectToModify.scale.z);
+					}
+				} else if (this.mode == "position") {
+					if (this.axis == "x") {
+						objectToModify.position.x += this.factor;
+						// Calculate and display center position
+						if (objectToModify.geometry) {
+							objectToModify.geometry.computeBoundingBox();
+							const box = objectToModify.geometry.boundingBox;
+							const centerX = objectToModify.position.x + ((box.max.x + box.min.x) / 2) * objectToModify.scale.x;
+							console.log("New position x: " + objectToModify.position.x);
+							console.log("Current center X: " + centerX);
+						}
+					} else if (this.axis == "y") {
+						objectToModify.position.y += this.factor;
+						console.log("New position y is : " + objectToModify.position.y);
+					} else if (this.axis == "z") {
+						objectToModify.position.z += this.factor;
+						console.log("New position z is : " + objectToModify.position.z);
+					}
+				} else if (this.mode == "rotate") {
+					if (this.axis == "x") {
+						objectToModify.rotation.x += this.factor;
+						console.log("New x rotation is : " + objectToModify.rotation.x);
+					} else if (this.axis == "y") {
+						objectToModify.rotation.y += this.factor;
+						console.log("New rotation y is : " + objectToModify.rotation.y);
+					} else if (this.axis == "z") {
+						objectToModify.rotation.z += this.factor;
+						console.log("New rotation z is : " + objectToModify.rotation.z);
+					}
+				} else if (this.mode == "zoom") {
+					if (objectToModify.fov) {
+						objectToModify.fov -= this.factor * 10;
+						objectToModify.updateProjectionMatrix();
+						console.log("Zooming in, new FOV is : " + objectToModify.fov);
+					} else {
+						console.log("Object cannot zoom");
+					}
+				}
+			} else if (event.code == "NumpadSubtract") {
+				if (this.mode == "scale") {
+					if (this.axis == "x") {
+						objectToModify.scale.x -= this.factor;
+						console.log("New x scale is : " + objectToModify.scale.x);
+					} else if (this.axis == "y") {
+						objectToModify.scale.y -= this.factor;
+						console.log("New scale y is : " + objectToModify.scale.y);
+					} else if (this.axis == "z") {
+						objectToModify.scale.z -= this.factor;
+						console.log("New scale z is : " + objectToModify.scale.z);
+					} else if (this.axis == "all") {
+						objectToModify.scale.x -= this.factor;
+						objectToModify.scale.y -= this.factor;
+						objectToModify.scale.z -= this.factor;
+						console.log("New scale x is : " + objectToModify.scale.x);
+						console.log("New scale y is : " + objectToModify.scale.y);
+						console.log("New scale z is : " + objectToModify.scale.z);
+					}
+				} else if (this.mode == "position") {
+					if (this.axis == "x") {
+						objectToModify.position.x -= this.factor;
+						console.log("New x position is : " + objectToModify.position.x);
+					} else if (this.axis == "y") {
+						objectToModify.position.y -= this.factor;
+						console.log("New y position is : " + objectToModify.position.y);
+					} else if (this.axis == "z") {
+						objectToModify.position.z -= this.factor;
+						console.log("New z position is : " + objectToModify.position.z);
+					}
+				} else if (this.mode == "rotate") {
+					if (this.axis == "x") {
+						objectToModify.rotation.x -= this.factor;
+						console.log("New x rotation is : " + objectToModify.rotation.x);
+					} else if (this.axis == "y") {
+						objectToModify.rotation.y -= this.factor;
+						console.log("New rotation y is : " + objectToModify.rotation.y);
+					} else if (this.axis == "z") {
+						objectToModify.rotation.z -= this.factor;
+						console.log("New rotation z is : " + objectToModify.rotation.z);
+					}
+				} else if (this.mode == "zoom") {
+					if (objectToModify.fov) {
+						objectToModify.fov += this.factor * 10;
+						objectToModify.updateProjectionMatrix();
+						console.log("Zooming in, new FOV is : " + objectToModify.fov);
+					} else {
+						console.log("Object cannot zoom");
+					}
+				}
+			} else if (event.code == "KeyX") {
+				this.axis = "x";
+				console.log("Axis set to x");
+			} else if (event.code == "KeyY") {
+				this.axis = "y";
+				console.log("Axis set to y");
+			} else if (event.code == "KeyZ") {
+				this.axis = "z";
+				console.log("Axis set to z");
+			} else if (event.code == "KeyA") {
+				this.axis = "all";
+				console.log("Axis set to all");
 			}
-		});
+		}
 	}
 }
+	

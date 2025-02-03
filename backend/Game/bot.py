@@ -71,7 +71,7 @@ class Bot:
 		if not target_y or not self.paddle_position:
 			return
 
-		dead_zone = 0.5  # Adjust this value as needed
+		dead_zone = self.paddle_height/2  # Adjust this value as needed
 		distance = target_y - self.paddle_position.y
 
 		if abs(distance) > dead_zone:
