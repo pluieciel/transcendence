@@ -17,6 +17,7 @@ export class Game {
 		this.inputManager = null;
 
 		this.onGameEnd = null;
+		this.ended = false;
 		this.showBanner = null;
 		this.setupWebSocket();
 		this.lastTime = 0;
@@ -28,7 +29,7 @@ export class Game {
 		this.editor = true;
 
 		this.keydownListener = this.enableDebugMode.bind(this);
-		window.addEventListener('keydown', this.keydownListener);
+		window.addEventListener("keydown", this.keydownListener);
 	}
 
 	dispose() {
@@ -36,7 +37,6 @@ export class Game {
 		if (this.ws) {
 			this.ws.close();
 		}
-		
 	}
 
 	clean() {
@@ -47,7 +47,8 @@ export class Game {
 			this.renderer.renderer.dispose();
 		}
 		this.initialized = false;
-		window.removeEventListener('keydown', this.keydownListener);
+		this.ended = true;
+		window.removeEventListener("keydown", this.keydownListener);
 		this.inputManager.dispose();
 	}
 
@@ -133,7 +134,7 @@ export class Game {
 					if (this.onGameEnd) {
 						console.log("calling game end fun");
 						this.onGameEnd(event.winnerName, event.winnerAvatar, event.scoreLeft, event.scoreRight, event.eloChange);
-                        this.dispose();
+						this.dispose();
 					}
 					this.ws.close(1000);
 					console.log("Websocket closed");
@@ -191,13 +192,15 @@ export class Game {
 	}
 
 	animate(currentTime) {
-		requestAnimationFrame(this.animate.bind(this));
-		const deltaTime = (currentTime - this.lastTime) / 1000;
-		this.lastTime = currentTime;
-		if (this.particleSystem) {
-			this.particleSystem.update(deltaTime);
+		if (this.ended == false) {
+			requestAnimationFrame(this.animate.bind(this));
+			const deltaTime = (currentTime - this.lastTime) / 1000;
+			this.lastTime = currentTime;
+			if (this.particleSystem) {
+				this.particleSystem.update(deltaTime);
+			}
+			this.sceneManager.composer.render();
 		}
-		this.sceneManager.composer.render();
 	}
 
 	/******************************DEBUG************************************/
@@ -359,4 +362,3 @@ export class Game {
 		}
 	}
 }
-	
