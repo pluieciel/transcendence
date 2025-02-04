@@ -28,7 +28,7 @@ export default class CreditsView {
 							Javascript <i class="fab fa-js"></i> is used for the Frontend<br>
 							The backend is built in python <i class="fa-brands fa-python"></i> with Django<br>
 							PostgreSQL for the Database <i class="fas fa-database"></i><br><br>
-							What to do for the best user experience:<br>Check out our user customization options,<br>invite a few friends to play with you,<br>and have fun<br><br>
+							What to do for the best user experience:<br>Check out our user customization options,<br>invite a few friends to play with you,<br>and have fun.<br><br>
 							We hope you enjoy exploring our project!
 						</p>
 					</div>
@@ -41,17 +41,16 @@ export default class CreditsView {
 							<a href="https://github.com/siul008" target="_blank" rel="noopener noreferrer">Julien Nunes</a><br>
 							<a href="https://github.com/neutrou" target="_blank" rel="noopener noreferrer">Victor Algranti</a><br>
 						</div>
-						<div class="pdf-container userOutline">
-						    <embed id="pdf" 
-							src=
-							"https://cdn.intra.42.fr/pdf/pdf/134058/en.subject.pdf#toolbar=0&navpanes=0">
-						</object>
+						<iframe id="pdf" class="userOutline"
+						src=
+						"https://cdn.intra.42.fr/pdf/pdf/134058/en.subject.pdf#toolbar=0&navpanes=0">
 						</div>
-					</div>
-				</div>
-			</div>
-`;
+						</div>
+						</div>
+						`;
 						}
 					}
+					// 	<div class="pdf-container userOutline">
+					// </div>
 					
 					// "https://media.geeksforgeeks.org/wp-content/cdn-uploads/20210101201653/PDF.pdf"

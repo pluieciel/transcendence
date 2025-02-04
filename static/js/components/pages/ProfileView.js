@@ -18,8 +18,7 @@ export default class ProfileView {
 
 			<div id="mainPage">
 				<div class ="content">
-					<div class="profile userOutline">
-						<h2>Profile</h2>
+					<div id="profile-content" class="profile userOutline">
 						<h3 id="p-name">${this.username}</h3>
 						<h3 id="p-elo">Loading...</h3>
 						<h3 id="p-winrate">Loading...</h3>
@@ -33,12 +32,13 @@ export default class ProfileView {
     }
 
 	async setProfileFields() {
+		var	div = document.getElementById('profile-content');
 		var name = document.getElementById("p-name");
 		var elo = document.getElementById("p-elo");
 		var ratio = document.getElementById("p-wl");
 		var winrate = document.getElementById("p-winrate");
 		var tourn = document.getElementById("p-tourn");
-
+		
 		try {
 			const response = await fetch("/api/get/profile", {
 				method: "POST",
@@ -46,12 +46,15 @@ export default class ProfileView {
 					"Content-Type": "application/json",
 				},
 			});
-
+			
 			const data = await response.json();
-
-            const avatarUrl = await window.app.getAvatar(this.username);
-			if (avatarUrl)
-				name.innerHTML = `<img id="avatarImg" src=${avatarUrl} alt="User Avatar" width="30" height="30"></img> ` + this.username;
+			
+            // const avatarUrl = await window.app.getAvatar(this.username);
+			// if (avatarUrl)
+			// {
+			// 	const	avatarContent = `<img id="avatarImg" src=${avatarUrl} alt="User Avatar" width="30" height="30"></img> `;
+			// 	div.innerHTML = avatarContent + div.innerHTML;
+			// }
 
 			if (data.success) {
 				elo.innerHTML = "Elo: " + data["elo"];
