@@ -55,9 +55,10 @@
 }
 
 #gameCanvas {
+	display: none;
 	width: 100%;
 	height: auto;
-	display: block;
+	display: none;
 	margin: 0 auto;
 }
 
@@ -417,4 +418,28 @@
 .description {
 	font-size: 30px;
 	font-weight: 400;
+}
+
+#gameDiv {
+	position: fixed; /* Ensure the container is positioned fixed to take up the full viewport */
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.waiting-message {
+	font-size: 48px; /* Increase the font size */
+	color: var(--user-color); /* Text color */
+	background-color: rgba(0, 0, 0, 0.7); /* Background color with opacity */
+	font-family: "Exo 2", sans-serif;
+	padding: 70px; /* Increase padding around the text */
+	border-radius: 10px; /* Rounded corners */
+	text-align: center; /* Center the text */
+	z-index: 1000; /* Ensure it is above other elements */
+	outline: 2px var(--user-color); /* Add an outline */
+	box-shadow: 0 0 20px var(--user-color);
 }

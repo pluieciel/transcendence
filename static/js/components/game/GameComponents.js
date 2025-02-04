@@ -10,7 +10,6 @@ export default class GameComponent {
 
 		this.render();
 		this.addEventListeners();
-		//this.timerElement = document.getElementById("timer");
 	}
 
 	render() {
@@ -25,20 +24,6 @@ export default class GameComponent {
 						</div>
 					</div>
 				</div>
-				<div id="gameDiv" style="display: none; position: relative;">
-	   				<div class="outer" id="banner">
-					    <div class="title" id="bannerTitle">Title Placeholder</div>
-					    <div class="description" id="bannerDescription">Description placeholder that is long</div>
-					</div>
-                    <div id="overlay">
-                        <h2 id="winner-name">Winner</h2>
-                        <img id="winner-avatar" src="" alt="Winner's Avatar" width="100" height="100">
-                        <p id="score-text">Score</p>
-                        <p id="elo-text">Elo</p>
-                        <button id="returnButton">Return to Main Menu</button>
-                    </div>
-                    <canvas id="gameCanvas"></canvas>
-                </div>
 			`;
 
 		const button = document.getElementById("quickMatch");
@@ -51,8 +36,6 @@ export default class GameComponent {
 		const playAI = document.getElementById("playAI");
 		const matchSearchModal = document.getElementById("matchSearch");
 		const cancelGameSearch = document.getElementById("gameSearchCancel");
-		const returnButton = document.getElementById("returnButton");
-		const gameDiv = document.getElementById("gameDiv");
 
 		if (quickMatch) {
 			quickMatch.setAttribute("data-bs-toggle", "modal");
@@ -73,12 +56,6 @@ export default class GameComponent {
 		if (cancelGameSearch) {
 			cancelGameSearch.addEventListener("click", () => {
 				this.stopTimerAndDismissModal();
-			});
-		}
-
-		if (returnButton) {
-			returnButton.addEventListener("click", () => {
-				this.returnToMainMenu(gameDiv, returnButton);
 			});
 		}
 	}
@@ -110,7 +87,7 @@ export default class GameComponent {
 		window.app.gamews.onmessage = (event) => {
 			const events = JSON.parse(event.data);
 			if (events.message_type === "init") {
-				this.displayGame(events);
+				this.redirectToGame(events);
 			}
 		};
 
@@ -132,76 +109,16 @@ export default class GameComponent {
 		};
 	}
 
-	displayGame(events) {
-		setTimeout(() => {
-			const canvas = document.querySelector("#gameCanvas");
-			const game = new Game(canvas, window.app.gamews);
-			window.addEventListener('beforeunload', () => {
-				game.dispose();
-			});
-			game.onGameEnd = this.onGameEnd.bind(this);
-			game.showBanner = this.showBanner.bind(this);
-			console.log("game.showBanner assigned:", game.showBanner); // Verify assignment
-			const gameDiv = document.querySelector("#gameDiv");
-			const mainPage = document.querySelector("#mainPage");
-			gameDiv.style.display = "block";
-			mainPage.style.display = "none";
-			this.stopTimerAndDismissModal();
-			game.initialize(events.data);
-		}, 1000);
-	}
-
-	showBanner(title, description) {
-		const banner = document.getElementById("banner");
-		const bannerTitle = document.getElementById("bannerTitle");
-		const bannerDescription = document.getElementById("bannerDescription");
-
-		bannerTitle.textContent = title;
-		bannerDescription.textContent = description;
-
-		banner.style.opacity = 0;
-		banner.style.display = "flex";
-		setTimeout(() => {
-			banner.style.opacity = 1;
-		}, 10);
-
-		setTimeout(() => {
-			banner.style.opacity = 0;
-			setTimeout(() => {
-				banner.style.display = "none";
-			}, 1000); // Duration of the fade-out transition
-		}, 3000 + 1000); // 2 seconds + duration of the fade-in transition
-	}
-
-	onGameEnd(winnerName, winnerAvatar, scoreLeft, scoreRight, eloChange) {
-		console.log("game end called");
-		const overlay = document.querySelector("#overlay");
-		let username = sessionStorage.getItem("username");
-		overlay.style.display = "flex";
-		document.querySelector("#winner-name").textContent = `Winner: ${winnerName}`;
-		document.querySelector("#winner-avatar").src = winnerAvatar;
-		document.querySelector("#score-text").textContent = `Final Score: ${scoreLeft} - ${scoreRight}`;
-		document.querySelector("#elo-text").textContent = `ELO Change: ${winnerName == username ? "+" : "-"}${eloChange}`;
-		const returnButton = document.querySelector("#returnButton");
-		returnButton.style.display = "block";
-		returnButton.onclick = () => {
-			this.returnToMainMenu(gameDiv, returnButton);
-		};
-	}
-
-	returnToMainMenu(gameDiv, returnButton) {
-		gameDiv.style.display = "none";
-		returnButton.style.display = "none";
-		document.querySelector("#overlay").style.display = "none";
-		document.querySelector("#mainPage").style.display = "block";
-
-		if (window.app.gamews) {
-			window.app.gamews.close();
+	redirectToGame(events) {
+		window.app.router.navigateTo("/game");
+		const gameView = window.app.router.currentComponent;
+		if (gameView && gameView.initializeGame) {
+			gameView.initializeGame(events);
 		}
 
-		window.app.ingame = false;
-		sessionStorage.setItem("ingame", "false");
-		window.app.router.currentComponent.setProfileFields().then();
+		setTimeout(() => {
+			this.stopTimerAndDismissModal();
+		}, 1000);
 	}
 
 	startSearchGameTimer() {
