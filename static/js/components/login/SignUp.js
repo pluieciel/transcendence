@@ -51,6 +51,7 @@ export default class SignUp {
 			if (data.success) {
                 this.recaptchaWidgetId = grecaptcha.render('recaptcha', {
                     'sitekey' : data.client_id,
+                    'theme' : 'dark',
                 });
 			}
 		} catch (error) {

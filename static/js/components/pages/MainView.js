@@ -24,8 +24,9 @@ export default class MainView {
 		this.container.innerHTML = `
 			<header>
 				<h1 id="pong">PONG</h1>
-					<button id="settingsBtn">Settings</button>
-					<button id="logoutBtn">Log out</button>
+				<button id="adminBtn">Admin</button>
+				<button id="settingsBtn">Settings</button>
+				<button id="logoutBtn">Log out</button>
 			</header>
 
 			<div id="mainPage">
@@ -119,19 +120,28 @@ export default class MainView {
 		}
 	}
 
-	addEventListeners() {
-		// Logout button
-		const logoutBtn = this.container.querySelector("#logoutBtn");
-		const settings = this.container.querySelector("#settingsBtn");
+    addEventListeners() {
+        const adminBtn = this.container.querySelector("#adminBtn");
+        const settingsBtn = this.container.querySelector("#settingsBtn");
+        const logoutBtn = this.container.querySelector("#logoutBtn");
+
+		adminBtn.addEventListener("click", () => {
+			window.app.router.navigateTo("/admin");
+		});
 
 		logoutBtn.addEventListener("click", () => {
 			window.app.chatBox.disconnect();
 			window.app.logout();
 		});
 
-		settings.addEventListener("click", () => {
+		settingsBtn.addEventListener("click", () => {
 			window.app.router.navigateTo("/settings");
 		});
+
+        logoutBtn.addEventListener("click", () => {
+            window.app.chatBox.disconnect();
+            window.app.logout();
+        });
 	}
 
 	async setProfileFields() {

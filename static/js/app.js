@@ -1,10 +1,10 @@
-import LoginView from "./components/pages/LoginView.js";
-import MainView from "./components/pages/MainView.js";
-import SettingsView from "./components/pages/SettingsView.js";
-import LoginOAuth from "./components/login/LoginOAuth.js";
-import GameComponent from "./components/game/GameComponents.js";
-import Router from "./router.js";
+import LoginView from './components/pages/LoginView.js';
+import MainView from './components/pages/MainView.js';
+import SettingsView from './components/pages/SettingsView.js';
+import AdminView from './components/pages/AdminView.js';
 import GameView from "./components/pages/GameView.js";
+import LoginOAuth from './components/login/LoginOAuth.js';
+import Router from './router.js';
 
 class App {
 	constructor() {
@@ -14,6 +14,7 @@ class App {
 			{ path: "/settings", component: SettingsView },
 			{ path: "/login/oauth", component: LoginOAuth },
 			{ path: "*", component: LoginView },
+			{ path: '/admin', component: AdminView },
 			{ path: "/game", component: GameView },
 		];
 		this.state = {
