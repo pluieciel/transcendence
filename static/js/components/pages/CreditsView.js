@@ -3,17 +3,19 @@ export default class CreditsView {
 		this.container = container;
 		this.username = window.app.state.username;
 		this.render();
-		this.setButtons();
 		this.addEventListerners();
+		if (!window.app.settings['fetched'])
+			window.app.getPreferences();
 	}
 
 	render() {
 		this.container.innerHTML = `
 			<header>
 				<h1 id="pong">PONG</h1>
-					<button id="customBtn" class="nav-btn">Custom</button>
 					<button id="indexBtn" class="nav-btn">Index</button>
+					<button id="customBtn" class="nav-btn">Custom</button>
 					<button id="profileBtn" class="nav-btn">Profile</button>
+					<button id="creditsBtn" class="nav-btn disabledBtn">Credits</button>
 					<button id="logoutBtn" class="nav-btn">Log out</button>
 			</header>
 
@@ -53,16 +55,6 @@ export default class CreditsView {
 			</div>
 						`;
 	};
-
-	setButtons() {
-		const	index = document.getElementById('indexBtn');
-		const	custom = document.getElementById('customBtn');
-		const	profile = document.getElementById('profileBtn');
-
-		index.style['right'] = '295px';
-		custom.style['right'] = '440px';
-		profile.style['right'] = '150px';
-	}
 
 	addNavEventListeners() {
 		const	index = document.getElementById('indexBtn');

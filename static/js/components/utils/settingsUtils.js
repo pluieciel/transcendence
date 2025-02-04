@@ -3,9 +3,6 @@ export async function addUserData(settings) {
 	const	qualityDiv = document.getElementById('qualityDiv');
 	const	leftQuality = document.getElementById('leftQuality');
 	const	rightQuality = document.getElementById('rightQuality');
-	const	enable2FA = document.querySelector('#enable2FA');
-	const	disable2FA = document.querySelector('#disable2FA');
-	const 	is_2fa_enabled = window.app.settings.is_2fa_enabled;
 	const	colorIndex = settings.color;
 	const	qualityIndex = settings.quality;
 	
@@ -27,12 +24,9 @@ export async function addUserData(settings) {
 	};
 	if (qualityIndex == 0) leftQuality.classList.add("disabled");
 	else leftQuality.classList.remove("disabled");
-
+	
 	if (qualityIndex == 2) rightQuality.classList.add("disabled");
 	else rightQuality.classList.remove("disabled");
-
-	if (is_2fa_enabled) {enable2FA.style.display = "none";disable2FA.style.display = "block";}
-	else {enable2FA.style.display = "blon";disable2FA.style.display = "none";}
 
 	window.app.setColor(colorIndex);
 	colorDiv.innerHTML = "Color: " + colorArray[colorIndex];

@@ -30,9 +30,9 @@ class App {
 
 	setColor(color) {
 		switch (color) {
-			default: document.documentElement.style.setProperty("--user-color", "#00BDD1");break; 
+			default: document.documentElement.style.setProperty("--user-color", "#0FF");break; 
 			case 0: document.documentElement.style.setProperty("--user-color", "#3E27F8");break; //Blue
-			case 1: document.documentElement.style.setProperty("--user-color", "#00BDD1");break; //Cyan
+			case 1: document.documentElement.style.setProperty("--user-color", "#0FF");break; //Cyan
 			case 2: document.documentElement.style.setProperty("--user-color", "#00AD06");break; //Green
 			case 3: document.documentElement.style.setProperty("--user-color", "#E67E00");break; //Orrange
 			case 4: document.documentElement.style.setProperty("--user-color", "#E6008F");break; //Pink
@@ -44,9 +44,6 @@ class App {
 	}
 
 	async getAvatar(username) {
-		// if (this.avatarCache[username]) {
-		// 	return this.avatarCache[username];
-		// }
 		const response = await fetch(`/api/get/avatar/${username}`, {
 			method: "POST",
 			headers: {
