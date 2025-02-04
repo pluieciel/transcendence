@@ -16,7 +16,6 @@ export default class MainView {
 		if (!window.app.settings['fetched']) window.app.getPreferences();
 		this.checkForBackdrop();
         this.addEventListeners();
-		this.setProfileFields();
         if (window.app.ingame) {
             console.log("Reconnecting to game");
             const protocol =
@@ -123,7 +122,7 @@ export default class MainView {
 		const selectorRumble = document.getElementById("rumble");
         const selectorClassic = document.getElementById("classic");
 		const adminBtn = this.container.querySelector("#adminBtn");
-		const settingsBtn = this.container.querySelector("#settingsBtn");
+		const customBtn = this.container.querySelector("#customBtn");
 		const logoutBtn = this.container.querySelector("#logoutBtn");
 		
 		this.addNavEventListeners();
@@ -147,8 +146,8 @@ export default class MainView {
 			window.app.logout();
 		});
 
-		settingsBtn.addEventListener("click", () => {
-			window.app.router.navigateTo("/settings");
+		customBtn.addEventListener("click", () => {
+			window.app.router.navigateTo("/custom");
 		});
 
         logoutBtn.addEventListener("click", () => {
@@ -168,37 +167,6 @@ export default class MainView {
 		else {
 			selectorRumble.classList.add("disabled");
 			selectorClassic.classList.remove("disabled");
-		}
-	}
-
-	async setProfileFields () {
-		try {
-			const response = await fetch("/api/get/profile", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-			});
-			const data = await response.json();
-
-			const avatarUrl = await window.app.getAvatar(this.username);
-			if (avatarUrl) name.innerHTML = `<img id="avatarImg" src=${avatarUrl} alt="User Avatar" width="30" height="30"></img> ` + this.username;
-
-			if (data.success) {
-				elo.innerHTML = "Elo: " + data["elo"];
-				winrate.innerHTML = "Winrate: " + data["winrate"];
-				ratio.innerHTML = "Ratio: " + data["wins"] + "/" + data["looses"];
-				tourn.innerHTML = "Tournaments won: " + data["tourn_won"] + " played: " + data["tourn_joined"];
-				if (data["display"]) {
-					let toInsert = " (" + data["display"] + ")";
-					name.insertAdjacentHTML("beforeend", toInsert);
-				}
-			} else throw new Error("Request failure");
-		} catch (error) {
-			elo.innerHTML = "Failed to load elo";
-			winrate.innerHTML = "Failed to load winrate";
-			tourn.innerHTML = "Failed to load tournaments";
-			console.error("An error occurred: ", error);
 		}
 	}
 

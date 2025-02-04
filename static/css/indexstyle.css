@@ -53,16 +53,24 @@ a {
 }
 
 #services {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+#services-container {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 20px;
+    gap: 75px;
     padding: 20px;
+	width: 1200px;
 }
 
 .service {
     display: flex;
     flex-direction: column;
-    padding: 20px;
+    padding: 15px;
+	padding-bottom: 0;
     height: 200px;
     background-color: var(--accent-color);
 	color: var(--secondary-color);
@@ -80,7 +88,7 @@ a {
 }
 
 .service button {
-	padding: 10px 20px;
+	padding: 0px !important;
 	font-size: 16px;
 	cursor: pointer;
 	border-radius: 5px;
@@ -225,6 +233,10 @@ a {
 
 .disabledBtn:hover {
 	transform: none !important;
+}
+
+#indexAdminBtn {
+	right: 730px;
 }
 
 #indexBtn {

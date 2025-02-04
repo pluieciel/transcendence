@@ -168,6 +168,11 @@ export default class ProfileView {
 		const	custom = document.getElementById('customBtn');
 		const	credits = document.getElementById('creditsBtn');
 		const	logoutBtn = document.getElementById('logoutBtn');
+		const	adminBtn = document.getElementById('adminBtn');
+
+		adminBtn.addEventListener('click', () => {
+			window.app.router.navigateTo('/admin');
+		});
 
 		logoutBtn.addEventListener("click", () => {
             window.app.chatBox.disconnect();
@@ -383,6 +388,7 @@ export default class ProfileView {
 			} catch (e) {
 				console.error(e);
 			}
+			this.setProfileFields();
 		});
 		
 		avatar.addEventListener('click', function() {
@@ -430,129 +436,10 @@ export default class ProfileView {
 		});
 	}
 	
-	addNavigationEventListeners() {
-		const	logoutBtn = document.getElementById('logoutBtn');
-		const	indexBtn = document.getElementById('indexBtn');
-		const	adminBtn = document.getElementById('adminBtn');
-
-		logoutBtn.addEventListener('click', () => {
-			window.app.logout();
-		});
-		
-		indexBtn.addEventListener('click', () => {
-			if (this.settings.color != window.app.settings.color || this.settings.quality != window.app.settings.quality) {
-				this.message2("You have unsaved changes", "Click the save changes button to proceed");
-				return ;
-			}
-			window.app.router.navigateTo('/index');
-		});
-
-		adminBtn.addEventListener('click', () => {
-			window.app.router.navigateTo('/admin');
-		});
-	}
-	
     addEventListeners() {
+		this.addProfileEventListeners();
 		this.add2FAEventListeners();
 		this.addSecurityEventListeners();
-		this.addNavigationEventListeners();
+		this.addNavEventListeners();
     }
-	
-	async eraseInDB() {
-		try {
-			const response = await fetch('/api/del/user', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-			});
-
-			const data = await response.json();
-			
-			if (data.success)
-				alert("deleted user successfully");
-			else
-				throw new Error(data.message);
-		} catch (error) {
-			console.error('An error occurred: ', error);
-			return false;
-		}
-		return true;
-	}
-
-	async saveChanges(main) {
-		try {
-			const response = await fetch('/api/settings/set/preferences', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					'newColor': this.settings.color,
-					'newQuality': this.settings.quality,
-				}),			
-				});
-				
-				const data = await response.json();
-				
-				if (data.success) {
-					window.app.settings.color = this.settings.color;
-				window.app.settings.quality = this.settings.quality;
-				if (!main)
-					this.message(true, 'Theme and quality changes saved!');
-				else {
-					window.app.router.navigateTo('/index');
-					const modal = bootstrap.Modal.getInstance(this.container.querySelector('#changeModal'));
-					if (modal)
-						modal.hide();
-				}
-			}
-			else
-				throw new Error(data['message']);
-		}
-		catch (error) {
-			console.error(error);
-		};
-	}
-	
-	async addUserData() {
-		const	colorDiv = document.getElementById('colorDiv');
-		const	qualityDiv = document.getElementById('qualityDiv');
-		const	leftQuality = document.getElementById('leftQuality');
-		const	rightQuality = document.getElementById('rightQuality');
-		const	enable2FA = this.container.querySelector('#enable2FA');
-		const	disable2FA = this.container.querySelector('#disable2FA');
-		const 	is_2fa_enabled = window.app.settings.is_2fa_enabled;
-		const	colorIndex = this.settings.color;
-		const	qualityIndex = this.settings.quality;
-		
-		let colorArray = {
-			0: 'Blue',
-			1: 'Cyan',
-			2: 'Green',
-			3: 'Orange',
-			4: 'Pink',
-			5: 'Purple',
-			6: 'Red',
-			7: 'Soft Green',
-			8: 'White'
-		};
-		let qualityArray = {
-			0: 'Low',
-			1: 'Medium',
-			2: 'High',
-		};
-		if (qualityIndex == 0) leftQuality.classList.add("disabled");
-		else leftQuality.classList.remove("disabled");
-
-		if (qualityIndex == 2) rightQuality.classList.add("disabled");
-		else rightQuality.classList.remove("disabled");
-
-		if (is_2fa_enabled) {enable2FA.style.display = "none";disable2FA.style.display = "block";}
-		else {enable2FA.style.display = "block";disable2FA.style.display = "none";}
-
-		colorDiv.innerHTML = "Color: " + colorArray[colorIndex];
-		window.app.setColor(colorIndex);
-		qualityDiv.innerHTML = "Quality: " + qualityArray[qualityIndex];
-	}
 }
