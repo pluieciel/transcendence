@@ -3,7 +3,7 @@ datasources:
   - name: prometheus
     type: prometheus
     access: proxy
-    url: http://prometheus:9090/admin/prometheus
+    url: http://prometheus:9090/admin/services/prometheus
     basicAuth: true
     basicAuthUser: ${PROMETHEUS_USERNAME}
     isDefault: true

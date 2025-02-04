@@ -1,6 +1,7 @@
 import LoginView from './components/pages/LoginView.js';
 import MainView from './components/pages/MainView.js';
 import SettingsView from './components/pages/SettingsView.js';
+import AdminView from './components/pages/AdminView.js';
 import LoginOAuth from './components/login/LoginOAuth.js';
 import Router from './router.js';
 
@@ -9,6 +10,7 @@ class App {
 		this.routes = [
 			{ path: '/', component: LoginView },
 			{ path: '/index', component: MainView },
+			{ path: '/admin', component: AdminView },
 			{ path: '/settings', component: SettingsView },
 			{ path: '/login/oauth', component: LoginOAuth },
 			{ path: '*', component: LoginView },
