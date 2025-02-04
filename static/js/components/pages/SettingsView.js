@@ -123,8 +123,6 @@ export default class SettingsView {
 			</div>
 		</div>
 	</div>
-	<div id="passwordError" class="alert alert-danger d-none"></div>
-					
 					`;
 				}
 	
@@ -181,6 +179,7 @@ export default class SettingsView {
 						const data = await response.json();
 
 						const recoveryCodes = this.container.querySelector('#recoveryCodes');
+						recoveryCodes.innerHTML = '';
 						recoveryCodes.append(Object.assign(document.createElement('li'), {textContent: data.recovery_code_1}));
 						recoveryCodes.append(Object.assign(document.createElement('li'), {textContent: data.recovery_code_2}));
 						recoveryCodes.append(Object.assign(document.createElement('li'), {textContent: data.recovery_code_3}));
@@ -191,7 +190,7 @@ export default class SettingsView {
 						new bootstrap.Modal(this.container.querySelector('#recoveryModal')).show();
 					}
 				} else if (response.status == 409) {
-					alert(response.message);
+					console.log(response.message);
 				} else {
 					errorDiv.textContent = data['message'] || 'Login failed';
                     errorDiv.classList.remove('d-none');
@@ -264,9 +263,12 @@ export default class SettingsView {
 		let		file;
 		const	fileInput = document.getElementById('fileInput');
 		const	enable2FA = this.container.querySelector('#enable2FA');
+		const	disable2FA = this.container.querySelector('#disable2FA');
 		const	changeNameBtn = document.getElementById('changeNameBtn');
 		const	avatar = this.container.querySelector('.avatar-selector-settings');
-		
+		const	totpError = this.container.querySelector('#totpError');
+		const	newName = this.container.querySelector('#newName');
+
 		enable2FA.addEventListener('click', async (e) => {
 			e.preventDefault();
 			try {
@@ -284,14 +286,14 @@ export default class SettingsView {
 					const qrCode = this.container.querySelector('#qrCode');
 					qrCode.innerHTML = data.qr_code;
 				} else if (response.status == 409) {
-					alert(data.message);
+					console.log(data.message);
 				} else {
-					errorDiv.textContent = data.message;
-                    errorDiv.classList.remove('d-none');
+					totpError.textContent = data.message;
+                    totpError.classList.remove('d-none');
 				}
 			} catch (error) {
-				errorDiv.textContent = 'An error occurred:' + error;
-                errorDiv.classList.remove('d-none');
+				totpError.textContent = 'An error occurred:' + error;
+                totpError.classList.remove('d-none');
 			}
 		});
 
@@ -312,14 +314,12 @@ export default class SettingsView {
 					enable2FA.style.display = "block";
 					disable2FA.style.display = "none";
 				} else if (response.status == 409) {
-					alert(data.message);
+					console.log(data.message);
 				} else {
-					errorDiv.textContent = data.message;
-					errorDiv.classList.remove('d-none');
+					console.log(data.message);
 				}
 			} catch (error) {
-				errorDiv.textContent = 'An error occurred: ' + error;
-				errorDiv.classList.remove('d-none');
+				console.log('An error occurred: ' + error);
 			}
 		});
 		
@@ -568,7 +568,7 @@ export default class SettingsView {
 		else rightQuality.classList.remove("disabled");
 
 		if (is_2fa_enabled) {enable2FA.style.display = "none";disable2FA.style.display = "block";}
-		else {enable2FA.style.display = "blon";disable2FA.style.display = "none";}
+		else {enable2FA.style.display = "block";disable2FA.style.display = "none";}
 
 		colorDiv.innerHTML = "Color: " + colorArray[colorIndex];
 		window.app.setColor(colorIndex);
