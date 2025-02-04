@@ -57,6 +57,55 @@ a {
 	text-decoration: none;
 }
 
+#services {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+.service {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    height: 200px;
+    background-color: var(--accent-color);
+	color: var(--secondary-color);
+    border-radius: 8px;
+}
+
+.service h3 {
+    margin: 0 0 10px 0;
+}
+
+.service-description {
+    flex-grow: 1;
+    margin: 0 0 15px 0;
+    font-size: 0.9em;
+}
+
+.service button {
+	padding: 10px 20px;
+	font-size: 16px;
+	cursor: pointer;
+	border-radius: 5px;
+	transition: all 0.2s;
+	margin: 5px;
+}
+
+.service-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.service-logo {
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
+}
+
 #pong {
 	text-shadow: 0 0 15px #fff;
 }
@@ -167,7 +216,7 @@ a {
 	background-color: var(--primary-color);
 }
 
-.game-buttons > button {
+.game-buttons > button, .service > button {
 	padding: 10px 20px;
     margin: 10px 0;
     width: 100%;
@@ -183,18 +232,18 @@ a {
 	transition: all 0.5s;
 }
 
-.game-buttons > button:hover {
+.game-buttons > button:hover, .service > button:hover {
 	background-color: #000;
 }
 
-.containerPrivate > button, .containerGame > button, #row > button, .avatar-selector-settings {
+.containerPrivate > button, .containerGame > button, #row > button, .avatar-selector-settings, #services > button {
 	color: var(--secondary-color);
 	border: 2px solid var(--primary-color);
 	background-color: var(--primary-color);
 	transition: all 0.5s !important;
 }
 
-.containerPrivate > button:hover, .containerGame > button:hover, .arrow:hover {
+.containerPrivate > button:hover, .containerGame > button:hover, .arrow:hover, #services > button:hover {
 	box-shadow: 0 0 15px var(--user-color);
 }
 
