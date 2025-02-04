@@ -393,8 +393,11 @@ class GameBackend:
 				color = '#676a6e'
 			events.append({"type": "ball_last_hitter", "color": color})
 
-		trajectory_points = self.game.ball.predict_trajectory()
-		trajectory_data = [vars(point) for point in trajectory_points]
+		if (self.game.event.name == 'Visible Trajectory'):
+			trajectory_points = self.game.ball.predict_trajectory()
+			trajectory_data = [vars(point) for point in trajectory_points]
+		else:
+			trajectory_data = []
 
 		ballX = self.game.ball.position.x
 

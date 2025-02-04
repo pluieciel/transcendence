@@ -116,6 +116,9 @@ export class Game {
 		}
 		if (data.trajectory) {
 			this.sceneManager.updateTrajectory(data.trajectory);
+			this.sceneManager.showTrajectory(true);
+		} else {
+			this.sceneManager.showTrajectory(false);
 		}
 		if (data.events && data.events.length > 0) {
 			data.events.forEach((event) => {

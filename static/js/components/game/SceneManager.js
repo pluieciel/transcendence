@@ -391,7 +391,7 @@ export class SceneManager {
 		this.bottomBorder.visible = this.debugMod;
 		this.leftBorder.visible = this.debugMod;
 		this.rightBorder.visible = this.debugMod;
-		if (this.trajectoryLine) this.trajectoryLine.visible = this.debugMod;
+		if (this.trajectoryLine) this.showTrajectory(this.debugMod);
 
 		this.leftPaddle.visible = !this.debugMod;
 		this.rightPaddle.visible = !this.debugMod;
@@ -409,13 +409,19 @@ export class SceneManager {
 
 		const geometry = new THREE.BufferGeometry().setFromPoints(points);
 		const material = new THREE.LineBasicMaterial({
-			color: 0x329da8,
+			color: 0xffffff,
 			opacity: 1,
 		});
 
 		this.trajectoryLine = new THREE.Line(geometry, material);
 		this.scene.add(this.trajectoryLine);
 		this.trajectoryLine.visible = this.debugMod;
+	}
+
+	showTrajectory(visible) {
+		if (this.trajectoryLine) {
+			this.trajectoryLine.visible = visible;
+		}
 	}
 
 	createDebugPaddles() {
