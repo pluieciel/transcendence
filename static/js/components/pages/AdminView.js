@@ -3,7 +3,18 @@ export default class MainView {
         this.container = container;
 		this.render();
 		this.addEventListeners();
+		this.getSettings();
     }
+
+	async getSettings() {
+		if (!window.app.settings.fetched)
+			await window.app.getPreferences();
+		this.settings = {
+			color: window.app.settings.color,
+			quality: window.app.settings.quality
+		};
+		return ;
+	}
 
     render() {
         this.container.innerHTML = `
