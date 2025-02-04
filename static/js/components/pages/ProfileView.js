@@ -15,7 +15,8 @@ export default class ProfileView {
 		this.container.innerHTML = `
 		<header>
 			<h1 id="pong">PONG</h1>
-				<button id="indexBtn" class="nav-btn">Index</button>
+				<button id="adminBtn">Admin</button>
+			<button id="indexBtn" class="nav-btn">Index</button>
 				<button id="customBtn" class="nav-btn">Custom</button>
 				<button id="profileBtn" class="nav-btn disabledBtn">Profile</button>
 				<button id="creditsBtn" class="nav-btn">Credits</button>
@@ -223,6 +224,7 @@ export default class ProfileView {
 						const data = await response.json();
 
 						const recoveryCodes = this.container.querySelector('#recoveryCodes');
+						recoveryCodes.innerHTML = '';
 						recoveryCodes.append(Object.assign(document.createElement('li'), {textContent: data.recovery_code_1}));
 						recoveryCodes.append(Object.assign(document.createElement('li'), {textContent: data.recovery_code_2}));
 						recoveryCodes.append(Object.assign(document.createElement('li'), {textContent: data.recovery_code_3}));
@@ -233,7 +235,7 @@ export default class ProfileView {
 						new bootstrap.Modal(this.container.querySelector('#recoveryModal')).show();
 					}
 				} else if (response.status == 409) {
-					alert(response.message);
+					console.log(response.message);
 				} else {
 					errorDiv.textContent = data['message'] || 'Login failed';
                     errorDiv.classList.remove('d-none');
@@ -249,10 +251,12 @@ export default class ProfileView {
 		let		file;
 		const	fileInput = document.getElementById('fileInput');
 		const	enable2FA = this.container.querySelector('#enable2FA');
+		const	disable2FA = this.container.querySelector('#disable2FA');
 		const	changeNameBtn = document.getElementById('changeNameBtn');
 		const	avatar = this.container.querySelector('.avatar-selector-settings');
-		const	newName = document.getElementById('newName');
-		
+		const	totpError = this.container.querySelector('#totpError');
+		const	newName = this.container.querySelector('#newName');
+
 		enable2FA.addEventListener('click', async (e) => {
 			e.preventDefault();
 			try {
@@ -270,14 +274,14 @@ export default class ProfileView {
 					const qrCode = this.container.querySelector('#qrCode');
 					qrCode.innerHTML = data.qr_code;
 				} else if (response.status == 409) {
-					alert(data.message);
+					console.log(data.message);
 				} else {
-					errorDiv.textContent = data.message;
-                    errorDiv.classList.remove('d-none');
+					totpError.textContent = data.message;
+                    totpError.classList.remove('d-none');
 				}
 			} catch (error) {
-				errorDiv.textContent = 'An error occurred:' + error;
-                errorDiv.classList.remove('d-none');
+				totpError.textContent = 'An error occurred:' + error;
+                totpError.classList.remove('d-none');
 			}
 		});
 
@@ -298,14 +302,12 @@ export default class ProfileView {
 					enable2FA.style.display = "block";
 					disable2FA.style.display = "none";
 				} else if (response.status == 409) {
-					alert(data.message);
+					console.log(data.message);
 				} else {
-					errorDiv.textContent = data.message;
-					errorDiv.classList.remove('d-none');
+					console.log(data.message);
 				}
 			} catch (error) {
-				errorDiv.textContent = 'An error occurred: ' + error;
-				errorDiv.classList.remove('d-none');
+				console.log('An error occurred: ' + error);
 			}
 		});
 		
@@ -427,11 +429,130 @@ export default class ProfileView {
 				window.app.logout();
 		});
 	}
+	
+	addNavigationEventListeners() {
+		const	logoutBtn = document.getElementById('logoutBtn');
+		const	indexBtn = document.getElementById('indexBtn');
+		const	adminBtn = document.getElementById('adminBtn');
 
-	addEventListeners() {
-		this.addNavEventListeners();
+		logoutBtn.addEventListener('click', () => {
+			window.app.logout();
+		});
+		
+		indexBtn.addEventListener('click', () => {
+			if (this.settings.color != window.app.settings.color || this.settings.quality != window.app.settings.quality) {
+				this.message2("You have unsaved changes", "Click the save changes button to proceed");
+				return ;
+			}
+			window.app.router.navigateTo('/index');
+		});
+
+		adminBtn.addEventListener('click', () => {
+			window.app.router.navigateTo('/admin');
+		});
+	}
+	
+    addEventListeners() {
 		this.add2FAEventListeners();
 		this.addSecurityEventListeners();
-		this.addProfileEventListeners();
+		this.addNavigationEventListeners();
+    }
+	
+	async eraseInDB() {
+		try {
+			const response = await fetch('/api/del/user', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+			});
+
+			const data = await response.json();
+			
+			if (data.success)
+				alert("deleted user successfully");
+			else
+				throw new Error(data.message);
+		} catch (error) {
+			console.error('An error occurred: ', error);
+			return false;
+		}
+		return true;
+	}
+
+	async saveChanges(main) {
+		try {
+			const response = await fetch('/api/settings/set/preferences', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					'newColor': this.settings.color,
+					'newQuality': this.settings.quality,
+				}),			
+				});
+				
+				const data = await response.json();
+				
+				if (data.success) {
+					window.app.settings.color = this.settings.color;
+				window.app.settings.quality = this.settings.quality;
+				if (!main)
+					this.message(true, 'Theme and quality changes saved!');
+				else {
+					window.app.router.navigateTo('/index');
+					const modal = bootstrap.Modal.getInstance(this.container.querySelector('#changeModal'));
+					if (modal)
+						modal.hide();
+				}
+			}
+			else
+				throw new Error(data['message']);
+		}
+		catch (error) {
+			console.error(error);
+		};
+	}
+	
+	async addUserData() {
+		const	colorDiv = document.getElementById('colorDiv');
+		const	qualityDiv = document.getElementById('qualityDiv');
+		const	leftQuality = document.getElementById('leftQuality');
+		const	rightQuality = document.getElementById('rightQuality');
+		const	enable2FA = this.container.querySelector('#enable2FA');
+		const	disable2FA = this.container.querySelector('#disable2FA');
+		const 	is_2fa_enabled = window.app.settings.is_2fa_enabled;
+		const	colorIndex = this.settings.color;
+		const	qualityIndex = this.settings.quality;
+		
+		let colorArray = {
+			0: 'Blue',
+			1: 'Cyan',
+			2: 'Green',
+			3: 'Orange',
+			4: 'Pink',
+			5: 'Purple',
+			6: 'Red',
+			7: 'Soft Green',
+			8: 'White'
+		};
+		let qualityArray = {
+			0: 'Low',
+			1: 'Medium',
+			2: 'High',
+		};
+		if (qualityIndex == 0) leftQuality.classList.add("disabled");
+		else leftQuality.classList.remove("disabled");
+
+		if (qualityIndex == 2) rightQuality.classList.add("disabled");
+		else rightQuality.classList.remove("disabled");
+
+		if (is_2fa_enabled) {enable2FA.style.display = "none";disable2FA.style.display = "block";}
+		else {enable2FA.style.display = "block";disable2FA.style.display = "none";}
+
+		colorDiv.innerHTML = "Color: " + colorArray[colorIndex];
+		window.app.setColor(colorIndex);
+		qualityDiv.innerHTML = "Quality: " + qualityArray[qualityIndex];
 	}
 }

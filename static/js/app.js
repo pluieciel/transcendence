@@ -1,3 +1,4 @@
+import AdminView from './components/pages/AdminView.js';
 import Router from './router.js';
 import MainView from './components/pages/MainView.js';
 import LoginView from './components/pages/LoginView.js';
@@ -14,6 +15,7 @@ class App {
 			{ path: '/custom', component: CustomView },
 			{ path: '/credits', component: CreditsView },
 			{ path: '/profile', component: ProfileView },
+			{ path: '/admin', component: AdminView },
 			{ path: '/login/oauth', component: LoginOAuth },
 			{ path: '*', component: LoginView },
 		]

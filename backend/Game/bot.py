@@ -5,6 +5,10 @@ import math
 import logging
 from .normal_game_logic import Vector2D
 
+class BotAvatar:
+ def __init__(self, url):
+ 	self.url = url
+
 
 class BotUser:
     def __init__(self, username, elo, color, user_id):
@@ -12,6 +16,8 @@ class BotUser:
         self.elo = elo
         self.color = color
         self.id = user_id
+        self.avatar = BotAvatar("/bot.png")
+        self.avatar42 = None
 
 
 class Bot:
@@ -65,7 +71,7 @@ class Bot:
 		if not target_y or not self.paddle_position:
 			return
 
-		dead_zone = 0.5  # Adjust this value as needed
+		dead_zone = self.paddle_height/2  # Adjust this value as needed
 		distance = target_y - self.paddle_position.y
 
 		if abs(distance) > dead_zone:

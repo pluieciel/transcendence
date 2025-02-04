@@ -4,11 +4,13 @@ import { PostProcessing } from "./PostProcessing.js";
 import { TextManager } from "./TextManager.js";
 
 export class SceneManager {
-	constructor(renderer, quality){
+	constructor(renderer, quality) {
 		this.leftPaddle = null;
 		this.rightPaddle = null;
 		this.ball = null;
-		this.quality = quality
+		this.base_paddle_height = 0.75;
+		this.base_debug_height = 0;
+		this.quality = quality;
 
 		//Debug
 		this.debugMod = false;
@@ -18,13 +20,36 @@ export class SceneManager {
 		this.rightBorder = null;
 		this.leftBorder = null;
 		this.trajectoryLine = null;
-		this.avatar = avatar;
+		this.avatar = null;
 
 		this.composer = null;
 		this.renderer = renderer;
 		this.light = null;
 		this.textManager = null;
 		this.colorTextureMap = this.getTextureMap();
+	}
+
+	dispose() {
+		if (this.scene) {
+			this.scene.traverse((object) => {
+				if (object.geometry) {
+					object.geometry.dispose();
+				}
+				if (object.material) {
+					if (Array.isArray(object.material)) {
+						object.material.forEach((material) => material.dispose());
+					} else {
+						object.material.dispose();
+					}
+				}
+			});
+		}
+		if (this.renderer) {
+			this.renderer.dispose();
+		}
+		if (this.composer) {
+			this.composer.dispose();
+		}
 	}
 
 	async initialize(data) {
@@ -47,8 +72,8 @@ export class SceneManager {
 	}
 
 	createCamera() {
-		this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-		this.camera.position.set(0, 12, 50);
+		this.camera = new THREE.PerspectiveCamera(38, window.innerWidth / window.innerHeight, 0.1, 1000);
+		this.camera.position.set(0, 9.3, 50);
 	}
 
 	setupLights() {
@@ -65,9 +90,9 @@ export class SceneManager {
 			this.createModels(data),
 			//TODO LINK FROM DB AVATAR
 			//RIGHT
-			this.createPlayerAvatar("/js/components/game/Textures/image.png", new THREE.Vector3(16.1, 25, -9.6), data.player.right.color),
+			this.createPlayerAvatar(data.player.right.avatar, new THREE.Vector3(16.1, 25, -9.6), data.player.right.color),
 			//LEFT
-			this.createPlayerAvatar("/js/components/game/Textures/valgrant.jpeg", new THREE.Vector3(-16.7, 25, -9.6), data.player.left.color),
+			this.createPlayerAvatar(data.player.left.avatar, new THREE.Vector3(-16.7, 25, -9.6), data.player.left.color),
 		]);
 		this.createDebugPaddles();
 	}
@@ -102,9 +127,9 @@ export class SceneManager {
 
 		const tableScale = new THREE.Vector3(4.14, 4.14, 4.14);
 		const tablePos = new THREE.Vector3(0, 1.59, -30.72);
-		const leftPaddleScale = new THREE.Vector3(0.75, 0.25, 0.5);
+		const leftPaddleScale = new THREE.Vector3(this.base_paddle_height, 0.25, 0.5);
 		const rightPaddlePos = new THREE.Vector3(-18, -3.2, -15);
-		const rightPaddleScale = new THREE.Vector3(0.75, 0.25, 0.5);
+		const rightPaddleScale = new THREE.Vector3(this.base_paddle_height, 0.25, 0.5);
 		const leftPaddlePos = new THREE.Vector3(17.94, -3.2, -15);
 		const ballScale = new THREE.Vector3(0.44, 0.44, 0.44);
 		const ballPos = new THREE.Vector3(0, -3, -15);
@@ -223,10 +248,13 @@ export class SceneManager {
 
 					const avatar = new THREE.Mesh(avatarGeometry, avatarMaterial);
 					avatar.position.copy(position);
+					avatar.material.map.flipX = false;
 					avatar.material.map.flipY = false;
+					avatar.material.map.flipZ = false;
 					avatar.material.needsUpdate = true;
 					avatar.rotation.x = 0.5;
 					avatar.rotation.z = Math.PI;
+					avatar.rotation.y = Math.PI;
 					avatar.scale.set(0.8, 0.8, 0.8);
 
 					// Create the background plane
@@ -363,7 +391,7 @@ export class SceneManager {
 		this.bottomBorder.visible = this.debugMod;
 		this.leftBorder.visible = this.debugMod;
 		this.rightBorder.visible = this.debugMod;
-		this.trajectoryLine.visible = this.debugMod;
+		if (this.trajectoryLine) this.trajectoryLine.visible = this.debugMod;
 
 		this.leftPaddle.visible = !this.debugMod;
 		this.rightPaddle.visible = !this.debugMod;
@@ -402,6 +430,7 @@ export class SceneManager {
 
 		this.scene.add(paddle1);
 		this.scene.add(paddle2);
+		this.base_debug_height = paddle1.scale.y;
 		this.paddles.push(paddle1, paddle2);
 	}
 

@@ -43,7 +43,7 @@ export default class Login {
                                 </div>
                                 <div id="totpError" class="alert alert-danger d-none"></div>
                                 <button type="button" class="btn btn-primary" id="recoveryCodeBtn">Use recovery code</button>
-                                <button type="button" class="btn btn-primary" id="totpBtn" style="display: none;">Use totp</button>
+                                <button type="button" class="btn btn-primary" id="totpBtn" style="display: none;">Use 2FA</button>
 	                        </div>
 	                        <div class="modal-footer">
 	                            <button type="submit" class="btn btn-primary" id="totpSubmit">Submit</button>

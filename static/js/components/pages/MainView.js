@@ -3,18 +3,20 @@ import Tournament from "../tournament/Tournament.js";
 import GameComponent from "../game/GameComponents.js";
 
 export default class MainView {
-    constructor(container) {
-        this.container = container;
+	constructor(container) {
+		this.container = container;
 
-        this.countdownTime = 0;
-        this.timerInterval = null;
-		
-        this.username = window.app.state.username;
+		this.countdownTime = 0;
+		this.timerInterval = null;
+
+		this.username = window.app.state.username;
 
 		this.render();
 		this.initComponents();
+		if (!window.app.settings['fetched']) window.app.getPreferences();
 		this.checkForBackdrop();
         this.addEventListeners();
+		this.setProfileFields();
         if (window.app.ingame) {
             console.log("Reconnecting to game");
             const protocol =
@@ -40,8 +42,11 @@ export default class MainView {
     }
 
 
-    render() {
-        this.container.innerHTML = `
+
+
+
+	render() {
+		this.container.innerHTML = `
 			<header>
 				<h1 id="pong">PONG</h1>
 					<button id="indexBtn" class="nav-btn disabledBtn">Index</button>
@@ -49,6 +54,7 @@ export default class MainView {
 					<button id="profileBtn" class="nav-btn">Profile</button>
 					<button id="creditsBtn" class="nav-btn">Credits</button>
 					<button id="logoutBtn" class="nav-btn">Log out</button>
+					<button id="adminBtn">Admin</button>
 			</header>
 
 			<div id="mainPage">
@@ -76,7 +82,7 @@ export default class MainView {
 			<div id="gameContainer"></div>
 
         `;
-    }
+	}
 
     showLeaderboard() {
         const mainContent = this.container.querySelector("#mainContent");
@@ -89,33 +95,36 @@ export default class MainView {
             window.app.tournament = new Tournament(tournamentContainer);
         } else {
 			window.app.tournament.container = tournamentContainer;
-            window.app.tournament.render();
+			window.app.tournament.render();
 			window.app.tournament.addEventListeners();
 			window.app.tournament.updateContent();
-        }
+		}
 
         const chatBoxContainer = this.container.querySelector("#chatBoxContainer");
         if (!window.app.chatBox) {
             window.app.chatBox = new ChatBox(chatBoxContainer);
         } else {
 			window.app.chatBox.container = chatBoxContainer;
-            window.app.chatBox.render(chatBoxContainer);
+			window.app.chatBox.render(chatBoxContainer);
 			window.app.chatBox.addEventListeners();
 			window.app.chatBox.updateOnlineUsersList();
-        }
+		}
 
-        new GameComponent(this.container.querySelector("#gameContainer"));
+		new GameComponent(this.container.querySelector("#gameContainer"));
 
-        const quickMatchButton = this.container.querySelector("#quickMatch");
-        if (quickMatchButton) {
-            quickMatchButton.setAttribute("data-bs-toggle", "modal");
-            quickMatchButton.setAttribute("data-bs-target", "#matchSearch");
-        }
-    }
+		const quickMatchButton = this.container.querySelector("#quickMatch");
+		if (quickMatchButton) {
+			quickMatchButton.setAttribute("data-bs-toggle", "modal");
+			quickMatchButton.setAttribute("data-bs-target", "#matchSearch");
+		}
+	}
 
     addEventListeners() {
 		const selectorRumble = document.getElementById("rumble");
         const selectorClassic = document.getElementById("classic");
+		const adminBtn = this.container.querySelector("#adminBtn");
+		const settingsBtn = this.container.querySelector("#settingsBtn");
+		const logoutBtn = this.container.querySelector("#logoutBtn");
 		
 		this.addNavEventListeners();
 
@@ -128,6 +137,24 @@ export default class MainView {
 			window.app.settings['game-selector'] = "classic"
 			this.addSelector();
 		});
+
+		adminBtn.addEventListener("click", () => {
+			window.app.router.navigateTo("/admin");
+		});
+
+		logoutBtn.addEventListener("click", () => {
+			window.app.chatBox.disconnect();
+			window.app.logout();
+		});
+
+		settingsBtn.addEventListener("click", () => {
+			window.app.router.navigateTo("/settings");
+		});
+
+        logoutBtn.addEventListener("click", () => {
+            window.app.chatBox.disconnect();
+            window.app.logout();
+        });
 	}
 
 	addSelector() {
@@ -143,11 +170,41 @@ export default class MainView {
 			selectorClassic.classList.remove("disabled");
 		}
 	}
-	
+
+	async setProfileFields () {
+		try {
+			const response = await fetch("/api/get/profile", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+			});
+			const data = await response.json();
+
+			const avatarUrl = await window.app.getAvatar(this.username);
+			if (avatarUrl) name.innerHTML = `<img id="avatarImg" src=${avatarUrl} alt="User Avatar" width="30" height="30"></img> ` + this.username;
+
+			if (data.success) {
+				elo.innerHTML = "Elo: " + data["elo"];
+				winrate.innerHTML = "Winrate: " + data["winrate"];
+				ratio.innerHTML = "Ratio: " + data["wins"] + "/" + data["looses"];
+				tourn.innerHTML = "Tournaments won: " + data["tourn_won"] + " played: " + data["tourn_joined"];
+				if (data["display"]) {
+					let toInsert = " (" + data["display"] + ")";
+					name.insertAdjacentHTML("beforeend", toInsert);
+				}
+			} else throw new Error("Request failure");
+		} catch (error) {
+			elo.innerHTML = "Failed to load elo";
+			winrate.innerHTML = "Failed to load winrate";
+			tourn.innerHTML = "Failed to load tournaments";
+			console.error("An error occurred: ", error);
+		}
+	}
+
 	checkForBackdrop() {
 		const el = document.querySelector(".modal-backdrop");
-		if (el)
-			el.remove();
+		if (el) el.remove();
 	}
 
 	addNavEventListeners() {

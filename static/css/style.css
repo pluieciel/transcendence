@@ -54,6 +54,13 @@
 	border-radius: 8px;
 }
 
+#gameCanvas {
+	width: 100%;
+	height: auto;
+	display: block;
+	margin: 0 auto;
+}
+
 .chat-message.admin .message-header {
 	display: none; /* Hide the header for admin messages if needed */
 }
@@ -143,7 +150,8 @@
 
 .custom-tabs .chat-nav-link.active {
 	background-color: rgba(255, 255, 255, 0.3);
-	border-color: var(--user-color) transparent var(--user-color) var(--user-color);
+	border-color: var(--user-color) transparent var(--user-color)
+		var(--user-color);
 	color: white;
 }
 
@@ -334,7 +342,7 @@
 	height: 100%;
 	background: rgba(0, 0, 0, 0.8); /* Darker background */
 	color: white;
-	display : none;
+	display: none;
 	flex-direction: column;
 	justify-content: center; /* Vertically center the content */
 	align-items: center; /* Horizontally center the content */
@@ -345,7 +353,7 @@
 	font-size: 2rem;
 	font-weight: bold;
 	margin-bottom: 20px;
-	color: var(--user-color); 
+	color: var(--user-color);
 	text-shadow: 2px 2px 10px rgba(255, 255, 255, 0.5);
 }
 
@@ -369,4 +377,44 @@
 
 #chatTabs {
 	border-bottom: 0;
+}
+
+.outer {
+	position: fixed;
+	pointer-events: none;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	width: 547px;
+	height: 196px;
+	background: rgba(0, 0, 0, 0.8); /* Black background with 0.8 opacity */
+	border: 11px solid black;
+	box-shadow: 0px 4px 12.6px 21px rgba(255, 255, 255, 0.25);
+	display: flex;
+	flex-direction: column;
+	justify-content: top;
+	align-items: center;
+	gap: 10px;
+	opacity: 0; /* Start with 0 opacity */
+	transition: opacity 1s ease-in-out; /* Add transition for opacity */
+}
+
+.title,
+.description {
+	pointer-events: none;
+	font-family: "Exo 2", sans-serif;
+	color: white;
+	text-shadow: 0px 4px 4px black;
+	text-align: center;
+}
+
+.title {
+	font-size: 34px;
+	font-weight: 500;
+	margin-bottom: 10px; /* Add some space between title and description */
+}
+
+.description {
+	font-size: 30px;
+	font-weight: 400;
 }

@@ -39,4 +39,9 @@ export class InputManager {
 			);
 		}
 	}
+
+	dispose() {
+		window.removeEventListener("keydown", this.keydownListener);
+		window.removeEventListener("keyup", this.keyupListener);
+	}
 }

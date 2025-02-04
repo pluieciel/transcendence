@@ -8,4 +8,4 @@ elasticsearch.hosts: ["${ELASTIC_HOST}"]
 elasticsearch.username: "${ELASTICSEARCH_USERNAME}"
 elasticsearch.password: "${ELASTICSEARCH_PASSWORD}"
 xpack.reporting.roles.enabled: false
-server.basePath: "/admin/kibana"
+server.basePath: "/admin/services/kibana"

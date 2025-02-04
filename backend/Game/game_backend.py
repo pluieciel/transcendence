@@ -51,7 +51,7 @@ class GameBackend:
 		if (type == "vanilla"):
 			return NormalGameInstance(self.broadcast_state, self.on_game_end)
 		elif (type == "rumble"):
-			return RumbleGameInstance(self.rumble_broadcast_state, self.on_game_end)
+			return RumbleGameInstance(self.rumble_broadcast_state, self.rumble_revert_event_broadcast, self.on_game_end)
 		else:
 			self.logger.error("Game type not found")
 
@@ -76,6 +76,16 @@ class GameBackend:
 	def stop_game(self):
 		self.game.stop()
 
+	async def player_disc(self, user):
+		if (self.player_left and self.player_left.user.id == user.id):
+			self.logger.info("Player left disconnected, calling forfeit")
+			await self.game.forfeit("LEFT")
+		elif (self.player_right and self.player_right.user.id == user.id):
+			self.logger.info("Player right disconnected, calling forfeit")
+			await self.game.forfeit("RIGHT")
+		else:
+			self.logger.warning("Player disc called but user not found")
+
 	def player_in_game(self, user):
 		if (self.player_left and self.player_left.user.id == user.id):
 			return True
@@ -84,7 +94,6 @@ class GameBackend:
 		return False
 
 	async def disconnect_user(self, user):
-		print("WATATATATATA", flush=True)
 		old_channel = None
 		if (self.player_left and self.player_left.user.id == user.id):
 			old_channel = self.player_left.channel
@@ -294,9 +303,8 @@ class GameBackend:
 				"scoreLeft": self.game.player_left.score,
 				"scoreRight": self.game.player_right.score,
 				"eloChange": self.elo_change
-    	})
+		})
 		if self.game.ball.lastHitter is not None:
-			self.logger.info(self.game.ball.lastHitter)
 			if (self.game.ball.lastHitter == "LEFT"):
 				color = self.get_color(self.player_left.user)
 			elif self.game.ball.lastHitter == "RIGHT":
@@ -348,10 +356,10 @@ class GameBackend:
 		events = []
 		if self.game.scored:
 			events.append({
-            "type": "score",
-            "position": vars(self.game.scorePos),
-            "score_left": self.game.player_left.score,
-            "score_right": self.game.player_right.score
+			"type": "score",
+			"position": vars(self.game.scorePos),
+			"score_left": self.game.player_left.score,
+			"score_right": self.game.player_right.score
 			})
 			self.game.scored = False
 		if self.game.ended:
@@ -363,9 +371,20 @@ class GameBackend:
 				"scoreLeft": self.game.player_left.score,
 				"scoreRight": self.game.player_right.score,
 				"eloChange": self.elo_change
-    	})
+		})
+		if self.game.announceEvent or self.game.event.action is not 'none':
+			self.logger.info(f"Announcing event {self.game.event.name} and {self.game.event.description}")
+			events.append({
+				"type": "event",
+				"announce" : self.game.announceEvent,
+				"name": self.game.event.name,
+				"description": self.game.event.description,
+				"action": self.game.event.action,
+		})
+		self.game.event.action = 'none'
+		if (self.game.announceEvent):
+			self.game.announceEvent = False
 		if self.game.ball.lastHitter is not None:
-			self.logger.info(self.game.ball.lastHitter)
 			if (self.game.ball.lastHitter == "LEFT"):
 				color = self.get_color(self.player_left.user)
 			elif self.game.ball.lastHitter == "RIGHT":
@@ -377,18 +396,51 @@ class GameBackend:
 		trajectory_points = self.game.ball.predict_trajectory()
 		trajectory_data = [vars(point) for point in trajectory_points]
 
+		ballX = self.game.ball.position.x
+
+		if (self.game.event.name == 'SmokeCloud' and ballX >= -6 and ballX <= 6):
+			ball_pos = {
+				"x": 1000,
+				"y": 1000,
+				"z": 1000
+			}
+		else:
+			ball_pos = vars(self.game.ball.position)
 		state = {
 			"type": "game.update",
 			"data": {
 				"positions": {
 					"player_left": vars(self.game.player_left.position),
 					"player_right": vars(self.game.player_right.position),
-					"ball": vars(self.game.ball.position),
+					"ball": ball_pos,
 				},
 				"trajectory": trajectory_data,
 				"events": events
 			}
 		}
+		try:
+			await self.channel_layer.group_send(str(self.game_id), state)
+		except Exception as e:
+			self.logger.info(f"Error {e}")
+
+	async def rumble_revert_event_broadcast(self):
+		events = []
+		if (self.game.event.action != 'none'):
+			action = self.game.event.action
+			self.game.event.action = 'none'
+			events.append({
+				"type": "event",
+				"name": self.game.event.name,
+				"announce" : False,
+				"description": self.game.event.description,
+				"action": action,
+			})
+			state = {
+				"type": "game.update",
+				"data": {
+					"events": events
+				}
+			}
 		try:
 			await self.channel_layer.group_send(str(self.game_id), state)
 		except Exception as e:

@@ -259,6 +259,9 @@ export default class ChatBox {
                             const canvas =
                                 document.querySelector("#gameCanvas");
                             const game = new Game(canvas, window.app.gamews);
+                            window.addEventListener('beforeunload', () => {
+                                game.dispose();
+                            });
                             console.log("Game initialization");
                             const gameDiv = document.querySelector("#gameDiv");
                             gameDiv.style.display = "block";
@@ -897,6 +900,9 @@ export default class ChatBox {
                             const canvas =
                                 document.querySelector("#gameCanvas");
                             const game = new Game(canvas, window.app.gamews);
+                            window.addEventListener('beforeunload', () => {
+                                game.dispose();
+                            });
                             console.log("Game initialization");
                             const gameDiv = document.querySelector("#gameDiv");
                             gameDiv.style.display = "block";
