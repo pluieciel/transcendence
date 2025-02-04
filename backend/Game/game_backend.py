@@ -141,11 +141,9 @@ class GameBackend:
 				await self.update_elo(self.game.winner)
 
 			if self.game.winner == "LEFT":
-				winner = self.player_left.user
-				self.game.winner = winner.username
+				self.game.winner = self.player_left.user
 			elif self.game.winner == "RIGHT":
-				winner = self.player_right.user
-				self.game.winner = winner.username
+				self.game.winner = self.player_right.user
 
 			if self.game_type == "vanilla":
 				await self.broadcast_state()
@@ -167,15 +165,15 @@ class GameBackend:
 			#next round for tournament
 			if game_history_db.game_category == "Tournament1":
 				next_game_place = game_history_db.tournament_round2_place
-				self.chat_consumer.tournament_info["round1"][f"game{next_game_place}"]["winner"] = winner.username
+				self.chat_consumer.tournament_info["round1"][f"game{next_game_place}"]["winner"] = self.game.winner.username
 				next_game_id = game_history_db.tournament_round2_game_id
 				new_game_history_db = await self.manager.get_game_by_id(next_game_id)
 				if next_game_place == 1:
-					await self.manager.set_game_state(new_game_history_db, 'waiting', player_a=winner)
-					self.chat_consumer.tournament_info["round2"]["game1"]["p1"] = winner.username
+					await self.manager.set_game_state(new_game_history_db, 'waiting', player_a=self.game.winner)
+					self.chat_consumer.tournament_info["round2"]["game1"]["p1"] = self.game.winner.username
 				else:
-					await self.manager.set_game_state(new_game_history_db, 'waiting', player_b=winner)
-					self.chat_consumer.tournament_info["round2"]["game1"]["p2"] = winner.username
+					await self.manager.set_game_state(new_game_history_db, 'waiting', player_b=self.game.winner)
+					self.chat_consumer.tournament_info["round2"]["game1"]["p2"] = self.game.winner.username
 
 				if self.chat_consumer.tournament_info["round2"]["game1"].get("p1", None) and self.chat_consumer.tournament_info["round2"]["game1"].get("p2", None):
 					self.chat_consumer.tournament_info["round2"]["game1"]["state"] = "prepare"
@@ -197,7 +195,7 @@ class GameBackend:
 						}
 					)
 			elif game_history_db.game_category == "Tournament2":
-				self.chat_consumer.tournament_info["round2"]["game1"]["winner"] = winner.username
+				self.chat_consumer.tournament_info["round2"]["game1"]["winner"] = self.game.winner.username
 
 				redis_client = redis.Redis(host='redis', port=6379, db=0)
 				groups = [g.decode('utf-8') for g in redis_client.smembers('active_groups')]
@@ -298,8 +296,8 @@ class GameBackend:
 			self.logger.info(f"Appending winner info with {self.game.winner}")
 			events.append({
 				"type": "game_end",
-				"winnerName": self.game.winner,
-				"winnerAvatar": '/js/components/game/Textures/image.png', #TODO BACKEND
+				"winnerName": self.game.winner.username,
+				"winnerAvatar": self.game.winner.avatar, #TODO BACKEND
 				"scoreLeft": self.game.player_left.score,
 				"scoreRight": self.game.player_right.score,
 				"eloChange": self.elo_change
@@ -363,11 +361,18 @@ class GameBackend:
 			})
 			self.game.scored = False
 		if self.game.ended:
-			self.logger.info(f"Appending winner info with {self.game.winner}")
+			if (self.game.winner.avatar42):
+				avatar = self.game.winner.avatar42
+			elif (self.game.winner.avatar):
+				avatar = self.game.winner.avatar.url
+			else:
+				avatar = '/default_avatar.png'
+
+			self.logger.info(f"Appending winner info with {self.game.winner.username}")
 			events.append({
 				"type": "game_end",
-				"winnerName": self.game.winner,
-				"winnerAvatar": '/js/components/game/Textures/image.png', #TODO BACKEND
+				"winnerName": self.game.winner.username,
+				"winnerAvatar": avatar,
 				"scoreLeft": self.game.player_left.score,
 				"scoreRight": self.game.player_right.score,
 				"eloChange": self.elo_change

@@ -231,9 +231,8 @@ export class SceneManager {
 					texture.encoding = THREE.sRGBEncoding;
 					texture.needsUpdate = true;
 
-					const aspectRatio = texture.image.width / texture.image.height;
 					const width = 5;
-					const height = width / aspectRatio;
+					const height = 5; /*width / aspectRatio;*/
 
 					// Create the avatar plane
 					const avatarGeometry = new THREE.PlaneGeometry(width, height);

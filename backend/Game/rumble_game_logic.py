@@ -286,16 +286,16 @@ class RumbleGameInstance:
 
 	def get_event(self):
 		events = [
-			#InvertedControlsEvent(self),
-			#RandomBouncesEvent(self),
-			#MirrorBallEvent(self),
-			#LightsOutEvent(self),
-			#SmokeCloudEvent(self),
-			#InfiniteSpeedEvent(self),
-			#ReverseBallEvent(self),
-			#ShrinkingPaddleEvent(self)#,
-			#IcyPaddlesEvent(self),
-			#NoStoppingEvent(self),
+			InvertedControlsEvent(self),
+			RandomBouncesEvent(self),
+			MirrorBallEvent(self),
+			LightsOutEvent(self),
+			SmokeCloudEvent(self),
+			InfiniteSpeedEvent(self),
+			ReverseBallEvent(self),
+			ShrinkingPaddleEvent(self),
+			IcyPaddlesEvent(self),
+			NoStoppingEvent(self),
 			VisibleTrajectoryEvent(self)
 		]
 		return random.choice(events)

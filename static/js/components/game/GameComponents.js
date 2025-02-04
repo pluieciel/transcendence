@@ -1,10 +1,7 @@
-import { Game } from "./Game.js";
-
 export default class GameComponent {
 	constructor(container) {
 		this.container = container;
 
-		//Search game timer
 		this.countdownTime = 0;
 		this.timerInterval = null;
 
@@ -15,20 +12,16 @@ export default class GameComponent {
 	render() {
 		this.container.innerHTML = `
 			<!-- Quick Match Timer container -->
-				<div class="modal fade" id="matchSearch" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-					<div class="modal-dialog modal-dialog-centered">
-						<div class="modal-content modal-content-game d-flex flex-column align-items-center justify-content-center text-center">
-							<h5 class="modal-title w-70 mt-3 mb-3" id="staticBackdropLabel">Searching for a game</h5>
-							<h2 id="timer">0s</h2> <!-- Timer below the header -->
-							<button type="button" class="btn btn-secondary m-3" id="gameSearchCancel" data-bs-dismiss="modal">Cancel</button>
-						</div>
+			<div class="modal fade" id="matchSearch" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+				<div class="modal-dialog modal-dialog-centered">
+					<div class="modal-content modal-content-game d-flex flex-column align-items-center justify-content-center text-center">
+						<h5 class="modal-title w-70 mt-3 mb-3" id="staticBackdropLabel">Searching for a game</h5>
+						<h2 id="timer">0s</h2> <!-- Timer below the header -->
+						<button type="button" class="btn btn-secondary m-3" id="gameSearchCancel" data-bs-dismiss="modal">Cancel</button>
 					</div>
 				</div>
-			`;
-
-		const button = document.getElementById("quickMatch");
-		button.setAttribute("data-bs-toggle", "modal");
-		button.setAttribute("data-bs-target", "#matchSearch");
+			</div>
+		`;
 	}
 
 	addEventListeners() {
@@ -47,14 +40,11 @@ export default class GameComponent {
 			playAI.addEventListener("click", () => this.playBot(1)); // TODO: Select difficulty
 		}
 
-		if (matchSearchModal) {
-			matchSearchModal.addEventListener("hidden.bs.modal", () => {
-				this.stopTimerAndDismissModal();
-			});
-		}
-
 		if (cancelGameSearch) {
 			cancelGameSearch.addEventListener("click", () => {
+				if (window.app.gamews) {
+					window.app.gamews.close();
+				}
 				this.stopTimerAndDismissModal();
 			});
 		}
@@ -109,16 +99,13 @@ export default class GameComponent {
 		};
 	}
 
-	redirectToGame(events) {
+	async redirectToGame(events) {
+		await this.stopTimerAndDismissModal();
 		window.app.router.navigateTo("/game");
 		const gameView = window.app.router.currentComponent;
 		if (gameView && gameView.initializeGame) {
 			gameView.initializeGame(events);
 		}
-
-		setTimeout(() => {
-			this.stopTimerAndDismissModal();
-		}, 1000);
 	}
 
 	startSearchGameTimer() {
@@ -135,7 +122,7 @@ export default class GameComponent {
 		}, 1000);
 	}
 
-	stopTimerAndDismissModal() {
+	async stopTimerAndDismissModal() {
 		clearInterval(this.timerInterval);
 		if (this.timerElement) {
 			this.timerElement.innerText = "0s";
@@ -143,6 +130,7 @@ export default class GameComponent {
 		const matchSearchModal = bootstrap.Modal.getInstance(document.getElementById("matchSearch"));
 		if (matchSearchModal) {
 			matchSearchModal.hide();
+			await new Promise((resolve) => setTimeout(resolve, 300)); // Wait for the modal to fully close
 		}
 	}
 }

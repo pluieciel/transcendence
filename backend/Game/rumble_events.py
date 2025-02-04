@@ -275,10 +275,10 @@ class VisibleTrajectoryEvent(GameEvent):
 		self.game = game
 		self.name = "Visible Trajectory"
 		self.action = 'none'
-		self.description = "You can now see the ball trajectory !"
-		self.ball_accel_mult = 1.5
+		self.description = "You can now see the ball trajectory, but it goes faster !"
+		self.ball_accel_mult = 1.3
 		self.ball_basespeed_mult = 1
-		self.player_speed_mult = 1.2
+		self.player_speed_mult = 1.3
 
 	def apply_specific(self):
 		pass

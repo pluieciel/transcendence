@@ -9,6 +9,14 @@ export default class GameView {
 		this.addEventListeners();
 		this.handlePopState = this.handlePopState.bind(this);
 		window.addEventListener("popstate", this.handlePopState);
+		this.checkForBackdrop();
+	}
+
+	checkForBackdrop() {
+		const el = document.querySelector(".modal-backdrop");
+		if (el) el.remove();
+		const els = document.querySelector(".modal-backdrop");
+		if (els) els.remove();
 	}
 
 	async getSettings() {
