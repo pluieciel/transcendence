@@ -100,13 +100,7 @@ export default class GameView {
 	}
 
 	returnToMainMenu() {
-		const gameDiv = document.querySelector("#gameDiv");
 		const returnButton = document.querySelector("#returnButton");
-		gameDiv.style.display = "none";
-		returnButton.style.display = "none";
-		document.querySelector("#overlay").style.display = "none";
-		document.querySelector("#mainPage").style.display = "block";
-
 		this.disposeGame();
 
 		window.app.ingame = false;
