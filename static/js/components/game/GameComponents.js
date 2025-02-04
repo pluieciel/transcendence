@@ -10,7 +10,6 @@ export default class GameComponent {
 
 		this.render();
 		this.addEventListeners();
-		//this.timerElement = document.getElementById("timer");
 	}
 
 	render() {
@@ -47,6 +46,7 @@ export default class GameComponent {
 	}
 
 	addEventListeners() {
+		window.app.settings['game-selector']; //rumble || classic
 		const quickMatch = document.getElementById("quickMatch");
 		const playAI = document.getElementById("playAI");
 		const matchSearchModal = document.getElementById("matchSearch");

@@ -1,17 +1,21 @@
-import LoginView from './components/pages/LoginView.js';
-import MainView from './components/pages/MainView.js';
-import SettingsView from './components/pages/SettingsView.js';
 import AdminView from './components/pages/AdminView.js';
-import LoginOAuth from './components/login/LoginOAuth.js';
 import Router from './router.js';
+import MainView from './components/pages/MainView.js';
+import LoginView from './components/pages/LoginView.js';
+import LoginOAuth from './components/login/LoginOAuth.js';
+import ProfileView from './components/pages/ProfileView.js';
+import CreditsView from './components/pages/CreditsView.js';
+import CustomView from './components/pages/CustomView.js';
 
 class App {
 	constructor() {
 		this.routes = [
 			{ path: '/', component: LoginView },
 			{ path: '/index', component: MainView },
+			{ path: '/custom', component: CustomView },
+			{ path: '/credits', component: CreditsView },
+			{ path: '/profile', component: ProfileView },
 			{ path: '/admin', component: AdminView },
-			{ path: '/settings', component: SettingsView },
 			{ path: '/login/oauth', component: LoginOAuth },
 			{ path: '*', component: LoginView },
 		]
@@ -26,11 +30,11 @@ class App {
 		this.router = new Router(this.routes);
 	}
 
-	setColor() {
-		switch (this.settings.color) {
-			default: document.documentElement.style.setProperty("--user-color", "#00BDD1");break; 
+	setColor(color) {
+		switch (color) {
+			default: document.documentElement.style.setProperty("--user-color", "#0FF");break; 
 			case 0: document.documentElement.style.setProperty("--user-color", "#3E27F8");break; //Blue
-			case 1: document.documentElement.style.setProperty("--user-color", "#00BDD1");break; //Cyan
+			case 1: document.documentElement.style.setProperty("--user-color", "#0FF");break; //Cyan
 			case 2: document.documentElement.style.setProperty("--user-color", "#00AD06");break; //Green
 			case 3: document.documentElement.style.setProperty("--user-color", "#E67E00");break; //Orrange
 			case 4: document.documentElement.style.setProperty("--user-color", "#E6008F");break; //Pink
@@ -42,9 +46,6 @@ class App {
 	}
 
 	async getAvatar(username) {
-		// if (this.avatarCache[username]) {
-		// 	return this.avatarCache[username];
-		// }
 		const response = await fetch(`/api/get/avatar/${username}`, {
 			method: "POST",
 			headers: {
