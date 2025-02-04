@@ -3,14 +3,18 @@ export default class CreditsView {
 		this.container = container;
 		this.username = window.app.state.username;
 		this.render();
+		this.setButtons();
+		this.addEventListerners();
 	}
 
 	render() {
 		this.container.innerHTML = `
 			<header>
 				<h1 id="pong">PONG</h1>
-					<button id="settingsBtn">Settings</button>
-					<button id="logoutBtn">Log out</button>
+					<button id="customBtn" class="nav-btn">Custom</button>
+					<button id="indexBtn" class="nav-btn">Index</button>
+					<button id="profileBtn" class="nav-btn">Profile</button>
+					<button id="logoutBtn" class="nav-btn">Log out</button>
 			</header>
 
 			<div id="mainPage">
@@ -44,13 +48,47 @@ export default class CreditsView {
 						<iframe id="pdf" class="userOutline"
 						src=
 						"https://cdn.intra.42.fr/pdf/pdf/134058/en.subject.pdf#toolbar=0&navpanes=0">
-						</div>
-						</div>
-						</div>
+					</div>
+				</div>
+			</div>
 						`;
-						}
-					}
-					// 	<div class="pdf-container userOutline">
-					// </div>
-					
-					// "https://media.geeksforgeeks.org/wp-content/cdn-uploads/20210101201653/PDF.pdf"
+	};
+
+	setButtons() {
+		const	index = document.getElementById('indexBtn');
+		const	custom = document.getElementById('customBtn');
+		const	profile = document.getElementById('profileBtn');
+
+		index.style['right'] = '295px';
+		custom.style['right'] = '440px';
+		profile.style['right'] = '150px';
+	}
+
+	addNavEventListeners() {
+		const	index = document.getElementById('indexBtn');
+		const	custom = document.getElementById('customBtn');
+		const	profile = document.getElementById('profileBtn');
+		const	logoutBtn = document.getElementById('logoutBtn');
+
+		logoutBtn.addEventListener("click", () => {
+            window.app.chatBox.disconnect();
+            window.app.logout();
+        });
+
+		custom.addEventListener("click", () => {
+			window.app.router.navigateTo("/custom");
+		});
+
+		index.addEventListener("click", () => {
+			window.app.router.navigateTo("/index");
+		});
+
+		profile.addEventListener("click", () => {
+			window.app.router.navigateTo("/profile");
+		});
+	}
+
+	addEventListerners() {
+		this.addNavEventListeners();
+	}
+}

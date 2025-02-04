@@ -1,6 +1,6 @@
 import {addUserData, message, message2, saveUserChanges, eraseInDB} from "../utils/settingsUtils.js"
 
-export default class SettingsView {
+export default class CustomView {
     constructor(container) {
 		this.container = container;
         this.username = window.app.state.username;
@@ -9,6 +9,7 @@ export default class SettingsView {
 	
 	async init() {
 		this.render();
+		this.setButtons();
 		this.addEventListeners();
 		await this.getSettings();
 		await addUserData(this.settings);
@@ -28,8 +29,10 @@ export default class SettingsView {
         this.container.innerHTML = `
     <header>
         <h1 id="pong">PONG</h1>
-			<button id="indexBtn">Main</button>
-			<button id="logoutBtn">Log out</button>
+			<button id="profileBtn" class="nav-btn">Profile</button>
+			<button id="indexBtn" class="nav-btn">Index</button>
+			<button id="creditsBtn" class="nav-btn">Credits</button>
+			<button id="logoutBtn" class="nav-btn">Log out</button>
 	</header>
 	<div class="welcome">
         <p>Welcome to your settings, you can change everything here!</p>
@@ -428,15 +431,28 @@ export default class SettingsView {
 				window.app.logout();
 		});
 	}
-	
-	addNavigationEventListeners() {
+
+	setButtons() {
+		const	profile = document.getElementById('profileBtn');
+		const	index = document.getElementById('indexBtn');
+		const	credits = document.getElementById('creditsBtn');
+
+		index.style['right'] = '295px';
+		profile.style['right'] = '440px';
+		credits.style['right'] = '150px';
+	}
+
+	addNavEventListeners() {
+		const	profile = document.getElementById('profileBtn');
+		const	index = document.getElementById('indexBtn');
+		const	credits = document.getElementById('creditsBtn');
 		const	logoutBtn = document.getElementById('logoutBtn');
-		const	indexBtn = document.getElementById('indexBtn');
-	
-		logoutBtn.addEventListener('click', () => {
-			window.app.logout();
-		});
-		
+
+		logoutBtn.addEventListener("click", () => {
+            window.app.chatBox.disconnect();
+            window.app.logout();
+        });
+
 		indexBtn.addEventListener('click', () => {
 			if (this.settings.color != window.app.settings.color || this.settings.quality != window.app.settings.quality) {
 				message2("You have unsaved changes", "Click the save changes button to proceed");
@@ -444,13 +460,23 @@ export default class SettingsView {
 			}
 			window.app.router.navigateTo('/index');
 		});
-	}
+
+
+		profile.addEventListener("click", () => {
+			window.app.router.navigateTo("/profile");
+		});
+
+		credits.addEventListener("click", () => {
+			window.app.router.navigateTo("/credits");
+		});
 	
-    addEventListeners() {
+	}
+
+	addEventListeners() {
 		this.add2FAEventListeners();
 		this.addCustomizationEventListeners();
 		this.addProfileEventListeners();
 		this.addSecurityEventListeners();
-		this.addNavigationEventListeners();
+		this.addNavEventListeners();
     }
 }

@@ -14,7 +14,7 @@ export default class MainView {
 		this.render();
 		this.initComponents();
 		this.checkForBackdrop();
-
+		this.setButtons();
         this.addEventListeners();
         if (window.app.ingame) {
             console.log("Reconnecting to game");
@@ -42,8 +42,10 @@ export default class MainView {
         this.container.innerHTML = `
 			<header>
 				<h1 id="pong">PONG</h1>
-					<button id="settingsBtn">Settings</button>
-					<button id="logoutBtn">Log out</button>
+					<button id="customBtn" class="nav-btn">Custom</button>
+					<button id="creditsBtn" class="nav-btn">Credits</button>
+					<button id="profileBtn" class="nav-btn">Profile</button>
+					<button id="logoutBtn" class="nav-btn">Log out</button>
 			</header>
 
 			<div id="mainPage">
@@ -112,19 +114,10 @@ export default class MainView {
     }
 
     addEventListeners() {
-        const logoutBtn = this.container.querySelector("#logoutBtn");
-        const settings = this.container.querySelector("#settingsBtn");
-        const selectorRumble = document.getElementById("rumble");
+		const selectorRumble = document.getElementById("rumble");
         const selectorClassic = document.getElementById("classic");
-
-        logoutBtn.addEventListener("click", () => {
-            window.app.chatBox.disconnect();
-            window.app.logout();
-        });
-
-		settings.addEventListener("click", () => {
-			window.app.router.navigateTo("/settings");
-		});
+		
+		this.addNavEventListeners();
 
 		selectorRumble.addEventListener("click", () => {
 			window.app.settings['game-selector'] = "rumble"
@@ -155,5 +148,39 @@ export default class MainView {
 		const el = document.querySelector(".modal-backdrop");
 		if (el)
 			el.remove();
+	}
+
+	setButtons() {
+		const	profile = document.getElementById('profileBtn');
+		const	custom = document.getElementById('customBtn');
+		const	credits = document.getElementById('creditsBtn');
+
+		custom.style['right'] = '440px';
+		profile.style['right'] = '295px';
+		credits.style['right'] = '150px';
+	}
+
+	addNavEventListeners() {
+		const	profile = document.getElementById('profileBtn');
+		const	custom = document.getElementById('customBtn');
+		const	credits = document.getElementById('creditsBtn');
+		const	logoutBtn = document.getElementById('logoutBtn');
+
+		logoutBtn.addEventListener("click", () => {
+            window.app.chatBox.disconnect();
+            window.app.logout();
+        });
+
+		custom.addEventListener("click", () => {
+			window.app.router.navigateTo("/custom");
+		});
+
+		profile.addEventListener("click", () => {
+			window.app.router.navigateTo("/profile");
+		});
+
+		credits.addEventListener("click", () => {
+			window.app.router.navigateTo("/credits");
+		});
 	}
 }

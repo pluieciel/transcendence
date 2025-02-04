@@ -95,12 +95,7 @@ p {
 	margin-right: 20px;
 }
 
-.profile {
-    margin-top: 100px;
-	font-size: 2rem;
-}
-
-.credits-container {
+.credits-container, .profile-container {
 	margin-top: 120px;
     display: flex;
     justify-content: center;
@@ -156,7 +151,20 @@ p {
 	margin-right: 20px;
 }
 
-#settingsBtn, #indexBtn, #logoutBtn {
+
+#settingsBtn, #indexBtn {
+	right: 150px;
+}
+
+#logoutBtn {
+	right: 5px;
+}
+
+.nav-btn {
+	color: var(--user-color);
+	box-shadow: 0 4px 15px var(--user-color);
+	background-color: var(--header-color);
+	border: 0.5px solid var(--user-color);
 	display: block;
 	padding: 10px 20px;
 	font-size: 1rem;
@@ -171,7 +179,7 @@ p {
 	transition: all 0.2s;
 }
 
-#settingsBtn:hover, #indexBtn:hover, #logoutBtn:hover {
+.nav-btn:hover {
     transform: scale(1.1);
 }
 
@@ -181,22 +189,6 @@ p {
     border: #ddd solid 1px;
 }
 
-#settingsBtn, #indexBtn {
-	color: var(--user-color);
-	right: 150px;
-	border: 0.5px solid var(--user-color);
-	background-color: var(--header-color);
-	box-shadow: 0 4px 15px var(--user-color);
-}
-
-#logoutBtn {
-	color: var(--user-color);
-	right: 150px;
-	border: 0.5px solid var(--user-color);
-	background-color: var(--header-color);
-	box-shadow: 0 4px 15px var(--user-color);
-	right: 5px;
-}
 
 .containerPrivate > button, .containerSensitive > button, .containerGame > button, #row > button {
 	padding: 10px 20px;
@@ -236,7 +228,7 @@ p {
 }
 
 .game-selector {
-    display: flex;
+	display: flex;
     justify-content: space-between;
     align-items: flex-start;
     gap: 20px;
@@ -343,7 +335,7 @@ p {
 
 #qr-path {
 	fill: var(--secondary-color);
-
+	
 }
 
 input[type="file"]::file-selector-button {
