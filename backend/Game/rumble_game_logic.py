@@ -3,9 +3,9 @@ import time
 import random
 import math
 import logging
-from .game_helper_class import BounceMethods, MovementMethod, Vector2D, DEFAULT_BALL_POS, RIGHT_SIDE_DIR, LEFT_SIDE_DIR, DEFAULT_BALL_ACCELERATION, DEFAULT_BALL_BASE_SPEED, DEFAULT_PLAYER_SPEED
-from .rumble_custom_method import MirrorBounce, RandomBounce, IcyMovement, InvertedMovements, NoStoppingMovements, NormalBounce, NormalMovements
-from .rumble_events import InvertedControlsEvent, RandomBouncesEvent, MirrorBallEvent, LightsOutEvent, SmokeCloudEvent, InfiniteSpeedEvent, ReverseBallEvent, ShrinkingPaddleEvent, IcyPaddlesEvent, NoStoppingEvent, VisibleTrajectoryEvent
+from .game_helper_class import BounceMethods, MovementMethod, Vector2D, DEFAULT_BALL_POS, RIGHT_SIDE_DIR, LEFT_SIDE_DIR, DEFAULT_BALL_ACCELERATION, DEFAULT_BALL_BASE_SPEED, DEFAULT_PLAYER_SPEED, random_angle
+from .rumble_custom_method import MirrorBounce, RandomBounce, IcyMovement, InvertedMovements, NoStoppingMovements, NormalBounce, NormalMovements, KillerBall
+from .rumble_events import InvertedControlsEvent, RandomBouncesEvent, MirrorBallEvent, LightsOutEvent, SmokeCloudEvent, InfiniteSpeedEvent, ReverseBallEvent, ShrinkingPaddleEvent, IcyPaddlesEvent, NoStoppingEvent, VisibleTrajectoryEvent, KillerBallEvent
 
 
 
@@ -153,7 +153,7 @@ class RumbleGameInstance:
 				right_paddle.paddle_height/2 + ball.radius):
 					if ball.velocity.x > 0:
 						ball.position.x = right_paddle.position.x - right_paddle.paddle_thickness/2 - ball.radius
-						ball.bounce_methods.BouncePaddle(ball, right_paddle.position.x, right_paddle.position.y)
+						await ball.bounce_methods.BouncePaddle(ball, right_paddle.position.x, right_paddle.position.y)
 
 						if (self.event.name == 'Shrinking Paddles' and self.player_right.paddle_height > 2.25):
 							self.player_right.paddle_height *= 0.9
@@ -168,7 +168,7 @@ class RumbleGameInstance:
 				left_paddle.paddle_height/2 + ball.radius):
 					if ball.velocity.x < 0:
 						ball.position.x = left_paddle.position.x + left_paddle.paddle_thickness/2 + ball.radius
-						ball.bounce_methods.BouncePaddle(ball, left_paddle.position.x, left_paddle.position.y)
+						await ball.bounce_methods.BouncePaddle(ball, left_paddle.position.x, left_paddle.position.y)
 
 						if (self.event.name == 'Shrinking Paddles' and self.player_left.paddle_height > 2.25):
 							self.player_left.paddle_height *= 0.9
@@ -178,9 +178,17 @@ class RumbleGameInstance:
 
 		if not paddle_hit:
 			if ball_pos.x >= self.bounds.right.x:
-				await self.on_score("LEFT")
+				if (self.event.name == 'Killer Ball'):
+					random_angle(ball)
+					ball.position.x = ball.bounds.right.x - ball.radius
+				else:
+					await self.on_score("LEFT")
 			elif ball_pos.x <= self.bounds.left.x:
-				await self.on_score("RIGHT")
+				if (self.event.name == 'Killer Ball'):
+					random_angle(ball)
+					ball.position.x = ball.bounds.left.x + ball.radius
+				else:
+					await self.on_score("RIGHT")
 
 	async def on_score(self, winner):
 		if winner == "LEFT":
@@ -296,6 +304,7 @@ class RumbleGameInstance:
 			ShrinkingPaddleEvent(self),
 			IcyPaddlesEvent(self),
 			NoStoppingEvent(self),
-			VisibleTrajectoryEvent(self)
+			VisibleTrajectoryEvent(self),
+			KillerBallEvent(self)
 		]
 		return random.choice(events)

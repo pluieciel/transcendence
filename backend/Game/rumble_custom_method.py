@@ -13,7 +13,7 @@ class NormalBounce(BounceMethods):
 		else:
 			ball.position.y = ball.bounds.bottom.y + ball.radius
 
-	def BouncePaddle(self, ball, paddle_x, paddle_y):
+	async def BouncePaddle(self, ball, paddle_x, paddle_y):
 		relative_intersect_y = paddle_y - ball.position.y
 		normalized_intersect = relative_intersect_y / (4.0/2)
 		bounce_angle = normalized_intersect * math.radians(45)
@@ -39,7 +39,7 @@ class MirrorBounce(BounceMethods):
 		else:
 			ball.position.y = ball.bounds.top.y - ball.radius
 
-	def BouncePaddle(self, ball, paddle_x, paddle_y):
+	async def BouncePaddle(self, ball, paddle_x, paddle_y):
 		relative_intersect_y = paddle_y - ball.position.y
 		normalized_intersect = relative_intersect_y / (4.0/2)
 		bounce_angle = normalized_intersect * math.radians(45)
@@ -72,7 +72,7 @@ class RandomBounce(BounceMethods):
 		else:
 			ball.position.y = ball.bounds.bottom.y + ball.radius
 
-	def BouncePaddle(self, ball, paddle_x, paddle_y):
+	async def BouncePaddle(self, ball, paddle_x, paddle_y):
 		random_angle = random.uniform(-80, 80)
 		random_angle_rad = math.radians(random_angle)
 
@@ -89,6 +89,22 @@ class RandomBounce(BounceMethods):
 		if ball.speed >= ball.maxSpeed:
 			ball.speed = ball.maxSpeed
 
+class KillerBall(BounceMethods):
+	def __init__(self, game):
+		self.game = game
+
+	def BounceWall(self, ball, is_top):
+		ball.velocity.y *= -1
+		if is_top:
+			ball.position.y = ball.bounds.top.y - ball.radius
+		else:
+			ball.position.y = ball.bounds.bottom.y + ball.radius
+
+	async def BouncePaddle(self, ball, paddle_x, paddle_y):
+		if paddle_x < ball.position.x:  # Right paddle
+			await self.game.on_score("LEFT")
+		else:  # Left paddle
+			await self.game.on_score("RIGHT")
 
 ################### MOVEMENT METHOD ###################
 

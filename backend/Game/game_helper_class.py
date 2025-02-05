@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 import math
+import random
 
 class BounceMethods(ABC):
 	@abstractmethod
@@ -7,7 +8,7 @@ class BounceMethods(ABC):
 		pass
 
 	@abstractmethod
-	def BouncePaddle(self, ball, paddle_x, paddle_y):
+	async def BouncePaddle(self, ball, paddle_x, paddle_y):
 		pass
 
 class MovementMethod(ABC):
@@ -29,6 +30,19 @@ class Vector2D:
 		self.x /= magnitude
 		self.y /= magnitude
 		self.z /= magnitude
+
+def random_angle(ball):
+	random_angle = random.uniform(-40, 40)
+	random_angle_rad = math.radians(random_angle)
+	ball.velocity.x *= -1
+	directionY = (ball.velocity.y > 0) * 2 - 1
+	ball.velocity.y = abs(ball.speed * math.tan(random_angle_rad)) * directionY
+	ball.velocity.normalize()
+	ball.velocity.y *= ball.speed
+	ball.velocity.x *= ball.speed
+	ball.speed += ball.acceleration
+	if ball.speed >= ball.maxSpeed:
+		ball.speed = ball.maxSpeed
 
 DEFAULT_BALL_POS = Vector2D(0, 7.8, -15)
 RIGHT_SIDE_DIR = 1

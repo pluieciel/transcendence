@@ -3,7 +3,7 @@ import random
 import logging
 from abc import ABC, abstractmethod
 from .game_helper_class import DEFAULT_BALL_ACCELERATION, DEFAULT_BALL_BASE_SPEED, DEFAULT_PLAYER_SPEED
-from .rumble_custom_method import MirrorBounce, RandomBounce, IcyMovement, InvertedMovements, NoStoppingMovements, NormalBounce, NormalMovements
+from .rumble_custom_method import MirrorBounce, RandomBounce, IcyMovement, InvertedMovements, NoStoppingMovements, NormalBounce, NormalMovements, KillerBall
 
 class GameEvent(ABC):
 	def __init__(self, game: 'RumbleGameInstance'):
@@ -196,24 +196,6 @@ class ShrinkingPaddleEvent(GameEvent):
 		self.game.player_left.paddle_height = self.paddle_height
 		self.game.player_right.paddle_height = self.paddle_height
 
-
-# class SwitchSideEvent(GameEvent):
-# 	def __init__(self, game: 'RumbleGameInstance'):
-# 		self.game = game
-# 		self.name = "Random Bounces"
-# 		self.action = 'none'
-# 		self.description = "All bounces from the ball are random !"
-# 		self.ball_accel_mult = 1
-# 		self.ball_basespeed_mult = 0.9
-# 		self.player_speed_mult = 1.1
-
-# 	def apply_specific(self):
-# 		self.game.ball.bounce_methods = RandomBounce()
-
-# 	def revert_specific(self):
-# 		self.game.ball.bounce_methods = NormalBounce()
-#
-
 class NoStoppingEvent(GameEvent):
 	def __init__(self, game: 'RumbleGameInstance'):
 		self.game = game
@@ -233,21 +215,21 @@ class NoStoppingEvent(GameEvent):
 		self.game.player_right.movement_method = NormalMovements()
 
 
-# class KillerBallEvent(GameEvent):
-# 	def __init__(self, game: 'RumbleGameInstance'):
-# 		self.game = game
-# 		self.action = 'none'
-# 		self.name = "Random Bounces"
-# 		self.description = "All bounces from the ball are random !"
-# 		self.ball_accel_mult = 1
-# 		self.ball_basespeed_mult = 0.9
-# 		self.player_speed_mult = 1.1
+class KillerBallEvent(GameEvent):
+	def __init__(self, game: 'RumbleGameInstance'):
+		self.game = game
+		self.action = 'none'
+		self.name = "Killer Ball"
+		self.description = "Do not get hit by the ball !"
+		self.ball_accel_mult = 1.1
+		self.ball_basespeed_mult = 0.9
+		self.player_speed_mult = 1.1
 
-# 	def apply_specific(self):
-# 		self.game.ball.bounce_methods = RandomBounce()
+	def apply_specific(self):
+		self.game.ball.bounce_methods = KillerBall(self.game)
 
-# 	def revert_specific(self):
-# 		self.game.ball.bounce_methods = NormalBounce()
+	def revert_specific(self):
+		self.game.ball.bounce_methods = NormalBounce()
 
 
 class IcyPaddlesEvent(GameEvent):
@@ -285,19 +267,3 @@ class VisibleTrajectoryEvent(GameEvent):
 
 	def revert_specific(self):
 		pass
-
-# class CameraShakeEvent(GameEvent):
-# 	def __init__(self, game: 'RumbleGameInstance'):
-# 		self.game = game
-# 		self.name = "Random Bounces"
-# 		self.action = 'none'
-# 		self.description = "All bounces from the ball are random !"
-# 		self.ball_accel_mult = 1
-# 		self.ball_basespeed_mult = 0.9
-# 		self.player_speed_mult = 1.1
-
-# 	def apply_specific(self):
-# 		self.game.ball.bounce_methods = RandomBounce()
-
-# 	def revert_specific(self):
-# 		self.game.ball.bounce_methods = NormalBounce()
