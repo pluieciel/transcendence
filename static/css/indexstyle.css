@@ -142,11 +142,15 @@ a {
     flex-direction: column;
 }
 
+#ghistory {
+	margin-bottom: 20px;	
+}
+
 .profile-card {
 	border-radius: 5px;
 	width: 250px;
 	padding: 10px 20px;
-	margin-top: 20px;
+	margin-bottom: 20px;
 	background-color: var(--primary-color);
 	color: var(--secondary-color);
 }

@@ -192,35 +192,14 @@ export default class ProfileView {
 			const data = await response.json();
 
 			if (data.success) {
-				document.getElementById('profile-history').innerHTML = "<h2>Game History</h2>";
-				for (let i = 0; i < data.game.length; i++)
-					this.addHistory(data.game[i]);
+				document.getElementById('profile-history').innerHTML = "<h2 id=\"ghistory\">Game History</h2>";
+				for (let i = 0; i < data.game.length && i < 6; i++)
+					this.addHistory(data.game[0]);
 			}
 		}
 		catch (e) {
 			console.error("An error occurred: ", e);
 		}
-
-		// for (let i = 0; i )
-		// let data = {
-		// 	'user1': "valgrant",
-		// 	'user2': "valgrant",
-		// 	'score1': "10",
-		// 	'score2': "8",
-		// 	'avatar1': "https://cdn.intra.42.fr/users/6256bf3b76f8634f1e0df573022b0b72/valgrant.JPG",
-		// 	'avatar2': "https://cdn.intra.42.fr/users/6256bf3b76f8634f1e0df573022b0b72/valgrant.JPG",
-		// 	'mode': "classic",
-		// 	'elo1': "+20",
-		// 	'elo2': "-20",
-		// }
-		// this.addHistory(data);
-		// this.addHistory(data);
-		// this.addHistory(data);
-		// this.addHistory(data);
-		// this.addHistory(data);
-		// this.addHistory(data);
-		// this.addHistory(data);
-		// this.addHistory(data);
 	}
 
 	addNavEventListeners() {
