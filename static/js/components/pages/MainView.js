@@ -55,13 +55,16 @@ export default class MainView {
 	render() {
 		this.container.innerHTML = `
 			<header>
-				<h1 id="pong">PONG</h1>
-					<button id="adminBtn" class="nav-btn">Admin</button>
-					<button id="indexBtn" class="nav-btn disabledBtn">Index</button>
-					<button id="customBtn" class="nav-btn">Custom</button>
-					<button id="profileBtn" class="nav-btn">Profile</button>
-					<button id="creditsBtn" class="nav-btn">Credits</button>
-					<button id="logoutBtn" class="nav-btn">Log out</button>
+				<h1 id="pong">P <i class="fa-solid fa-table-tennis-paddle-ball fa-xs"></i> N G</h1>
+				<div id="nav-buttons">
+					<button class="nav-button"><i class="fa-solid fa-gamepad fa-2xl"></i>Play</button>
+					<button class="nav-button"><i class="fa-solid fa-palette fa-2xl"></i>Customize</button>
+					<button class="nav-button"><i class="fa-solid fa-medal fa-2xl"></i>Leaderboard</button>
+					<button class="nav-button"><i class="fa-solid fa-trophy fa-2xl"></i>Achievements</button>
+					<button class="nav-button"><i class="fa-solid fa-user fa-2xl"></i>Profile</button>
+					<button class="nav-button"><i class="fa-solid fa-user-tie fa-2xl"></i>Admin</button>
+					<button class="nav-button" id="logout-button"><i class="fa-solid fa-right-from-bracket fa-2xl"></i>Log Out</button>
+				</div>
 			</header>
 
 			<div id="mainPage">
