@@ -57,8 +57,8 @@ export default class ProfileView {
 					</div>
 				</div>
 				<div class="container-row">
-					<img id="avatarImg" class="userOutline d-none" alt="User Avatar" width="150" height="150"></img>
 					<h3 id="p-name">${this.username}</h3>
+					<img id="avatarImg" class="userOutline d-none" alt="User Avatar" width="150" height="150"></img>
 					<div id="profile-content" class="profile userOutline">
 						<h3 id="p-elo">Loading...</h3>
 						<h3 id="p-winrate">Loading...</h3>

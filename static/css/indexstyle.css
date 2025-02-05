@@ -528,6 +528,7 @@ a {
 #p-name, #p-avatar {
 	display: inline;
 	vertical-align: middle;
+	color: var(--secondary-color);
 }
 
 #staticBackdropLabel {
