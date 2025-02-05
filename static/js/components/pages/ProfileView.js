@@ -75,7 +75,7 @@ export default class ProfileView {
 										<div id="qrCodeError" class="alert alert-danger d-none"></div>
 									</div>
 	                                <div class="mb-3">
-	                                    <input id="totpInput" class="form-control" maxlength="6" placeholder="scan the qr code and enter the code you receive" required>
+	                                    <input id="totpInput" class="form-control" maxlength="6" placeholder="Enter 2FA code" required>
 	                                </div>
 	                                <div id="totpError" class="alert alert-danger d-none"></div>
 	                        </div>

@@ -478,7 +478,7 @@ input[type="file"]::file-selector-button {
 	color: var(--secondary-color);
 }
 
-#usrnm-form, #pwd-form, #cfm-pwd-form {
+#usrnm-form, #pwd-form, #cfm-pwd-form, #totpInput, #recoveryCodeInput {
 	color: var(--secondary-color);
 	background-color: var(--hover-color);
 }
@@ -492,7 +492,7 @@ input[type="file"]::file-selector-button {
 	box-shadow: 0 0 5px var(--user-color);
 }
 
-#usrnm-form::placeholder, #pwd-form::placeholder, #cfm-pwd-form::placeholder{
+#usrnm-form::placeholder, #pwd-form::placeholder, #cfm-pwd-form::placeholder, #totpInput::placeholder, #recoveryCodeInput::placeholder{
 	color: var(--secondary-color);
 }
 
