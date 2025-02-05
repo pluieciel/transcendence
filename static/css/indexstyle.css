@@ -41,7 +41,8 @@ header {
 
 h1, h2 {
     font-size: 2.5rem;
-	text-shadow: 0 0 2px #fff;
+	color: var(--secondary-color);
+	text-shadow: 0 0 2px var(--secondary-color);
     margin: 0;
 }
 
@@ -130,6 +131,47 @@ a {
 
 #play {
 	margin-bottom: 10px;
+}
+
+#profile-history {
+	padding: 10px 50px;
+	background-color: var(--accent-color);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+    flex-direction: column;
+}
+
+.profile-card {
+	border-radius: 5px;
+	width: 250px;
+	padding: 10px 20px;
+	margin-top: 20px;
+	background-color: var(--primary-color);
+	color: var(--secondary-color);
+}
+
+.card-row {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.card-avatar {
+	width: 30px;
+	height: 30px;
+	border-radius: 50%;
+}
+
+.card-user {
+	display: flex;
+	align-items: center;
+    flex-direction: column;
+}
+
+.card-score {
+	display: inline-block;
+	padding: 0px 10px;
 }
 
 .game-buttons {

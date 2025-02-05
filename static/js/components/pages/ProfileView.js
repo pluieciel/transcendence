@@ -60,6 +60,33 @@ export default class ProfileView {
 					<input type="password" id="newPasswordInput" placeholder="">
 					<button id="deleteAccBtn">Delete my account</button>
 				</div>
+				<div id="profile-history" class="userOutline">
+					<h2>Game History</h2>
+					<div class="profile-card">
+						<div class="card-row">
+							<div class="card-user">
+								<img class="card-avatar" src="https://cdn.intra.42.fr/users/6256bf3b76f8634f1e0df573022b0b72/valgrant.JPG">
+								valgrant
+							</div>
+							<p class="card-score">10 - 7</p>
+							<div class="card-user">
+								<img class="card-avatar" src="https://cdn.intra.42.fr/users/6256bf3b76f8634f1e0df573022b0b72/valgrant.JPG">
+								valgrant
+							</div>
+						</div>
+						<div class="card-row">
+							<div class="card-elo">
+							+20
+							</div>
+							<div class="card-mode">
+							Rumble
+							</div>
+							<div class="card-elo">
+							-20
+							</div>
+						</div>
+					</div>
+				</div>
 			</div>
 			<div class="modal fade" id="totpModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                 <div class="modal-dialog">
@@ -454,4 +481,8 @@ export default class ProfileView {
 		this.addSecurityEventListeners();
 		this.addNavEventListeners();
     }
+
+	addGame(data) {
+		
+	}
 }
