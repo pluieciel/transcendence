@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from channels.db import database_sync_to_async
+import logging
 
 @database_sync_to_async
 def user_update_game(user, isplaying, game_id):
@@ -25,6 +26,23 @@ def get_user(user_id):
 @database_sync_to_async
 def update_is_2fa_enabled(user, is_2fa_enabled):
 	user.is_2fa_enabled = is_2fa_enabled
+	user.save()
+
+@database_sync_to_async
+def update_user_elo(user, elo):
+	user.elo = elo
+	user.save()
+
+@database_sync_to_async
+def add_user_wins(user):
+	user.wins += 1
+	logging.getLogger('game').info(f"User {user.username} wins: {user.wins}, loses : {user.looses}")
+	user.save()
+
+@database_sync_to_async
+def add_user_looses(user):
+	user.looses += 1
+	logging.getLogger('game').info(f"User {user.username} wins: {user.wins}, loses : {user.looses}")
 	user.save()
 
 @database_sync_to_async

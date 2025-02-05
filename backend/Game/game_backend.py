@@ -6,7 +6,7 @@ from .normal_game_logic import NormalGameInstance, GameBounds
 from .rumble_game_logic import RumbleGameInstance, GameBounds
 from channels.db import database_sync_to_async
 from .bot import Bot
-from api.db_utils import user_update_game
+from api.db_utils import user_update_game, update_user_elo, add_user_wins, add_user_looses
 from datetime import datetime
 import redis
 from channels.layers import get_channel_layer
@@ -77,10 +77,10 @@ class GameBackend:
 		self.game.stop()
 
 	async def player_disc(self, user):
-		if (self.player_left and self.player_left.user.id == user.id):
+		if (self.player_left and self.player_left.user.id == user.id and not self.game.ended):
 			self.logger.info("Player left disconnected, calling forfeit")
 			await self.game.forfeit("LEFT")
-		elif (self.player_right and self.player_right.user.id == user.id):
+		elif (self.player_right and self.player_right.user.id == user.id and not self.game.ended):
 			self.logger.info("Player right disconnected, calling forfeit")
 			await self.game.forfeit("RIGHT")
 		else:
@@ -142,8 +142,16 @@ class GameBackend:
 
 			if self.game.winner == "LEFT":
 				self.game.winner = self.player_left.user
+				if (self.is_bot_game is False):
+					await add_user_wins(self.player_left.user)
+					await add_user_looses(self.player_right.user)
+				self.logger.info("Updated win lose")
 			elif self.game.winner == "RIGHT":
 				self.game.winner = self.player_right.user
+				if (self.is_bot_game is False):
+					await add_user_wins(self.player_right.user)
+					await add_user_looses(self.player_left.user)
+				self.logger.info("Updated win lose")
 
 			if self.game_type == "vanilla":
 				await self.broadcast_state()
@@ -153,6 +161,7 @@ class GameBackend:
 			if self.player_left:
 				self.logger.info(f"Resetting left player: {self.player_left.user.username}")
 				await user_update_game(self.player_left.user, isplaying=False, game_id=-1)
+
 
 			if self.player_right and not self.is_bot_game:
 				self.logger.info(f"Resetting right player: {self.player_right.user.username}")
@@ -232,12 +241,6 @@ class GameBackend:
 			import traceback
 			self.logger.error(traceback.format_exc())
 
-
-	@database_sync_to_async
-	def update_user_elo(self, user, elo):
-		user.elo = elo
-		user.save()
-
 	async def update_elo(self, winner):
 		elo_pleft = self.player_left.user.elo
 		elo_pright = self.player_right.user.elo
@@ -261,9 +264,9 @@ class GameBackend:
 		elo_change = abs(new_elo_pleft - elo_pleft)
 		self.elo_change = round(elo_change)
 
-		await self.update_user_elo(self.player_left.user, new_elo_pleft)
+		await update_user_elo(self.player_left.user, new_elo_pleft)
 		if not self.is_bot_game:
-			await self.update_user_elo(self.player_right.user, new_elo_pright)
+			await update_user_elo(self.player_right.user, new_elo_pright)
 
 	def get_color(self, user):
 		color_map = {
