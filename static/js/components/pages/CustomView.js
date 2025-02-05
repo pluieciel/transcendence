@@ -4,13 +4,17 @@ export default class CustomView {
     constructor(container) {
 		this.container = container;
         this.username = window.app.state.username;
-		this.init()
+		this.init();
     }
 	
 	async init() {
 		this.render();
 		this.addEventListeners();
 		await this.getSettings();
+		if (window.app.settings.is_admin) {
+			const adminBtn = this.container.querySelector("#adminBtn");
+			adminBtn.style.display = "block";
+		}
 		await addUserData(this.settings);
 	}
 	
@@ -28,6 +32,7 @@ export default class CustomView {
         this.container.innerHTML = `
     <header>
         <h1 id="pong">PONG</h1>
+			<button id="adminBtn" class="nav-btn">Admin</button>
 			<button id="indexBtn" class="nav-btn">Index</button>
 			<button id="customBtn" class="nav-btn disabledBtn">Custom</button>
 			<button id="profileBtn" class="nav-btn">Profile</button>
@@ -123,13 +128,14 @@ export default class CustomView {
 		const	index = document.getElementById('indexBtn');
 		const	credits = document.getElementById('creditsBtn');
 		const	logoutBtn = document.getElementById('logoutBtn');
+		const	adminBtn = document.getElementById('adminBtn');
 
 		logoutBtn.addEventListener("click", () => {
             window.app.chatBox.disconnect();
             window.app.logout();
         });
 
-		indexBtn.addEventListener('click', () => {
+		index.addEventListener('click', () => {
 			if (this.settings.color != window.app.settings.color || this.settings.quality != window.app.settings.quality) {
 				message2("You have unsaved changes", "Click the save changes button to proceed");
 				return ;
@@ -145,7 +151,10 @@ export default class CustomView {
 		credits.addEventListener("click", () => {
 			window.app.router.navigateTo("/credits");
 		});
-	
+
+		adminBtn.addEventListener("click", () => {
+			window.app.router.navigateTo("/admin");
+		});
 	}
 
 	addEventListeners() {

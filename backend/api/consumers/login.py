@@ -84,8 +84,6 @@ class LoginConsumer(AsyncHttpConsumer):
 					'is_2fa_enabled': True,
 				}
 
-
-
 			return await self.send_response(200, json.dumps(response_data).encode(),
 				headers=[(b"Content-Type", b"application/json"), (b"Set-Cookie", generate_jwt_cookie(user))])
 

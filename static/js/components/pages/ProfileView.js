@@ -4,19 +4,31 @@ export default class ProfileView {
 	constructor(container) {
 		this.container = container;
 		this.username = window.app.state.username;
+		this.init();
+	}
+
+	async init() {
 		this.render();
-		if (!window.app.settings['fetched'])
-			window.app.getPreferences();
 		this.addEventListeners();
 		this.setProfileFields();
+		await this.getSettings();
+	}
+	
+	async getSettings() {
+		if (!window.app.settings['fetched'])
+			await window.app.getPreferences();
+		if (window.app.settings.is_admin) {
+			const adminBtn = this.container.querySelector("#adminBtn");
+			adminBtn.style.display = "block";
+		}
 	}
 	
 	render() {
 		this.container.innerHTML = `
 		<header>
 			<h1 id="pong">PONG</h1>
-				<button id="adminBtn">Admin</button>
-			<button id="indexBtn" class="nav-btn">Index</button>
+				<button id="adminBtn" class="nav-btn">Admin</button>
+				<button id="indexBtn" class="nav-btn">Index</button>
 				<button id="customBtn" class="nav-btn">Custom</button>
 				<button id="profileBtn" class="nav-btn disabledBtn">Profile</button>
 				<button id="creditsBtn" class="nav-btn">Credits</button>
@@ -63,7 +75,7 @@ export default class ProfileView {
 										<div id="qrCodeError" class="alert alert-danger d-none"></div>
 									</div>
 	                                <div class="mb-3">
-	                                    <input id="totpInput" class="form-control" maxlength="6" placeholder="scan the qr code and enter the code you receive" required>
+	                                    <input id="totpInput" class="form-control" maxlength="6" placeholder="Enter 2FA code" required>
 	                                </div>
 	                                <div id="totpError" class="alert alert-danger d-none"></div>
 	                        </div>

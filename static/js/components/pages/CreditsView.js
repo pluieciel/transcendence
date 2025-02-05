@@ -2,16 +2,29 @@ export default class CreditsView {
 	constructor(container) {
 		this.container = container;
 		this.username = window.app.state.username;
+		this.init();
+	}
+
+	async init() {
 		this.render();
-		this.addEventListerners();
+		this.addNavEventListeners();
+		await this.getSettings();
+	}
+	
+	async getSettings() {
 		if (!window.app.settings['fetched'])
-			window.app.getPreferences();
+			await window.app.getPreferences();
+		if (window.app.settings.is_admin) {
+			const adminBtn = this.container.querySelector("#adminBtn");
+			adminBtn.style.display = "block";
+		}
 	}
 
 	render() {
 		this.container.innerHTML = `
 			<header>
 				<h1 id="pong">PONG</h1>
+					<button id="adminBtn" class="nav-btn">Admin</button>
 					<button id="indexBtn" class="nav-btn">Index</button>
 					<button id="customBtn" class="nav-btn">Custom</button>
 					<button id="profileBtn" class="nav-btn">Profile</button>
@@ -61,7 +74,7 @@ export default class CreditsView {
 		const	custom = document.getElementById('customBtn');
 		const	profile = document.getElementById('profileBtn');
 		const	logoutBtn = document.getElementById('logoutBtn');
-
+		const	adminBtn = document.getElementById('adminBtn');
 		logoutBtn.addEventListener("click", () => {
             window.app.chatBox.disconnect();
             window.app.logout();
@@ -78,9 +91,9 @@ export default class CreditsView {
 		profile.addEventListener("click", () => {
 			window.app.router.navigateTo("/profile");
 		});
-	}
 
-	addEventListerners() {
-		this.addNavEventListeners();
+		adminBtn.addEventListener("click", () => {
+			window.app.router.navigateTo("/admin");
+		});
 	}
 }

@@ -11,6 +11,10 @@ export default class MainView {
 
 		this.username = window.app.state.username;
 
+		this.init();
+    }
+
+	async init() {
 		this.render();
 		this.initComponents();
 		if (!window.app.settings['fetched']) window.app.getPreferences();
@@ -36,24 +40,28 @@ export default class MainView {
                 sessionStorage.setItem("ingame", "false");
             };
         }
+		await this.getSettings();
+	}
+	
+	async getSettings() {
 		if (!window.app.settings['fetched'])
-			window.app.getPreferences();
-    }
-
-
-
-
+			await window.app.getPreferences();
+		if (window.app.settings.is_admin) {
+			const adminBtn = this.container.querySelector("#adminBtn");
+			adminBtn.style.display = "block";
+		}
+	}
 
 	render() {
 		this.container.innerHTML = `
 			<header>
 				<h1 id="pong">PONG</h1>
+					<button id="adminBtn" class="nav-btn">Admin</button>
 					<button id="indexBtn" class="nav-btn disabledBtn">Index</button>
 					<button id="customBtn" class="nav-btn">Custom</button>
 					<button id="profileBtn" class="nav-btn">Profile</button>
 					<button id="creditsBtn" class="nav-btn">Credits</button>
 					<button id="logoutBtn" class="nav-btn">Log out</button>
-					<button id="adminBtn">Admin</button>
 			</header>
 
 			<div id="mainPage">
@@ -180,7 +188,7 @@ export default class MainView {
 		const	custom = document.getElementById('customBtn');
 		const	credits = document.getElementById('creditsBtn');
 		const	logoutBtn = document.getElementById('logoutBtn');
-
+		const	adminBtn = document.getElementById('adminBtn');
 		logoutBtn.addEventListener("click", () => {
             window.app.chatBox.disconnect();
             window.app.logout();
@@ -196,6 +204,10 @@ export default class MainView {
 
 		credits.addEventListener("click", () => {
 			window.app.router.navigateTo("/credits");
+		});
+
+		adminBtn.addEventListener("click", () => {
+			window.app.router.navigateTo("/admin");
 		});
 	}
 }
