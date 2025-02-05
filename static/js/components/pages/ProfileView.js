@@ -62,30 +62,6 @@ export default class ProfileView {
 				</div>
 				<div id="profile-history" class="userOutline">
 					<h2>Game History</h2>
-					<div class="profile-card">
-						<div class="card-row">
-							<div class="card-user">
-								<img class="card-avatar" src="https://cdn.intra.42.fr/users/6256bf3b76f8634f1e0df573022b0b72/valgrant.JPG">
-								valgrant
-							</div>
-							<p class="card-score">10 - 7</p>
-							<div class="card-user">
-								<img class="card-avatar" src="https://cdn.intra.42.fr/users/6256bf3b76f8634f1e0df573022b0b72/valgrant.JPG">
-								valgrant
-							</div>
-						</div>
-						<div class="card-row">
-							<div class="card-elo">
-							+20
-							</div>
-							<div class="card-mode">
-							Rumble
-							</div>
-							<div class="card-elo">
-							-20
-							</div>
-						</div>
-					</div>
 				</div>
 			</div>
 			<div class="modal fade" id="totpModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -190,16 +166,33 @@ export default class ProfileView {
 			} else
 				throw new Error("Request failure");
 
-			if (is_2fa_enabled) {enable2FA.style.display = "none";disable2FA.style.display = "block";}
-			else {enable2FA.style.display = "blon";disable2FA.style.display = "none";}
+				
+			} catch (error) {
+				elo.innerHTML = "Failed to load elo";
+				winrate.innerHTML = "Failed to load winrate";
+				ratio.innerHTML = "Failed to load ratio";
+				tourn.innerHTML = "Failed to load tournaments";
+				console.error("An error occurred: ", error);
+			}
+		if (is_2fa_enabled) {enable2FA.style.display = "none";disable2FA.style.display = "block";}
+		else {enable2FA.style.display = "blon";disable2FA.style.display = "none";}
 
-		} catch (error) {
-			elo.innerHTML = "Failed to load elo";
-			winrate.innerHTML = "Failed to load winrate";
-			ratio.innerHTML = "Failed to load ratio";
-			tourn.innerHTML = "Failed to load tournaments";
-			console.error("An error occurred: ", error);
+		let data = {
+			'user1': "valgrant",
+			'user2': "valgrant",
+			'score1': "10",
+			'score2': "8",
+			'avatar1': "https://cdn.intra.42.fr/users/6256bf3b76f8634f1e0df573022b0b72/valgrant.JPG",
+			'avatar2': "https://cdn.intra.42.fr/users/6256bf3b76f8634f1e0df573022b0b72/valgrant.JPG",
+			'mode': "classic",
+			'elo1': "+20",
+			'elo2': "-20",
 		}
+		this.addHistory(data);
+		this.addHistory(data);
+		this.addHistory(data);
+		this.addHistory(data);
+		this.addHistory(data);
 	}
 
 	addNavEventListeners() {
@@ -482,7 +475,44 @@ export default class ProfileView {
 		this.addNavEventListeners();
     }
 
-	addGame(data) {
-		
+	addHistory(data) {
+		let	card = "";
+		const history = document.getElementById('profile-history');
+
+		card += "<div class=\"profile-card\"><div class=\"card-row\"><div class=\"card-user\">";
+		card += "<img class=\"card-avatar\" src=\"" + data['avatar1'] + "\">" + data['user1'] + " </div>";
+		card += "<p class=\"card-score\">" + data['score1'] + " - " + data['score2'] + "</p><div class=\"card-user\">";
+		card += "<img class=\"card-avatar\" src=\"" + data['avatar2'] + "\">" + data['user2'] + " </div>";
+		card += "</div><div class=\"card-row\">";
+		card += "<div class=\"card-elo\">" + data['elo1'] + "</div><div class=\"card-mode\">" + data['mode'] + "</div><div class=\"card-elo\">" + data['elo2'] + "</div>";
+
+		history.innerHTML += card;
 	}
 }
+
+/*					<div class="profile-card">
+						<div class="card-row">
+							<div class="card-user">
+								<img class="card-avatar" src="https://cdn.intra.42.fr/users/6256bf3b76f8634f1e0df573022b0b72/valgrant.JPG">
+								valgrant
+							</div>
+							<p class="card-score">10 - 7</p>
+							<div class="card-user">
+								<img class="card-avatar" src="https://cdn.intra.42.fr/users/6256bf3b76f8634f1e0df573022b0b72/valgrant.JPG">
+								valgrant
+							</div>
+						</div>
+						<div class="card-row">
+							<div class="card-elo">
+							+20
+							</div>
+							<div class="card-mode">
+							Rumble
+							</div>
+							<div class="card-elo">
+							-20
+							</div>
+						</div>
+					</div>
+					*/
+
