@@ -193,12 +193,14 @@ class RumbleGameInstance:
 	async def on_score(self, winner):
 		if winner == "LEFT":
 			self.player_left.score += 1
-			self.scorePos = Vector2D(self.bounds.right.x, self.ball.position.y, self.ball.position.z)
+			self.scorePos = Vector2D(self.ball.position.x, self.ball.position.y, self.ball.position.z)
+			#self.scorePos = Vector2D(self.bounds.right.x, self.ball.position.y, self.ball.position.z)
 			self.ball.start(LEFT_SIDE_DIR, DEFAULT_BALL_POS)
 			self.ball.lastHitter = "RIGHT"
 		elif winner == "RIGHT":
 			self.player_right.score += 1
-			self.scorePos = Vector2D(self.bounds.left.x, self.ball.position.y, self.ball.position.z)
+			self.scorePos = Vector2D(self.ball.position.x, self.ball.position.y, self.ball.position.z)
+			#self.scorePos = Vector2D(self.bounds.left.x, self.ball.position.y, self.ball.position.z)
 			self.ball.start(RIGHT_SIDE_DIR, DEFAULT_BALL_POS)
 			self.ball.lastHitter = "LEFT"
 		self.event.revert()
@@ -294,17 +296,17 @@ class RumbleGameInstance:
 
 	def get_event(self):
 		events = [
-			InvertedControlsEvent(self),
-			RandomBouncesEvent(self),
-			MirrorBallEvent(self),
-			LightsOutEvent(self),
-			SmokeCloudEvent(self),
-			InfiniteSpeedEvent(self),
-			ReverseBallEvent(self),
-			ShrinkingPaddleEvent(self),
-			IcyPaddlesEvent(self),
-			NoStoppingEvent(self),
-			VisibleTrajectoryEvent(self),
+			# InvertedControlsEvent(self),
+			# RandomBouncesEvent(self),
+			# MirrorBallEvent(self),
+			# LightsOutEvent(self),
+			# SmokeCloudEvent(self),
+			# InfiniteSpeedEvent(self),
+			# ReverseBallEvent(self),
+			# ShrinkingPaddleEvent(self),
+			# IcyPaddlesEvent(self),
+			# NoStoppingEvent(self),
+			# VisibleTrajectoryEvent(self),
 			KillerBallEvent(self)
 		]
 		return random.choice(events)
