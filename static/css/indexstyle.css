@@ -31,6 +31,10 @@ body {
 	text-shadow: 0 0 5px var(--user-color);
 }
 
+#admin-button {
+	display: none;
+}
+
 #nav-buttons {
     display: flex;
     align-items: center;

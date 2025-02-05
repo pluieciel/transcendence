@@ -47,8 +47,8 @@ export default class MainView {
 		if (!window.app.settings['fetched'])
 			await window.app.getPreferences();
 		if (window.app.settings.is_admin) {
-			const adminBtn = this.container.querySelector("#adminBtn");
-			adminBtn.style.display = "block";
+			const adminButton = document.getElementById("admin-button");
+			adminButton.style.display = "block";
 		}
 	}
 
@@ -199,7 +199,7 @@ export default class MainView {
 		});
 
 		playButton.addEventListener("click", () => {
-			window.app.router.navigateTo("/play");
+			window.app.router.navigateTo("/index");
 		});
 
 		customizeButton.addEventListener("click", () => {
