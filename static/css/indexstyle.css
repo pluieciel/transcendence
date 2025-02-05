@@ -172,6 +172,8 @@ a {
 .card-score {
 	display: inline-block;
 	padding: 0px 10px;
+	font-weight: bold;
+	text-shadow: 0 0 5px var(--secondary-color);
 }
 
 .game-buttons {

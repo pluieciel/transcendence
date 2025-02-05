@@ -136,7 +136,10 @@ export default class ProfileView {
 		const	enable2FA = document.querySelector('#enable2FA');
 		const	disable2FA = document.querySelector('#disable2FA');
 		const 	is_2fa_enabled = window.app.settings.is_2fa_enabled;
-		
+
+		if (is_2fa_enabled) {enable2FA.style.display = "none";disable2FA.style.display = "block";}
+		else {enable2FA.style.display = "blon";disable2FA.style.display = "none";}
+
 		try {
 			const response = await fetch("/api/get/profile", {
 				method: "POST",
@@ -167,32 +170,53 @@ export default class ProfileView {
 				throw new Error("Request failure");
 
 				
-			} catch (error) {
+			} catch (e) {
 				elo.innerHTML = "Failed to load elo";
 				winrate.innerHTML = "Failed to load winrate";
 				ratio.innerHTML = "Failed to load ratio";
 				tourn.innerHTML = "Failed to load tournaments";
-				console.error("An error occurred: ", error);
+				console.error("An error occurred: ", e);
 			}
-		if (is_2fa_enabled) {enable2FA.style.display = "none";disable2FA.style.display = "block";}
-		else {enable2FA.style.display = "blon";disable2FA.style.display = "none";}
 
-		let data = {
-			'user1': "valgrant",
-			'user2': "valgrant",
-			'score1': "10",
-			'score2': "8",
-			'avatar1': "https://cdn.intra.42.fr/users/6256bf3b76f8634f1e0df573022b0b72/valgrant.JPG",
-			'avatar2': "https://cdn.intra.42.fr/users/6256bf3b76f8634f1e0df573022b0b72/valgrant.JPG",
-			'mode': "classic",
-			'elo1': "+20",
-			'elo2': "-20",
+		try {
+			const response = await fetch(`/api/get/history/${this.username}`, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+			});
+
+			const data = await response.json();
+
+			if (data.success) {
+				for (let i = 0; i < data.game.length; i++)
+					this.addHistory(data.game[i]);
+			}
 		}
-		this.addHistory(data);
-		this.addHistory(data);
-		this.addHistory(data);
-		this.addHistory(data);
-		this.addHistory(data);
+		catch (e) {
+			console.error("An error occurred: ", e);
+		}
+
+		// for (let i = 0; i )
+		// let data = {
+		// 	'user1': "valgrant",
+		// 	'user2': "valgrant",
+		// 	'score1': "10",
+		// 	'score2': "8",
+		// 	'avatar1': "https://cdn.intra.42.fr/users/6256bf3b76f8634f1e0df573022b0b72/valgrant.JPG",
+		// 	'avatar2': "https://cdn.intra.42.fr/users/6256bf3b76f8634f1e0df573022b0b72/valgrant.JPG",
+		// 	'mode': "classic",
+		// 	'elo1': "+20",
+		// 	'elo2': "-20",
+		// }
+		// this.addHistory(data);
+		// this.addHistory(data);
+		// this.addHistory(data);
+		// this.addHistory(data);
+		// this.addHistory(data);
+		// this.addHistory(data);
+		// this.addHistory(data);
+		// this.addHistory(data);
 	}
 
 	addNavEventListeners() {
