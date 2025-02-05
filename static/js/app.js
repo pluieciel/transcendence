@@ -70,6 +70,7 @@ class App {
 		this.settings.color = data['color'];
 		this.settings.quality = data['quality'];
 		this.settings.is_2fa_enabled = data['is_2fa_enabled'];
+		this.settings.is_admin = data['is_admin'];
 		this.settings.fetched = true;
 		this.setColor(this.settings.color);
 	}
@@ -84,6 +85,7 @@ class App {
 	}
 
 	logout() {
+		this.settings.fetched = false;
 		this.state.isLoggedIn = false;
 		this.ingame = false;
 		sessionStorage.clear();

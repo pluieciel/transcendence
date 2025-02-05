@@ -235,8 +235,9 @@ a {
 	transform: none !important;
 }
 
-#indexAdminBtn {
+#adminBtn {
 	right: 730px;
+	display: none;
 }
 
 #indexBtn {

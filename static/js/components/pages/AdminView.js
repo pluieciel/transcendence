@@ -1,31 +1,33 @@
 export default class MainView {
     constructor(container) {
         this.container = container;
-		this.render();
-		this.addEventListeners();
-		this.getSettings();
+		this.init();
     }
 
-	async getSettings() {
-		if (!window.app.settings.fetched)
-			await window.app.getPreferences();
-		this.settings = {
-			color: window.app.settings.color,
-			quality: window.app.settings.quality
-		};
-		return ;
+	async init() {
+		this.render();
+		this.addEventListeners();
+		await this.getSettings();
 	}
-
+	
+	async getSettings() {
+		if (!window.app.settings['fetched'])
+			await window.app.getPreferences();
+		if (window.app.settings.is_admin) {
+			const adminBtn = this.container.querySelector("#adminBtn");
+			adminBtn.style.display = "block";
+		}
+	}
     render() {
         this.container.innerHTML = `
 			<header>
 				<h1 id="pong">PONG</h1>
-					<button id="indexAdminBtn" class="nav-btn disabledBtn">Admin</button>
-					<button id="indexBtn" class="nav-btn">Index</button>
-					<button id="customBtn" class="nav-btn">Custom</button>
-					<button id="profileBtn" class="nav-btn">Profile</button>
-					<button id="creditsBtn" class="nav-btn">Credits</button>
-					<button id="logoutBtn" class="nav-btn">Log out</button>
+				<button id="adminBtn" class="nav-btn disabledBtn">Admin</button>
+				<button id="indexBtn" class="nav-btn">Index</button>
+				<button id="customBtn" class="nav-btn">Custom</button>
+				<button id="profileBtn" class="nav-btn">Profile</button>
+				<button id="creditsBtn" class="nav-btn">Credits</button>
+				<button id="logoutBtn" class="nav-btn">Log out</button>
 			</header>
 			<div class="welcome">
 				<p>Welcome to your admin dashboard, you can access all monitoring services here!</p>

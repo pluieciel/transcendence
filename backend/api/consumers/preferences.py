@@ -19,6 +19,7 @@ class getPreferences(AsyncHttpConsumer):
 				'color': user.color,
 				'quality': user.quality,
 				'is_2fa_enabled': user.is_2fa_enabled,
+				'is_admin': user.is_admin,
 			}
 			return await self.send_response(200, json.dumps(response_data).encode(),
 				headers=[(b"Content-Type", b"application/json")])
