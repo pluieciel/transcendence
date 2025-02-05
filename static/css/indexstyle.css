@@ -23,6 +23,14 @@ body {
 	flex-direction: column;
 }
 
+#credit-button {
+	background: none;
+	border: none;
+	font-weight: bold;
+	color: var(--user-color);
+	text-shadow: 0 0 5px var(--user-color);
+}
+
 #nav-buttons {
     display: flex;
     align-items: center;

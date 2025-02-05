@@ -55,15 +55,34 @@ export default class MainView {
 	render() {
 		this.container.innerHTML = `
 			<header>
-				<h1 id="pong">P <i class="fa-solid fa-table-tennis-paddle-ball fa-xs"></i> N G</h1>
+				<h1 id="pong">P 
+					<button id="credit-button">
+						<i class="fa-solid fa-table-tennis-paddle-ball fa-xs"></i>
+					</button>
+					 N G
+				</h1>
 				<div id="nav-buttons">
-					<button class="nav-button nav-button-disabled" id="play-button"><i class="fa-solid fa-gamepad fa-2xl"></i>Play</button>
-					<button class="nav-button" id="customize-button"><i class="fa-solid fa-palette fa-2xl"></i>Customize</button>
-					<button class="nav-button" id="leaderboard-button"><i class="fa-solid fa-medal fa-2xl"></i>Leaderboard</button>
-					<button class="nav-button" id="achievements-button"><i class="fa-solid fa-trophy fa-2xl"></i>Achievements</button>
-					<button class="nav-button" id="profile-button"><i class="fa-solid fa-user fa-2xl"></i>Profile</button>
-					<button class="nav-button" id="admin-button"><i class="fa-solid fa-user-tie fa-2xl"></i>Admin</button>
-					<button class="nav-button" id="logout-button"><i class="fa-solid fa-right-from-bracket fa-2xl"></i>Log Out</button>
+					<button class="nav-button nav-button-disabled" id="play-button">
+						<i class="fa-solid fa-gamepad fa-2xl"></i>Play
+					</button>
+					<button class="nav-button" id="customize-button">
+						<i class="fa-solid fa-palette fa-2xl"></i>Customize
+					</button>
+					<button class="nav-button" id="leaderboard-button">
+						<i class="fa-solid fa-medal fa-2xl"></i>Leaderboard
+					</button>
+					<button class="nav-button" id="achievements-button">
+						<i class="fa-solid fa-trophy fa-2xl"></i>Achievements
+					</button>
+					<button class="nav-button" id="profile-button">
+						<i class="fa-solid fa-user fa-2xl"></i>Profile
+					</button>
+					<button class="nav-button" id="admin-button">
+						<i class="fa-solid fa-user-tie fa-2xl"></i>Admin
+					</button>
+					<button class="nav-button" id="logout-button">
+						<i class="fa-solid fa-right-from-bracket fa-2xl"></i>Log Out
+					</button>
 				</div>
 			</header>
 
@@ -132,9 +151,6 @@ export default class MainView {
     addEventListeners() {
 		const selectorRumble = document.getElementById("rumble");
         const selectorClassic = document.getElementById("classic");
-		const adminBtn = this.container.querySelector("#adminBtn");
-		const customBtn = this.container.querySelector("#customBtn");
-		const logoutBtn = this.container.querySelector("#logoutBtn");
 		
 		this.addNavEventListeners();
 
@@ -147,24 +163,6 @@ export default class MainView {
 			window.app.settings['game-selector'] = "classic"
 			this.addSelector();
 		});
-
-		adminBtn.addEventListener("click", () => {
-			window.app.router.navigateTo("/admin");
-		});
-
-		logoutBtn.addEventListener("click", () => {
-			window.app.chatBox.disconnect();
-			window.app.logout();
-		});
-
-		customBtn.addEventListener("click", () => {
-			window.app.router.navigateTo("/custom");
-		});
-
-        logoutBtn.addEventListener("click", () => {
-            window.app.chatBox.disconnect();
-            window.app.logout();
-        });
 	}
 
 	addSelector() {
@@ -187,30 +185,46 @@ export default class MainView {
 	}
 
 	addNavEventListeners() {
-		const	profile = document.getElementById('profileBtn');
-		const	custom = document.getElementById('customBtn');
-		const	credits = document.getElementById('creditsBtn');
-		const	logoutBtn = document.getElementById('logoutBtn');
-		const	adminBtn = document.getElementById('adminBtn');
-		logoutBtn.addEventListener("click", () => {
-            window.app.chatBox.disconnect();
-            window.app.logout();
-        });
+		const creditButton = document.getElementById("credit-button");
+		const playButton = document.getElementById("play-button");
+		const customizeButton = document.getElementById("customize-button");
+		const leaderboardButton = document.getElementById("leaderboard-button");
+		const achievementsButton = document.getElementById("achievements-button");
+		const profileButton = document.getElementById("profile-button");
+		const adminButton = document.getElementById("admin-button");
+		const logoutButton = document.getElementById("logout-button");
 
-		custom.addEventListener("click", () => {
-			window.app.router.navigateTo("/custom");
-		});
-
-		profile.addEventListener("click", () => {
-			window.app.router.navigateTo("/profile");
-		});
-
-		credits.addEventListener("click", () => {
+		creditButton.addEventListener("click", () => {
 			window.app.router.navigateTo("/credits");
 		});
 
-		adminBtn.addEventListener("click", () => {
+		playButton.addEventListener("click", () => {
+			window.app.router.navigateTo("/play");
+		});
+
+		customizeButton.addEventListener("click", () => {
+			window.app.router.navigateTo("/customize");
+		});
+		
+		leaderboardButton.addEventListener("click", () => {
+			window.app.router.navigateTo("/leaderboard");
+		});
+
+		achievementsButton.addEventListener("click", () => {
+			window.app.router.navigateTo("/achievements");
+		});
+
+		profileButton.addEventListener("click", () => {
+			window.app.router.navigateTo("/profile");
+		});
+
+		adminButton.addEventListener("click", () => {
 			window.app.router.navigateTo("/admin");
+		});
+
+		logoutButton.addEventListener("click", () => {
+			window.app.chatBox.disconnect();
+			window.app.logout();
 		});
 	}
 }
