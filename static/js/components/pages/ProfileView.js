@@ -60,9 +60,12 @@ export default class ProfileView {
 					<h3 id="p-name">${this.username}</h3>
 					<img id="avatarImg" class="userOutline d-none" alt="User Avatar" width="150" height="150"></img>
 					<div id="profile-content" class="profile userOutline">
-						<h3 id="p-elo">Loading...</h3>
-						<h3 id="p-winrate">Loading...</h3>
-						<h3 id="p-wl">Loading...</h3>
+					<h3 id="p-elo">Loading...</h3>
+					<h3 id="p-winrate">Loading...</h3>
+					<h3 id="p-wl">Loading...</h3>
+					<div id="progress-bar" class="all-rounded">
+					    <div id="progress-bar-percentage" style="width: 50%"><span>Ratio: 0/0</span></div>
+					</div>
 						<h3 id="p-tourn">Loading...</h3>
 					</div>
 				</div>
@@ -168,7 +171,7 @@ export default class ProfileView {
 				tourn.innerHTML = "Trophies: " + data["tourn_won"] + "<br>Tournaments played: " + data["tourn_joined"];
 				name.innerHTML = this.username; 
 				if (data['display']) {
-					let toInsert = " (" + data['display'] + ")";
+					let toInsert = " [" + data['display'] + "]";
 					name.insertAdjacentHTML('beforeend', toInsert);
 				}
 			} else
