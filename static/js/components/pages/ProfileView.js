@@ -37,7 +37,7 @@ export default class ProfileView {
 		
 		<div id="mainPage">
 			<div class="profile-container">
-				<div id="container-settings">
+				<div class="container-row">
 					<div id="profile-settings" class="settings userOutline">
 						<h3>Profile info</h3>
 						<button id="changeNameBtn">Change your display name</button>
@@ -56,13 +56,15 @@ export default class ProfileView {
 						<button id="deleteAccBtn">Delete my account</button>
 					</div>
 				</div>
-				<div id="profile-content" class="profile userOutline">
+				<div class="container-row">
 					<img id="avatarImg" class="userOutline d-none" alt="User Avatar" width="150" height="150"></img>
-					<h3 id="p-name">${this.username}</h3>
-					<h3 id="p-elo">Loading...</h3>
-					<h3 id="p-winrate">Loading...</h3>
-					<h3 id="p-wl">Loading...</h3>
-					<h3 id="p-tourn">Loading...</h3>
+					<div id="profile-content" class="profile userOutline">
+						<h3 id="p-name">${this.username}</h3>
+						<h3 id="p-elo">Loading...</h3>
+						<h3 id="p-winrate">Loading...</h3>
+						<h3 id="p-wl">Loading...</h3>
+						<h3 id="p-tourn">Loading...</h3>
+					</div>
 				</div>
 				<div id="profile-history" class="userOutline">
 				</div>
