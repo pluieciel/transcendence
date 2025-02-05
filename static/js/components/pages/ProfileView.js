@@ -37,6 +37,25 @@ export default class ProfileView {
 		
 		<div id="mainPage">
 			<div class="profile-container">
+				<div id="container-settings">
+					<div id="profile-settings" class="settings userOutline">
+						<h3>Profile info</h3>
+						<button id="changeNameBtn">Change your display name</button>
+						<input type="text" id="newName">
+						<span id="avatarSpan">
+							<label class="avatar-selector-settings">Change your profile picture</label>
+							<input type="file" id="fileInput" accept="image/*" hidden>
+						</span>
+						<button type="button" id="enable2FA">Enable 2FA</button>
+						<button type="button" id="disable2FA">Disable 2FA</button>
+					</div>
+					<div id="profile-dangerous" class="settings userOutline">
+						<h3>be careful!</h3>
+						<button id="passwordButton">Set New Password</button>
+						<input type="password" id="newPasswordInput" placeholder="">
+						<button id="deleteAccBtn">Delete my account</button>
+					</div>
+				</div>
 				<div id="profile-content" class="profile userOutline">
 					<img id="avatarImg" class="userOutline d-none" alt="User Avatar" width="150" height="150"></img>
 					<h3 id="p-name">${this.username}</h3>
@@ -45,23 +64,7 @@ export default class ProfileView {
 					<h3 id="p-wl">Loading...</h3>
 					<h3 id="p-tourn">Loading...</h3>
 				</div>
-				<div id="profile-settings" class="profile userOutline">
-					<h3>Profile info i guess</h3>
-					<button id="changeNameBtn">Change your display name</button>
-					<input type="text" id="newName">
-					<span id="avatarSpan">
-						<label class="avatar-selector-settings">Change your profile picture</label>
-					    <input type="file" id="fileInput" accept="image/*" hidden>
-					</span>
-					<button type="button" id="enable2FA">Enable 2FA</button>
-					<button type="button" id="disable2FA">Disable 2FA</button>
-					<h3>Be careful with those</h3>
-					<button id="passwordButton">Set New Password</button>
-					<input type="password" id="newPasswordInput" placeholder="">
-					<button id="deleteAccBtn">Delete my account</button>
-				</div>
 				<div id="profile-history" class="userOutline">
-					<h2>Game History</h2>
 				</div>
 			</div>
 			<div class="modal fade" id="totpModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -168,8 +171,6 @@ export default class ProfileView {
 				}
 			} else
 				throw new Error("Request failure");
-
-				
 			} catch (e) {
 				elo.innerHTML = "Failed to load elo";
 				winrate.innerHTML = "Failed to load winrate";
@@ -189,6 +190,7 @@ export default class ProfileView {
 			const data = await response.json();
 
 			if (data.success) {
+				document.getElementById('profile-history').innerHTML = "<h2>Game History</h2>";
 				for (let i = 0; i < data.game.length; i++)
 					this.addHistory(data.game[i]);
 			}
@@ -502,14 +504,15 @@ export default class ProfileView {
 	addHistory(data) {
 		let	card = "";
 		const history = document.getElementById('profile-history');
-
+		
+		
 		card += "<div class=\"profile-card\"><div class=\"card-row\"><div class=\"card-user\">";
 		card += "<img class=\"card-avatar\" src=\"" + data['avatar1'] + "\">" + data['user1'] + " </div>";
 		card += "<p class=\"card-score\">" + data['score1'] + " - " + data['score2'] + "</p><div class=\"card-user\">";
 		card += "<img class=\"card-avatar\" src=\"" + data['avatar2'] + "\">" + data['user2'] + " </div>";
 		card += "</div><div class=\"card-row\">";
 		card += "<div class=\"card-elo\">" + data['elo1'] + "</div><div class=\"card-mode\">" + data['mode'] + "</div><div class=\"card-elo\">" + data['elo2'] + "</div>";
-
+		
 		history.innerHTML += card;
 	}
 }
