@@ -85,7 +85,7 @@ export class Game {
 		};
 	}
 
-	emitParticles(position = new THREE.Vector3(0, 0, 0)) {
+	emitParticles(position = new THREE.Vector3(0, 0, 0), color) {
 		const particleCount = 170;
 		const geometry = "sphere";
 		const velocity = 0.3;
@@ -94,7 +94,7 @@ export class Game {
 		//orange 0xe67e00
 		//cyan 0x00BDD1
 		if (this.particleSystem) {
-			this.particleSystem.emit(particleCount, geometry, velocity, lifetime, size, position, 0x00bdd1);
+			this.particleSystem.emit(particleCount, geometry, velocity, lifetime, size, position, color);
 		}
 	}
 
@@ -124,7 +124,7 @@ export class Game {
 			data.events.forEach((event) => {
 				if (event.type === "score" && event.position) {
 					const scorePosition = new THREE.Vector3(event.position.x, event.position.y, event.position.z);
-					this.emitParticles(scorePosition);
+					this.emitParticles(scorePosition, event.color);
 					this.sceneManager.shakeCamera(0.5, 280);
 					try {
 						this.sceneManager.textManager.updateScore("left", event.score_left.toString());

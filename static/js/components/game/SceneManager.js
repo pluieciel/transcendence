@@ -55,7 +55,6 @@ export class SceneManager {
 	shakeCamera(intensity = 0.05, duration = 500) {
 		const originalPosition = this.camera.position.clone();
 		const shakeEndTime = performance.now() + duration;
-		console.log("shaking");
 		const shake = () => {
 			const now = performance.now();
 			if (now < shakeEndTime) {

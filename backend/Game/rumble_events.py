@@ -267,3 +267,20 @@ class VisibleTrajectoryEvent(GameEvent):
 
 	def revert_specific(self):
 		pass
+
+
+class BreathingTimeEvent(GameEvent):
+	def __init__(self, game: 'RumbleGameInstance'):
+		self.game = game
+		self.name = "Breathing Time"
+		self.action = 'none'
+		self.description = "Nothing happens"
+		self.ball_accel_mult = 1
+		self.ball_basespeed_mult = 1
+		self.player_speed_mult = 1
+
+	def apply_specific(self):
+		pass
+
+	def revert_specific(self):
+		pass

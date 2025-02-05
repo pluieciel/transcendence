@@ -305,10 +305,10 @@ class GameBackend:
 				"scoreRight": self.game.player_right.score,
 				"eloChange": self.elo_change
 		})
-		if self.game.ball.lastHitter is not None:
-			if (self.game.ball.lastHitter == "LEFT"):
+		if self.game.winner is not None:
+			if (self.game.winner == "LEFT"):
 				color = self.get_color(self.player_left.user)
-			elif self.game.ball.lastHitter == "RIGHT":
+			elif self.game.winner == "RIGHT":
 				color = self.get_color(self.player_right.user)
 			else:
 				color = '#676a6e'
@@ -356,11 +356,24 @@ class GameBackend:
 	async def rumble_broadcast_state(self):
 		events = []
 		if self.game.scored:
+			if self.game.scorer is not None:
+				if (self.game.scorer == "LEFT"):
+					color = self.get_color(self.player_left.user)
+				elif self.game.scorer == "RIGHT":
+					color = self.get_color(self.player_right.user)
+				else:
+					self.logger.info(f"color defaulted to grey cause winner is not left or right")
+					color = '#676a6e'
+				self.game.scorer = None
+			else:
+				self.logger.info(f"color defaulted to grey cause winner is none")
+				color = '#676a6e'
 			events.append({
 			"type": "score",
 			"position": vars(self.game.scorePos),
 			"score_left": self.game.player_left.score,
-			"score_right": self.game.player_right.score
+			"score_right": self.game.player_right.score,
+			"color" : color
 			})
 			self.game.scored = False
 		if self.game.ended:

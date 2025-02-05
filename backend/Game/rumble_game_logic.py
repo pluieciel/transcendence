@@ -5,7 +5,7 @@ import math
 import logging
 from .game_helper_class import BounceMethods, MovementMethod, Vector2D, DEFAULT_BALL_POS, RIGHT_SIDE_DIR, LEFT_SIDE_DIR, DEFAULT_BALL_ACCELERATION, DEFAULT_BALL_BASE_SPEED, DEFAULT_PLAYER_SPEED, random_angle
 from .rumble_custom_method import MirrorBounce, RandomBounce, IcyMovement, InvertedMovements, NoStoppingMovements, NormalBounce, NormalMovements, KillerBall
-from .rumble_events import InvertedControlsEvent, RandomBouncesEvent, MirrorBallEvent, LightsOutEvent, SmokeCloudEvent, InfiniteSpeedEvent, ReverseBallEvent, ShrinkingPaddleEvent, IcyPaddlesEvent, NoStoppingEvent, VisibleTrajectoryEvent, KillerBallEvent
+from .rumble_events import InvertedControlsEvent, RandomBouncesEvent, MirrorBallEvent, LightsOutEvent, SmokeCloudEvent, InfiniteSpeedEvent, ReverseBallEvent, ShrinkingPaddleEvent, IcyPaddlesEvent, NoStoppingEvent, VisibleTrajectoryEvent, KillerBallEvent, BreathingTimeEvent
 
 
 
@@ -122,6 +122,7 @@ class RumbleGameInstance:
 		self.event.apply()
 		self.paused = False
 		self.ended = False
+		self.scorer = None
 		self.winner = None
 		self.is_running = False
 		self.last_update_time = time.time()
@@ -194,15 +195,15 @@ class RumbleGameInstance:
 		if winner == "LEFT":
 			self.player_left.score += 1
 			self.scorePos = Vector2D(self.ball.position.x, self.ball.position.y, self.ball.position.z)
-			#self.scorePos = Vector2D(self.bounds.right.x, self.ball.position.y, self.ball.position.z)
 			self.ball.start(LEFT_SIDE_DIR, DEFAULT_BALL_POS)
 			self.ball.lastHitter = "RIGHT"
+			self.scorer = "LEFT"
 		elif winner == "RIGHT":
 			self.player_right.score += 1
 			self.scorePos = Vector2D(self.ball.position.x, self.ball.position.y, self.ball.position.z)
-			#self.scorePos = Vector2D(self.bounds.left.x, self.ball.position.y, self.ball.position.z)
 			self.ball.start(RIGHT_SIDE_DIR, DEFAULT_BALL_POS)
 			self.ball.lastHitter = "LEFT"
+			self.scorer = "RIGHT"
 		self.event.revert()
 		await self.revert_event_fun()
 		self.event = self.get_event()
@@ -307,6 +308,7 @@ class RumbleGameInstance:
 			# IcyPaddlesEvent(self),
 			# NoStoppingEvent(self),
 			# VisibleTrajectoryEvent(self),
-			KillerBallEvent(self)
+			#KillerBallEvent(self),
+			BreathingTimeEvent(self)
 		]
 		return random.choice(events)
