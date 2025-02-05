@@ -489,30 +489,3 @@ export default class ProfileView {
 		history.innerHTML += card;
 	}
 }
-
-/*					<div class="profile-card">
-						<div class="card-row">
-							<div class="card-user">
-								<img class="card-avatar" src="https://cdn.intra.42.fr/users/6256bf3b76f8634f1e0df573022b0b72/valgrant.JPG">
-								valgrant
-							</div>
-							<p class="card-score">10 - 7</p>
-							<div class="card-user">
-								<img class="card-avatar" src="https://cdn.intra.42.fr/users/6256bf3b76f8634f1e0df573022b0b72/valgrant.JPG">
-								valgrant
-							</div>
-						</div>
-						<div class="card-row">
-							<div class="card-elo">
-							+20
-							</div>
-							<div class="card-mode">
-							Rumble
-							</div>
-							<div class="card-elo">
-							-20
-							</div>
-						</div>
-					</div>
-					*/
-
