@@ -13,7 +13,7 @@
 }
 
 body {
-    font-family: Arial, sans-serif;
+    font-family: "Exo 2", sans-serif;
     color: var(--primary-color);
     background-color: var(--primary-color);
     margin: 0;
