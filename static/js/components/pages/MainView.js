@@ -57,7 +57,7 @@ export default class MainView {
 			<header>
 				<h1 id="pong">P <i class="fa-solid fa-table-tennis-paddle-ball fa-xs"></i> N G</h1>
 				<div id="nav-buttons">
-					<button class="nav-button" id="play-button"><i class="fa-solid fa-gamepad fa-2xl"></i>Play</button>
+					<button class="nav-button nav-button-disabled" id="play-button"><i class="fa-solid fa-gamepad fa-2xl"></i>Play</button>
 					<button class="nav-button" id="customize-button"><i class="fa-solid fa-palette fa-2xl"></i>Customize</button>
 					<button class="nav-button" id="leaderboard-button"><i class="fa-solid fa-medal fa-2xl"></i>Leaderboard</button>
 					<button class="nav-button" id="achievements-button"><i class="fa-solid fa-trophy fa-2xl"></i>Achievements</button>

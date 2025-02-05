@@ -6,6 +6,7 @@
 	--header-color: #090909;
 	--header-shadow-color: rgba(255, 255, 255, 0.3);
 	--user-color: #0ff;
+	--disabled-color: #535353;
 }
 
 ::placeholder {
@@ -40,20 +41,9 @@ body {
 	text-shadow: 0 0 5px var(--user-color);
 }
 
-#play-button {
-	margin-left: 75px;
-}
-
-#play-button:before {
-	content: "";
-	position: absolute;
-	top: 0;
-	width: 100%;
-	height: 2px;
-	background-color: var(--user-color);
-	transform: rotate(135deg);
-    transform-origin: 1px 1px;
-	box-shadow: 0 0 5px var(--user-color);
+.nav-button-disabled {
+	color: var(--disabled-color);
+	text-shadow: 0 0 5px var(--disabled-color);
 }
 
 .nav-button i {
@@ -76,7 +66,7 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: var(--primary-color);
+    background-color: var(--header-color);
     color: var(--secondary-color);
     width: 100%;
 	height: 128px;
