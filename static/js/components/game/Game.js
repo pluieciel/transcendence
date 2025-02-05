@@ -125,6 +125,7 @@ export class Game {
 				if (event.type === "score" && event.position) {
 					const scorePosition = new THREE.Vector3(event.position.x, event.position.y, event.position.z);
 					this.emitParticles(scorePosition);
+					this.sceneManager.shakeCamera(0.5, 280);
 					try {
 						this.sceneManager.textManager.updateScore("left", event.score_left.toString());
 						this.sceneManager.textManager.updateScore("right", event.score_right.toString());
@@ -218,7 +219,6 @@ export class Game {
 		let objectToModify = null;
 		if (event.code === "Space") {
 			this.sceneManager.toggleDebugMode();
-			this.emitParticles();
 		}
 		if (this.editor) {
 			if (event.code == "KeyG") {

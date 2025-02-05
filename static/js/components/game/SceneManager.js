@@ -52,6 +52,28 @@ export class SceneManager {
 		}
 	}
 
+	shakeCamera(intensity = 0.05, duration = 500) {
+		const originalPosition = this.camera.position.clone();
+		const shakeEndTime = performance.now() + duration;
+		console.log("shaking");
+		const shake = () => {
+			const now = performance.now();
+			if (now < shakeEndTime) {
+				const shakeX = (Math.random() - 0.5) * intensity;
+				const shakeY = (Math.random() - 0.5) * intensity;
+				const shakeZ = (Math.random() - 0.5) * intensity;
+
+				this.camera.position.set(originalPosition.x + shakeX, originalPosition.y + shakeY, originalPosition.z + shakeZ);
+
+				requestAnimationFrame(shake);
+			} else {
+				this.camera.position.copy(originalPosition);
+			}
+		};
+
+		shake();
+	}
+
 	async initialize(data) {
 		//Create Scene, Lights, Camera
 		this.scene = new THREE.Scene();

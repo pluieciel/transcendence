@@ -115,17 +115,17 @@ class SmokeCloudEvent(GameEvent):
 	def __init__(self, game: 'RumbleGameInstance'):
 		self.game = game
 		self.name = "SmokeCloud"
-		self.action = 'none'
+		self.action = 'smoke'
 		self.description = "The ball disappears when in the middle of the field !"
 		self.ball_accel_mult = 1
 		self.ball_basespeed_mult = 1
 		self.player_speed_mult = 1
 
 	def apply_specific(self):
-		pass
+		self.action = 'smoke'
 
 	def revert_specific(self):
-		pass
+		self.action = 'reset'
 
 class InfiniteSpeedEvent(GameEvent):
 	def __init__(self, game: 'RumbleGameInstance'):
