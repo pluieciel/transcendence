@@ -182,12 +182,14 @@ class RumbleGameInstance:
 				if (self.event.name == 'Killer Ball'):
 					random_angle(ball)
 					ball.position.x = ball.bounds.right.x - ball.radius
+					self.ball.lastHitter = "RIGHT"
 				else:
 					await self.on_score("LEFT")
 			elif ball_pos.x <= self.bounds.left.x:
 				if (self.event.name == 'Killer Ball'):
 					random_angle(ball)
 					ball.position.x = ball.bounds.left.x + ball.radius
+					self.ball.lastHitter = "LEFT"
 				else:
 					await self.on_score("RIGHT")
 
@@ -308,7 +310,7 @@ class RumbleGameInstance:
 			# IcyPaddlesEvent(self),
 			# NoStoppingEvent(self),
 			# VisibleTrajectoryEvent(self),
-			#KillerBallEvent(self),
-			BreathingTimeEvent(self)
+			KillerBallEvent(self)#,
+			#BreathingTimeEvent(self)
 		]
 		return random.choice(events)
