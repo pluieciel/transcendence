@@ -62,9 +62,8 @@ export default class ProfileView {
 					<div id="profile-content" class="profile userOutline">
 					<h3 id="p-elo">Loading...</h3>
 					<h3 id="p-winrate">Loading...</h3>
-					<h3 id="p-wl">Loading...</h3>
 					<div id="progress-bar" class="all-rounded">
-					    <div id="progress-bar-percentage" style="width: 50%"><span>Ratio: 0/0</span></div>
+					    <div id="progress-bar-percentage"><span id="p-wl">Loading...</span></div>
 					</div>
 						<h3 id="p-tourn">Loading...</h3>
 					</div>
@@ -143,6 +142,7 @@ export default class ProfileView {
 		let		avatar = document.getElementById("avatarImg");
 		const	enable2FA = document.querySelector('#enable2FA');
 		const	disable2FA = document.querySelector('#disable2FA');
+		const	bar = document.getElementById('progress-bar-percentage');
 		const 	is_2fa_enabled = window.app.settings.is_2fa_enabled;
 
 		if (is_2fa_enabled) {enable2FA.style.display = "none";disable2FA.style.display = "block";}
@@ -167,7 +167,20 @@ export default class ProfileView {
 			if (data.success) {
 				elo.innerHTML = "Elo: " + data["elo"];
 				winrate.innerHTML = "Winrate: " + data["winrate"];
-				ratio.innerHTML = "Ratio: " + data["wins"] + "/" + data["looses"];
+				const	win = data['wins'];
+				const	loose = data['looses'];
+				if (loose != 0)
+					bar.style.width = (win + loose) / loose + "%";
+				else {
+					bar.style.backgroundColor = "var(--hover-color)";
+					bar.style.width = "100%";
+					bar.style.borderTopRightRadius = "5px";
+					bar.style.borderBottomRightRadius = "5px";
+				}
+				if (win == 0 && loose == 0)
+					ratio.innerHTML = "Go play!";
+				else
+					ratio.innerHTML = "Ratio: " + win + "/" + loose;
 				tourn.innerHTML = "Trophies: " + data["tourn_won"] + "<br>Tournaments played: " + data["tourn_joined"];
 				name.innerHTML = this.username; 
 				if (data['display']) {
@@ -196,8 +209,8 @@ export default class ProfileView {
 
 			if (data.success) {
 				document.getElementById('profile-history').innerHTML = "<h2 id=\"ghistory\">Game History</h2>";
-				for (let i = 0; i < data.game.length && i < 6; i++)
-					this.addHistory(data.game[0]);
+				for (let i = 0;i < data.game.length && i < 5; i++)
+					this.addHistory(data.game[i]);
 			}
 		}
 		catch (e) {
