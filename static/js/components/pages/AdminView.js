@@ -1,34 +1,62 @@
 export default class MainView {
     constructor(container) {
         this.container = container;
-		this.render();
-		this.addEventListeners();
-		this.getSettings();
+		this.init();
     }
 
-	async getSettings() {
-		if (!window.app.settings.fetched)
-			await window.app.getPreferences();
-		this.settings = {
-			color: window.app.settings.color,
-			quality: window.app.settings.quality
-		};
-		return ;
+	async init() {
+		this.render();
+		this.addEventListeners();
+		await this.getSettings();
 	}
-
+	
+	async getSettings() {
+		if (!window.app.settings['fetched'])
+			await window.app.getPreferences();
+		if (window.app.settings.is_admin) {
+			const adminButton = document.getElementById("admin-button");
+			adminButton.style.display = "block";
+		}
+	}
     render() {
         this.container.innerHTML = `
 			<header>
-				<h1 id="pong">PONG</h1>
-				<button id="indexAdminBtn">Main</button>
-				<button id="settingsBtn">Settings</button>
-				<button id="logoutBtn">Log out</button>
+				<h1 id="pong">P 
+					<button id="credit-button">
+						<i class="fa-solid fa-table-tennis-paddle-ball fa-xs"></i>
+					</button>
+					 N G
+				</h1>
+				<div id="nav-buttons">
+					<button class="nav-button" id="play-button">
+						<i class="fa-solid fa-gamepad fa-xl"></i>Play
+					</button>
+					<button class="nav-button" id="customize-button">
+						<i class="fa-solid fa-palette fa-xl"></i>Customize
+					</button>
+					<button class="nav-button" id="leaderboard-button">
+						<i class="fa-solid fa-medal fa-xl"></i>Leaderboard
+					</button>
+					<button class="nav-button" id="achievements-button">
+						<i class="fa-solid fa-trophy fa-xl"></i>Achievements
+					</button>
+					<button class="nav-button" id="profile-button">
+						<i class="fa-solid fa-user fa-xl"></i>Profile
+					</button>
+					<button class="nav-button nav-button-disabled" id="admin-button">
+						<i class="fa-solid fa-user-tie fa-xl"></i>Admin
+					</button>
+					<button class="nav-button" id="logout-button">
+						<i class="fa-solid fa-right-from-bracket fa-xl"></i>Log Out
+					</button>
+				</div>
 			</header>
 			<div class="welcome">
 				<p>Welcome to your admin dashboard, you can access all monitoring services here!</p>
 			</div>
 			<div id="services">
-				<div class="service redHover">
+			<div id="services-container">
+				<div class="service userOutline">
 					<div class="service-header">
 						<h3>Elasticsearch</h3>
 						<img src="/imgs/elasticsearch_logo.webp" alt="Elasticsearch logo" class="service-logo">
@@ -36,7 +64,7 @@ export default class MainView {
 					<p class="service-description">Search and analytics engine for all application logs and metrics.</p>
 					<button id="elasticsearchBtn">Go to Elasticsearch</button>
 				</div>
-				<div class="service redHover">
+				<div class="service userOutline">
 					<div class="service-header">
 						<h3>Kibana</h3>
 						<img src="/imgs/kibana_logo.webp" alt="Kibana logo" class="service-logo">
@@ -44,7 +72,7 @@ export default class MainView {
 					<p class="service-description">Visualization dashboard for Elasticsearch data and log analysis.</p>
 					<button id="kibanaBtn">Go to Kibana</button>
 				</div>
-				<div class="service redHover">
+				<div class="service userOutline">
 					<div class="service-header">
 						<h3>cAdvisor</h3>
 						<img src="/imgs/cadvisor_logo.webp" alt="cAdvisor logo" class="service-logo">
@@ -52,14 +80,14 @@ export default class MainView {
 					<p class="service-description">Container resource usage and performance analyzer.</p>
 					<button id="cadvisorBtn">Go to cAdvisor</button>
 				</div>
-				<div class="service redHover">
+				<div class="service userOutline">
 					<div class="service-header">
 						<h3>Node Exporter</h3>
 					</div>
 					<p class="service-description">Hardware and OS metrics exporter for system monitoring.</p>
 					<button id="nodeExporterBtn">Go to Node Exporter</button>
 				</div>
-				<div class="service redHover">
+				<div class="service userOutline">
 					<div class="service-header">
 						<h3>Prometheus</h3>
 						<img src="/imgs/prometheus_logo.webp" alt="Prometheus logo" class="service-logo">
@@ -67,7 +95,7 @@ export default class MainView {
 					<p class="service-description">Time series database for metrics collection and alerting.</p>
 					<button id="prometheusBtn">Go to Prometheus</button>
 				</div>
-				<div class="service redHover">
+				<div class="service userOutline">
 					<div class="service-header">
 						<h3>Grafana</h3>
 						<img src="/imgs/grafana_logo.webp" alt="Grafana logo" class="service-logo">
@@ -76,32 +104,62 @@ export default class MainView {
 					<button id="grafanaBtn">Go to Grafana</button>
 				</div>
 			</div>
+			</div>
         `;
     }
 
+	addNavEventListeners() {
+		const creditButton = document.getElementById("credit-button");
+		const playButton = document.getElementById("play-button");
+		const customizeButton = document.getElementById("customize-button");
+		const leaderboardButton = document.getElementById("leaderboard-button");
+		const achievementsButton = document.getElementById("achievements-button");
+		const profileButton = document.getElementById("profile-button");
+		const adminButton = document.getElementById("admin-button");
+		const logoutButton = document.getElementById("logout-button");
+
+		creditButton.addEventListener("click", () => {
+			window.app.router.navigateTo("/credits");
+		});
+
+		playButton.addEventListener("click", () => {
+			window.app.router.navigateTo("/index");
+		});
+
+		customizeButton.addEventListener("click", () => {
+			window.app.router.navigateTo("/customize");
+		});
+		
+		leaderboardButton.addEventListener("click", () => {
+			window.app.router.navigateTo("/leaderboard");
+		});
+
+		achievementsButton.addEventListener("click", () => {
+			window.app.router.navigateTo("/achievements");
+		});
+
+		profileButton.addEventListener("click", () => {
+			window.app.router.navigateTo("/profile");
+		});
+
+		adminButton.addEventListener("click", () => {
+			window.app.router.navigateTo("/admin");
+		});
+
+		logoutButton.addEventListener("click", () => {
+			window.app.chatBox.disconnect();
+			window.app.logout();
+		});
+	}
+
     addEventListeners() {
-        const indexAdminBtn = this.container.querySelector("#indexAdminBtn");
-		const settingsBtn = this.container.querySelector("#settingsBtn");
-        const logoutBtn = this.container.querySelector("#logoutBtn");
-		const elasticsearchBtn = this.container.querySelector("#elasticsearchBtn");
-		const kibanaBtn = this.container.querySelector("#kibanaBtn");
-		const nodeExporterBtn = this.container.querySelector("#nodeExporterBtn");
-		const cadvisorBtn = this.container.querySelector("#cadvisorBtn");
-		const prometheusBtn = this.container.querySelector("#prometheusBtn");
-		const grafanaBtn = this.container.querySelector("#grafanaBtn");
-
-        logoutBtn.addEventListener("click", () => {
-            window.app.chatBox.disconnect();
-            window.app.logout();
-        });
-
-		settingsBtn.addEventListener('click', () => {
-            window.app.router.navigateTo('/settings');
-        });
-
-		indexAdminBtn.addEventListener('click', () => {
-            window.app.router.navigateTo('/index');
-        });
+		this.addNavEventListeners();
+		const elasticsearchBtn = document.getElementById("elasticsearchBtn");
+		const kibanaBtn = document.getElementById("kibanaBtn");
+		const nodeExporterBtn = document.getElementById("nodeExporterBtn");
+		const cadvisorBtn = document.getElementById("cadvisorBtn");
+		const prometheusBtn = document.getElementById("prometheusBtn");
+		const grafanaBtn = document.getElementById("grafanaBtn");
 
 		elasticsearchBtn.addEventListener("click", () => {
 			window.location.href = "/admin/services/elasticsearch";

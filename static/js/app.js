@@ -1,22 +1,28 @@
-import LoginView from "./components/pages/LoginView.js";
-import MainView from "./components/pages/MainView.js";
-import SettingsView from "./components/pages/SettingsView.js";
-import AdminView from "./components/pages/AdminView.js";
-import GameView from "./components/pages/GameView.js";
-import LoginOAuth from "./components/login/LoginOAuth.js";
-import Router from "./router.js";
+import AdminView from './components/pages/AdminView.js';
+import Router from './router.js';
+import MainView from './components/pages/MainView.js';
+import LoginView from './components/pages/LoginView.js';
+import LoginOAuth from './components/login/LoginOAuth.js';
+import ProfileView from './components/pages/ProfileView.js';
+import CreditsView from './components/pages/CreditsView.js';
+import CustomizeView from './components/pages/CustomizeView.js';
+import GameView from './components/pages/GameView.js';
+
 
 class App {
 	constructor() {
 		this.routes = [
-			{ path: "/", component: LoginView },
-			{ path: "/index", component: MainView },
-			{ path: "/settings", component: SettingsView },
-			{ path: "/login/oauth", component: LoginOAuth },
-			{ path: "*", component: LoginView },
-			{ path: "/admin", component: AdminView },
+			{ path: '/', component: LoginView },
+			{ path: '/index', component: MainView },
+			{ path: '/customize', component: CustomizeView },
+			{ path: '/credits', component: CreditsView },
+			{ path: '/profile', component: ProfileView },
+			{ path: '/admin', component: AdminView },
+			{ path: '/settings', component: SettingsView },
+			{ path: '/login/oauth', component: LoginOAuth },
+			{ path: '*', component: LoginView },
 			{ path: "/game", component: GameView },
-		];
+		]
 		this.state = {
 			isLoggedIn: sessionStorage.getItem("isLoggedIn") === "true",
 			username: sessionStorage.getItem("username"),
@@ -64,9 +70,6 @@ class App {
 	}
 
 	async getAvatar(username) {
-		// if (this.avatarCache[username]) {
-		// 	return this.avatarCache[username];
-		// }
 		const response = await fetch(`/api/get/avatar/${username}`, {
 			method: "POST",
 			headers: {
@@ -86,10 +89,12 @@ class App {
 			},
 		});
 		const data = await response.json();
-		if (!data.success) return;
-		this.settings.color = data["color"];
-		this.settings.quality = data["quality"];
-		this.settings.is_2fa_enabled = data["is_2fa_enabled"];
+		if (!data.success)
+			return;
+		this.settings.color = data['color'];
+		this.settings.quality = data['quality'];
+		this.settings.is_2fa_enabled = data['is_2fa_enabled'];
+		this.settings.is_admin = data['is_admin'];
 		this.settings.fetched = true;
 		this.setColor(this.settings.color);
 	}
@@ -104,6 +109,7 @@ class App {
 	}
 
 	logout() {
+		this.settings.fetched = false;
 		this.state.isLoggedIn = false;
 		this.ingame = false;
 		sessionStorage.clear();

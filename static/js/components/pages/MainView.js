@@ -11,63 +11,94 @@ export default class MainView {
 
 		this.username = window.app.state.username;
 
+		this.init();
+    }
+
+	async init() {
 		this.render();
 		this.initComponents();
-		this.setProfileFields();
-		if (!window.app.settings.fetched) window.app.getPreferences();
+		if (!window.app.settings['fetched']) window.app.getPreferences();
 		this.checkForBackdrop();
+        this.addEventListeners();
+        if (window.app.ingame) {
+            console.log("Reconnecting to game");
+            const protocol =
+                window.location.protocol === "https:" ? "wss:" : "ws:";
+            const host = window.location.host;
+            const wsUrl = `${protocol}//${host}/ws/game/reconnect=true`;
+            window.app.gamews = new WebSocket(wsUrl);
+            window.app.gamews.onmessage = (event) => {
+                const events = JSON.parse(event.data);
+                if (events.message_type === "init") {
+                    this.displayGame(events);
+                }
+            };
 
-		this.addEventListeners();
+            window.app.gamews.onclose = () => {
+                console.log("Disconnected from server");
+                window.app.ingame = false;
+                sessionStorage.setItem("ingame", "false");
+            };
+        }
+		await this.getSettings();
+	}
+	
+	async getSettings() {
+		if (!window.app.settings['fetched'])
+			await window.app.getPreferences();
+		if (window.app.settings.is_admin) {
+			const adminButton = document.getElementById("admin-button");
+			adminButton.style.display = "block";
+		}
 	}
 
 	render() {
 		this.container.innerHTML = `
 			<header>
-				<h1 id="pong">PONG</h1>
-				<button id="adminBtn">Admin</button>
-				<button id="settingsBtn">Settings</button>
-				<button id="logoutBtn">Log out</button>
+				<h1 id="pong">P 
+					<button id="credit-button">
+						<i class="fa-solid fa-table-tennis-paddle-ball fa-xs"></i>
+					</button>
+					 N G
+				</h1>
+				<div id="nav-buttons">
+					<button class="nav-button nav-button-disabled" id="play-button">
+						<i class="fa-solid fa-gamepad fa-xl"></i>Play
+					</button>
+					<button class="nav-button" id="customize-button">
+						<i class="fa-solid fa-palette fa-xl"></i>Customize
+					</button>
+					<button class="nav-button" id="leaderboard-button">
+						<i class="fa-solid fa-medal fa-xl"></i>Leaderboard
+					</button>
+					<button class="nav-button" id="achievements-button">
+						<i class="fa-solid fa-trophy fa-xl"></i>Achievements
+					</button>
+					<button class="nav-button" id="profile-button">
+						<i class="fa-solid fa-user fa-xl"></i>Profile
+					</button>
+					<button class="nav-button" id="admin-button">
+						<i class="fa-solid fa-user-tie fa-xl"></i>Admin
+					</button>
+					<button class="nav-button" id="logout-button">
+						<i class="fa-solid fa-right-from-bracket fa-xl"></i>Log Out
+					</button>
+				</div>
 			</header>
 
 			<div id="mainPage">
-				<div class="welcome">
-					<p>Welcome to Pong! Get ready to play!</p>
-				</div>
-				<div class ="content">
-					<div class="credits redHover">
-						<h2>Credits</h2>
-						<p>
-							Welcome to <strong>ft_transcendence</strong>,<br>
-							the final project of the 42 common core curriculum!<br>
-							This project is our version of the classic <b>Pong</b> game<br><br>
-							Ressources used:<br>
-							The whole project is running in docker <i class="fab fa-docker"></i><br>
-							We're using nginx as our webserv <i class="fas fa-server"></i><br>
-							Javascript <i class="fab fa-js"></i> is used for the Frontend<br>
-							PostgreSQL for the Database <i class="fas fa-database"></i><br><br>
-							Created by:<br>
-							<a href="https://github.com/jlefonde" target="_blank" rel="noopener noreferrer">Joris Lefondeur</a><br>
-							<a href="https://github.com/pluieciel" target="_blank" rel="noopener noreferrer">Yue Zhao</a><br>
-							<a href="https://github.com/siul008" target="_blank" rel="noopener noreferrer">Julien Nunes</a><br>
-							<a href="https://github.com/neutrou" target="_blank" rel="noopener noreferrer">Victor Algranti</a><br><br>
-							We hope you enjoy exploring our project!
-						</p>
+				<div class="content">
+					<div class="game-buttons userOutline">
+						<h2 id="play">PLAY!</h2>
+						<div class="row game-selector">
+							<button id="classic" class="game-btn">classic</button>
+							<button id="rumble" class="disabled game-btn">rumble</button>
+						</div>
+						<button id="playAI">AI</button>
+						<button id="quickMatch" class="nav-link" data-view="game" data-bs-toggle="modal" data-bs-target="#matchSearch">Ranked</button>
+						<button id="tournamentButton" data-bs-toggle="modal" data-bs-target="#tournamentModal">Tournament</button>
+					</div>
 
-					</div>
-							<div class="game-buttons redHover">
-							<h2>PLAY!</h2>
-							<button id="playAI">AI</button>
-							<button id="quickMatch" class="nav-link" data-view="game" data-bs-toggle="modal" data-bs-target="#matchSearch">Quick Match</button>
-							<button id="tournamentButton" data-bs-toggle="modal" data-bs-target="#tournamentModal">Tournament</button>
-					</div>
-					<div class="profile redHover">
-						<h2>Profile</h2>
-						<h3 id="p-name">${this.username}</h3>
-						<h3 id="p-elo">Loading...</h3>
-						<h3 id="p-winrate">Loading...</h3>
-						<h3 id="p-wl">Loading...</h3>
-						<h3 id="p-tourn">Loading...</h3>
-					</div>
 				</div>
 			</div>
 			<!-- ChatBox container -->
@@ -82,29 +113,26 @@ export default class MainView {
         `;
 	}
 
-	showLeaderboard() {
-		const mainContent = this.container.querySelector("#mainContent");
-		mainContent.innerHTML = "<h2>Leaderboard View</h2>";
-		// Add any additional logic to initialize the leaderboard view
-	}
+    showLeaderboard() {
+        const mainContent = this.container.querySelector("#mainContent");
+        mainContent.innerHTML = "<h2>Leaderboard View</h2>";
+    }
 
-	initComponents() {
-		// Initialize Tournament
-		const tournamentContainer = this.container.querySelector("#tournamentContainer");
-		if (!window.app.tournament) {
-			window.app.tournament = new Tournament(tournamentContainer);
-		} else {
+    initComponents() {
+        const tournamentContainer = this.container.querySelector("#tournamentContainer",);
+        if (!window.app.tournament) {
+            window.app.tournament = new Tournament(tournamentContainer);
+        } else {
 			window.app.tournament.container = tournamentContainer;
 			window.app.tournament.render();
 			window.app.tournament.addEventListeners();
 			window.app.tournament.updateContent();
 		}
 
-		// Initialize ChatBox
-		const chatBoxContainer = this.container.querySelector("#chatBoxContainer");
-		if (!window.app.chatBox) {
-			window.app.chatBox = new ChatBox(chatBoxContainer);
-		} else {
+        const chatBoxContainer = this.container.querySelector("#chatBoxContainer");
+        if (!window.app.chatBox) {
+            window.app.chatBox = new ChatBox(chatBoxContainer);
+        } else {
 			window.app.chatBox.container = chatBoxContainer;
 			window.app.chatBox.render(chatBoxContainer);
 			window.app.chatBox.addEventListeners();
@@ -121,68 +149,82 @@ export default class MainView {
 	}
 
     addEventListeners() {
-        const adminBtn = this.container.querySelector("#adminBtn");
-        const settingsBtn = this.container.querySelector("#settingsBtn");
-        const logoutBtn = this.container.querySelector("#logoutBtn");
+		const selectorRumble = document.getElementById("rumble");
+        const selectorClassic = document.getElementById("classic");
+		
+		this.addNavEventListeners();
 
-		adminBtn.addEventListener("click", () => {
-			window.app.router.navigateTo("/admin");
+		selectorRumble.addEventListener("click", () => {
+			window.app.settings['game-selector'] = "rumble"
+			this.addSelector();
 		});
-
-		logoutBtn.addEventListener("click", () => {
-			window.app.chatBox.disconnect();
-			window.app.logout();
+		
+		selectorClassic.addEventListener("click", () => {
+			window.app.settings['game-selector'] = "classic"
+			this.addSelector();
 		});
-
-		settingsBtn.addEventListener("click", () => {
-			window.app.router.navigateTo("/settings");
-		});
-
-        logoutBtn.addEventListener("click", () => {
-            window.app.chatBox.disconnect();
-            window.app.logout();
-        });
 	}
 
-	async setProfileFields() {
-		var name = document.getElementById("p-name");
-		var elo = document.getElementById("p-elo");
-		var ratio = document.getElementById("p-wl");
-		var winrate = document.getElementById("p-winrate");
-		var tourn = document.getElementById("p-tourn");
+	addSelector() {
+		const selectorRumble = document.getElementById("rumble");
+        const selectorClassic = document.getElementById("classic");
 
-		try {
-			const response = await fetch("/api/get/profile", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-			});
-			const data = await response.json();
-
-			const avatarUrl = await window.app.getAvatar(this.username);
-			if (avatarUrl) name.innerHTML = `<img id="avatarImg" src=${avatarUrl} alt="User Avatar" width="30" height="30"></img> ` + this.username;
-
-			if (data.success) {
-				elo.innerHTML = "Elo: " + data["elo"];
-				winrate.innerHTML = "Winrate: " + data["winrate"];
-				ratio.innerHTML = "Ratio: " + data["wins"] + "/" + data["looses"];
-				tourn.innerHTML = "Tournaments won: " + data["tourn_won"] + " played: " + data["tourn_joined"];
-				if (data["display"]) {
-					let toInsert = " (" + data["display"] + ")";
-					name.insertAdjacentHTML("beforeend", toInsert);
-				}
-			} else throw new Error("Request failure");
-		} catch (error) {
-			elo.innerHTML = "Failed to load elo";
-			winrate.innerHTML = "Failed to load winrate";
-			tourn.innerHTML = "Failed to load tournaments";
-			console.error("An error occurred: ", error);
+		if (window.app.settings['game-selector'] == "rumble") {
+			selectorRumble.classList.remove("disabled");
+			selectorClassic.classList.add("disabled");
+		}
+		else {
+			selectorRumble.classList.add("disabled");
+			selectorClassic.classList.remove("disabled");
 		}
 	}
 
 	checkForBackdrop() {
 		const el = document.querySelector(".modal-backdrop");
 		if (el) el.remove();
+	}
+
+	addNavEventListeners() {
+		const creditButton = document.getElementById("credit-button");
+		const playButton = document.getElementById("play-button");
+		const customizeButton = document.getElementById("customize-button");
+		const leaderboardButton = document.getElementById("leaderboard-button");
+		const achievementsButton = document.getElementById("achievements-button");
+		const profileButton = document.getElementById("profile-button");
+		const adminButton = document.getElementById("admin-button");
+		const logoutButton = document.getElementById("logout-button");
+
+		creditButton.addEventListener("click", () => {
+			window.app.router.navigateTo("/credits");
+		});
+
+		playButton.addEventListener("click", () => {
+			window.app.router.navigateTo("/index");
+		});
+
+		customizeButton.addEventListener("click", () => {
+			window.app.router.navigateTo("/customize");
+		});
+		
+		leaderboardButton.addEventListener("click", () => {
+			window.app.router.navigateTo("/leaderboard");
+		});
+
+		achievementsButton.addEventListener("click", () => {
+			window.app.router.navigateTo("/achievements");
+		});
+
+		profileButton.addEventListener("click", () => {
+			window.app.router.navigateTo("/profile");
+		});
+
+		adminButton.addEventListener("click", () => {
+			window.app.router.navigateTo("/admin");
+		});
+
+		logoutButton.addEventListener("click", () => {
+			window.app.chatBox.disconnect();
+			window.app.logout();
+		});
 	}
 }

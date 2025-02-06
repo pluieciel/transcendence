@@ -38,8 +38,8 @@ export default class Login {
                         <form id="totpForm">
 	                        <div class="modal-body">
                                 <div class="mb-3">
-                                    <input id="totpInput" class="form-control" maxlength="6" required>
-                                    <input id="recoveryCodeInput" class="form-control" maxlength="16" disabled required style="display: none;">
+                                    <input id="totpInput" class="form-control" maxlength="6" required placeholder="Enter 2FA code">
+                                    <input id="recoveryCodeInput" class="form-control" maxlength="16" disabled required style="display: none;" placeholder="Enter recovery code">
                                 </div>
                                 <div id="totpError" class="alert alert-danger d-none"></div>
                                 <button type="button" class="btn btn-primary" id="recoveryCodeBtn">Use recovery code</button>
