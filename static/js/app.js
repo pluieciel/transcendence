@@ -33,8 +33,8 @@ class App {
 		this.router = new Router(this.routes);
 	}
 
-	setColor() {
-		switch (this.settings.color) {
+	setColor(color) {
+		switch (color) {
 			case 0:
 				document.documentElement.style.setProperty("--user-color", "#3E27F8");
 				break; //Blue
