@@ -6,6 +6,7 @@
 	--header-color: #090909;
 	--header-shadow-color: rgba(255, 255, 255, 0.3);
 	--user-color: #0ff;
+	--disabled-color: #535353;
 }
 
 ::placeholder {
@@ -13,30 +14,94 @@
 }
 
 body {
-    font-family: Arial, sans-serif;
-    color: var(--primary-color);
-    background-color: var(--primary-color);
-    margin: 0;
-    padding: 0;
+	font-family: "Exo 2", sans-serif;
+	color: var(--primary-color);
+	background-color: var(--primary-color);
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+}
+
+#credit-button {
+	background: none;
+	border: none;
+	font-weight: bold;
+	color: var(--user-color);
+	text-shadow: 0 0 5px var(--user-color);
+}
+
+#admin-button {
+	display: none;
+}
+
+#nav-buttons {
     display: flex;
-    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-grow: 1;
+}
+
+.nav-button {
+    color: var(--user-color);
+	width: 125px;
+    background: none;
+    font-size: 0.9rem;
+    font-weight: bold;
+    border: none;
+    margin-left: 100px;
+	text-shadow: 0 0 5px var(--user-color);
+}
+
+.nav-button-disabled {
+	color: var(--disabled-color);
+	text-shadow: 0 0 5px var(--disabled-color);
+}
+
+.nav-button i {
+    padding: 20px;
+    display: block;
+}
+
+#pong::after {
+	content: "";
+	position: absolute;
+	top: 0;
+	width: 100%;
+	height: 2px;
+	background-color: var(--user-color);
+	transform: rotate(135deg);
+    transform-origin: 1px 1px;
+	box-shadow: 0 0 5px var(--user-color);
+	margin-left: 125px;
+}
+
+#logout-button {
+    margin-left: auto;
+    align-self: flex-end;
+}
+
+#pong {
+	margin-left: 25px;
+	color: var(--user-color);
+	text-shadow: 0 0 5px var(--user-color);
 }
 
 header {
-    background-color: var(--header-color);
-    padding: 20px;
-    color: var(--secondary-color);
     display: flex;
     justify-content: space-between;
     align-items: center;
+    background-color: var(--header-color);
+    color: var(--secondary-color);
     width: 100%;
+	height: 100px;
     top: 0;
     left: 0;
-	position: absolute;
-	overflow: hidden;
+    position: absolute;
+    overflow: hidden;
     box-sizing: border-box;
-	box-shadow: 0 0 5px var(--user-color);
-	border-bottom: 1px solid var(--user-color);
+    box-shadow: 0 0 5px var(--user-color);
+    border-bottom: 1px solid var(--user-color);
 }
 
 h1, h2 {
@@ -107,10 +172,6 @@ a {
     width: 30px;
     height: 30px;
     object-fit: contain;
-}
-
-#pong {
-	text-shadow: 0 0 15px #fff;
 }
 
 .welcome {

@@ -1,4 +1,4 @@
-FROM nginx:stable-alpine3.20 AS build
+FROM nginx:1.26.2-alpine AS build
 
 WORKDIR /build
 
@@ -24,7 +24,7 @@ RUN git clone https://github.com/kjdev/nginx-auth-jwt.git && \
     ./configure --with-compat --add-dynamic-module=../nginx-auth-jwt && \
     make modules
 
-FROM nginx:stable-alpine3.20
+FROM nginx:1.26.2-alpine
 
 WORKDIR /var/www/html
 

@@ -5,14 +5,14 @@ import LoginView from './components/pages/LoginView.js';
 import LoginOAuth from './components/login/LoginOAuth.js';
 import ProfileView from './components/pages/ProfileView.js';
 import CreditsView from './components/pages/CreditsView.js';
-import CustomView from './components/pages/CustomView.js';
+import CustomizeView from './components/pages/CustomizeView.js';
 
 class App {
 	constructor() {
 		this.routes = [
 			{ path: '/', component: LoginView },
 			{ path: '/index', component: MainView },
-			{ path: '/custom', component: CustomView },
+			{ path: '/customize', component: CustomizeView },
 			{ path: '/credits', component: CreditsView },
 			{ path: '/profile', component: ProfileView },
 			{ path: '/admin', component: AdminView },
