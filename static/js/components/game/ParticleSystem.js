@@ -72,7 +72,6 @@ export class ParticleSystem {
 		let angle = Math.random() * Math.PI * 2;
 		let length = Math.random() * 0.5;
 		particle.velocity = new THREE.Vector3(Math.cos(angle) * velocity * length, Math.sin(angle) * velocity * length, 0);
-		console.log(particle.velocity);
 		particle.lifetime = lifetime;
 		particle.position.copy(position);
 

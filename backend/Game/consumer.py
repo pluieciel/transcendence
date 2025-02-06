@@ -352,7 +352,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 			4: "#EC008F",
 			5: "#6400C4",
 			6: "#E71200",
-			7: "#OEC384",
+			7: "#0EC384", #Soft green
 			8: "#E6E3E1"
 		}
 		try:

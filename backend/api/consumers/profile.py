@@ -18,7 +18,8 @@ class ProfileConsumer(AsyncHttpConsumer):
 			if tot_games == 0:
 				winrate = "No games found"
 			else:
-				winrate = (user.wins / tot_games) * 100 + "%"
+				winrate = (user.wins / tot_games) * 100
+				winrate = f"{winrate:.0f}%"
 
 			response_data = {
 				'success': True,

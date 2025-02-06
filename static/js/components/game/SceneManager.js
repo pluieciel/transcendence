@@ -52,6 +52,27 @@ export class SceneManager {
 		}
 	}
 
+	shakeCamera(intensity = 0.05, duration = 500) {
+		const originalPosition = this.camera.position.clone();
+		const shakeEndTime = performance.now() + duration;
+		const shake = () => {
+			const now = performance.now();
+			if (now < shakeEndTime) {
+				const shakeX = (Math.random() - 0.5) * intensity;
+				const shakeY = (Math.random() - 0.5) * intensity;
+				const shakeZ = (Math.random() - 0.5) * intensity;
+
+				this.camera.position.set(originalPosition.x + shakeX, originalPosition.y + shakeY, originalPosition.z + shakeZ);
+
+				requestAnimationFrame(shake);
+			} else {
+				this.camera.position.copy(originalPosition);
+			}
+		};
+
+		shake();
+	}
+
 	async initialize(data) {
 		//Create Scene, Lights, Camera
 		this.scene = new THREE.Scene();
@@ -231,9 +252,8 @@ export class SceneManager {
 					texture.encoding = THREE.sRGBEncoding;
 					texture.needsUpdate = true;
 
-					const aspectRatio = texture.image.width / texture.image.height;
 					const width = 5;
-					const height = width / aspectRatio;
+					const height = 5; /*width / aspectRatio;*/
 
 					// Create the avatar plane
 					const avatarGeometry = new THREE.PlaneGeometry(width, height);
@@ -311,12 +331,14 @@ export class SceneManager {
 								case "PaddleLights":
 									obj.material.color.set(color);
 									obj.material.emissive.set(color);
+									console.log(color);
 									obj.material.emissiveIntensity = 2;
 									break;
 								case "BallColor":
 									this.ballMat = obj.material;
 									obj.material.color.set(color);
 									obj.material.emissive.set(color);
+									console.log(color);
 									obj.material.emissiveIntensity = 2;
 							}
 						}
@@ -357,7 +379,7 @@ export class SceneManager {
 				rightTexture: "/js/components/game/Textures/TextureRightOrange.png",
 			},
 			//SoftGreen
-			"#OEC384": {
+			"#0EC384": {
 				leftTexture: "/js/components/game/Textures/TextureLeftSoftGreen.png",
 				rightTexture: "/js/components/game/Textures/TextureRightSoftGreen.png",
 			},
@@ -391,7 +413,7 @@ export class SceneManager {
 		this.bottomBorder.visible = this.debugMod;
 		this.leftBorder.visible = this.debugMod;
 		this.rightBorder.visible = this.debugMod;
-		if (this.trajectoryLine) this.trajectoryLine.visible = this.debugMod;
+		if (this.trajectoryLine) this.showTrajectory(this.debugMod);
 
 		this.leftPaddle.visible = !this.debugMod;
 		this.rightPaddle.visible = !this.debugMod;
@@ -409,13 +431,19 @@ export class SceneManager {
 
 		const geometry = new THREE.BufferGeometry().setFromPoints(points);
 		const material = new THREE.LineBasicMaterial({
-			color: 0x329da8,
+			color: 0xffffff,
 			opacity: 1,
 		});
 
 		this.trajectoryLine = new THREE.Line(geometry, material);
 		this.scene.add(this.trajectoryLine);
 		this.trajectoryLine.visible = this.debugMod;
+	}
+
+	showTrajectory(visible) {
+		if (this.trajectoryLine) {
+			this.trajectoryLine.visible = visible;
+		}
 	}
 
 	createDebugPaddles() {
