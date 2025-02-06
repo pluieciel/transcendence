@@ -18,7 +18,6 @@ class App {
 			{ path: '/credits', component: CreditsView },
 			{ path: '/profile', component: ProfileView },
 			{ path: '/admin', component: AdminView },
-			{ path: '/settings', component: SettingsView },
 			{ path: '/login/oauth', component: LoginOAuth },
 			{ path: '*', component: LoginView },
 			{ path: "/game", component: GameView },

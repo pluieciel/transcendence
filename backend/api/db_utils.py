@@ -97,4 +97,4 @@ def delete_game_history(game_id):
 	if (game):
 		game.delete()
 	else:
-		logging.getLogger('game').error(f"Game {game_id} not found", coulndt delete)
+		logging.getLogger('game').error(f"Game {game_id} not found couldn't delete")
