@@ -91,6 +91,9 @@ export default class ProfileView {
 					</div>
 				</div>
 				<div id="profile-history" class="userOutline">
+					<h2 id="ghistory">Game History</h2>
+					<div id="history-content">
+					</div>
 				</div>
 			</div>
 			<div class="modal fade" id="totpModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -230,9 +233,21 @@ export default class ProfileView {
 			const data = await response.json();
 
 			if (data.success) {
-				document.getElementById('profile-history').innerHTML = "<h2 id=\"ghistory\">Game History</h2>";
-				for (let i = 0;i < data.game.length && i < 5; i++)
+				const	history = document.getElementById('history-content');
+				
+				for (let i = 0;i < data.game.length; i++)
 					this.addHistory(data.game[i]);
+				this.addHistory(data.game[0]);
+				this.addHistory(data.game[0]);
+				this.addHistory(data.game[0]);
+				this.addHistory(data.game[0]);
+				this.addHistory(data.game[0]);
+				this.addHistory(data.game[0]);
+				this.addHistory(data.game[0]);
+				this.addHistory(data.game[0]);
+				this.addHistory(data.game[0]);
+				this.addHistory(data.game[0]);
+				this.addHistory(data.game[0]);
 			}
 		}
 		catch (e) {
@@ -537,7 +552,7 @@ export default class ProfileView {
 
 	addHistory(data) {
 		let	card = "";
-		const history = document.getElementById('profile-history');
+		const	history = document.getElementById('history-content');
 		
 		
 		card += "<div class=\"profile-card\"><div class=\"card-row\"><div class=\"card-user\">";
