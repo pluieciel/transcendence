@@ -68,6 +68,13 @@ body {
 	border-bottom-right-radius: 5px;
 }
 
+#leaderboard-table {
+	overflow: auto;
+	height: 650px !important;
+	margin-left: 15px;
+	margin-right: 5px;
+}
+
 .lb-card-header {
 	display: flex;
 	justify-content: center;
@@ -79,7 +86,7 @@ body {
 	display: flex;
 	justify-content: center;
 	flex-direction: row;
-	margin: 0 20px;
+	margin: 0 5px;
 	border: 1px solid var(--primary-color);
 }
 

@@ -57,7 +57,6 @@ export default class LeaderboardView {
 			<div id="leaderboard-page-container">
 				<div id="leaderboard-content" class="userOutline">
 					<h2 id="leaderboard-title">Leaderboard</h2>
-					<div id="leaderboard-table">
 						<div class="lb-card-header">
 							<div class="lb-card-pos lb-card-att round-left">Rank</div>
 							<div class="lb-card-user lb-card-att">User</div>
@@ -66,6 +65,7 @@ export default class LeaderboardView {
 							<div class="lb-card-games lb-card-att">Games</div>
 							<div class="lb-card-icon lb-card-att round-right">Profile</div>
 						</div>
+						<div id="leaderboard-table">
 						</div>
 						</div>
 						</div>
