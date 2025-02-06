@@ -15,6 +15,7 @@ from Chat.routing import websocket_urlpatterns as chat_websocket_patterns
 from Game.routing import websocket_urlpatterns as game_websocket_patterns
 from django.urls import path, re_path
 from api.consumers.history import getHistory
+from api.consumers.leaderboard import getLeaderboard
 from api.consumers.login_2fa import Login2FAConsumer
 from api.consumers.login_2fa_recovery import Login2FARecoveryConsumer
 from api.consumers.enable_2fa import Enable2FAConsumer
@@ -58,6 +59,7 @@ http_patterns = [
     re_path(r'^api/get/avatar/.*$', AvatarConsumer.as_asgi()),
     re_path(r'^api/get/history/.*$', getHistory.as_asgi()),
     path('api/get/profile', ProfileConsumer.as_asgi()),
+    path('api/get/leaderboard', getLeaderboard.as_asgi()),
 	path('api/settings/set/preferences', setPreferences.as_asgi()),
 	path('api/settings/get/preferences', getPreferences.as_asgi()),
     path('api/del/user', RemoveConsumer.as_asgi()),
