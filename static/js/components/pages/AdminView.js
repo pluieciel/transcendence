@@ -14,20 +14,42 @@ export default class MainView {
 		if (!window.app.settings['fetched'])
 			await window.app.getPreferences();
 		if (window.app.settings.is_admin) {
-			const adminBtn = this.container.querySelector("#adminBtn");
-			adminBtn.style.display = "block";
+			const adminButton = document.getElementById("admin-button");
+			adminButton.style.display = "block";
 		}
 	}
     render() {
         this.container.innerHTML = `
 			<header>
-				<h1 id="pong">PONG</h1>
-				<button id="adminBtn" class="nav-btn disabledBtn">Admin</button>
-				<button id="indexBtn" class="nav-btn">Index</button>
-				<button id="customBtn" class="nav-btn">Custom</button>
-				<button id="profileBtn" class="nav-btn">Profile</button>
-				<button id="creditsBtn" class="nav-btn">Credits</button>
-				<button id="logoutBtn" class="nav-btn">Log out</button>
+				<h1 id="pong">P 
+					<button id="credit-button">
+						<i class="fa-solid fa-table-tennis-paddle-ball fa-xs"></i>
+					</button>
+					 N G
+				</h1>
+				<div id="nav-buttons">
+					<button class="nav-button" id="play-button">
+						<i class="fa-solid fa-gamepad fa-xl"></i>Play
+					</button>
+					<button class="nav-button" id="customize-button">
+						<i class="fa-solid fa-palette fa-xl"></i>Customize
+					</button>
+					<button class="nav-button" id="leaderboard-button">
+						<i class="fa-solid fa-medal fa-xl"></i>Leaderboard
+					</button>
+					<button class="nav-button" id="achievements-button">
+						<i class="fa-solid fa-trophy fa-xl"></i>Achievements
+					</button>
+					<button class="nav-button" id="profile-button">
+						<i class="fa-solid fa-user fa-xl"></i>Profile
+					</button>
+					<button class="nav-button nav-button-disabled" id="admin-button">
+						<i class="fa-solid fa-user-tie fa-xl"></i>Admin
+					</button>
+					<button class="nav-button" id="logout-button">
+						<i class="fa-solid fa-right-from-bracket fa-xl"></i>Log Out
+					</button>
+				</div>
 			</header>
 			<div class="welcome">
 				<p>Welcome to your admin dashboard, you can access all monitoring services here!</p>
@@ -86,39 +108,58 @@ export default class MainView {
         `;
     }
 
+	addNavEventListeners() {
+		const creditButton = document.getElementById("credit-button");
+		const playButton = document.getElementById("play-button");
+		const customizeButton = document.getElementById("customize-button");
+		const leaderboardButton = document.getElementById("leaderboard-button");
+		const achievementsButton = document.getElementById("achievements-button");
+		const profileButton = document.getElementById("profile-button");
+		const adminButton = document.getElementById("admin-button");
+		const logoutButton = document.getElementById("logout-button");
+
+		creditButton.addEventListener("click", () => {
+			window.app.router.navigateTo("/credits");
+		});
+
+		playButton.addEventListener("click", () => {
+			window.app.router.navigateTo("/index");
+		});
+
+		customizeButton.addEventListener("click", () => {
+			window.app.router.navigateTo("/customize");
+		});
+		
+		leaderboardButton.addEventListener("click", () => {
+			window.app.router.navigateTo("/leaderboard");
+		});
+
+		achievementsButton.addEventListener("click", () => {
+			window.app.router.navigateTo("/achievements");
+		});
+
+		profileButton.addEventListener("click", () => {
+			window.app.router.navigateTo("/profile");
+		});
+
+		adminButton.addEventListener("click", () => {
+			window.app.router.navigateTo("/admin");
+		});
+
+		logoutButton.addEventListener("click", () => {
+			window.app.chatBox.disconnect();
+			window.app.logout();
+		});
+	}
+
     addEventListeners() {
-        const indexBtn = document.getElementById("indexBtn");
-		const customBtn = document.getElementById("customBtn");
-        const profileBtn = document.getElementById("profileBtn");
-        const creditsBtn = document.getElementById("creditsBtn");
-        const logoutBtn = document.getElementById("logoutBtn");
+		this.addNavEventListeners();
 		const elasticsearchBtn = document.getElementById("elasticsearchBtn");
 		const kibanaBtn = document.getElementById("kibanaBtn");
 		const nodeExporterBtn = document.getElementById("nodeExporterBtn");
 		const cadvisorBtn = document.getElementById("cadvisorBtn");
 		const prometheusBtn = document.getElementById("prometheusBtn");
 		const grafanaBtn = document.getElementById("grafanaBtn");
-
-        logoutBtn.addEventListener("click", () => {
-            window.app.chatBox.disconnect();
-            window.app.logout();
-        });
-
-		creditsBtn.addEventListener('click', () => {
-            window.app.router.navigateTo('/credits');
-        });
-
-		profileBtn.addEventListener('click', () => {
-            window.app.router.navigateTo('/profile');
-        });
-
-		customBtn.addEventListener('click', () => {
-            window.app.router.navigateTo('/custom');
-        });
-
-		indexBtn.addEventListener('click', () => {
-            window.app.router.navigateTo('/index');
-        });
 
 		elasticsearchBtn.addEventListener("click", () => {
 			window.location.href = "/admin/services/elasticsearch";
