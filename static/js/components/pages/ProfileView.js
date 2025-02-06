@@ -59,28 +59,38 @@ export default class ProfileView {
 		
 		<div id="mainPage">
 			<div class="profile-container">
-				<div id="profile-content" class="profile userOutline">
-					<img id="avatarImg" class="userOutline d-none" alt="User Avatar" width="150" height="150"></img>
+				<div class="container-row">
+					<div id="profile-settings" class="settings userOutline">
+						<h3>Profile info</h3>
+						<button id="changeNameBtn">Change your display name</button>
+						<input type="text" id="newName">
+						<span id="avatarSpan">
+							<label class="avatar-selector-settings">Change your profile picture</label>
+							<input type="file" id="fileInput" accept="image/*" hidden>
+						</span>
+						<button type="button" id="enable2FA">Enable 2FA</button>
+						<button type="button" id="disable2FA">Disable 2FA</button>
+					</div>
+					<div id="profile-dangerous" class="settings userOutline">
+						<h3>be careful!</h3>
+						<button id="passwordButton">Set New Password</button>
+						<input type="password" id="newPasswordInput" placeholder="">
+						<button id="deleteAccBtn">Delete my account</button>
+					</div>
+				</div>
+				<div class="container-row">
 					<h3 id="p-name">${this.username}</h3>
+					<img id="avatarImg" class="userOutline d-none" alt="User Avatar" width="150" height="150"></img>
+					<div id="profile-content" class="profile userOutline">
 					<h3 id="p-elo">Loading...</h3>
 					<h3 id="p-winrate">Loading...</h3>
-					<h3 id="p-wl">Loading...</h3>
-					<h3 id="p-tourn">Loading...</h3>
+					<div id="progress-bar" class="all-rounded">
+					    <div id="progress-bar-percentage"><span id="p-wl">Loading...</span></div>
+					</div>
+						<h3 id="p-tourn">Loading...</h3>
+					</div>
 				</div>
-				<div id="profile-settings" class="profile userOutline">
-					<h3>Profile info i guess</h3>
-					<button id="changeNameBtn">Change your display name</button>
-					<input type="text" id="newName">
-					<span id="avatarSpan">
-						<label class="avatar-selector-settings">Change your profile picture</label>
-					    <input type="file" id="fileInput" accept="image/*" hidden>
-					</span>
-					<button type="button" id="enable2FA">Enable 2FA</button>
-					<button type="button" id="disable2FA">Disable 2FA</button>
-					<h3>Be careful with those</h3>
-					<button id="passwordButton">Set New Password</button>
-					<input type="password" id="newPasswordInput" placeholder="">
-					<button id="deleteAccBtn">Delete my account</button>
+				<div id="profile-history" class="userOutline">
 				</div>
 			</div>
 			<div class="modal fade" id="totpModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -154,8 +164,12 @@ export default class ProfileView {
 		let		avatar = document.getElementById("avatarImg");
 		const	enable2FA = document.querySelector('#enable2FA');
 		const	disable2FA = document.querySelector('#disable2FA');
+		const	bar = document.getElementById('progress-bar-percentage');
 		const 	is_2fa_enabled = window.app.settings.is_2fa_enabled;
-		
+
+		if (is_2fa_enabled) {enable2FA.style.display = "none";disable2FA.style.display = "block";}
+		else {enable2FA.style.display = "blon";disable2FA.style.display = "none";}
+
 		try {
 			const response = await fetch("/api/get/profile", {
 				method: "POST",
@@ -175,25 +189,54 @@ export default class ProfileView {
 			if (data.success) {
 				elo.innerHTML = "Elo: " + data["elo"];
 				winrate.innerHTML = "Winrate: " + data["winrate"];
-				ratio.innerHTML = "Ratio: " + data["wins"] + "/" + data["looses"];
+				const	win = data['wins'];
+				const	loose = data['looses'];
+				if (loose != 0)
+					bar.style.width = (win + loose) / loose + "%";
+				else {
+					bar.style.backgroundColor = "var(--hover-color)";
+					bar.style.width = "100%";
+					bar.style.borderTopRightRadius = "5px";
+					bar.style.borderBottomRightRadius = "5px";
+				}
+				if (win == 0 && loose == 0)
+					ratio.innerHTML = "Go play!";
+				else
+					ratio.innerHTML = "Ratio: " + win + "/" + loose;
 				tourn.innerHTML = "Trophies: " + data["tourn_won"] + "<br>Tournaments played: " + data["tourn_joined"];
 				name.innerHTML = this.username; 
 				if (data['display']) {
-					let toInsert = " (" + data['display'] + ")";
+					let toInsert = " [" + data['display'] + "]";
 					name.insertAdjacentHTML('beforeend', toInsert);
 				}
 			} else
 				throw new Error("Request failure");
+			} catch (e) {
+				elo.innerHTML = "Failed to load elo";
+				winrate.innerHTML = "Failed to load winrate";
+				ratio.innerHTML = "Failed to load ratio";
+				tourn.innerHTML = "Failed to load tournaments";
+				console.error("An error occurred: ", e);
+			}
 
-			if (is_2fa_enabled) {enable2FA.style.display = "none";disable2FA.style.display = "block";}
-			else {enable2FA.style.display = "blon";disable2FA.style.display = "none";}
+		try {
+			const response = await fetch(`/api/get/history/${this.username}`, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+			});
 
-		} catch (error) {
-			elo.innerHTML = "Failed to load elo";
-			winrate.innerHTML = "Failed to load winrate";
-			ratio.innerHTML = "Failed to load ratio";
-			tourn.innerHTML = "Failed to load tournaments";
-			console.error("An error occurred: ", error);
+			const data = await response.json();
+
+			if (data.success) {
+				document.getElementById('profile-history').innerHTML = "<h2 id=\"ghistory\">Game History</h2>";
+				for (let i = 0;i < data.game.length && i < 5; i++)
+					this.addHistory(data.game[i]);
+			}
+		}
+		catch (e) {
+			console.error("An error occurred: ", e);
 		}
 	}
 
@@ -491,4 +534,19 @@ export default class ProfileView {
 		this.addSecurityEventListeners();
 		this.addNavEventListeners();
     }
+
+	addHistory(data) {
+		let	card = "";
+		const history = document.getElementById('profile-history');
+		
+		
+		card += "<div class=\"profile-card\"><div class=\"card-row\"><div class=\"card-user\">";
+		card += "<img class=\"card-avatar\" src=\"" + data['avatar1'] + "\">" + data['user1'] + " </div>";
+		card += "<p class=\"card-score\">" + data['score1'] + " - " + data['score2'] + "</p><div class=\"card-user\">";
+		card += "<img class=\"card-avatar\" src=\"" + data['avatar2'] + "\">" + data['user2'] + " </div>";
+		card += "</div><div class=\"card-row\">";
+		card += "<div class=\"card-elo\">" + data['elo1'] + "</div><div class=\"card-mode\">" + data['mode'] + "</div><div class=\"card-elo\">" + data['elo2'] + "</div>";
+		
+		history.innerHTML += card;
+	}
 }
