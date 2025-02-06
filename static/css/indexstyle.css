@@ -9,6 +9,21 @@
 	--disabled-color: #535353;
 }
 
+::-webkit-scrollbar {
+	width: 10px;
+}
+  
+::-webkit-scrollbar-track {
+	background: #888;
+	border-radius: 5px;
+    margin-bottom: 20px;
+}
+
+::-webkit-scrollbar-thumb {
+	border-radius: 5px;
+	background: var(--secondary-color);
+}
+
 ::placeholder {
 	color: #000;
 }
@@ -193,6 +208,11 @@ a {
 
 #play {
 	margin-bottom: 10px;
+}
+
+#history-content {
+	overflow: auto;
+	height: 354px;
 }
 
 #profile-history {
