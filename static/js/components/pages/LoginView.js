@@ -7,6 +7,16 @@ export default class LoginView {
 		this.render();
 		this.addEventListeners();
 		this.showLogin();
+		this.getSettings();
+	}
+
+	async getSettings() {
+		if (!window.app.settings.fetched) await window.app.getPreferences();
+		this.settings = {
+			color: window.app.settings.color,
+			quality: window.app.settings.quality,
+		};
+		return;
 	}
 
 	render() {

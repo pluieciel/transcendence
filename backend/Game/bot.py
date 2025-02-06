@@ -85,6 +85,16 @@ class Bot:
 			self.game.player_right.keys["ArrowUp"] = False
 			self.game.player_right.keys["ArrowDown"] = False
 
+	def calculate_safe_position(self):
+		# Move the paddle to the opposite side of the ball
+		if not self.paddle_position:
+			return self.game.bounds.bottom.y
+		court_top = self.game.bounds.top.y
+		court_bottom = self.game.bounds.bottom.y
+		if self.ball_position and self.ball_position.y < (court_top + court_bottom) / 2:
+			return court_top - self.paddle_height / 2
+		else:
+			return court_bottom + self.paddle_height / 2
 
 	def update_vision(self):
 		#self.logger.info("Bot Updated Vision")
@@ -98,14 +108,16 @@ class Bot:
 		self.game.ball.velocity.y,
 		self.game.ball.velocity.z
 	)
-
-
 		self.ball_radius = self.game.ball.radius
 		self.paddle_position = self.game.player_right.position
 		self.paddle_height = self.game.player_right.paddle_height
 
 	def update_movement(self):
-		target_y = self.calculate_ball_landing_position()
+		if self.game.event.name == 'Killer Ball':
+			self.logger.info("Killer Ball event detected")
+			target_y = self.calculate_safe_position()
+		else:
+			target_y = self.calculate_ball_landing_position()
 		if target_y is not None:
 			self.move_paddle(target_y)
 
@@ -120,7 +132,6 @@ class Bot:
 				current_time = time.time()
 
 				if current_time - self.last_vision_update >= self.vision_update_rate:
-					#self.logger.info(f"{self.vision_update_rate} compared to {current_time - self.last_vision_update}")
 					self.update_vision()
 					self.last_vision_update = current_time
 

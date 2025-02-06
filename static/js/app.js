@@ -6,6 +6,8 @@ import LoginOAuth from './components/login/LoginOAuth.js';
 import ProfileView from './components/pages/ProfileView.js';
 import CreditsView from './components/pages/CreditsView.js';
 import CustomizeView from './components/pages/CustomizeView.js';
+import GameView from './components/pages/GameView.js';
+
 
 class App {
 	constructor() {
@@ -18,30 +20,51 @@ class App {
 			{ path: '/admin', component: AdminView },
 			{ path: '/login/oauth', component: LoginOAuth },
 			{ path: '*', component: LoginView },
+			{ path: "/game", component: GameView },
 		]
 		this.state = {
 			isLoggedIn: sessionStorage.getItem("isLoggedIn") === "true",
 			username: sessionStorage.getItem("username"),
 		};
 		this.avatarCache = {};
-		this.settings = {'fetched' : false};
+		this.settings = { fetched: false };
 		this.ingame = sessionStorage.getItem("ingame") === "true";
 		window.app = this;
 		this.router = new Router(this.routes);
 	}
 
-	setColor(color) {
-		switch (color) {
-			default: document.documentElement.style.setProperty("--user-color", "#0FF");break; 
-			case 0: document.documentElement.style.setProperty("--user-color", "#3E27F8");break; //Blue
-			case 1: document.documentElement.style.setProperty("--user-color", "#0FF");break; //Cyan
-			case 2: document.documentElement.style.setProperty("--user-color", "#00AD06");break; //Green
-			case 3: document.documentElement.style.setProperty("--user-color", "#E67E00");break; //Orrange
-			case 4: document.documentElement.style.setProperty("--user-color", "#E6008F");break; //Pink
-			case 5: document.documentElement.style.setProperty("--user-color", "#6400C4");break; //Purple
-			case 6: document.documentElement.style.setProperty("--user-color", "#E71200");break; //Red
-			case 7: document.documentElement.style.setProperty("--user-color", "#0EC384");break; //Pink
-			case 8: document.documentElement.style.setProperty("--user-color", "#E6E3E1");break; //White
+	setColor() {
+		switch (this.settings.color) {
+			case 0:
+				document.documentElement.style.setProperty("--user-color", "#3E27F8");
+				break; //Blue
+			case 1:
+				document.documentElement.style.setProperty("--user-color", "#00BDD1");
+				break; //Cyan
+			case 2:
+				document.documentElement.style.setProperty("--user-color", "#00AD06");
+				break; //Green
+			case 3:
+				document.documentElement.style.setProperty("--user-color", "#E67E00");
+				break; //Orrange
+			case 4:
+				document.documentElement.style.setProperty("--user-color", "#E6008F");
+				break; //Pink
+			case 5:
+				document.documentElement.style.setProperty("--user-color", "#6400C4");
+				break; //Purple
+			case 6:
+				document.documentElement.style.setProperty("--user-color", "#E71200");
+				break; //Red
+			case 7:
+				document.documentElement.style.setProperty("--user-color", "#0EC384");
+				break; //Soft Green
+			case 8:
+				document.documentElement.style.setProperty("--user-color", "#E6E3E1");
+				break; //White
+			default:
+				document.documentElement.style.setProperty("--user-color", "#00BDD1");
+				break;
 		}
 	}
 
@@ -78,10 +101,10 @@ class App {
 	login(data) {
 		this.state.isLoggedIn = true;
 		this.state.username = data.username;
-		sessionStorage.setItem('isLoggedIn', 'true');
-		sessionStorage.setItem('username', data.username);
+		sessionStorage.setItem("isLoggedIn", "true");
+		sessionStorage.setItem("username", data.username);
 		this.getPreferences();
-		this.router.navigateTo('/index');
+		this.router.navigateTo("/index");
 	}
 
 	logout() {
@@ -97,6 +120,6 @@ class App {
 	}
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener("DOMContentLoaded", () => {
 	window.app = new App();
 });

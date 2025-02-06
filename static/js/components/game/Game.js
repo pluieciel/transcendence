@@ -17,6 +17,7 @@ export class Game {
 		this.inputManager = null;
 
 		this.onGameEnd = null;
+		this.ended = false;
 		this.showBanner = null;
 		this.setupWebSocket();
 		this.lastTime = 0;
@@ -28,7 +29,7 @@ export class Game {
 		this.editor = true;
 
 		this.keydownListener = this.enableDebugMode.bind(this);
-		window.addEventListener('keydown', this.keydownListener);
+		window.addEventListener("keydown", this.keydownListener);
 	}
 
 	dispose() {
@@ -36,7 +37,6 @@ export class Game {
 		if (this.ws) {
 			this.ws.close();
 		}
-		
 	}
 
 	clean() {
@@ -47,7 +47,8 @@ export class Game {
 			this.renderer.renderer.dispose();
 		}
 		this.initialized = false;
-		window.removeEventListener('keydown', this.keydownListener);
+		this.ended = true;
+		window.removeEventListener("keydown", this.keydownListener);
 		this.inputManager.dispose();
 	}
 
@@ -84,7 +85,7 @@ export class Game {
 		};
 	}
 
-	emitParticles(position = new THREE.Vector3(0, 0, 0)) {
+	emitParticles(position = new THREE.Vector3(0, 0, 0), color) {
 		const particleCount = 170;
 		const geometry = "sphere";
 		const velocity = 0.3;
@@ -93,7 +94,7 @@ export class Game {
 		//orange 0xe67e00
 		//cyan 0x00BDD1
 		if (this.particleSystem) {
-			this.particleSystem.emit(particleCount, geometry, velocity, lifetime, size, position, 0x00bdd1);
+			this.particleSystem.emit(particleCount, geometry, velocity, lifetime, size, position, color);
 		}
 	}
 
@@ -115,12 +116,16 @@ export class Game {
 		}
 		if (data.trajectory) {
 			this.sceneManager.updateTrajectory(data.trajectory);
+			this.sceneManager.showTrajectory(true);
+		} else {
+			this.sceneManager.showTrajectory(false);
 		}
 		if (data.events && data.events.length > 0) {
 			data.events.forEach((event) => {
 				if (event.type === "score" && event.position) {
 					const scorePosition = new THREE.Vector3(event.position.x, event.position.y, event.position.z);
-					this.emitParticles(scorePosition);
+					this.emitParticles(scorePosition, event.color);
+					this.sceneManager.shakeCamera(0.5, 280);
 					try {
 						this.sceneManager.textManager.updateScore("left", event.score_left.toString());
 						this.sceneManager.textManager.updateScore("right", event.score_right.toString());
@@ -133,7 +138,7 @@ export class Game {
 					if (this.onGameEnd) {
 						console.log("calling game end fun");
 						this.onGameEnd(event.winnerName, event.winnerAvatar, event.scoreLeft, event.scoreRight, event.eloChange);
-                        this.dispose();
+						this.dispose();
 					}
 					this.ws.close(1000);
 					console.log("Websocket closed");
@@ -191,13 +196,15 @@ export class Game {
 	}
 
 	animate(currentTime) {
-		requestAnimationFrame(this.animate.bind(this));
-		const deltaTime = (currentTime - this.lastTime) / 1000;
-		this.lastTime = currentTime;
-		if (this.particleSystem) {
-			this.particleSystem.update(deltaTime);
+		if (this.ended == false) {
+			requestAnimationFrame(this.animate.bind(this));
+			const deltaTime = (currentTime - this.lastTime) / 1000;
+			this.lastTime = currentTime;
+			if (this.particleSystem) {
+				this.particleSystem.update(deltaTime);
+			}
+			this.sceneManager.composer.render();
 		}
-		this.sceneManager.composer.render();
 	}
 
 	/******************************DEBUG************************************/
@@ -212,7 +219,6 @@ export class Game {
 		let objectToModify = null;
 		if (event.code === "Space") {
 			this.sceneManager.toggleDebugMode();
-			this.emitParticles();
 		}
 		if (this.editor) {
 			if (event.code == "KeyG") {
@@ -359,4 +365,3 @@ export class Game {
 		}
 	}
 }
-	
