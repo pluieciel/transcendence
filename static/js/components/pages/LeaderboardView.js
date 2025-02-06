@@ -141,7 +141,8 @@ export default class LeaderboardView {
 	
 			const data = await response.json();
 	
-			if (data.success) {
+			if (data['success']) {
+				console.log(data['users']);
 				let i = 0;
 				while (i < data.users.length)
 					this.addUserToLB(data.users[i], ++i);
@@ -149,6 +150,9 @@ export default class LeaderboardView {
 				let cardid = "lb-card-" + i;
 				document.getElementById(cardid).classList.add('lb-card-last');
 				
+			}
+			else {
+				console.log(data['message']);
 			}
 		}
 		catch (e) {
@@ -164,7 +168,7 @@ export default class LeaderboardView {
 		card += "<div class=\"lb-card-pos lb-card-att\">" + place + "</div>";
 		card += "<div class=\"lb-card-user lb-card-att\"><img class=\"lb-card-avatar\" src=\"" + data['avatar'] + "\"></img>  " + data['username'] + "</div>";
 		card += "<div class=\"lb-card-elo lb-card-att\">" + data['elo'] + "</div>";
-		card += "<div class=\"lb-card-winrate lb-card-att\">" + data['winrate'] + "%" + "</div>";
+		card += "<div class=\"lb-card-winrate lb-card-att\">" + data['winrate'] + "</div>";
 		card += "<div class=\"lb-card-games lb-card-att\">" + data['games'] + "</div>";
 		card += "<div class=\"lb-card-icon lb-card-att\"><i class=\"fa-solid fa-user fa-xl\"></i></div>";
 		card += "</div>";
