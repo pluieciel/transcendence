@@ -331,12 +331,14 @@ export class SceneManager {
 								case "PaddleLights":
 									obj.material.color.set(color);
 									obj.material.emissive.set(color);
+									console.log(color);
 									obj.material.emissiveIntensity = 2;
 									break;
 								case "BallColor":
 									this.ballMat = obj.material;
 									obj.material.color.set(color);
 									obj.material.emissive.set(color);
+									console.log(color);
 									obj.material.emissiveIntensity = 2;
 							}
 						}
@@ -377,7 +379,7 @@ export class SceneManager {
 				rightTexture: "/js/components/game/Textures/TextureRightOrange.png",
 			},
 			//SoftGreen
-			"#OEC384": {
+			"#0EC384": {
 				leftTexture: "/js/components/game/Textures/TextureLeftSoftGreen.png",
 				rightTexture: "/js/components/game/Textures/TextureRightSoftGreen.png",
 			},

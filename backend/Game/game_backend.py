@@ -6,7 +6,7 @@ from .normal_game_logic import NormalGameInstance, GameBounds
 from .rumble_game_logic import RumbleGameInstance, GameBounds
 from channels.db import database_sync_to_async
 from .bot import Bot
-from api.db_utils import user_update_game, update_user_elo, add_user_wins, add_user_looses
+from api.db_utils import finish_game_history, user_update_game, update_user_elo, add_user_wins, add_user_looses, delete_game_history
 from datetime import datetime
 import redis
 from channels.layers import get_channel_layer
@@ -153,6 +153,11 @@ class GameBackend:
 					await add_user_looses(self.player_left.user)
 				self.logger.info("Updated win lose")
 
+			if (self.is_bot_game):
+				await delete_game_history(self.game_id)
+			else:
+				await finish_game_history(self.game_id, self.game.player_left.score, self.game.player_right.score, self.elo_change, self.game.winner)
+
 			if self.game_type == "vanilla":
 				await self.broadcast_state()
 			else:
@@ -277,7 +282,7 @@ class GameBackend:
 			4: "#EC008F",
 			5: "#6400C4",
 			6: "#E71200",
-			7: "#OEC384",
+			7: "#0EC384", #Soft green
 			8: "#E6E3E1"
 		}
 		try:

@@ -1,10 +1,10 @@
-import LoginView from './components/pages/LoginView.js';
-import MainView from './components/pages/MainView.js';
-import SettingsView from './components/pages/SettingsView.js';
-import AdminView from './components/pages/AdminView.js';
+import LoginView from "./components/pages/LoginView.js";
+import MainView from "./components/pages/MainView.js";
+import SettingsView from "./components/pages/SettingsView.js";
+import AdminView from "./components/pages/AdminView.js";
 import GameView from "./components/pages/GameView.js";
-import LoginOAuth from './components/login/LoginOAuth.js';
-import Router from './router.js';
+import LoginOAuth from "./components/login/LoginOAuth.js";
+import Router from "./router.js";
 
 class App {
 	constructor() {
@@ -14,7 +14,7 @@ class App {
 			{ path: "/settings", component: SettingsView },
 			{ path: "/login/oauth", component: LoginOAuth },
 			{ path: "*", component: LoginView },
-			{ path: '/admin', component: AdminView },
+			{ path: "/admin", component: AdminView },
 			{ path: "/game", component: GameView },
 		];
 		this.state = {
@@ -30,9 +30,6 @@ class App {
 
 	setColor() {
 		switch (this.settings.color) {
-			default:
-				document.documentElement.style.setProperty("--user-color", "#00BDD1");
-				break;
 			case 0:
 				document.documentElement.style.setProperty("--user-color", "#3E27F8");
 				break; //Blue
@@ -56,10 +53,13 @@ class App {
 				break; //Red
 			case 7:
 				document.documentElement.style.setProperty("--user-color", "#0EC384");
-				break; //Pink
+				break; //Soft Green
 			case 8:
 				document.documentElement.style.setProperty("--user-color", "#E6E3E1");
 				break; //White
+			default:
+				document.documentElement.style.setProperty("--user-color", "#00BDD1");
+				break;
 		}
 	}
 
