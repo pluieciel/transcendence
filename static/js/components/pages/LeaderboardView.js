@@ -149,7 +149,6 @@ export default class LeaderboardView {
 				document.getElementById('lb-card-1').classList.add('lb-card-first');
 				let cardid = "lb-card-" + i;
 				document.getElementById(cardid).classList.add('lb-card-last');
-				
 			}
 			else {
 				console.log(data['message']);
@@ -161,7 +160,8 @@ export default class LeaderboardView {
 	}
 
 	addUserToLB(data, place) {
-		let	card = "";
+		let		card = "";
+		let		id = "lb-card-link-" + place;
 		const	lb = document.getElementById('leaderboard-table');
 		
 		card += "<div id=\"lb-card-" + place + "\"class=\"lb-card\">";
@@ -173,9 +173,14 @@ export default class LeaderboardView {
 		card += "<div class=\"lb-card-elo lb-card-att\">" + data['elo'] + "</div>";
 		card += "<div class=\"lb-card-winrate lb-card-att\">" + data['winrate'] + "</div>";
 		card += "<div class=\"lb-card-games lb-card-att\">" + data['games'] + "</div>";
-		card += "<div class=\"lb-card-icon lb-card-att\"><i class=\"fa-solid fa-user fa-xl\"></i></div>";
+		card += "<div class=\"lb-card-icon lb-card-att\" id=\"lb-card-link-" + place + "\"><i class=\"fa-solid fa-user fa-xl\"></i></div>";
 		card += "</div>";
 
-		lb.innerHTML += card;
+		lb.insertAdjacentHTML("beforeend", card);
+
+		document.getElementById(id).addEventListener("click", () => {
+			console.log('test');
+			window.app.router.navigateTo(data['link']);
+		});
 	}
 }

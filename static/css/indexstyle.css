@@ -39,7 +39,7 @@ body {
 }
 
 #leaderboard-page-container {
-	margin-top: 120px;
+	margin-top: 180px;
 	display: flex;
 	align-items: center;
 	flex-direction: column;
@@ -70,7 +70,7 @@ body {
 
 #leaderboard-table {
 	overflow: auto;
-	height: 650px !important;
+	max-height: 500px !important;
 	margin-left: 15px;
 	margin-right: 5px;
 }
@@ -135,7 +135,7 @@ body {
 }
 
 .lb-card-winrate {
-	width: 100px !important;
+	width: 120px !important;
 }
 
 #credit-button {
