@@ -76,13 +76,21 @@ class Bot:
 		distance = target_y - self.paddle_position.y
 
 		if abs(distance) > dead_zone:
-			if distance > 0:  # Need to move up
-				self.game.player_right.keys["ArrowUp"] = self.game.event.name != 'Inverted Controls'
-				self.game.player_right.keys["ArrowDown"] = self.game.event.name == 'Inverted Controls'
-			else:  # Need to move down
-				self.game.player_right.keys["ArrowUp"] = self.game.event.name == 'Inverted Controls'
-				self.game.player_right.keys["ArrowDown"] = self.game.event.name != 'Inverted Controls'
-		else:  # Within dead zone - stop moving
+			if hasattr(self.game, 'event'):
+				if distance > 0:
+					self.game.player_right.keys["ArrowUp"] = self.game.event.name != 'Inverted Controls'
+					self.game.player_right.keys["ArrowDown"] = self.game.event.name == 'Inverted Controls'
+				else:
+					self.game.player_right.keys["ArrowUp"] = self.game.event.name == 'Inverted Controls'
+					self.game.player_right.keys["ArrowDown"] = self.game.event.name != 'Inverted Controls'
+			else:
+				if distance > 0:
+					self.game.player_right.keys["ArrowUp"] = True
+					self.game.player_right.keys["ArrowDown"] = False
+				else:
+					self.game.player_right.keys["ArrowUp"] = False
+					self.game.player_right.keys["ArrowDown"] = True
+		else:
 			self.game.player_right.keys["ArrowUp"] = False
 			self.game.player_right.keys["ArrowDown"] = False
 
@@ -114,7 +122,7 @@ class Bot:
 		self.paddle_height = self.game.player_right.paddle_height
 
 	def update_movement(self):
-		if self.game.event.name == 'Killer Ball':
+		if hasattr(self.game, 'event') and self.game.event.name == 'Killer Ball':
 			self.logger.info("Killer Ball event detected")
 			target_y = self.calculate_safe_position()
 		else:

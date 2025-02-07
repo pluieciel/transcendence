@@ -3,39 +3,29 @@ import time
 import random
 import math
 import logging
-import threading
-
-RIGHT_SIDE_DIR = 1
-LEFT_SIDE_DIR = -1
-
-class Vector2D:
-	def __init__(self, x=0.0, y=0.0, z=0.0):
-		self.x = x
-		self.y = y
-		self.z = z
-
-DEFAULT_BALL_POS = Vector2D(0, -3, -15)
+from .game_helper_class import BounceMethods, MovementMethod, Vector2D, DEFAULT_BALL_POS, RIGHT_SIDE_DIR, LEFT_SIDE_DIR, DEFAULT_BALL_ACCELERATION, DEFAULT_BALL_BASE_SPEED, DEFAULT_PLAYER_SPEED, random_angle
 
 class Ball:
 	def __init__(self):
 		self.position = DEFAULT_BALL_POS
 		self.velocity = Vector2D()
-		self.baseSpeed = 30
+		self.baseSpeed = DEFAULT_BALL_BASE_SPEED
 		self.speed = self.baseSpeed
-		self.maxSpeedMult = 0.7
+		self.maxSpeedMult = 0.8
 		self.maxSpeed = self.calculate_max_safe_speed(self.maxSpeedMult)
 		self.radius = 0.5
 		self.bounds = GameBounds()
-		self.countdown = 5
+		self.countdown = 2
 		self.visible = False
 		self.is_moving = False
-		self.acceleration = 1.2
+		self.acceleration = DEFAULT_BALL_ACCELERATION
+		self.lastHitter = "NONE"
 
 	def calculate_max_safe_speed(self, maxSpeedMult):
 		bounds = GameBounds()
 		court_height = bounds.top.y - bounds.bottom.y
 		court_width = bounds.right.x - bounds.left.x
-		paddle_speed = 24
+		paddle_speed = 35
 		max_paddle_travel = court_height - 4
 		paddle_travel_time = max_paddle_travel / paddle_speed
 		ball_travel_distance = math.sqrt(court_width**2 + court_height**2)
@@ -43,34 +33,47 @@ class Ball:
 
 		return (max_safe_speed * self.maxSpeedMult)
 
+	def BounceWall(self, is_top):
+		ball = self
+		ball.velocity.y *= -1
+		if is_top:
+			ball.position.y = ball.bounds.top.y - ball.radius
+		else:
+			ball.position.y = ball.bounds.bottom.y + ball.radius
+
+	def BouncePaddle(self, paddle_x, paddle_y):
+		ball = self
+		relative_intersect_y = paddle_y - ball.position.y
+		normalized_intersect = relative_intersect_y / (4.0/2)
+		bounce_angle = normalized_intersect * math.radians(45)
+
+		if paddle_x < ball.position.x:  # Right paddle
+			ball.velocity.x = ball.speed * math.cos(bounce_angle)
+		else:  # Left paddle
+			ball.velocity.x = -ball.speed * math.cos(bounce_angle)
+		ball.velocity.y = -ball.speed * math.sin(bounce_angle)
+
+		ball.speed += ball.acceleration
+		if (ball.speed >= ball.maxSpeed):
+			ball.speed = ball.maxSpeed
+
 	def predict_trajectory(self):
 		if not self.is_moving:
 			return []
-
 		points = []
 		sim_pos = Vector2D(self.position.x, self.position.y, self.position.z)
 		sim_vel = Vector2D(self.velocity.x, self.velocity.y, self.velocity.z)
 
-		for _ in range(200):  # Limit the number of points to prevent infinite loops
-			# Add current position to points
+		for _ in range(200):
 			points.append(Vector2D(sim_pos.x, sim_pos.y, sim_pos.z))
-
-			# Simulate next position
 			next_x = sim_pos.x + sim_vel.x * 0.016  # 0.016 is roughly 1 frame at 60fps
 			next_y = sim_pos.y + sim_vel.y * 0.016
-
-			# Check for wall collisions
 			if next_y >= self.bounds.top.y - self.radius or next_y <= self.bounds.bottom.y + self.radius:
 				sim_vel.y *= -1
-
-			# Update simulated position
 			sim_pos.x = next_x
 			sim_pos.y = next_y
-
-			# Stop if we reach the side boundaries
 			if sim_pos.x <= self.bounds.left.x or sim_pos.x >= self.bounds.right.x:
 				break
-
 		return points
 
 	def start(self, startDir, ballPos):
@@ -84,31 +87,9 @@ class Ball:
 		self.velocity.y = self.speed * math.sin(angle_rad)
 		self.position = Vector2D(ballPos.x, ballPos.y, ballPos.z)
 
-	def bounce_wall(self, is_top):
-		self.velocity.y *= -1
-		if is_top:
-			self.position.y = self.bounds.top.y - self.radius
-		else:
-			self.position.y = self.bounds.bottom.y + self.radius
-
 	def start_movement(self):
 		self.is_moving = True
 		self.visible = True
-
-	def bounce_paddle(self, paddle_x, paddle_y):
-		relative_intersect_y = paddle_y - self.position.y
-		normalized_intersect = relative_intersect_y / (4.0/2)
-		bounce_angle = normalized_intersect * math.radians(45)
-
-		if paddle_x < self.position.x:  # Right paddle
-			self.velocity.x = self.speed * math.cos(bounce_angle)
-		else:  # Left paddle
-			self.velocity.x = -self.speed * math.cos(bounce_angle)
-		self.velocity.y = -self.speed * math.sin(bounce_angle)
-
-		self.speed += self.acceleration
-		if (self.speed >= self.maxSpeed):
-			self.speed = self.maxSpeed
 
 	def update(self, delta_time):
 		if self.countdown > 0:
@@ -116,9 +97,7 @@ class Ball:
 			if self.countdown <= 0:
 				self.start_movement()
 
-		#if self.is_moving:
-		#	self.position.x += self.velocity.x * delta_time
-		#	self.position.y += self.velocity.y * delta_time
+
 
 class Player:
 	def __init__(self, position, score, keys, game_bounds):
@@ -126,7 +105,7 @@ class Player:
 		self.score = score
 		self.keys = keys
 		self.paddle_speed = 35
-		self.paddle_height = 4.0
+		self.paddle_height = 5.006
 		self.paddle_thickness = 0.8
 		self.game_bounds = game_bounds
 		self.startPos = Vector2D(0, 0, 0)
@@ -134,32 +113,32 @@ class Player:
 	def update(self, delta_time):
 		movement = 0
 		if self.keys["ArrowUp"]:
-			movement += 1
+			movement = 1
 		if self.keys["ArrowDown"]:
-			movement -= 1
+			movement = -1
 
-		if movement != 0:
-			movement_amount = movement * self.paddle_speed * delta_time
-			self.position.y += movement_amount
-			self.position.y = min(max(self.position.y,
-									self.game_bounds.bottom.y + self.paddle_height/2 + 0.1),
-								self.game_bounds.top.y - self.paddle_height/2 - 0.1)
+		movement_amount = movement * self.paddle_speed * delta_time
+		self.position.y += movement_amount
+		self.position.y = min(max(self.position.y,
+								self.game_bounds.bottom.y + self.paddle_height/2 + 0.1),
+							self.game_bounds.top.y - self.paddle_height/2 - 0.1)
 
 class GameBounds:
 	def __init__(self):
-		self.top = Vector2D(0, 10.56, -15)
-		self.bottom = Vector2D(0, -17.89, -15)
-		self.left = Vector2D(-20.45, -3.70, -15)
-		self.right = Vector2D(20.42, -3.70, -15)
+		self.top = Vector2D(0, 10.56+10.5, -15)
+		self.bottom = Vector2D(0, -17.89+10.5, -15)
+		self.left = Vector2D(-20.45, -3.70+10.5, -15)
+		self.right = Vector2D(20.42, -3.70+10.5, -15)
 
-class NormalGameInstance:
+class ClassicGameInstance:
 	def __init__(self, broadcast_fun, game_end_fun):
 		self.bounds = GameBounds()
-		self.player_left = Player(Vector2D(self.bounds.left.x + 2, -3, -15), 0,{"ArrowUp": False, "ArrowDown": False}, self.bounds)
-		self.player_right = Player(Vector2D(self.bounds.right.x - 2, -3, -15), 0,{"ArrowUp": False, "ArrowDown": False}, self.bounds)
+		self.player_left = Player(Vector2D(self.bounds.left.x + 2, -3+10.5, -15), 0,{"ArrowUp": False, "ArrowDown": False}, self.bounds)
+		self.player_right = Player(Vector2D(self.bounds.right.x - 2, -3+10.5, -15), 0,{"ArrowUp": False, "ArrowDown": False}, self.bounds)
 		self.ball = Ball()
 		self.paused = False
 		self.ended = False
+		self.scorer = None
 		self.winner = None
 		self.is_running = False
 		self.last_update_time = time.time()
@@ -177,63 +156,59 @@ class NormalGameInstance:
 		ball_pos = ball.position
 		paddle_hit = False
 
-		# Wall collisions
 		if ball_pos.y >= self.bounds.top.y - ball.radius:
-			ball.bounce_wall(True)
+			self.ball.BounceWall(True)
 		elif ball_pos.y <= self.bounds.bottom.y + ball.radius:
-			ball.bounce_wall(False)
+			self.ball.BounceWall(False)
 
-		# Right paddle collision
 		right_paddle = self.player_right
 		if (ball_pos.x <= right_paddle.position.x + right_paddle.paddle_thickness/2 + ball.radius and
 			ball_pos.x >= right_paddle.position.x - right_paddle.paddle_thickness/2 - ball.radius):
-
-			# Vertical collision check
 			if (abs(ball_pos.y - right_paddle.position.y) <=
 				right_paddle.paddle_height/2 + ball.radius):
+					if ball.velocity.x > 0:
+						ball.position.x = right_paddle.position.x - right_paddle.paddle_thickness/2 - ball.radius
+						self.ball.BouncePaddle(right_paddle.position.x, right_paddle.position.y)
+						ball.lastHitter = "RIGHT"
+						paddle_hit = True
 
-				# Prevent ball from getting stuck inside paddle
-				if ball.velocity.x > 0:
-					ball.position.x = right_paddle.position.x - right_paddle.paddle_thickness/2 - ball.radius
-
-				ball.bounce_paddle(right_paddle.position.x, right_paddle.position.y)
-				paddle_hit = True
-
-		# Left paddle collision
 		left_paddle = self.player_left
 		if (ball_pos.x >= left_paddle.position.x - left_paddle.paddle_thickness/2 - ball.radius and
 			ball_pos.x <= left_paddle.position.x + left_paddle.paddle_thickness/2 + ball.radius):
-
-			# Vertical collision check
-			if (abs(ball_pos.y - left_paddle.position.y) <=
+				if (abs(ball_pos.y - left_paddle.position.y) <=
 				left_paddle.paddle_height/2 + ball.radius):
+					if ball.velocity.x < 0:
+						ball.position.x = left_paddle.position.x + left_paddle.paddle_thickness/2 + ball.radius
+						self.ball.BouncePaddle(left_paddle.position.x, left_paddle.position.y)
 
-				# Prevent ball from getting stuck inside paddle
-				if ball.velocity.x < 0:
-					ball.position.x = left_paddle.position.x + left_paddle.paddle_thickness/2 + ball.radius
-
-				ball.bounce_paddle(left_paddle.position.x, left_paddle.position.y)
-				paddle_hit = True
+						ball.lastHitter = "LEFT"  # Add this line
+						paddle_hit = True
 
 		if not paddle_hit:
 			if ball_pos.x >= self.bounds.right.x:
-				await self.on_score("LEFT")
+					await self.on_score("LEFT")
 			elif ball_pos.x <= self.bounds.left.x:
-				await self.on_score("RIGHT")
+					await self.on_score("RIGHT")
 
 	async def on_score(self, winner):
 		if winner == "LEFT":
 			self.player_left.score += 1
-			self.scorePos = Vector2D(self.bounds.right.x, self.ball.position.y, self.ball.position.z)
-			self.ball.start(LEFT_SIDE_DIR, Vector2D(self.player_right.position.x - 1, self.player_right.position.y, -15))
+			self.scorePos = Vector2D(self.ball.position.x, self.ball.position.y, self.ball.position.z)
+			self.ball.start(LEFT_SIDE_DIR, DEFAULT_BALL_POS)
+			self.ball.lastHitter = "RIGHT"
+			self.scorer = "LEFT"
 		elif winner == "RIGHT":
 			self.player_right.score += 1
-			self.scorePos = Vector2D(self.bounds.left.x, self.ball.position.y, self.ball.position.z)
-			self.ball.start(RIGHT_SIDE_DIR, Vector2D(self.player_left.position.x + 1, self.player_left.position.y, -15))
+			self.scorePos = Vector2D(self.ball.position.x, self.ball.position.y, self.ball.position.z)
+			self.ball.start(RIGHT_SIDE_DIR, DEFAULT_BALL_POS)
+			self.ball.lastHitter = "LEFT"
+			self.scorer = "RIGHT"
+		self.announceEvent = True
 		self.ball.visible = False
 		self.ball.is_moving = False
-		self.ball.countdown = 1
+		self.ball.countdown = 5
 		self.scored = True
+
 		if (self.check_winner(winner)):
 			await self.on_game_end(winner)
 
@@ -252,6 +227,14 @@ class NormalGameInstance:
 				return True
 		return False
 
+	async def forfeit(self, side):
+		if (side == "LEFT"):
+			self.logger.info("Player left forfeited")
+			await self.on_game_end("RIGHT")
+		else:
+			self.logger.info("Player right forfeited")
+			await self.on_game_end("LEFT")
+
 	async def on_game_end(self, winner):
 		self.logger.info("Game ended")
 		self.stop()
@@ -260,8 +243,8 @@ class NormalGameInstance:
 		await self.game_end_fun()
 
 	def start(self):
-		self.last_update_time = current_time
 		self.is_running = True
+		self.last_update_time = time.time()
 		self.ball.start(random.choice([LEFT_SIDE_DIR, RIGHT_SIDE_DIR]), DEFAULT_BALL_POS)
 		self.loop_task = asyncio.create_task(self.game_loop())
 
@@ -287,10 +270,9 @@ class NormalGameInstance:
 						current_step = min(step_size, remaining_time)
 						#accumulated_step += current_step
 
-						if self.ball.is_moving: #and accumulated_step >= 0.016:
-							self.ball.position.x += self.ball.velocity.x * current_step #* accumulated_step
-							self.ball.position.y += self.ball.velocity.y * current_step #* accumulated_step
-							#accumulated_step = 0
+						if self.ball.is_moving:
+							self.ball.position.x += self.ball.velocity.x * current_step
+							self.ball.position.y += self.ball.velocity.y * current_step
 
 						await (self.check_collisions())
 

@@ -10,42 +10,21 @@ export default class MainView {
 		this.timerInterval = null;
 
 		this.username = window.app.state.username;
-
+		window.app.settings["game-selector"] = "classic";
 		this.init();
-    }
+	}
 
 	async init() {
 		this.render();
 		this.initComponents();
-		if (!window.app.settings['fetched']) window.app.getPreferences();
+		if (!window.app.settings["fetched"]) window.app.getPreferences();
 		this.checkForBackdrop();
-        this.addEventListeners();
-        if (window.app.ingame) {
-            console.log("Reconnecting to game");
-            const protocol =
-                window.location.protocol === "https:" ? "wss:" : "ws:";
-            const host = window.location.host;
-            const wsUrl = `${protocol}//${host}/ws/game/reconnect=true`;
-            window.app.gamews = new WebSocket(wsUrl);
-            window.app.gamews.onmessage = (event) => {
-                const events = JSON.parse(event.data);
-                if (events.message_type === "init") {
-                    this.displayGame(events);
-                }
-            };
-
-            window.app.gamews.onclose = () => {
-                console.log("Disconnected from server");
-                window.app.ingame = false;
-                sessionStorage.setItem("ingame", "false");
-            };
-        }
+		this.addEventListeners();
 		await this.getSettings();
 	}
-	
+
 	async getSettings() {
-		if (!window.app.settings['fetched'])
-			await window.app.getPreferences();
+		if (!window.app.settings["fetched"]) await window.app.getPreferences();
 		if (window.app.settings.is_admin) {
 			const adminButton = document.getElementById("admin-button");
 			adminButton.style.display = "block";
@@ -55,7 +34,7 @@ export default class MainView {
 	render() {
 		this.container.innerHTML = `
 			<header>
-				<h1 id="pong">P 
+				<h1 id="pong">P
 					<button id="credit-button">
 						<i class="fa-solid fa-table-tennis-paddle-ball fa-xs"></i>
 					</button>
@@ -113,26 +92,26 @@ export default class MainView {
         `;
 	}
 
-    showLeaderboard() {
-        const mainContent = this.container.querySelector("#mainContent");
-        mainContent.innerHTML = "<h2>Leaderboard View</h2>";
-    }
+	showLeaderboard() {
+		const mainContent = this.container.querySelector("#mainContent");
+		mainContent.innerHTML = "<h2>Leaderboard View</h2>";
+	}
 
-    initComponents() {
-        const tournamentContainer = this.container.querySelector("#tournamentContainer",);
-        if (!window.app.tournament) {
-            window.app.tournament = new Tournament(tournamentContainer);
-        } else {
+	initComponents() {
+		const tournamentContainer = this.container.querySelector("#tournamentContainer");
+		if (!window.app.tournament) {
+			window.app.tournament = new Tournament(tournamentContainer);
+		} else {
 			window.app.tournament.container = tournamentContainer;
 			window.app.tournament.render();
 			window.app.tournament.addEventListeners();
 			window.app.tournament.updateContent();
 		}
 
-        const chatBoxContainer = this.container.querySelector("#chatBoxContainer");
-        if (!window.app.chatBox) {
-            window.app.chatBox = new ChatBox(chatBoxContainer);
-        } else {
+		const chatBoxContainer = this.container.querySelector("#chatBoxContainer");
+		if (!window.app.chatBox) {
+			window.app.chatBox = new ChatBox(chatBoxContainer);
+		} else {
 			window.app.chatBox.container = chatBoxContainer;
 			window.app.chatBox.render(chatBoxContainer);
 			window.app.chatBox.addEventListeners();
@@ -148,32 +127,31 @@ export default class MainView {
 		}
 	}
 
-    addEventListeners() {
+	addEventListeners() {
 		const selectorRumble = document.getElementById("rumble");
-        const selectorClassic = document.getElementById("classic");
-		
+		const selectorClassic = document.getElementById("classic");
+
 		this.addNavEventListeners();
 
 		selectorRumble.addEventListener("click", () => {
-			window.app.settings['game-selector'] = "rumble"
+			window.app.settings["game-selector"] = "rumble";
 			this.addSelector();
 		});
-		
+
 		selectorClassic.addEventListener("click", () => {
-			window.app.settings['game-selector'] = "classic"
+			window.app.settings["game-selector"] = "classic";
 			this.addSelector();
 		});
 	}
 
 	addSelector() {
 		const selectorRumble = document.getElementById("rumble");
-        const selectorClassic = document.getElementById("classic");
+		const selectorClassic = document.getElementById("classic");
 
-		if (window.app.settings['game-selector'] == "rumble") {
+		if (window.app.settings["game-selector"] == "rumble") {
 			selectorRumble.classList.remove("disabled");
 			selectorClassic.classList.add("disabled");
-		}
-		else {
+		} else {
 			selectorRumble.classList.add("disabled");
 			selectorClassic.classList.remove("disabled");
 		}
@@ -205,7 +183,7 @@ export default class MainView {
 		customizeButton.addEventListener("click", () => {
 			window.app.router.navigateTo("/customize");
 		});
-		
+
 		leaderboardButton.addEventListener("click", () => {
 			window.app.router.navigateTo("/leaderboard");
 		});
