@@ -213,6 +213,7 @@ a {
     justify-content: center;
     align-items: flex-start;
     gap: 20px;
+	margin-top: 90px;
 }
 
 #play {
