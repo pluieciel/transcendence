@@ -63,25 +63,25 @@ export default class MainView {
 				</h1>
 				<div id="nav-buttons">
 					<button class="nav-button nav-button-disabled" id="play-button">
-						<i class="fa-solid fa-gamepad fa-xl"></i>Play
+						<i class="fa-solid fa-gamepad fa-2xl"></i>Play
 					</button>
 					<button class="nav-button" id="customize-button">
-						<i class="fa-solid fa-palette fa-xl"></i>Customize
+						<i class="fa-solid fa-palette fa-2xl"></i>Customize
 					</button>
 					<button class="nav-button" id="leaderboard-button">
-						<i class="fa-solid fa-medal fa-xl"></i>Leaderboard
+						<i class="fa-solid fa-medal fa-2xl"></i>Leaderboard
 					</button>
 					<button class="nav-button" id="achievements-button">
-						<i class="fa-solid fa-trophy fa-xl"></i>Achievements
+						<i class="fa-solid fa-trophy fa-2xl"></i>Achievements
 					</button>
 					<button class="nav-button" id="profile-button">
-						<i class="fa-solid fa-user fa-xl"></i>Profile
+						<i class="fa-solid fa-user fa-2xl"></i>Profile
 					</button>
 					<button class="nav-button" id="admin-button">
-						<i class="fa-solid fa-user-tie fa-xl"></i>Admin
+						<i class="fa-solid fa-user-tie fa-2xl"></i>Admin
 					</button>
 					<button class="nav-button" id="logout-button">
-						<i class="fa-solid fa-right-from-bracket fa-xl"></i>Log Out
+						<i class="fa-solid fa-right-from-bracket fa-2xl"></i>Log Out
 					</button>
 				</div>
 			</header>
