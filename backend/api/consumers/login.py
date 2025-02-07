@@ -2,7 +2,7 @@ from django.contrib.auth import authenticate
 from django.core.cache import cache
 from channels.generic.http import AsyncHttpConsumer
 from channels.db import database_sync_to_async
-from api.db_utils import get_user_exists, connect_user
+from api.db_utils import get_user_exists
 from api.utils import generate_jwt_cookie, hash_password
 import json
 
