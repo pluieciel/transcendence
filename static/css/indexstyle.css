@@ -69,8 +69,12 @@ body {
     font-size: 0.9rem;
     font-weight: bold;
     border: none;
-    margin-left: 100px;
+    margin-left: 10px;
 	text-shadow: 0 0 5px var(--user-color);
+}
+
+#play-button {
+	margin-left: 100px;
 }
 
 .nav-button-disabled {
@@ -103,6 +107,7 @@ body {
 
 #pong {
 	margin-left: 25px;
+	width: 150px;
 	color: var(--user-color);
 	text-shadow: 0 0 5px var(--user-color);
 }
