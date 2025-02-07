@@ -1,6 +1,6 @@
 import {addUserData, message, message2, saveUserChanges, eraseInDB} from "../utils/settingsUtils.js"
 
-export default class CustomView {
+export default class CustomizeView {
     constructor(container) {
 		this.container = container;
         this.username = window.app.state.username;

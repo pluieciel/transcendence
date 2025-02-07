@@ -39,6 +39,10 @@ body {
 	flex-direction: column;
 }
 
+.container {
+	padding-top: 150px;
+}
+
 #credit-button {
 	background: none;
 	border: none;
@@ -65,8 +69,12 @@ body {
     font-size: 0.9rem;
     font-weight: bold;
     border: none;
-    margin-left: 100px;
+    margin-left: 10px;
 	text-shadow: 0 0 5px var(--user-color);
+}
+
+#play-button {
+	margin-left: 100px;
 }
 
 .nav-button-disabled {
@@ -99,6 +107,7 @@ body {
 
 #pong {
 	margin-left: 25px;
+	width: 150px;
 	color: var(--user-color);
 	text-shadow: 0 0 5px var(--user-color);
 }
@@ -208,6 +217,18 @@ a {
 
 #play {
 	margin-bottom: 10px;
+}
+
+#login-title, #signup-title {
+	margin-bottom: 10px;
+	text-align: center;
+}
+
+#login-btn, #signup-btn {
+	background-color: transparent;
+	border: none;
+	color: var(--secondary-color);
+	text-shadow: 0 0 5px var(--user-color);
 }
 
 #history-content {
@@ -470,10 +491,6 @@ a {
 	background-color: var(--primary-color);
 }
 
-.avatar-selector-settings:hover {
-	background-color: #000;
-}
-
 .game-buttons > button, .service > button {
 	padding: 10px 20px;
     margin: 10px 0;
@@ -658,20 +675,31 @@ input[type="file"]::file-selector-button {
 	color: var(--secondary-color);
 }
 
-#loginBtn, #login42Btn, #signupBtn {
+#loginBtn, #login42Btn, #signupBtn, .avatar-selector {
 	border: 1px solid var(--primary-color);
 	background-color: var(--primary-color);	
 	transition: all 0.5s;
 }
 
-#loginBtn:hover, #loginBtn:focus, #login42Btn:hover, #login42Btn:focus, #signupBtn:hover, #signupBtn:focus {
+#loginBtn:hover, #loginBtn:focus, #login42Btn:hover, #login42Btn:focus, #signupBtn:hover, #signupBtn:focus, .avatar-selector:hover {
 	border: 1px solid var(--user-color);
 	box-shadow: 0 0 15px var(--user-color);
 }
 
 #loginForm, #signupForm {
 	border: 1px solid var(--user-color);
+	border-radius: 0px;
 	box-shadow: 0 0 20px var(--user-color);
+}
+
+#login-link, #signup-link {
+	text-align: center;
+	color: var(--secondary-color);
+}
+
+#oauth-logo {
+	width: 20px;
+	height: 20px;
 }
 
 #OAuthLoader {
@@ -766,15 +794,11 @@ input[type="file"]::file-selector-button {
 
 .avatar-selector {
 	display: inline-block;
-	padding: 10px 20px;
-	background-color: #007bff;
-	color: white;
+	padding: 7px 20px;
+	background-color: var(--primary-color);
+	color: var(--secondary-color);
 	cursor: pointer;
 	border-radius: 5px;
-}
-
-.avatar-selector:hover {
-	background-color: #0056b3;
 }
 
 .disable-backdrop {
