@@ -390,9 +390,13 @@ class GameBackend:
 				avatar = '/default_avatar.png'
 
 			self.logger.info(f"Appending winner info with {self.game.winner.username}")
+			if (self.game.winner.display):
+				username = self.game.winner.display
+			else:
+				username = self.game.winner.username
 			events.append({
 				"type": "game_end",
-				"winnerName": self.game.winner.username,
+				"winnerName": username,
 				"winnerAvatar": avatar,
 				"scoreLeft": self.game.player_left.score,
 				"scoreRight": self.game.player_right.score,

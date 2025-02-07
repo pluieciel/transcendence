@@ -13,6 +13,7 @@ class BotAvatar:
 class BotUser:
     def __init__(self, username, elo, color, user_id):
         self.username = username
+        self.display = username
         self.elo = elo
         self.color = color
         self.id = user_id

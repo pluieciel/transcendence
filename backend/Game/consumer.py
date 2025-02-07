@@ -384,6 +384,16 @@ class GameConsumer(AsyncWebsocketConsumer):
 		else:
 			avatarLeft = '/default_avatar.png'
 
+		if (instance.player_left.user.display):
+			usernameLeft = instance.player_left.user.display
+		else:
+			usernameLeft = instance.player_left.user.username
+
+		if (instance.player_right.user.display):
+			usernameRight = instance.player_right.user.display
+		else:
+			usernameRight = instance.player_right
+
 
 		init_response = {
 			"type": "init",
@@ -400,16 +410,15 @@ class GameConsumer(AsyncWebsocketConsumer):
 						}
 					},
 					"player": {
-						#TODO ADD WIDTH AND SUCH
 						"left": {
-							"name": instance.player_left.user.username,
+							"name": usernameLeft,
 							"rank": instance.player_left.user.elo,
 							"score": instance.game.player_left.score,
 							"avatar" : avatarLeft,
 							"color": self.get_color(instance.player_left.user)
 						},
 						"right": {
-							"name": instance.player_right.user.username,
+							"name": usernameRight,
 							"rank": instance.player_right.user.elo,
 							"score": instance.game.player_right.score,
 							"avatar" : avatarRight,
