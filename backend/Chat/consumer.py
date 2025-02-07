@@ -12,7 +12,7 @@ from Game.consumer import game_manager
 import redis
 from copy import deepcopy
 from api.utils import get_secret_from_file
-from api.db_utils import disconnect_user, get_user_by_name
+from api.db_utils import get_user_by_name
 from openai import OpenAI
 from django.core.cache import cache
 import asyncio
@@ -167,12 +167,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 						"time": datetime.now().strftime("%H:%M:%S")
 					}
 				)
-		print("WATAFUK", flush=True)
 		user = await get_user_by_name(self.username)
-		print("ISCONNECTED = ", flush=True)
-		print(user.is_connected, flush=True)
-		if not await disconnect_user(user=user):
-			print("Failed to disconnect user", flush=True)
 
 	async def receive(self, text_data):
 		text_data_json = json.loads(text_data)
