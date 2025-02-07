@@ -35,7 +35,7 @@ export default class SignupView {
                             </div>
                             <div class="mb-3">
                                 <span id="avatarSpan">
-									<label class="avatar-selector">Upload your avatar</label>
+									<label class="avatar-selector"><i class="fa-solid fa-arrow-up-from-bracket"></i> Upload your avatar</label>
                                     <input type="file" id="fileInput" accept="image/*" hidden>
                                 </span>
                             </div>

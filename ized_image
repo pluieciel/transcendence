@@ -1,0 +1,45 @@
+[33mcommit 542aa23b78d314416c99fc7acfe24fce1f6fffa4[m
+Author: jlefonde <joris.lefondeur@protonmail.com>
+Date:   Tue Jan 28 10:47:50 2025 +0100
+
+    Removed resize avatar
+
+[1mdiff --git a/backend/api/consumers/avatar.py b/backend/api/consumers/avatar.py[m
+[1mindex 157df0e..bdc56e9 100644[m
+[1m--- a/backend/api/consumers/avatar.py[m
+[1m+++ b/backend/api/consumers/avatar.py[m
+[36m@@ -19,19 +19,15 @@[m [mclass AvatarConsumer(AsyncHttpConsumer):[m
+ 			path = self.scope['path'][m
+ 			match = re.search(r'/api/get/avatar/(\w+)', path)[m
+ 			user_name = match.group(1)[m
+[31m-			user = await get_user_by_name(user_name)[m
+ 			host = 'https://' + next((value.decode('utf-8') for key, value in self.scope['headers'] if key == b'x-forwarded-host'), 'localhost:9000')[m
+ 			if host == 'https://localhost:9000':[m
+ 				host = next((value.decode('utf-8') for key, value in self.scope['headers'] if key == b'origin'), 'localhost:9000')[m
+[31m-			#print(self.scope, flush=True)[m
+ 			response_data = {[m
+ 				'username': user.username,[m
+ 				'success': True,[m
+ 				'avatar' : f"{host}{user.avatar.url}" if user.avatar else f"{host}/default_avatar.png",[m
+ 			}[m
+ 			if (user.oauthlog):[m
+[31m-				print('avatar link ', flush=True)[m
+[31m-				print(user.avatar42, flush=True)[m
+ 				response_data['avatar'] = user.avatar42[m
+ 			return await self.send_response(200, json.dumps(response_data).encode(),[m
+ 				headers=[(b"Content-Type", b"application/json")])[m
+[1mdiff --git a/backend/api/consumers/signup.py b/backend/api/consumers/signup.py[m
+[1mindex d4f2504..1ee6f68 100644[m
+[1m--- a/backend/api/consumers/signup.py[m
+[1m+++ b/backend/api/consumers/signup.py[m
+[36m@@ -99,9 +99,8 @@[m [mclass SignupConsumer(AsyncHttpConsumer):[m
+ 			if avatar:[m
+ 				image_bytes = avatar.file.read()[m
+ 				image = Image.open(io.BytesIO(image_bytes))[m
+[31m-				resized_image = image.resize((60, 60), Image.Resampling.LANCZOS)[m
+ 				img_byte_arr = io.BytesIO()[m
+[31m-				resized_image.save(img_byte_arr, format=image.format or 'PNG')[m
+[32m+[m				[32mimage.save(img_byte_arr, format=image.format or 'PNG')[m
+ 				img_byte_arr.seek(0)[m
+ 				avatar.file = img_byte_arr [m
+ [m
