@@ -392,7 +392,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 		if (instance.player_right.user.display):
 			usernameRight = instance.player_right.user.display
 		else:
-			usernameRight = instance.player_right
+			usernameRight = instance.player_right.user.username
 
 
 		init_response = {
