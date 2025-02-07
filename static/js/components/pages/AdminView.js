@@ -1,4 +1,4 @@
-export default class MainView {
+export default class AdminView {
     constructor(container) {
         this.container = container;
 		this.init();

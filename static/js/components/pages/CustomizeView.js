@@ -4,8 +4,8 @@ import { Renderer } from "../game/Renderer.js";
 import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
 import { OrbitControls } from "https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js";
 
-export default class CustomView {
-	constructor(container) {
+export default class CustomizeView {
+    constructor(container) {
 		this.container = container;
 		this.username = window.app.state.username;
 		this.previewGame = null;
