@@ -103,7 +103,6 @@ class GameBackend:
 			self.player_right = None
 		return old_channel
 
-
 	def assign_player(self, user, channel):
 		if not self.player_left or self.player_left.user.id == user.id:
 			self.player_left = User(user, channel, "Connected")
