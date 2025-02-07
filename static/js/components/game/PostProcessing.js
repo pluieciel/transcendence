@@ -9,9 +9,10 @@ import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js"
 import { SMAAPass } from "three/addons/postprocessing/SMAAPass.js";
 
 export class PostProcessing {
-	constructor(renderer, quality, scene, camera) {
+	constructor(renderer, quality, scene, camera, preview = false) {
 		let antiAliasing = quality > 1;
 		let bloom = quality > 0;
+		this.renderTarget = null;
 
 		let bloomParams = {
 			exposure: 0,
@@ -20,15 +21,30 @@ export class PostProcessing {
 			bloomRadius: 0.4,
 			enabled: bloom,
 		};
+		if (preview) {
+			const canvas = renderer.domElement;
+			const width = canvas.clientWidth;
+			const height = canvas.clientHeight;
+			const pixelRatio = Math.min(window.devicePixelRatio, 2);
 
-		const renderTarget = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight, {
-			type: THREE.HalfFloatType,
-			samples: antiAliasing ? 8 : 0,
-			format: THREE.RGBAFormat,
-			colorSpace: THREE.SRGBColorSpace,
-			stencilBuffer: false,
-		});
-		this.composer = new EffectComposer(renderer, renderTarget);
+			this.renderTarget = new THREE.WebGLRenderTarget(width * pixelRatio, height * pixelRatio, {
+				type: THREE.HalfFloatType,
+				samples: antiAliasing ? 8 : 0,
+				format: THREE.RGBAFormat,
+				colorSpace: THREE.SRGBColorSpace,
+				stencilBuffer: false,
+			});
+		} else {
+			this.renderTarget = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight, {
+				type: THREE.HalfFloatType,
+				samples: antiAliasing ? 8 : 0,
+				format: THREE.RGBAFormat,
+				colorSpace: THREE.SRGBColorSpace,
+				stencilBuffer: false,
+			});
+		}
+
+		this.composer = new EffectComposer(renderer, this.renderTarget);
 		const renderPass = new RenderPass(scene, camera);
 		renderPass.clearColor = new THREE.Color(0x000000);
 		renderPass.clearAlpha = 0;
@@ -53,21 +69,41 @@ export class PostProcessing {
 			this.composer.addPass(smaaPass);
 		}
 
-		window.addEventListener("resize", () => {
-			const width = window.innerWidth;
-			const height = window.innerHeight;
-			const pixelRatio = Math.min(window.devicePixelRatio, 2);
+		window.addEventListener("resize", this.onWindowResize.bind(this));
+	}
 
-			camera.aspect = width / height;
-			camera.updateProjectionMatrix();
+	onWindowResize() {
+		const width = window.innerWidth;
+		const height = window.innerHeight;
+		const pixelRatio = Math.min(window.devicePixelRatio, 2);
 
-			renderer.setSize(width, height);
-			renderer.setPixelRatio(pixelRatio);
+		camera.aspect = width / height;
+		camera.updateProjectionMatrix();
 
-			renderTarget.setSize(width * pixelRatio, height * pixelRatio);
+		renderer.setSize(width, height);
+		renderer.setPixelRatio(pixelRatio);
 
-			this.composer.setSize(width, height);
-			this.composer.setPixelRatio(pixelRatio);
-		});
+		this.renderTarget.setSize(width * pixelRatio, height * pixelRatio);
+
+		this.composer.setSize(width, height);
+		this.composer.setPixelRatio(pixelRatio);
+	}
+
+	dispose() {
+		console.log("Disposing PostProcessing...");
+		window.removeEventListener("resize", this.onWindowResize.bind(this));
+
+		if (this.renderTarget) {
+			this.renderTarget.dispose();
+			this.renderTarget = null;
+		}
+
+		if (this.composer) {
+			this.composer.passes.forEach((pass) => {
+				if (pass.dispose) pass.dispose();
+			});
+			this.composer = null;
+		}
+		console.log("PostProcessing disposed.");
 	}
 }

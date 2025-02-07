@@ -260,6 +260,7 @@ class NormalGameInstance:
 		await self.game_end_fun()
 
 	def start(self):
+		self.last_update_time = current_time
 		self.is_running = True
 		self.ball.start(random.choice([LEFT_SIDE_DIR, RIGHT_SIDE_DIR]), DEFAULT_BALL_POS)
 		self.loop_task = asyncio.create_task(self.game_loop())

@@ -76,11 +76,11 @@ class Bot:
 
 		if abs(distance) > dead_zone:
 			if distance > 0:  # Need to move up
-				self.game.player_right.keys["ArrowUp"] = True
-				self.game.player_right.keys["ArrowDown"] = False
+				self.game.player_right.keys["ArrowUp"] = self.game.event.name != 'Inverted Controls'
+				self.game.player_right.keys["ArrowDown"] = self.game.event.name == 'Inverted Controls'
 			else:  # Need to move down
-				self.game.player_right.keys["ArrowUp"] = False
-				self.game.player_right.keys["ArrowDown"] = True
+				self.game.player_right.keys["ArrowUp"] = self.game.event.name == 'Inverted Controls'
+				self.game.player_right.keys["ArrowDown"] = self.game.event.name != 'Inverted Controls'
 		else:  # Within dead zone - stop moving
 			self.game.player_right.keys["ArrowUp"] = False
 			self.game.player_right.keys["ArrowDown"] = False

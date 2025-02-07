@@ -251,6 +251,7 @@ class RumbleGameInstance:
 
 	def start(self):
 		self.is_running = True
+		self.last_update_time = time.time()
 		self.logger.info(f"rumble self : {self}")
 		self.ball.start(random.choice([LEFT_SIDE_DIR, RIGHT_SIDE_DIR]), DEFAULT_BALL_POS)
 		self.loop_task = asyncio.create_task(self.game_loop())
@@ -264,6 +265,7 @@ class RumbleGameInstance:
 				current_time = time.time()
 				delta_time = current_time - self.last_update_time
 				self.last_update_time = current_time
+				self.logger.info('Game loop running')
 
 				if not self.paused:
 					self.player_left.update(delta_time)

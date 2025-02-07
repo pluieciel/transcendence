@@ -348,8 +348,8 @@ class GameConsumer(AsyncWebsocketConsumer):
 			0: '#3E27F8',
 			1: "#00BDD1",
 			2: "#00AD06",
-			3: "#e67e00",
-			4: "#EC008F",
+			3: "#E67E00",
+			4: "#E6008F",
 			5: "#6400C4",
 			6: "#E71200",
 			7: "#0EC384", #Soft green

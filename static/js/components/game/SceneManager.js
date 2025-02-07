@@ -23,6 +23,9 @@ export class SceneManager {
 		this.avatar = null;
 
 		this.composer = null;
+		this.low_composer = null;
+		this.medium_composer = null;
+		this.high_composer = null;
 		this.renderer = renderer;
 		this.light = null;
 		this.textManager = null;
@@ -30,6 +33,8 @@ export class SceneManager {
 	}
 
 	dispose() {
+		console.log("Disposing SceneManager...");
+
 		if (this.scene) {
 			this.scene.traverse((object) => {
 				if (object.geometry) {
@@ -37,19 +42,56 @@ export class SceneManager {
 				}
 				if (object.material) {
 					if (Array.isArray(object.material)) {
-						object.material.forEach((material) => material.dispose());
+						object.material.forEach((material) => {
+							if (material.map) material.map.dispose(); // Dispose of textures
+							material.dispose();
+						});
 					} else {
+						if (object.material.map) object.material.map.dispose(); // Dispose of textures
 						object.material.dispose();
 					}
 				}
 			});
+
+			// Remove all objects from the scene
+			while (this.scene.children.length > 0) {
+				this.scene.remove(this.scene.children[0]);
+			}
 		}
+
 		if (this.renderer) {
 			this.renderer.dispose();
 		}
+
 		if (this.composer) {
+			this.composer.passes.forEach((pass) => {
+				if (pass.dispose) pass.dispose();
+			});
 			this.composer.dispose();
 		}
+
+		if (this.low_composer) {
+			this.low_composer.passes.forEach((pass) => {
+				if (pass.dispose) pass.dispose();
+			});
+			this.low_composer.dispose();
+		}
+
+		if (this.medium_composer) {
+			this.medium_composer.passes.forEach((pass) => {
+				if (pass.dispose) pass.dispose();
+			});
+			this.medium_composer.dispose();
+		}
+
+		if (this.high_composer) {
+			this.high_composer.passes.forEach((pass) => {
+				if (pass.dispose) pass.dispose();
+			});
+			this.high_composer.dispose();
+		}
+
+		console.log("SceneManager disposed.");
 	}
 
 	shakeCamera(intensity = 0.05, duration = 500) {
@@ -92,9 +134,28 @@ export class SceneManager {
 		return true;
 	}
 
+	async initialize_preview(base_color) {
+		//Create Scene, Lights, Camera
+		this.scene = new THREE.Scene();
+		this.setupLights();
+		this.createCamera();
+		this.createModelsPreview(base_color);
+
+		this.postProcessingLow = new PostProcessing(this.renderer, 0, this.scene, this.camera, true);
+		this.postProcessingMedium = new PostProcessing(this.renderer, 1, this.scene, this.camera, true);
+		this.postProcessingHigh = new PostProcessing(this.renderer, 2, this.scene, this.camera, true);
+		this.postProcessing = new PostProcessing(this.renderer, this.quality, this.scene, this.camera, true);
+		this.low_composer = this.postProcessingLow.composer;
+		this.medium_composer = this.postProcessingMedium.composer;
+		this.high_composer = this.postProcessingHigh.composer;
+		this.composer = this.postProcessing.composer;
+		return true;
+	}
+
 	createCamera() {
 		this.camera = new THREE.PerspectiveCamera(38, window.innerWidth / window.innerHeight, 0.1, 1000);
 		this.camera.position.set(0, 9.3, 50);
+		this.camera.rotation.set(0, 0, 0);
 	}
 
 	setupLights() {
@@ -149,11 +210,11 @@ export class SceneManager {
 		const tableScale = new THREE.Vector3(4.14, 4.14, 4.14);
 		const tablePos = new THREE.Vector3(0, 1.59, -30.72);
 		const leftPaddleScale = new THREE.Vector3(this.base_paddle_height, 0.25, 0.5);
-		const rightPaddlePos = new THREE.Vector3(-18, -3.2, -15);
+		const rightPaddlePos = new THREE.Vector3(-18, 6, -15);
 		const rightPaddleScale = new THREE.Vector3(this.base_paddle_height, 0.25, 0.5);
-		const leftPaddlePos = new THREE.Vector3(17.94, -3.2, -15);
+		const leftPaddlePos = new THREE.Vector3(17.94, 6, -15);
 		const ballScale = new THREE.Vector3(0.44, 0.44, 0.44);
-		const ballPos = new THREE.Vector3(0, -3, -15);
+		const ballPos = new THREE.Vector3(0, 6, -15);
 		const leftColor = data.player.left.color;
 		const rightColor = data.player.right.color;
 
@@ -163,6 +224,33 @@ export class SceneManager {
 
 		//Ball defaulted to grey color
 		this.ball = await this.loadModel("/js/components/game/Ball.glb", loader, "#5c6169", ballScale, ballPos, "Ball");
+
+		this.scene.add(this.table);
+		this.scene.add(this.leftPaddle);
+		this.scene.add(this.rightPaddle);
+		this.scene.add(this.ball);
+	}
+
+	async createModelsPreview(base_color) {
+		const loader = new GLTFLoader();
+		const tableScale = new THREE.Vector3(4.14, 4.14, 4.14);
+		const tablePos = new THREE.Vector3(0, 1.59, -30.72);
+		const leftPaddleScale = new THREE.Vector3(this.base_paddle_height, 0.25, 0.5);
+		const leftPaddlePos = new THREE.Vector3(-18, 6, -15);
+		const rightPaddleScale = new THREE.Vector3(this.base_paddle_height, 0.25, 0.5);
+		const rightPaddlePos = new THREE.Vector3(17.94, 6, -15);
+		const ballScale = new THREE.Vector3(0.44, 0.44, 0.44);
+		const ballPos = new THREE.Vector3(0, 6, -15);
+		const leftColor = base_color;
+		const rightColor = "#00BDD1";
+
+		console.log(base_color);
+		this.table = await this.loadModelTable("/js/components/game/Table.glb", loader, leftColor, rightColor, tableScale, tablePos, "Table");
+		this.leftPaddle = await this.loadModel("/js/components/game/Paddle.glb", loader, leftColor, leftPaddleScale, leftPaddlePos, "Left Paddle");
+		this.rightPaddle = await this.loadModel("/js/components/game/Paddle.glb", loader, rightColor, rightPaddleScale, rightPaddlePos, "Right Paddle");
+
+		//Ball defaulted to grey color
+		this.ball = await this.loadModel("/js/components/game/Ball.glb", loader, base_color, ballScale, ballPos, "Ball");
 
 		this.scene.add(this.table);
 		this.scene.add(this.leftPaddle);
@@ -374,7 +462,7 @@ export class SceneManager {
 				rightTexture: "/js/components/game/Textures/TextureRightBlue.png",
 			},
 			//Orange
-			"#e67e00": {
+			"#E67E00": {
 				leftTexture: "/js/components/game/Textures/TextureLeftOrange.png",
 				rightTexture: "/js/components/game/Textures/TextureRightOrange.png",
 			},
@@ -389,7 +477,7 @@ export class SceneManager {
 				rightTexture: "/js/components/game/Textures/TextureRightWhite.png",
 			},
 			//Pink
-			"#EC008F": {
+			"#E6008F": {
 				leftTexture: "/js/components/game/Textures/TextureLeftPink.png",
 				rightTexture: "/js/components/game/Textures/TextureRightPink.png",
 			},
