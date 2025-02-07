@@ -7,14 +7,12 @@ from channels.db import database_sync_to_async
 from django.contrib.auth import get_user_model
 import json
 import logging
-import random
-import re
 from urllib.parse import parse_qs
 from api.utils import jwt_to_user
 from channels.layers import get_channel_layer
 from datetime import datetime
 from time import sleep
-from api.db_utils import user_update_game
+from api.db_utils import user_update_game, delete_game_history
 
 class GameManager:
 	def __init__(self):
@@ -324,10 +322,14 @@ class GameConsumer(AsyncWebsocketConsumer):
 
 	async def disconnect(self, close_code):
 		if (self.game and self.game.game_id):
-			await self.channel_layer.group_discard(str(self.game.game_id), self.channel_name)
-			self.logger.info(f"Disconnecting user {self.user.username}")
-			await user_update_game(self.user, isplaying=False, game_id=-1)
-			await self.game.player_disc(self.user)
+			if (self.game.is_full()):
+				await self.channel_layer.group_discard(str(self.game.game_id), self.channel_name)
+				self.logger.info(f"Disconnecting user {self.user.username}")
+				await user_update_game(self.user, isplaying=False, game_id=-1)
+				await self.game.player_disc(self.user)
+			else:
+				self.logger.info(f"Deleting game n {self.game.game_id}")
+				await delete_game_history(self.game.game_id)
 		self.logger.info(f"WebSocket disconnected with code: {close_code}")
 
 	async def chat_message(self, event):
