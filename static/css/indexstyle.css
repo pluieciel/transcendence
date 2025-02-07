@@ -14,7 +14,7 @@
 }
   
 ::-webkit-scrollbar-track {
-	background: #888;
+	background: transparent;
 	border-radius: 5px;
     margin-bottom: 20px;
 }
@@ -29,7 +29,6 @@
 }
 
 body {
-
 	font-family: "Exo 2", sans-serif;
 	color: var(--primary-color);
 	background-color: var(--primary-color);
@@ -37,6 +36,106 @@ body {
 	padding: 0;
 	display: flex;
 	flex-direction: column;
+}
+
+#leaderboard-page-container {
+	margin-top: 180px;
+	display: flex;
+	align-items: center;
+	flex-direction: column;
+}
+
+#leaderboard-content {
+	display: flex;
+	align-items: center;
+	flex-direction: column;
+	background-color: var(--accent-color);
+	justify-content: center;
+	width: fit-content;
+}
+
+#leaderboard-title {
+	padding: 20px 0;
+}
+
+.round-left {
+	border-top-left-radius: 5px;
+	border-bottom-left-radius: 5px;
+}
+
+.round-right {
+	border-top-right-radius: 5px;
+	border-bottom-right-radius: 5px;
+}
+
+#leaderboard-table {
+	overflow: auto;
+	max-height: 500px !important;
+	margin-left: 15px;
+	margin-right: 5px;
+}
+
+.lb-card-header {
+	display: flex;
+	justify-content: center;
+	flex-direction: row;
+	padding: 10px 20px;
+}
+
+.lb-card {
+	display: flex;
+	justify-content: center;
+	flex-direction: row;
+	margin: 0 5px;
+	border: 1px solid var(--primary-color);
+}
+
+.lb-card-first {
+	border-top-left-radius: 5px;
+	border-top-right-radius: 5px;
+}
+
+.lb-card-last {
+	border-bottom-left-radius: 5px;
+	border-bottom-right-radius: 5px;
+	margin-bottom: 20px;
+}
+
+.lb-card-att {
+	text-align: center;
+	background-color: var(--primary-color);
+	padding: 10px 20px;
+	color: var(--user-color);
+}
+
+.lb-card-pos {
+	width: 80px !important;
+}
+
+.lb-card-user {
+	width: 180px !important;
+}
+
+.lb-card-avatar {
+	width: 30px;
+	height: 30px;
+	border-radius: 50%;
+}
+
+.lb-card-elo {
+	width: 80px !important;
+}
+
+.lb-card-icon {
+	width: 90px !important;
+}
+
+.lb-card-games {
+	width: 90px !important;
+}
+
+.lb-card-winrate {
+	width: 120px !important;
 }
 
 .container {

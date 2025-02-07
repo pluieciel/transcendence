@@ -7,6 +7,7 @@ import LoginOAuth from './components/login/LoginOAuth.js';
 import ProfileView from './components/pages/ProfileView.js';
 import CreditsView from './components/pages/CreditsView.js';
 import CustomizeView from './components/pages/CustomizeView.js';
+import LeaderboardView from './components/pages/LeaderboardView.js';
 import GameView from './components/pages/GameView.js';
 
 
@@ -20,6 +21,7 @@ class App {
 			{ path: '/customize', component: CustomizeView },
 			{ path: '/credits', component: CreditsView },
 			{ path: '/profile', component: ProfileView },
+			{ path: '/leaderboard', component: LeaderboardView },
 			{ path: '/admin', component: AdminView },
 			{ path: '/login/oauth', component: LoginOAuth },
 			{ path: '*', component: LoginView },
