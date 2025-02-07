@@ -60,11 +60,6 @@ class LoginConsumer(AsyncHttpConsumer):
 				}
 				return await self.send_response(401, json.dumps(response_data).encode(),
 					headers=[(b"Content-Type", b"application/json")])
-			if not await connect_user(user=user):
-				response_data = {
-					'success': False,
-					'message': 'User is already connected'
-				}
 				return await self.send_response(401, json.dumps(response_data).encode(),
 					headers=[(b"Content-Type", b"application/json")])
 			
