@@ -1,17 +1,29 @@
-export default class SignUp {
+export default class SignupView {
     constructor(container) {
         this.container = container;
         this.render();
         this.addEventListeners();
+        this.addLoginBtnEventListeners();
         this.loadReCaptcha().then();
     }
 
     render() {
         this.container.innerHTML = `
+			<header>
+				<h1 id="pong">P 
+					<button id="credit-button" disabled>
+						<i class="fa-solid fa-table-tennis-paddle-ball fa-xs"></i>
+					</button>
+					 N G
+				</h1>
+			</header>
             <div class="container">
                 <div class="row justify-content-center">
                     <div class="col-md-4">
                         <form id="signupForm" class="card p-4">
+                            <div class="mb-3">
+                                <h2 id="signup-title">Sign Up</h2>
+                            </div>
                             <div class="mb-3">
                                 <input type="text" id="usrnm-form" placeholder="Enter username" class="form-control" maxlength="16" required>
                             </div>
@@ -23,19 +35,29 @@ export default class SignUp {
                             </div>
                             <div class="mb-3">
                                 <span id="avatarSpan">
-									<label class="avatar-selector">Upload your avatar</label>
+									<label class="avatar-selector"><i class="fa-solid fa-arrow-up-from-bracket"></i> Upload your avatar</label>
                                     <input type="file" id="fileInput" accept="image/*" hidden>
                                 </span>
                             </div>
                             <div class="mb-3"id="recaptcha"></div>
                             <div id="formError" class="alert alert-danger d-none"></div>
-                            <button id="signupBtn" type="submit" class="btn btn-primary w-100">Sign Up</button>
+                            <button id="signupBtn" type="submit" class="btn btn-primary w-100"><i class="fa-solid fa-user-plus"></i> Sign Up</button>
+                            <div class="mt-3" id="login-link">
+								Already have an account? <button type="button" id="login-btn"> Log in</button>
+							</div>
                         </form>
                     </div>
                 </div>
             </div>
         `;
     }
+
+	addLoginBtnEventListeners() {
+		const loginBtn = this.container.querySelector('#login-btn');
+		loginBtn.addEventListener('click', () => {
+			window.app.router.navigateTo('/login');
+		});
+	}
 
     async loadReCaptcha() {
         const errorDiv = this.container.querySelector('#formError');

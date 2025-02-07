@@ -2,6 +2,7 @@ import AdminView from './components/pages/AdminView.js';
 import Router from './router.js';
 import MainView from './components/pages/MainView.js';
 import LoginView from './components/pages/LoginView.js';
+import SignupView from './components/pages/SignupView.js';
 import LoginOAuth from './components/login/LoginOAuth.js';
 import ProfileView from './components/pages/ProfileView.js';
 import CreditsView from './components/pages/CreditsView.js';
@@ -14,6 +15,8 @@ class App {
 	constructor() {
 		this.routes = [
 			{ path: '/', component: LoginView },
+			{ path: '/login', component: LoginView },
+			{ path: '/signup', component: SignupView },
 			{ path: '/index', component: MainView },
 			{ path: '/customize', component: CustomizeView },
 			{ path: '/credits', component: CreditsView },

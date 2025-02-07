@@ -32,6 +32,7 @@ from api.consumers.signup import SignupConsumer
 from api.consumers.recaptcha import RecaptchaConsumer
 from api.consumers.preferences import getPreferences, setPreferences
 from api.consumers.remove import RemoveConsumer
+from api.consumers.admin import AdminConsumer
 from api.consumers.display import setDisplay
 from django.contrib import admin
 from django.conf.urls.static import static
@@ -67,6 +68,7 @@ http_patterns = [
     path('api/get/recaptcha', RecaptchaConsumer.as_asgi()),
 	path('api/settings/set/display', setDisplay.as_asgi()),
 	path('api/settings/set/avatar', setAvatar.as_asgi()),
+	path('api/admin', AdminConsumer.as_asgi()),
     path('admin/', get_asgi_application()),
 ]
 

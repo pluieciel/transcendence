@@ -108,7 +108,7 @@ def is_valid_invite(sender, recipient):
 ##################### GAME HISTORY ###########################
 
 class GameHistory(models.Model):
-    game_mode = models.CharField(max_length=32)
+    game_mode = models.CharField(max_length=32, default='classic')
     game_category = models.CharField(max_length=32) # Quick Match, Invite, Tournament1/2?
     game_state = models.CharField(max_length=32, default='waiting') # waiting, playing, finished
     score_a = models.IntegerField(default=0)

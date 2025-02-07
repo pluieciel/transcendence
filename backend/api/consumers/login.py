@@ -2,7 +2,7 @@ from django.contrib.auth import authenticate
 from django.core.cache import cache
 from channels.generic.http import AsyncHttpConsumer
 from channels.db import database_sync_to_async
-from api.db_utils import get_user_exists, connect_user
+from api.db_utils import get_user_exists
 from api.utils import generate_jwt_cookie, hash_password
 import json
 
@@ -60,11 +60,6 @@ class LoginConsumer(AsyncHttpConsumer):
 				}
 				return await self.send_response(401, json.dumps(response_data).encode(),
 					headers=[(b"Content-Type", b"application/json")])
-			if not await connect_user(user=user):
-				response_data = {
-					'success': False,
-					'message': 'User is already connected'
-				}
 				return await self.send_response(401, json.dumps(response_data).encode(),
 					headers=[(b"Content-Type", b"application/json")])
 			

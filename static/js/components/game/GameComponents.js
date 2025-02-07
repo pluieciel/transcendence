@@ -25,7 +25,7 @@ export default class GameComponent {
 	}
 
 	addEventListeners() {
-		window.app.settings['game-selector']; //rumble || classic
+		window.app.settings["game-selector"]; //rumble || classic
 		const quickMatch = document.getElementById("quickMatch");
 		const playAI = document.getElementById("playAI");
 		const matchSearchModal = document.getElementById("matchSearch");
@@ -54,7 +54,7 @@ export default class GameComponent {
 	searchGame() {
 		const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
 		const host = window.location.host;
-		const wsUrl = `${protocol}//${host}/ws/game/`;
+		const wsUrl = `${protocol}//${host}/ws/game/?mode=${window.app.settings["game-selector"]}`;
 
 		this.initializeWebSocket(wsUrl);
 		this.startSearchGameTimer();
@@ -63,7 +63,7 @@ export default class GameComponent {
 	playBot(difficulty) {
 		const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
 		const host = window.location.host;
-		const wsUrl = `${protocol}//${host}/ws/game/?bot=${difficulty}`;
+		const wsUrl = `${protocol}//${host}/ws/game/?bot=${difficulty}&mode=${window.app.settings["game-selector"]}`;
 
 		this.initializeWebSocket(wsUrl);
 	}

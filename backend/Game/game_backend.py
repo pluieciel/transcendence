@@ -2,7 +2,7 @@ import asyncio
 import time
 import logging
 import json
-from .normal_game_logic import NormalGameInstance, GameBounds
+from .normal_game_logic import ClassicGameInstance, GameBounds
 from .rumble_game_logic import RumbleGameInstance, GameBounds
 from channels.db import database_sync_to_async
 from .bot import Bot
@@ -18,12 +18,11 @@ class User:
 		self.state = state
 
 class GameBackend:
-	def __init__(self, room_id, bot, manager, ranked):
+	def __init__(self, room_id, bot, manager, ranked, mode):
 		self.logger = logging.getLogger('game')
 		self.game_id = room_id
-		self.game_type = "rumble"
+		self.game_type = mode
 		self.game = self.get_game_instance(self.game_type)
-		self.game_mode = "Vanilla"
 		self.is_ranked = ranked
 		self.channel_layer = None
 		self.manager = manager
@@ -48,8 +47,8 @@ class GameBackend:
 			self.game.player_right.keys[key] = is_down
 
 	def get_game_instance(self, type):
-		if (type == "vanilla"):
-			return NormalGameInstance(self.broadcast_state, self.on_game_end)
+		if (type == "classic"):
+			return ClassicGameInstance(self.broadcast_state, self.on_game_end)
 		elif (type == "rumble"):
 			return RumbleGameInstance(self.rumble_broadcast_state, self.rumble_revert_event_broadcast, self.on_game_end)
 		else:
@@ -102,7 +101,6 @@ class GameBackend:
 			old_channel = self.player_right.channel
 			self.player_right = None
 		return old_channel
-
 
 	def assign_player(self, user, channel):
 		if not self.player_left or self.player_left.user.id == user.id:
@@ -158,7 +156,7 @@ class GameBackend:
 			else:
 				await finish_game_history(self.game_id, self.game.player_left.score, self.game.player_right.score, self.elo_change, self.game.winner)
 
-			if self.game_type == "vanilla":
+			if self.game_type == "classic":
 				await self.broadcast_state()
 			else:
 				await self.rumble_broadcast_state()
@@ -278,8 +276,8 @@ class GameBackend:
 			0: '#3E27F8',
 			1: "#00BDD1",
 			2: "#00AD06",
-			3: "#e67e00",
-			4: "#EC008F",
+			3: "#E67E00",
+			4: "#E6008F",
 			5: "#6400C4",
 			6: "#E71200",
 			7: "#0EC384", #Soft green
@@ -298,58 +296,69 @@ class GameBackend:
 	async def broadcast_state(self):
 		events = []
 		if self.game.scored:
-			events.append({"type": "score", "position": vars(self.game.scorePos)})
+			if self.game.scorer is not None:
+				if (self.game.scorer == "LEFT"):
+					color = self.get_color(self.player_left.user)
+				elif self.game.scorer == "RIGHT":
+					color = self.get_color(self.player_right.user)
+				else:
+					self.logger.info(f"color defaulted to grey cause winner is not left or right")
+					color = '#676a6e'
+				self.game.scorer = None
+			else:
+				self.logger.info(f"color defaulted to grey cause winner is none")
+				color = '#676a6e'
+			events.append({
+			"type": "score",
+			"position": vars(self.game.scorePos),
+			"score_left": self.game.player_left.score,
+			"score_right": self.game.player_right.score,
+			"color" : color
+			})
 			self.game.scored = False
 		if self.game.ended:
-			self.logger.info(f"Appending winner info with {self.game.winner}")
+			if (self.game.winner.avatar42):
+				avatar = self.game.winner.avatar42
+			elif (self.game.winner.avatar):
+				avatar = self.game.winner.avatar.url
+			else:
+				avatar = '/default_avatar.png'
+
+			self.logger.info(f"Appending winner info with {self.game.winner.username}")
+			if (self.game.winner.display):
+				username = self.game.winner.display
+			else:
+				username = self.game.winner.username
 			events.append({
 				"type": "game_end",
-				"winnerName": self.game.winner.username,
-				"winnerAvatar": self.game.winner.avatar, #TODO BACKEND
+				"winnerName": username,
+				"winnerAvatar": avatar,
 				"scoreLeft": self.game.player_left.score,
 				"scoreRight": self.game.player_right.score,
 				"eloChange": self.elo_change
 		})
-		if self.game.winner is not None:
-			if (self.game.winner == "LEFT"):
+		if self.game.ball.lastHitter is not None:
+			if (self.game.ball.lastHitter == "LEFT"):
 				color = self.get_color(self.player_left.user)
-			elif self.game.winner == "RIGHT":
+			elif self.game.ball.lastHitter == "RIGHT":
 				color = self.get_color(self.player_right.user)
 			else:
 				color = '#676a6e'
 			events.append({"type": "ball_last_hitter", "color": color})
 
-		trajectory_points = self.game.ball.predict_trajectory()
-		trajectory_data = [vars(point) for point in trajectory_points]
+		trajectory_data = []
 
+		ballX = self.game.ball.position.x
+		ball_pos = vars(self.game.ball.position)
 		state = {
 			"type": "game.update",
 			"data": {
 				"positions": {
 					"player_left": vars(self.game.player_left.position),
 					"player_right": vars(self.game.player_right.position),
-					"ball": vars(self.game.ball.position),
-					"borders": {
-						"top": vars(self.game.bounds.top),
-						"bottom": vars(self.game.bounds.bottom),
-						"left": vars(self.game.bounds.left),
-						"right": vars(self.game.bounds.right),
-					}
+					"ball": ball_pos,
 				},
 				"trajectory": trajectory_data,
-				"player": {
-					"left": {
-						"name": self.player_left.user.username,
-						"rank": self.player_left.user.elo,
-						"score": self.game.player_left.score
-					},
-					"right": {
-						"name": self.player_right.user.username,
-						"rank": self.player_right.user.elo,
-						"score": self.game.player_right.score
-					}
-				},
-				"game_started": self.game.is_running,
 				"events": events
 			}
 		}
@@ -390,15 +399,19 @@ class GameBackend:
 				avatar = '/default_avatar.png'
 
 			self.logger.info(f"Appending winner info with {self.game.winner.username}")
+			if (self.game.winner.display):
+				username = self.game.winner.display
+			else:
+				username = self.game.winner.username
 			events.append({
 				"type": "game_end",
-				"winnerName": self.game.winner.username,
+				"winnerName": username,
 				"winnerAvatar": avatar,
 				"scoreLeft": self.game.player_left.score,
 				"scoreRight": self.game.player_right.score,
 				"eloChange": self.elo_change
 		})
-		if self.game.announceEvent or self.game.event.action is not 'none':
+		if self.game.announceEvent or self.game.event.action != 'none':
 			self.logger.info(f"Announcing event {self.game.event.name} and {self.game.event.description}")
 			events.append({
 				"type": "event",

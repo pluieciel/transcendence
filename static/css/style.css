@@ -284,6 +284,7 @@
 #loginForm,
 #signupForm {
 	background-color: var(--accent-color);
+	margin-top: 90px;
 }
 
 .new-message-dot {
