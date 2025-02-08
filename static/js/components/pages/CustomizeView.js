@@ -40,74 +40,43 @@ export default class CustomizeView {
 	}
 
 	render() {
-		this.container.innerHTML = `
-<header>
-				<h1 id="pong">P
-					<button id="credit-button">
-						<i class="fa-solid fa-table-tennis-paddle-ball fa-xs"></i>
-					</button>
-					 N G
-				</h1>
-				<div id="nav-buttons">
-					<button class="nav-button" id="play-button">
-						<i class="fa-solid fa-gamepad fa-xl"></i>Play
-					</button>
-					<button class="nav-button nav-button-disabled" id="customize-button">
-						<i class="fa-solid fa-palette fa-xl"></i>Customize
-					</button>
-					<button class="nav-button" id="leaderboard-button">
-						<i class="fa-solid fa-medal fa-xl"></i>Leaderboard
-					</button>
-					<button class="nav-button" id="achievements-button">
-						<i class="fa-solid fa-trophy fa-xl"></i>Achievements
-					</button>
-					<button class="nav-button" id="profile-button">
-						<i class="fa-solid fa-user fa-xl"></i>Profile
-					</button>
-					<button class="nav-button" id="admin-button">
-						<i class="fa-solid fa-user-tie fa-xl"></i>Admin
-					</button>
-					<button class="nav-button" id="logout-button">
-						<i class="fa-solid fa-right-from-bracket fa-xl"></i>Log Out
-					</button>
+		window.app.renderHeader(this.container, "customize");
+		this.container.innerHTML += `
+			<div class ="contentCustomize">
+				<div class="containerGame userOutline">
+					<h3>Game customization</h3>
+					<div id="row">
+						<button id="leftColor" class="arrow"><</button>
+						<div id="colorDiv"></div>
+						<button id="rightColor"class="arrow">></button>
+					</div>
+					<div id="row">
+						<button id="leftQuality" class="arrow"><</button>
+						<div id="qualityDiv"></div>
+						<button id="rightQuality"class="arrow">></button>
+					</div>
+					<button id="savebtn">Save changes</button>
 				</div>
-			</header>
-	<div class ="contentCustomize">
-		<div class="containerGame userOutline">
-			<h3>Game customization</h3>
-			<div id="row">
-				<button id="leftColor" class="arrow"><</button>
-				<div id="colorDiv"></div>
-				<button id="rightColor"class="arrow">></button>
-			</div>
-			<div id="row">
-				<button id="leftQuality" class="arrow"><</button>
-				<div id="qualityDiv"></div>
-				<button id="rightQuality"class="arrow">></button>
-			</div>
-			<button id="savebtn">Save changes</button>
-		</div>
-		<canvas id="previewCanvas" class='userOutline' ></canvas>
-		<div class="modal fade" id="changeModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-			<div class="modal-dialog">
-				<div class="modal-content">
-					<div class="modal-header">
-						<h1 class="modal-title fs-5" id="modalHeader"></h1>
-						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-					</div>
-					<div class="modal-body">
-						<h2 class="modal-title fs-5" id="modalDialog"></h2>
-					</div>
-					<div id="modalFooter" class="modal-footer d-none">
-						<button class="btn btn-primary" id="modalsavebtn">Save changes</button>
-						<button class="btn btn-primary" id="gotomainbtn">Go to main without saving</button>
+				<canvas id="previewCanvas" class='userOutline' ></canvas>
+				<div class="modal fade" id="changeModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+					<div class="modal-dialog">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h1 class="modal-title fs-5" id="modalHeader"></h1>
+								<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+							</div>
+							<div class="modal-body">
+								<h2 class="modal-title fs-5" id="modalDialog"></h2>
+							</div>
+							<div id="modalFooter" class="modal-footer d-none">
+								<button class="btn btn-primary" id="modalsavebtn">Save changes</button>
+								<button class="btn btn-primary" id="gotomainbtn">Go to main without saving</button>
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
-		</div>
-
-
-					`;
+		`;
 	}
 
 	addCustomizationEventListeners() {

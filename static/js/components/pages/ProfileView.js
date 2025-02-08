@@ -24,138 +24,107 @@ export default class ProfileView {
 	}
 	
 	render() {
-		this.container.innerHTML = `
-			<header>
-				<h1 id="pong">P 
-					<button id="credit-button">
-						<i class="fa-solid fa-table-tennis-paddle-ball fa-xs"></i>
-					</button>
-					 N G
-				</h1>
-				<div id="nav-buttons">
-					<button class="nav-button" id="play-button">
-						<i class="fa-solid fa-gamepad fa-xl"></i>Play
-					</button>
-					<button class="nav-button" id="customize-button">
-						<i class="fa-solid fa-palette fa-xl"></i>Customize
-					</button>
-					<button class="nav-button" id="leaderboard-button">
-						<i class="fa-solid fa-medal fa-xl"></i>Leaderboard
-					</button>
-					<button class="nav-button" id="achievements-button">
-						<i class="fa-solid fa-trophy fa-xl"></i>Achievements
-					</button>
-					<button class="nav-button nav-button-disabled" id="profile-button">
-						<i class="fa-solid fa-user fa-xl"></i>Profile
-					</button>
-					<button class="nav-button" id="admin-button">
-						<i class="fa-solid fa-user-tie fa-xl"></i>Admin
-					</button>
-					<button class="nav-button" id="logout-button">
-						<i class="fa-solid fa-right-from-bracket fa-xl"></i>Log Out
-					</button>
-				</div>
-			</header>
-		
-		<div id="mainPage">
-			<div class="profile-container">
-				<div class="container-row">
-					<div id="profile-settings" class="settings userOutline">
-						<h3>Profile info</h3>
-						<button id="changeNameBtn">Change your display name</button>
-						<input type="text" id="newName">
-						<span id="avatarSpan">
-							<label class="avatar-selector-settings">Change your profile picture</label>
-							<input type="file" id="fileInput" accept="image/*" hidden>
-						</span>
-						<button type="button" id="enable2FA">Enable 2FA</button>
-						<button type="button" id="disable2FA">Disable 2FA</button>
-					</div>
-					<div id="profile-dangerous" class="settings userOutline">
-						<h3>be careful!</h3>
-						<button id="passwordButton">Set New Password</button>
-						<input type="password" id="newPasswordInput" placeholder="">
-						<button id="deleteAccBtn">Delete my account</button>
-					</div>
-				</div>
-				<div class="container-row">
-					<h3 id="p-name">${this.username}</h3>
-					<img id="avatarImg" class="userOutline d-none" alt="User Avatar" width="150" height="150"></img>
-					<div id="profile-content" class="profile userOutline">
-					<h3 id="p-elo">Loading...</h3>
-					<h3 id="p-winrate">Loading...</h3>
-					<div id="progress-bar" class="all-rounded">
-					    <div id="progress-bar-percentage"><span id="p-wl">Loading...</span></div>
-					</div>
-						<h3 id="p-tourn">Loading...</h3>
-					</div>
-				</div>
-				<div id="profile-history" class="userOutline">
-					<h2 id="ghistory">Game History</h2>
-					<div id="history-content">
-					</div>
-				</div>
-			</div>
-			<div class="modal fade" id="totpModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h1 class="modal-title fs-5" id="staticBackdropLabel">Two-Factor Authentication</h1>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <form id="totpForm">
-	                        <div class="modal-body">
-	                                <div class="mb-3">
-										<div id="qrCode"></div>
-										<div id="qrCodeError" class="alert alert-danger d-none"></div>
-									</div>
-	                                <div class="mb-3">
-	                                    <input id="totpInput" class="form-control" maxlength="6" placeholder="Enter 2FA code" required>
-	                                </div>
-	                                <div id="totpError" class="alert alert-danger d-none"></div>
-	                        </div>
-	                        <div class="modal-footer">
-	                            <button type="submit" class="btn btn-primary" id="totpSubmit">Submit</button>
-	                        </div>
-                        </form>
-                	</div>
-            	</div>
-			</div>
-			<div class="modal fade" id="recoveryModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h1 class="modal-title fs-5" id="staticBackdropLabel">Recovery codes</h1>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <form id="recoveryForm">
-	                        <div class="modal-body">
-	                            <ul id="recoveryCodes">
-								</ul>
-	                        </div>
-                        </form>
-                	</div>
-            	</div>
-			</div>
-			<div class="modal fade" id="changeModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-				<div class="modal-dialog">
-					<div class="modal-content">
-						<div class="modal-header">
-							<h1 class="modal-title fs-5" id="modalHeader"></h1>
-							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		window.app.renderHeader(this.container, "profile");
+		this.container.innerHTML += `
+			<div id="mainPage">
+				<div class="profile-container">
+					<div class="container-row">
+						<div id="profile-settings" class="settings userOutline">
+							<h3>Profile info</h3>
+							<button id="changeNameBtn">Change your display name</button>
+							<input type="text" id="newName">
+							<span id="avatarSpan">
+								<label class="avatar-selector-settings">Change your profile picture</label>
+								<input type="file" id="fileInput" accept="image/*" hidden>
+							</span>
+							<button type="button" id="enable2FA">Enable 2FA</button>
+							<button type="button" id="disable2FA">Disable 2FA</button>
 						</div>
-						<div class="modal-body">
-							<h2 class="modal-title fs-5" id="modalDialog"></h2>
+						<div id="profile-dangerous" class="settings userOutline">
+							<h3>be careful!</h3>
+							<button id="passwordButton">Set New Password</button>
+							<input type="password" id="newPasswordInput" placeholder="">
+							<button id="deleteAccBtn">Delete my account</button>
 						</div>
-						<div id="modalFooter" class="modal-footer d-none">
-							<button class="btn btn-primary" id="modalsavebtn">Save changes</button>
-							<button class="btn btn-primary" id="gotomainbtn">Go to main without saving</button>
+					</div>
+					<div class="container-row">
+						<h3 id="p-name">${this.username}</h3>
+						<img id="avatarImg" class="userOutline d-none" alt="User Avatar" width="150" height="150"></img>
+						<div id="profile-content" class="profile userOutline">
+						<h3 id="p-elo">Loading...</h3>
+						<h3 id="p-winrate">Loading...</h3>
+						<div id="progress-bar" class="all-rounded">
+							<div id="progress-bar-percentage"><span id="p-wl">Loading...</span></div>
+						</div>
+							<h3 id="p-tourn">Loading...</h3>
+						</div>
+					</div>
+					<div id="profile-history" class="userOutline">
+						<h2 id="ghistory">Game History</h2>
+						<div id="history-content">
+						</div>
+					</div>
+				</div>
+				<div class="modal fade" id="totpModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+					<div class="modal-dialog">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h1 class="modal-title fs-5" id="staticBackdropLabel">Two-Factor Authentication</h1>
+								<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+							</div>
+							<form id="totpForm">
+								<div class="modal-body">
+										<div class="mb-3">
+											<div id="qrCode"></div>
+											<div id="qrCodeError" class="alert alert-danger d-none"></div>
+										</div>
+										<div class="mb-3">
+											<input id="totpInput" class="form-control" maxlength="6" placeholder="Enter 2FA code" required>
+										</div>
+										<div id="totpError" class="alert alert-danger d-none"></div>
+								</div>
+								<div class="modal-footer">
+									<button type="submit" class="btn btn-primary" id="totpSubmit">Submit</button>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+				<div class="modal fade" id="recoveryModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+					<div class="modal-dialog">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h1 class="modal-title fs-5" id="staticBackdropLabel">Recovery codes</h1>
+								<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+							</div>
+							<form id="recoveryForm">
+								<div class="modal-body">
+									<ul id="recoveryCodes">
+									</ul>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+				<div class="modal fade" id="changeModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+					<div class="modal-dialog">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h1 class="modal-title fs-5" id="modalHeader"></h1>
+								<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+							</div>
+							<div class="modal-body">
+								<h2 class="modal-title fs-5" id="modalDialog"></h2>
+							</div>
+							<div id="modalFooter" class="modal-footer d-none">
+								<button class="btn btn-primary" id="modalsavebtn">Save changes</button>
+								<button class="btn btn-primary" id="gotomainbtn">Go to main without saving</button>
+							</div>
 						</div>
 					</div>
 				</div>
 			</div>
-		</div>
-	</div>`;
+		</div>`;
 	}
 
 	async setProfileFields() {

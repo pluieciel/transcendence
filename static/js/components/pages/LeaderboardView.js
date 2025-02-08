@@ -22,38 +22,8 @@ export default class LeaderboardView {
 	}
 
 	render() {
-		this.container.innerHTML = `
-				<header>
-				<h1 id="pong">P 
-					<button id="credit-button">
-						<i class="fa-solid fa-table-tennis-paddle-ball fa-xs"></i>
-					</button>
-					 N G
-				</h1>
-				<div id="nav-buttons">
-					<button class="nav-button" id="play-button">
-						<i class="fa-solid fa-gamepad fa-xl"></i>Play
-					</button>
-					<button class="nav-button" id="customize-button">
-						<i class="fa-solid fa-palette fa-xl"></i>Customize
-					</button>
-					<button class="nav-button nav-button-disabled" id="leaderboard-button">
-						<i class="fa-solid fa-medal fa-xl"></i>Leaderboard
-					</button>
-					<button class="nav-button" id="achievements-button">
-						<i class="fa-solid fa-trophy fa-xl"></i>Achievements
-					</button>
-					<button class="nav-button" id="profile-button">
-						<i class="fa-solid fa-user fa-xl"></i>Profile
-					</button>
-					<button class="nav-button" id="admin-button">
-						<i class="fa-solid fa-user-tie fa-xl"></i>Admin
-					</button>
-					<button class="nav-button" id="logout-button">
-						<i class="fa-solid fa-right-from-bracket fa-xl"></i>Log Out
-					</button>
-				</div>
-			</header>
+		window.app.renderHeader(this.container, "leaderboard");
+		this.container.innerHTML += `
 			<div id="leaderboard-page-container">
 				<div id="leaderboard-content" class="userOutline">
 					<h2 id="leaderboard-title">Leaderboard</h2>
@@ -67,9 +37,10 @@ export default class LeaderboardView {
 						</div>
 						<div id="leaderboard-table">
 						</div>
-						</div>
-						</div>
-						`;
+					</div>
+				</div>
+			</div>
+		`;
 	}
 						// <div class="lb-card">
 						// 	<div class="lb-card">

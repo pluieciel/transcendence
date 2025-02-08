@@ -109,6 +109,65 @@ class App {
 		errorDiv.style.display = 'block';
 	}
 
+	renderHeader(container, disableBtn = null, withNav = true, creditsDisabled = false) {
+		let header = `
+			<header>
+				<h1 id="header-title">P
+					<button id="credit-button" ${creditsDisabled ? 'disabled' : ''}>
+						<i class="fa-solid fa-table-tennis-paddle-ball fa-xs"></i>
+					</button>
+					N G
+				</h1>
+		`;
+
+		if (withNav)
+		{
+			header += `
+				<nav>
+					<ul>
+						<li>
+							<button id="play-button" ${disableBtn === "play" ? 'disabled' : ''}>
+								<i class="fa-solid fa-gamepad fa-xl"></i>Play
+							</button>
+						</li>
+						<li>
+							<button id="customize-button" ${disableBtn === "customize" ? 'disabled' : ''}>
+								<i class="fa-solid fa-palette fa-xl"></i>Customize
+							</button>
+						</li>
+						<li>
+							<button id="leaderboard-button" ${disableBtn === "leaderboard" ? 'disabled' : ''}>
+								<i class="fa-solid fa-medal fa-xl"></i>Leaderboard
+							</button>
+						</li>
+						<li>
+							<button id="achievements-button" ${disableBtn === "achievements" ? 'disabled' : ''}>
+								<i class="fa-solid fa-trophy fa-xl"></i>Achievements
+							</button>
+						</li>
+						<li>
+							<button id="profile-button" ${disableBtn === "profile" ? 'disabled' : ''}>
+								<i class="fa-solid fa-user fa-xl"></i>Profile
+							</button>
+						</li>
+						<li style="display: ${this.settings.is_admin ? 'block' : 'none'}">
+							<button id="admin-button" ${disableBtn === "admin" ? 'disabled' : ''}>
+								<i class="fa-solid fa-user-tie fa-xl"></i>Admin
+							</button>
+						</li>
+						<li>
+							<button id="logout-button">
+								<i class="fa-solid fa-right-from-bracket fa-xl"></i>Log Out
+							</button>
+						</li>
+					</ul>
+				</nav>
+			`;
+		}
+		header += `</header>`;
+		container.innerHTML = header;
+	}
+
 	login(data) {
 		this.state.isLoggedIn = true;
 		this.state.username = data.username;

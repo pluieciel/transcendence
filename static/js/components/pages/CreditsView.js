@@ -21,39 +21,8 @@ export default class CreditsView {
 	}
 
 	render() {
-		this.container.innerHTML = `
-			<header>
-				<h1 id="pong">P 
-					<button id="credit-button">
-						<i class="fa-solid fa-table-tennis-paddle-ball fa-xs"></i>
-					</button>
-					 N G
-				</h1>
-				<div id="nav-buttons">
-					<button class="nav-button" id="play-button">
-						<i class="fa-solid fa-gamepad fa-xl"></i>Play
-					</button>
-					<button class="nav-button" id="customize-button">
-						<i class="fa-solid fa-palette fa-xl"></i>Customize
-					</button>
-					<button class="nav-button" id="leaderboard-button">
-						<i class="fa-solid fa-medal fa-xl"></i>Leaderboard
-					</button>
-					<button class="nav-button" id="achievements-button">
-						<i class="fa-solid fa-trophy fa-xl"></i>Achievements
-					</button>
-					<button class="nav-button" id="profile-button">
-						<i class="fa-solid fa-user fa-xl"></i>Profile
-					</button>
-					<button class="nav-button" id="admin-button">
-						<i class="fa-solid fa-user-tie fa-xl"></i>Admin
-					</button>
-					<button class="nav-button" id="logout-button">
-						<i class="fa-solid fa-right-from-bracket fa-xl"></i>Log Out
-					</button>
-				</div>
-			</header>
-
+		window.app.renderHeader(this.container, "credits");
+		this.container.innerHTML += `
 			<div id="mainPage">
 				<div class="credits-container">
 					<div class="credits userOutline">

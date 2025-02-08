@@ -9,15 +9,8 @@ export default class SignupView {
     }
 
     render() {
-        this.container.innerHTML = `
-			<header>
-				<h1 id="header-title">P
-					<button id="credit-button" disabled>
-						<i class="fa-solid fa-table-tennis-paddle-ball fa-xs"></i>
-					</button>
-					N G
-				</h1>
-			</header>
+        window.app.renderHeader(this.container, null, false, true);
+        this.container.innerHTML += `
             <main>
 				<div id="signup-card" class="card">
 					<form id="signup-form">
