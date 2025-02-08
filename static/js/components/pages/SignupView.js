@@ -22,12 +22,12 @@ export default class SignupView {
 						<div class="input-container">
 							<i class="fa-solid fa-lock input-icon"></i>
 							<input type="password" id="password-input" placeholder="Password" maxlength="32" required>
-							<i class="fa-solid fa-eye-slash" id="password-toggle"></i>
+							<i class="fa-solid fa-eye" id="password-toggle"></i>
 						</div>
 						<div class="input-container">
 							<i class="fa-solid fa-lock input-icon"></i>
 							<input type="password" id="confirm-password-input" placeholder="Confirm Password" maxlength="32" required>
-							<i class="fa-solid fa-eye-slash" id="confirm-password-toggle"></i>
+							<i class="fa-solid fa-eye" id="confirm-password-toggle"></i>
 						</div>
 						<span id="upload-avatar">
 							<label for="avatar-input">
@@ -158,7 +158,8 @@ export default class SignupView {
 			const passwordToggle = document.getElementById("password-toggle");
 
 			passwordInput.type = passwordInput.type === "password" ? "text" : "password";
-			passwordToggle.classList.toggle("fa-eye", passwordInput.type === "text");
+			passwordToggle.classList.toggle("fa-eye-slash", passwordInput.type === "text");
+			passwordToggle.classList.toggle("fa-eye", passwordInput.type === "password");
 		});
 
 		confirmPasswordToggle.addEventListener("click", () => {
@@ -166,7 +167,8 @@ export default class SignupView {
 			const confirmPasswordToggle = document.getElementById("confirm-password-toggle");
 
 			confirmPasswordInput.type = confirmPasswordInput.type === "password" ? "text" : "password";
-				confirmPasswordToggle.classList.toggle("fa-eye", confirmPasswordInput.type === "text");
+			confirmPasswordToggle.classList.toggle("fa-eye-slash", confirmPasswordInput.type === "text");
+            confirmPasswordToggle.classList.toggle("fa-eye", confirmPasswordInput.type === "password");
 		});
 	}
 }

@@ -25,7 +25,7 @@ export default class LoginView {
 						<div class="input-container">
 							<i class="fa-solid fa-lock input-icon"></i>
 							<input type="password" id="password-input" placeholder="Password" maxlength="32" required>
-							<i class="fa-solid fa-eye-slash" id="password-toggle"></i>
+							<i class="fa-solid fa-eye" id="password-toggle"></i>
 						</div>
 						<div id="input-error"><i class="fa-solid fa-xmark"></i></div>
 						<button id="login-button" type="submit"><i class="fa-solid fa-right-to-bracket"></i> Log In</button>
@@ -219,7 +219,8 @@ export default class LoginView {
 			const passwordToggle = document.getElementById("password-toggle");
 
 			passwordInput.type = passwordInput.type === "password" ? "text" : "password";
-			passwordToggle.classList.toggle("fa-eye", passwordInput.type === "text");
+			passwordToggle.classList.toggle("fa-eye-slash", passwordInput.type === "text");
+			passwordToggle.classList.toggle("fa-eye", passwordInput.type === "password");
 		});
 	}
 }
