@@ -14,7 +14,7 @@ export default class SignupView {
             <main>
 				<div id="signup-card" class="card">
 					<form id="signup-form">
-						<h2 id="signup-title">Sign Up</h2>
+						<h2 id="card-title">SIGN UP</h2>
 						<div class="input-container">
 							<i class="fa-solid fa-user input-icon"></i>
 							<input type="text" id="username-input" placeholder="Username" maxlength="16" required>

@@ -7,7 +7,7 @@ export default class CreditsView {
 
 	async init() {
 		this.render();
-		this.addNavEventListeners();
+		window.app.addNavEventListeners();
 		await this.getSettings();
 	}
 	
@@ -59,48 +59,4 @@ export default class CreditsView {
 			</div>
 						`;
 	};
-
-	addNavEventListeners() {
-		const creditButton = document.getElementById("credit-button");
-		const playButton = document.getElementById("play-button");
-		const customizeButton = document.getElementById("customize-button");
-		const leaderboardButton = document.getElementById("leaderboard-button");
-		const achievementsButton = document.getElementById("achievements-button");
-		const profileButton = document.getElementById("profile-button");
-		const adminButton = document.getElementById("admin-button");
-		const logoutButton = document.getElementById("logout-button");
-
-		creditButton.addEventListener("click", () => {
-			window.app.router.navigateTo("/credits");
-		});
-
-		playButton.addEventListener("click", () => {
-			window.app.router.navigateTo("/index");
-		});
-
-		customizeButton.addEventListener("click", () => {
-			window.app.router.navigateTo("/customize");
-		});
-		
-		leaderboardButton.addEventListener("click", () => {
-			window.app.router.navigateTo("/leaderboard");
-		});
-
-		achievementsButton.addEventListener("click", () => {
-			window.app.router.navigateTo("/achievements");
-		});
-
-		profileButton.addEventListener("click", () => {
-			window.app.router.navigateTo("/profile");
-		});
-
-		adminButton.addEventListener("click", () => {
-			window.app.router.navigateTo("/admin");
-		});
-
-		logoutButton.addEventListener("click", () => {
-			window.app.chatBox.disconnect();
-			window.app.logout();
-		});
-	}
 }

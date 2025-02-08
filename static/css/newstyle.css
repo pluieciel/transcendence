@@ -169,6 +169,10 @@ main {
 	padding: 2rem;
 }
 
+#card-title {
+	margin-bottom: 2rem;
+}
+
 input {
 	margin-bottom: 1rem;
 	width: 100%;
@@ -256,10 +260,6 @@ form button:hover:not(:disabled) {
 	justify-content: center;
 }
 
-#login-title, #signup-title {
-	margin-bottom: 2rem;
-}
-
 #login-form button:not(#signup-button), #signup-form button:not(#login-button) {
 	width: 100%;
 }
@@ -335,6 +335,22 @@ hr::after {
 	margin-bottom: 1rem;
 	display: none;
 	align-self: flex-start;
+}
+
+/* ******************************** */
+/*                Play              */
+/* ******************************** */
+
+#play-card {
+	width: 30rem;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+}
+
+#play-button {
+	width: 100%;
 }
 
 /* ******************************** */

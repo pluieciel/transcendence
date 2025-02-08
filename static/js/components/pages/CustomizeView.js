@@ -125,85 +125,9 @@ export default class CustomizeView {
 		});
 	}
 
-	addNavEventListeners() {
-		const creditButton = document.getElementById("credit-button");
-		const playButton = document.getElementById("play-button");
-		const customizeButton = document.getElementById("customize-button");
-		const leaderboardButton = document.getElementById("leaderboard-button");
-		const achievementsButton = document.getElementById("achievements-button");
-		const profileButton = document.getElementById("profile-button");
-		const adminButton = document.getElementById("admin-button");
-		const logoutButton = document.getElementById("logout-button");
-
-		creditButton.addEventListener("click", async () => {
-			if (this.previewGame) {
-				this.previewGame.destroy();
-				await this.refresh_settings();
-			}
-			window.app.router.navigateTo("/credits");
-		});
-
-		playButton.addEventListener("click", async () => {
-			if (this.previewGame) {
-				this.previewGame.destroy();
-				await this.refresh_settings();
-			}
-			window.app.router.navigateTo("/index");
-		});
-
-		customizeButton.addEventListener("click", async () => {
-			if (this.previewGame) {
-				this.previewGame.destroy();
-				await this.refresh_settings();
-			}
-			window.app.router.navigateTo("/customize");
-		});
-
-		leaderboardButton.addEventListener("click", async () => {
-			if (this.previewGame) {
-				this.previewGame.destroy();
-				await this.refresh_settings();
-			}
-			window.app.router.navigateTo("/leaderboard");
-		});
-
-		achievementsButton.addEventListener("click", async () => {
-			if (this.previewGame) {
-				this.previewGame.destroy();
-				await this.refresh_settings();
-			}
-			window.app.router.navigateTo("/achievements");
-		});
-
-		profileButton.addEventListener("click", async () => {
-			if (this.previewGame) {
-				this.previewGame.destroy();
-				await this.refresh_settings();
-			}
-			window.app.router.navigateTo("/profile");
-		});
-
-		adminButton.addEventListener("click", async () => {
-			if (this.previewGame) {
-				this.previewGame.destroy();
-				await this.refresh_settings();
-			}
-			window.app.router.navigateTo("/admin");
-		});
-
-		logoutButton.addEventListener("click", async () => {
-			if (this.previewGame) {
-				this.previewGame.destroy();
-				await this.refresh_settings();
-			}
-			window.app.chatBox.disconnect();
-			window.app.logout();
-		});
-	}
-
 	addEventListeners() {
+		window.app.addNavEventListeners();
 		this.addCustomizationEventListeners();
-		this.addNavEventListeners();
 		window.addEventListener("popstate", () => {
 			if (this.previewGame) {
 				this.previewGame.destroy();

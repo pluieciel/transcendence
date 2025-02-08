@@ -17,7 +17,7 @@ export default class LoginView {
 			<main>
 				<div id="login-card" class="card">
 					<form id="login-form">
-						<h2 id="login-title">Log In</h2>
+						<h2 id="card-title">LOG IN</h2>
 						<div class="input-container">
 							<i class="fa-solid fa-user input-icon"></i>
 							<input type="text" id="username-input" placeholder="Username" maxlength="16" required>
@@ -31,7 +31,7 @@ export default class LoginView {
 						<button id="login-button" type="submit"><i class="fa-solid fa-right-to-bracket"></i> Log In</button>
 						<hr />
 						<button id="login42-button" type="button"><img src="imgs/42_logo.png" id="oauth-logo"> Login In with 42</button>
-						<div id="signup-link">Don't have an account? <button type="button" id="signup-button"> Sign up</button></div>
+						<div id="signup-link">Don't have an account? <button type="button" id="signup-button"> Sign Up</button></div>
 					</form>
 				</div>
 			</main>
