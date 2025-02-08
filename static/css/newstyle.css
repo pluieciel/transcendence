@@ -431,7 +431,7 @@ hr::after {
 {
     content: '';
     left: 0;
-    background-color: #03A9F4;
+    background-color: var(--hover-color);
 }
 
 #rumble {
@@ -450,7 +450,7 @@ hr::after {
 #button-10 .checkbox:checked + .knobs:before
 {
 	left: 50%;
-    background-color: #F44336;
+    background-color: var(--hover-color);
 }
 
 /* ******************************** */
