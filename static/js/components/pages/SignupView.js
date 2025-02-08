@@ -89,10 +89,6 @@ export default class SignupView {
 		let	file;
         
 		const MAX_FILE_SIZE = 1 * 1024 * 1024;
-		
-		avatar.addEventListener('click', function() {
-			document.getElementById('fileInput').click();
-		});
 
 		fileInput.addEventListener('change', function(event) {
 			file = event.target.files[0];
@@ -108,11 +104,11 @@ export default class SignupView {
             const recaptchaToken = grecaptcha.getResponse(this.recaptchaWidgetId);
 
             if (password !== confirmPassword) {
-                window.app.showErrorMsg('#formError', 'Passwords do not match');
+                window.app.showErrorMsg('#input-error', 'Passwords do not match');
                 return;
             }
             else if (!recaptchaToken) {
-                window.app.showErrorMsg('#formError', 'Please verify that you are not a robot');
+                window.app.showErrorMsg('#input-error', 'Please verify that you are not a robot');
                 return;
             }
 
@@ -123,13 +119,13 @@ export default class SignupView {
             formData.append('recaptcha_token', recaptchaToken);
             if (file) {
                 if (file.size > MAX_FILE_SIZE) {
-                    window.app.showErrorMsg('#formError', 'File size exceeds the 2MB limit');
+                    window.app.showErrorMsg('#input-error', 'File size exceeds the 2MB limit');
                     return;
                 }
                 const allowed_extensions = ["jpg", "jpeg", "png"]
                 const extension = file.name.split('.').pop();
                 if (!allowed_extensions.includes(extension)) {
-                    window.app.showErrorMsg('#formError', 'Avatar in jpg, jpeg, or png format only');
+                    window.app.showErrorMsg('#input-error', 'Avatar in jpg, jpeg, or png format only');
                     return;
                 }
                 const newFilename = `${username}.${extension}`;
@@ -152,10 +148,10 @@ export default class SignupView {
                     window.app.router.navigateTo('/login');
                 } else {
                     grecaptcha.reset(this.recaptchaWidgetId);
-                    window.app.showErrorMsg('#formError', data.message);
+                    window.app.showErrorMsg('#input-error', data.message);
                 }
             } catch (error) {
-                window.app.showErrorMsg('#formError', 'An error occurred: ' + error);
+                window.app.showErrorMsg('#input-error', 'An error occurred: ' + error);
             }
         });
     }
