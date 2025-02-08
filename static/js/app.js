@@ -103,6 +103,12 @@ class App {
 		this.setColor(this.settings.color);
 	}
 
+	showErrorMsg(selector, msg) {
+		const errorDiv = document.querySelector(selector);
+		errorDiv.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ${msg}`;
+		errorDiv.style.display = 'block';
+	}
+
 	login(data) {
 		this.state.isLoggedIn = true;
 		this.state.username = data.username;
