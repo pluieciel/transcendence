@@ -34,21 +34,23 @@ export default class MainView {
 	render() {
 		window.app.renderHeader(this.container, "play");
 		this.container.innerHTML += `
-			<div id="mainPage">
-				<div class="content">
-					<div class="game-buttons userOutline">
-						<h2 id="play">PLAY!</h2>
-						<div class="row game-selector">
-							<button id="classic" class="game-btn">classic</button>
-							<button id="rumble" class="disabled game-btn">rumble</button>
+			<main>
+				<div id="play-card" class="card">
+					<h2 id="card-title">PLAY</h2>
+					<div id="game-mode-selector">
+						<div class="button-cover">
+							<div class="button b2" id="button-10">
+							<input type="checkbox" class="checkbox">
+							<div class="knobs">
+								<span id="classic"><i class="fa-solid fa-star"></i> Classic</span>
+								<span id="rumble"><i class="fa-solid fa-bolt"></i> Rumble</span>
+							</div>
+							<div class="layer"></div>
+							</div>
 						</div>
-						<button id="playAI">AI</button>
-						<button id="quickMatch" class="nav-link" data-view="game" data-bs-toggle="modal" data-bs-target="#matchSearch">Ranked</button>
-						<button id="tournamentButton" data-bs-toggle="modal" data-bs-target="#tournamentModal">Tournament</button>
 					</div>
-
 				</div>
-			</div>
+			</main>
 			<!-- ChatBox container -->
 			<div id="chatBoxContainer"></div>
 
@@ -59,6 +61,16 @@ export default class MainView {
 			<div id="gameContainer"></div>
         `;
 	}
+
+// 	<div class="game-buttons userOutline">
+// 	<div class="row game-selector">
+// 		<button id="classic" class="game-btn">classic</button>
+// 		<button id="rumble" class="disabled game-btn">rumble</button>
+// 	</div>
+// 	<button id="playAI">AI</button>
+// 	<button id="quickMatch" class="nav-link" data-view="game" data-bs-toggle="modal" data-bs-target="#matchSearch">Ranked</button>
+// 	<button id="tournamentButton" data-bs-toggle="modal" data-bs-target="#tournamentModal">Tournament</button>
+// </div>
 
 	showLeaderboard() {
 		const mainContent = this.container.querySelector("#mainContent");

@@ -13,6 +13,7 @@
 	--input-error-color: #461623;
 	--input-error-border-color: #68292a;
 	--input-error-text-color: #b3373a;
+	--checkbox-unchecked-color: #4e4e4e;
 }
 
 html, body {
@@ -351,6 +352,105 @@ hr::after {
 
 #play-button {
 	width: 100%;
+}
+
+#game-mode-selector
+{
+    position: relative;
+    width: 100%;
+	height: 2.5rem;
+}
+
+.button-cover, .knobs, .layer
+{
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+}
+
+.button
+{
+    position: relative;
+    top: 50%;
+    width: 100%;
+    height: 2.5rem;
+}
+
+.button.r, .button.r .layer
+{
+    border-radius: 100px;
+}
+
+.button.b2
+{
+    border-radius: 2px;
+}
+
+.checkbox
+{
+    position: relative;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 3;
+}
+
+.knobs
+{
+    z-index: 2;
+}
+
+.layer
+{
+    width: 100%;
+	border-radius: 0.3rem;
+    background-color: var(--primary-color);
+    transition: 0.3s ease all;
+    z-index: 1;
+}
+
+#button-10 .knobs:before, #button-10 .knobs:after, #button-10 .knobs span
+{
+    position: absolute;
+    width: 50%;
+    height: 2.5rem;
+    font-weight: bold;
+    text-align: center;
+    line-height: 1;
+    padding: 9px 4px;
+    border-radius: 0.3rem;
+    transition: 0.3s ease all;
+}
+
+#button-10 .knobs:before
+{
+    content: '';
+    left: 0;
+    background-color: #03A9F4;
+}
+
+#rumble {
+	left: 50%;
+	color: var(--checkbox-unchecked-color);
+}
+
+#button-10 .checkbox:checked + .knobs #rumble {
+    color: var(--secondary-color);
+}
+
+#button-10 .checkbox:checked + .knobs #classic {
+    color: var(--checkbox-unchecked-color);
+}
+
+#button-10 .checkbox:checked + .knobs:before
+{
+	left: 50%;
+    background-color: #F44336;
 }
 
 /* ******************************** */
