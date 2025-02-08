@@ -4,63 +4,62 @@ export default class SignupView {
         this.render();
         this.addEventListeners();
         this.addLoginBtnEventListeners();
-        this.loadReCaptcha().then();
+        this.addPasswordToggleEventListeners();
+        this.loadReCaptcha();
     }
 
     render() {
         this.container.innerHTML = `
 			<header>
-				<h1 id="pong">P 
+				<h1 id="header-title">P
 					<button id="credit-button" disabled>
 						<i class="fa-solid fa-table-tennis-paddle-ball fa-xs"></i>
 					</button>
-					 N G
+					N G
 				</h1>
 			</header>
-            <div class="container">
-                <div class="row justify-content-center">
-                    <div class="col-md-4">
-                        <form id="signupForm" class="card p-4">
-                            <div class="mb-3">
-                                <h2 id="signup-title">Sign Up</h2>
-                            </div>
-                            <div class="mb-3">
-                                <input type="text" id="usrnm-form" placeholder="Enter username" class="form-control" maxlength="16" required>
-                            </div>
-                            <div class="mb-3">
-                                <input type="password" id="pwd-form" placeholder="Enter password" class="form-control" maxlength="32" required>
-                            </div>
-                            <div class="mb-3">
-                                <input type="password" id="cfm-pwd-form" placeholder="Confirm password" class="form-control" maxlength="32" required>
-                            </div>
-                            <div class="mb-3">
-                                <span id="avatarSpan">
-									<label class="avatar-selector"><i class="fa-solid fa-arrow-up-from-bracket"></i> Upload your avatar</label>
-                                    <input type="file" id="fileInput" accept="image/*" hidden>
-                                </span>
-                            </div>
-                            <div class="mb-3"id="recaptcha"></div>
-                            <div id="formError" class="alert alert-danger d-none"></div>
-                            <button id="signupBtn" type="submit" class="btn btn-primary w-100"><i class="fa-solid fa-user-plus"></i> Sign Up</button>
-                            <div class="mt-3" id="login-link">
-								Already have an account? <button type="button" id="login-btn"> Log in</button>
-							</div>
-                        </form>
-                    </div>
-                </div>
-            </div>
+            <main>
+				<div id="signup-card" class="card">
+					<form id="signup-form">
+						<h2 id="signup-title">Sign Up</h2>
+						<div class="input-container">
+							<i class="fa-solid fa-user input-icon"></i>
+							<input type="text" id="username-input" placeholder="Username" maxlength="16" required>
+						</div>
+						<div class="input-container">
+							<i class="fa-solid fa-lock input-icon"></i>
+							<input type="password" id="password-input" placeholder="Password" maxlength="32" required>
+							<i class="fa-solid fa-eye-slash" id="password-toggle"></i>
+						</div>
+						<div class="input-container">
+							<i class="fa-solid fa-lock input-icon"></i>
+							<input type="password" id="confirm-password-input" placeholder="Confirm Password" maxlength="32" required>
+							<i class="fa-solid fa-eye-slash" id="confirm-password-toggle"></i>
+						</div>
+						<span id="upload-avatar">
+							<label for="avatar-input">
+								<i class="fa-solid fa-arrow-up-from-bracket"></i> Upload Avatar
+							</label>
+							<input type="file" id="avatar-input" accept="image/*" hidden>
+						</span>
+                        <div id="recaptcha"></div>
+						<div id="input-error"><i class="fa-solid fa-xmark"></i></div>
+						<button id="signup-button" type="submit"><i class="fa-solid fa-user-plus"></i> Sign Up</button>
+						<div id="login-link">Already have an account? <button type="button" id="login-button"> Log In</button></div>
+					</form>
+				</div>
+			</main>
         `;
     }
 
 	addLoginBtnEventListeners() {
-		const loginBtn = this.container.querySelector('#login-btn');
+		const loginBtn = this.container.querySelector('#login-button');
 		loginBtn.addEventListener('click', () => {
 			window.app.router.navigateTo('/login');
 		});
 	}
 
     async loadReCaptcha() {
-        const errorDiv = this.container.querySelector('#formError');
         try {
 			const response = await fetch('/api/get/recaptcha', {
                 method: 'POST',
@@ -75,17 +74,18 @@ export default class SignupView {
                     'sitekey' : data.client_id,
                     'theme' : 'dark',
                 });
+                const recaptcha = document.getElementById('recaptcha');
+                recaptcha.style.display = 'block';
 			}
 		} catch (error) {
-			errorDiv.textContent = 'An error occurred:' + error;
-            errorDiv.classList.remove('d-none');
+            window.app.showErrorMsg('#input-error', 'An error occurred: ' + error);
 		}
     }
 
     addEventListeners() {
-		const form = this.container.querySelector('#signupForm');
-		const avatar = this.container.querySelector('.avatar-selector');
-		const fileInput = document.getElementById('fileInput');
+		const form = this.container.querySelector('#signup-form');
+		const avatar = this.container.querySelector('#upload-avatar');
+		const fileInput = document.getElementById('avatar-input');
 		let	file;
         
 		const MAX_FILE_SIZE = 1 * 1024 * 1024;
@@ -102,19 +102,18 @@ export default class SignupView {
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const username = this.container.querySelector('#usrnm-form').value;
-            const password = this.container.querySelector('#pwd-form').value;
-            const confirmPassword = this.container.querySelector('#cfm-pwd-form').value;
+            const username = this.container.querySelector('#username-input').value;
+            const password = this.container.querySelector('#password-input').value;
+            const confirmPassword = this.container.querySelector('#confirm-password-input').value;
             const recaptchaToken = grecaptcha.getResponse(this.recaptchaWidgetId);
-            const errorDiv = this.container.querySelector('#formError');
 
             if (password !== confirmPassword) {
-                errorDiv.textContent = 'Passwords do not match';
-                errorDiv.classList.remove('d-none');
+                window.app.showErrorMsg('#formError', 'Passwords do not match');
+                return;
             }
             else if (!recaptchaToken) {
-                errorDiv.textContent = 'Please verify that you are not a robot';
-                errorDiv.classList.remove('d-none');
+                window.app.showErrorMsg('#formError', 'Please verify that you are not a robot');
+                return;
             }
 
             const formData = new FormData();
@@ -124,15 +123,13 @@ export default class SignupView {
             formData.append('recaptcha_token', recaptchaToken);
             if (file) {
                 if (file.size > MAX_FILE_SIZE) {
-                    errorDiv.textContent = 'File size exceeds the 2MB limit';
-                    errorDiv.classList.remove('d-none');
+                    window.app.showErrorMsg('#formError', 'File size exceeds the 2MB limit');
                     return;
                 }
                 const allowed_extensions = ["jpg", "jpeg", "png"]
                 const extension = file.name.split('.').pop();
                 if (!allowed_extensions.includes(extension)) {
-                    errorDiv.textContent = 'Avatar in jpg, jpeg, or png format only';
-                    errorDiv.classList.remove('d-none');
+                    window.app.showErrorMsg('#formError', 'Avatar in jpg, jpeg, or png format only');
                     return;
                 }
                 const newFilename = `${username}.${extension}`;
@@ -155,13 +152,32 @@ export default class SignupView {
                     window.app.router.navigateTo('/login');
                 } else {
                     grecaptcha.reset(this.recaptchaWidgetId);
-                    errorDiv.textContent = data.message || 'Signup failed';
-                    errorDiv.classList.remove('d-none');
+                    window.app.showErrorMsg('#formError', data.message);
                 }
             } catch (error) {
-                errorDiv.textContent = 'An error occurred';
-                errorDiv.classList.remove('d-none');
+                window.app.showErrorMsg('#formError', 'An error occurred: ' + error);
             }
         });
     }
+
+    addPasswordToggleEventListeners() {
+		const passwordToggle = document.getElementById("password-toggle");
+		const confirmPasswordToggle = document.getElementById("confirm-password-toggle");
+
+		passwordToggle.addEventListener("click", () => {
+			const passwordInput = document.getElementById("password-input");
+			const passwordToggle = document.getElementById("password-toggle");
+
+			passwordInput.type = passwordInput.type === "password" ? "text" : "password";
+			passwordToggle.classList.toggle("fa-eye", passwordInput.type === "text");
+		});
+
+		confirmPasswordToggle.addEventListener("click", () => {
+			const confirmPasswordInput = document.getElementById("confirm-password-input");
+			const confirmPasswordToggle = document.getElementById("confirm-password-toggle");
+
+			confirmPasswordInput.type = confirmPasswordInput.type === "password" ? "text" : "password";
+				confirmPasswordToggle.classList.toggle("fa-eye", confirmPasswordInput.type === "text");
+		});
+	}
 }

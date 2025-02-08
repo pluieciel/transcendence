@@ -331,6 +331,12 @@ hr::after {
 	opacity: 0.5;
 }
 
+#recaptcha {
+	margin-bottom: 1rem;
+	display: none;
+	align-self: flex-start;
+}
+
 /* ******************************** */
 /*                Modal             */
 /* ******************************** */

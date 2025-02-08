@@ -125,7 +125,7 @@ export default class LoginView {
 				});
 			}
 		} catch (error) {
-			window.app.showErrorMsg('#input-error', 'An error occurred:' + error);
+			window.app.showErrorMsg('#input-error', 'An error occurred: ' + error);
 		}
 	}
 
@@ -179,7 +179,7 @@ export default class LoginView {
 					window.app.showErrorMsg('#totpError', data.message);
 				}
 			} catch (error) {
-				window.app.showErrorMsg('#totpError', 'An error occurred:' + error);
+				window.app.showErrorMsg('#totpError', 'An error occurred: ' + error);
 			}
 		});
 	}
@@ -213,7 +213,7 @@ export default class LoginView {
 					window.app.showErrorMsg('#input-error', data.message);
 				}
 			} catch (error) {
-				window.app.showErrorMsg('#input-error', 'An error occurred:' + error);
+				window.app.showErrorMsg('#input-error', 'An error occurred: ' + error);
 			}
 		});
 	}

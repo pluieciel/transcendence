@@ -353,7 +353,7 @@ export default class ProfileView {
                     errorDiv.classList.remove('d-none');
 				}
             } catch (error) {
-				errorDiv.textContent = 'An error occurred:' + error;
+				errorDiv.textContent = 'An error occurred: ' + error;
                 errorDiv.classList.remove('d-none');
             }
         });
@@ -392,7 +392,7 @@ export default class ProfileView {
                     totpError.classList.remove('d-none');
 				}
 			} catch (error) {
-				totpError.textContent = 'An error occurred:' + error;
+				totpError.textContent = 'An error occurred: ' + error;
                 totpError.classList.remove('d-none');
 			}
 		});
