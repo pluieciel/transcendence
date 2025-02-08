@@ -80,6 +80,7 @@ header button:hover:not(:disabled) {
 	height: 100%;
 	position: relative;
 	padding-right: 3.5rem;
+	font-weight: bold;
 }
 
 #header-title::after {
@@ -121,6 +122,7 @@ nav button {
 	flex-direction: column;
 	align-items: center;
 	padding: 1rem;
+	font-weight: bold;
 }
 
 nav button:disabled {
@@ -172,6 +174,7 @@ main {
 
 #card-title {
 	margin-bottom: 2rem;
+	font-weight: bold;
 }
 
 input {
@@ -205,6 +208,7 @@ form button {
 	border-radius: 0.3rem;
 	padding: 0.4rem;
 	transition: all 0.3s ease;
+	font-weight: bold;
 }
 
 form button:hover:not(:disabled) {
@@ -276,6 +280,7 @@ form button:hover:not(:disabled) {
 	text-decoration: underline;
 	text-underline-offset: 0.25rem;
 	padding: 0;
+	font-weight: normal;
 }
 
 #signup-link button:hover, #login-link button:hover {
@@ -312,6 +317,7 @@ hr::after {
 	border-radius: 0.3rem;
 	padding: 0.5rem 1rem;
 	text-align: center;
+	font-weight: bold;
 }
 
 #upload-avatar label {
@@ -350,18 +356,27 @@ hr::after {
 	justify-content: center;
 }
 
-#play-button {
+#start-button {
 	width: 100%;
+	margin-bottom: 1rem;
+	color: var(--secondary-color);
+	background-color: var(--primary-color);
+	border: 1px solid var(--primary-color);
+	border-radius: 0.3rem;
+	padding: 0.4rem;
+	transition: all 0.3s ease;
+	font-weight: bold;
 }
 
 #game-mode-selector
 {
+	margin-bottom: 1rem;
     position: relative;
     width: 100%;
 	height: 2.5rem;
 }
 
-.button-cover, .knobs, .layer
+.knobs, .layer
 {
     position: absolute;
     top: 0;
@@ -370,22 +385,11 @@ hr::after {
     left: 0;
 }
 
-.button
+.checkbox-button
 {
     position: relative;
-    top: 50%;
     width: 100%;
-    height: 2.5rem;
-}
-
-.button.r, .button.r .layer
-{
-    border-radius: 100px;
-}
-
-.button.b2
-{
-    border-radius: 2px;
+	height: 2.5rem;
 }
 
 .checkbox
@@ -414,7 +418,7 @@ hr::after {
     z-index: 1;
 }
 
-#button-10 .knobs:before, #button-10 .knobs:after, #button-10 .knobs span
+.checkbox-button .knobs:before, .checkbox-button .knobs:after, .checkbox-button .knobs span
 {
     position: absolute;
     width: 50%;
@@ -422,12 +426,12 @@ hr::after {
     font-weight: bold;
     text-align: center;
     line-height: 1;
-    padding: 9px 4px;
+    padding: 0.7rem 0;
     border-radius: 0.3rem;
     transition: 0.3s ease all;
 }
 
-#button-10 .knobs:before
+.checkbox-button .knobs:before
 {
     content: '';
     left: 0;
@@ -439,15 +443,15 @@ hr::after {
 	color: var(--checkbox-unchecked-color);
 }
 
-#button-10 .checkbox:checked + .knobs #rumble {
+.checkbox-button .checkbox:checked + .knobs #rumble {
     color: var(--secondary-color);
 }
 
-#button-10 .checkbox:checked + .knobs #classic {
+.checkbox-button .checkbox:checked + .knobs #classic {
     color: var(--checkbox-unchecked-color);
 }
 
-#button-10 .checkbox:checked + .knobs:before
+.checkbox-button .checkbox:checked + .knobs:before
 {
 	left: 50%;
     background-color: var(--hover-color);

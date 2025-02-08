@@ -38,17 +38,16 @@ export default class MainView {
 				<div id="play-card" class="card">
 					<h2 id="card-title">PLAY</h2>
 					<div id="game-mode-selector">
-						<div class="button-cover">
-							<div class="button b2" id="button-10">
+						<div class="checkbox-button">
 							<input type="checkbox" class="checkbox">
 							<div class="knobs">
 								<span id="classic"><i class="fa-solid fa-star"></i> Classic</span>
 								<span id="rumble"><i class="fa-solid fa-bolt"></i> Rumble</span>
 							</div>
 							<div class="layer"></div>
-							</div>
 						</div>
 					</div>
+					<button id="start-button" type="submit"><i class="fa-solid fa-gamepad"></i> Play</button>
 				</div>
 			</main>
 			<!-- ChatBox container -->
