@@ -10,7 +10,7 @@ export default class MainView {
 		this.timerInterval = null;
 
 		this.username = window.app.state.username;
-		window.app.settings["game-selector"] = "classic";
+		window.app.settings["game-type"] = "classic";
 		this.init();
 	}
 
@@ -37,15 +37,24 @@ export default class MainView {
 			<main>
 				<div id="play-card" class="card">
 					<h2 id="card-title">PLAY</h2>
-					<div id="game-mode-selector">
+					<div id="game-mode">
 						<div class="checkbox-button">
-							<input type="checkbox" class="checkbox">
+							<input type="checkbox" id="game-mode-checkbox" class="checkbox">
 							<div class="knobs">
-								<span id="classic"><i class="fa-solid fa-star"></i> Classic</span>
-								<span id="rumble"><i class="fa-solid fa-bolt"></i> Rumble</span>
+								<span id="game-mode-classic"><i class="fa-solid fa-star"></i> Classic</span>
+								<span id="game-mode-rumble"><i class="fa-solid fa-bolt"></i> Rumble</span>
 							</div>
 							<div class="layer"></div>
 						</div>
+					</div>
+					<div id="game-type">
+						<button id="selector-left-arrow"><i class="fa-solid fa-arrow-left fa-lg"></i></button>
+						<div id="selector-middle">
+							<span id="game-type-ai" data-game-type="ai"><i class="fa-solid fa-robot"></i> AI</span>
+							<span id="game-type-ranked" data-game-type="ranked"><i class="fa-solid fa-ranking-star"></i> Ranked</span>
+							<span id="game-type-tournament" data-game-type="tournament"><i class="fa-solid fa-crown"></i> Tournament</span>
+						</div>
+						<button id="selector-right-arrow"><i class="fa-solid fa-arrow-right fa-lg"></i></button>
 					</div>
 					<button id="start-button" type="submit"><i class="fa-solid fa-gamepad"></i> Play</button>
 				</div>
@@ -58,7 +67,7 @@ export default class MainView {
 
 			<!-- Game container -->
 			<div id="gameContainer"></div>
-        `;
+		`;
 	}
 
 // 	<div class="game-buttons userOutline">
@@ -106,33 +115,66 @@ export default class MainView {
 		}
 	}
 
-	addEventListeners() {
-		window.app.addNavEventListeners();
-		const selectorRumble = document.getElementById("rumble");
-		const selectorClassic = document.getElementById("classic");
+	addGameTypeSelectorEventListeners() {
+		const leftArrow = document.getElementById("selector-left-arrow");
+		const rightArrow = document.getElementById("selector-right-arrow");
 
-		selectorRumble.addEventListener("click", () => {
-			window.app.settings["game-selector"] = "rumble";
-			this.addSelector();
+		const gameTypes = [
+			document.getElementById("game-type-ai"),
+			document.getElementById("game-type-ranked"),
+			document.getElementById("game-type-tournament")
+		];
+
+		let currentIndex = 0;
+
+		gameTypes.forEach((type, index) => {
+			type.style.display = index === currentIndex ? "block" : "none";
 		});
 
-		selectorClassic.addEventListener("click", () => {
-			window.app.settings["game-selector"] = "classic";
-			this.addSelector();
+		const updateDisplay = (newIndex) => {
+			gameTypes[currentIndex].style.display = "none";
+			currentIndex = newIndex;
+			gameTypes[currentIndex].style.display = "block";
+		};
+
+		leftArrow.addEventListener("click", () => {
+			const newIndex = (currentIndex - 1 + gameTypes.length) % gameTypes.length;
+			updateDisplay(newIndex);
+		});
+
+		rightArrow.addEventListener("click", () => {
+			const newIndex = (currentIndex + 1) % gameTypes.length;
+			updateDisplay(newIndex);
 		});
 	}
 
-	addSelector() {
-		const selectorRumble = document.getElementById("rumble");
-		const selectorClassic = document.getElementById("classic");
+	addPlayButtonEventListeners() {
+		const playButton = document.getElementById("start-button");
 
-		if (window.app.settings["game-selector"] == "rumble") {
-			selectorRumble.classList.remove("disabled");
-			selectorClassic.classList.add("disabled");
-		} else {
-			selectorRumble.classList.add("disabled");
-			selectorClassic.classList.remove("disabled");
-		}
+		const checkbox = document.getElementById("game-mode-checkbox");
+		const gameTypes = [
+			document.getElementById("game-type-ai"),
+			document.getElementById("game-type-ranked"),
+			document.getElementById("game-type-tournament")
+		];
+
+		playButton.addEventListener("click", () => {
+			if (checkbox.checked)
+				window.app.settings["game-mode"] = "rumble";
+			else
+				window.app.settings["game-mode"] = "classic";
+
+			gameTypes.forEach((type) => {
+				if (type.style.display === "block")
+					window.app.settings["game-type"] = type.dataset.gameType;
+			});
+		});
+	}
+
+	addEventListeners() {
+		window.app.addNavEventListeners();
+		this.addGameTypeSelectorEventListeners();
+		this.addPlayButtonEventListeners();
 	}
 
 	checkForBackdrop() {

@@ -14,6 +14,7 @@
 	--input-error-border-color: #68292a;
 	--input-error-text-color: #b3373a;
 	--checkbox-unchecked-color: #4e4e4e;
+	--selector-color: #1e1e1e;
 }
 
 html, body {
@@ -356,6 +357,44 @@ hr::after {
 	justify-content: center;
 }
 
+#game-type {
+	width: 100%;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 1rem;
+	height: 2.5rem;
+	border-radius: 0.3rem;
+	background-color: var(--primary-color);
+}
+
+#selector-middle {
+	font-weight: bold;
+}
+
+#selector-left-arrow, #selector-right-arrow {
+	width: 4.5rem;
+	height: 2.5rem;
+	background-color: var(--selector-color);
+	color: var(--secondary-color);
+	border: none;
+}
+
+#selector-left-arrow {
+	border-radius: 0.3rem 0 0 0.3rem;
+	align-self: flex-start;
+}
+
+#selector-right-arrow {
+	border-radius: 0 0.3rem 0.3rem 0;
+	align-self: flex-end;
+}
+
+#game-type-ranked, #game-type-tournament {
+	display: none;
+}
+
 #start-button {
 	width: 100%;
 	margin-bottom: 1rem;
@@ -368,7 +407,7 @@ hr::after {
 	font-weight: bold;
 }
 
-#game-mode-selector
+#game-mode
 {
 	margin-bottom: 1rem;
     position: relative;
@@ -435,26 +474,26 @@ hr::after {
 {
     content: '';
     left: 0;
-    background-color: var(--hover-color);
+    background-color: var(--selector-color);
 }
 
-#rumble {
+#game-mode-rumble {
 	left: 50%;
 	color: var(--checkbox-unchecked-color);
 }
 
-.checkbox-button .checkbox:checked + .knobs #rumble {
+.checkbox-button .checkbox:checked + .knobs #game-mode-rumble {
     color: var(--secondary-color);
 }
 
-.checkbox-button .checkbox:checked + .knobs #classic {
+.checkbox-button .checkbox:checked + .knobs #game-mode-classic {
     color: var(--checkbox-unchecked-color);
 }
 
 .checkbox-button .checkbox:checked + .knobs:before
 {
 	left: 50%;
-    background-color: var(--hover-color);
+    background-color: var(--selector-color);
 }
 
 /* ******************************** */
