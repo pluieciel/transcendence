@@ -280,7 +280,7 @@ class GameBackend:
 			4: "#E6008F",
 			5: "#6400C4",
 			6: "#E71200",
-			7: "#0EC384", #Soft green
+			7: "#0EC384",
 			8: "#E6E3E1"
 		}
 		try:

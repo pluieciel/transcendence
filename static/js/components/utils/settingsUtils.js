@@ -1,8 +1,8 @@
 export async function addUserData(settings) {
-	const	colorDiv = document.getElementById('colorDiv');
-	const	qualityDiv = document.getElementById('qualityDiv');
-	const	leftQuality = document.getElementById('leftQuality');
-	const	rightQuality = document.getElementById('rightQuality');
+	const	color = document.getElementById('color-span');
+	const	quality = document.getElementById('quality-span');
+	const	qualityLeftArrow = document.querySelector('#quality #selector-left-arrow');
+	const	qualityRightArrow = document.querySelector('#quality #selector-right-arrow');
 	const	colorIndex = settings.color;
 	const	qualityIndex = settings.quality;
 	
@@ -22,15 +22,16 @@ export async function addUserData(settings) {
 		1: 'Medium',
 		2: 'High',
 	};
-	if (qualityIndex == 0) leftQuality.classList.add("disabled");
-	else leftQuality.classList.remove("disabled");
+	if (qualityIndex == 0) qualityLeftArrow.classList.add("disabled");
+	else qualityLeftArrow.classList.remove("disabled");
 	
-	if (qualityIndex == 2) rightQuality.classList.add("disabled");
-	else rightQuality.classList.remove("disabled");
+	if (qualityIndex == 2) qualityRightArrow.classList.add("disabled");
+	else qualityRightArrow.classList.remove("disabled");
 
 	window.app.setColor(colorIndex);
-	colorDiv.innerHTML = "Color: " + colorArray[colorIndex];
-	qualityDiv.innerHTML = "Quality: " + qualityArray[qualityIndex];
+	color.style.color = window.app.getColor(colorIndex);
+	color.innerHTML = "<i class=\"fa-solid fa-fill-drip\"></i> " + colorArray[colorIndex];
+	quality.innerHTML = "<i class=\"fa-solid fa-wrench\"></i> " + qualityArray[qualityIndex];
 };
 
 export async function eraseInDB() {

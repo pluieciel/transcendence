@@ -39,37 +39,31 @@ class App {
 	}
 
 	setColor(color) {
+		document.documentElement.style.setProperty("--user-color", this.getColor(color));
+	}
+
+	getColor(color) {
 		switch (color) {
 			case 0:
-				document.documentElement.style.setProperty("--user-color", "#3E27F8");
-				break; //Blue
+				return "#3E27F8"; //Blue
 			case 1:
-				document.documentElement.style.setProperty("--user-color", "#00BDD1");
-				break; //Cyan
+				return "#00BDD1"; //Cyan
 			case 2:
-				document.documentElement.style.setProperty("--user-color", "#00AD06");
-				break; //Green
+				return "#00AD06"; //Green
 			case 3:
-				document.documentElement.style.setProperty("--user-color", "#E67E00");
-				break; //Orrange
+				return "#E67E00"; //Orange
 			case 4:
-				document.documentElement.style.setProperty("--user-color", "#E6008F");
-				break; //Pink
+				return "#E6008F"; //Pink
 			case 5:
-				document.documentElement.style.setProperty("--user-color", "#6400C4");
-				break; //Purple
+				return "#6400C4"; //Purple
 			case 6:
-				document.documentElement.style.setProperty("--user-color", "#E71200");
-				break; //Red
+				return "#E71200"; //Red
 			case 7:
-				document.documentElement.style.setProperty("--user-color", "#0EC384");
-				break; //Soft Green
+				return "#0EC384"; //Soft Green
 			case 8:
-				document.documentElement.style.setProperty("--user-color", "#E6E3E1");
-				break; //White
+				return "#E6E3E1"; //White
 			default:
-				document.documentElement.style.setProperty("--user-color", "#00BDD1");
-				break;
+				return "#00BDD1";
 		}
 	}
 
