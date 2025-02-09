@@ -20,8 +20,8 @@ export default class CustomizeView {
 			const adminButton = document.getElementById("admin-button");
 			adminButton.style.display = "block";
 		}
-		await addUserData(this.settings);
-		const canvas = document.getElementById("previewCanvas");
+		//await addUserData(this.settings);
+		const canvas = document.getElementById("preview");
 		this.previewGame = new PreviewGame(canvas);
 		await this.previewGame.initialize();
 	}
@@ -42,42 +42,66 @@ export default class CustomizeView {
 	render() {
 		window.app.renderHeader(this.container, "customize");
 		this.container.innerHTML += `
-			<div class ="contentCustomize">
-				<div class="containerGame userOutline">
-					<h3>Game customization</h3>
-					<div id="row">
-						<button id="leftColor" class="arrow"><</button>
-						<div id="colorDiv"></div>
-						<button id="rightColor"class="arrow">></button>
-					</div>
-					<div id="row">
-						<button id="leftQuality" class="arrow"><</button>
-						<div id="qualityDiv"></div>
-						<button id="rightQuality"class="arrow">></button>
-					</div>
-					<button id="savebtn">Save changes</button>
-				</div>
-				<canvas id="previewCanvas" class='userOutline' ></canvas>
-				<div class="modal fade" id="changeModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-					<div class="modal-dialog">
-						<div class="modal-content">
-							<div class="modal-header">
-								<h1 class="modal-title fs-5" id="modalHeader"></h1>
-								<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-							</div>
-							<div class="modal-body">
-								<h2 class="modal-title fs-5" id="modalDialog"></h2>
-							</div>
-							<div id="modalFooter" class="modal-footer d-none">
-								<button class="btn btn-primary" id="modalsavebtn">Save changes</button>
-								<button class="btn btn-primary" id="gotomainbtn">Go to main without saving</button>
-							</div>
+			<main>
+				<div id="customize-card" class="card">
+					<h2 id="card-title">CUSTOMIZE</h2>
+					<div id="color">
+						<button id="selector-left-arrow"><i class="fa-solid fa-arrow-left fa-lg"></i></button>
+						<div id="selector-middle">
+							<span id="color-cyan" data-color="blue"><i class="fa-solid fa-fill-drip"></i> Cyan</span>
 						</div>
+						<button id="selector-right-arrow"><i class="fa-solid fa-arrow-right fa-lg"></i></button>
 					</div>
+					<div id="quality">
+						<button id="selector-left-arrow"><i class="fa-solid fa-arrow-left fa-lg"></i></button>
+						<div id="selector-middle">
+							<span id="quality-medium" data-quality="medium"><i class="fa-solid fa-wrench"></i> Medium</span>
+						</div>
+						<button id="selector-right-arrow"><i class="fa-solid fa-arrow-right fa-lg"></i></button>
+					</div>
+					<button id="save-button" type="submit"><i class="fa-solid fa-floppy-disk"></i> Save</button>
 				</div>
-			</div>
+				<div id="preview-card" class="card">
+					<canvas id="preview"></canvas>
+				</div>
+			</main>
 		`;
 	}
+
+	// <div class ="contentCustomize">
+	// 	<div class="containerGame userOutline">
+	// 		<h3>Game customization</h3>
+	// 		<div id="row">
+	// 			<button id="leftColor" class="arrow"><</button>
+	// 			<div id="colorDiv"></div>
+	// 			<button id="rightColor"class="arrow">></button>
+	// 		</div>
+	// 		<div id="row">
+	// 			<button id="leftQuality" class="arrow"><</button>
+	// 			<div id="qualityDiv"></div>
+	// 			<button id="rightQuality"class="arrow">></button>
+	// 		</div>
+	// 		<button id="savebtn">Save changes</button>
+	// 	</div>
+	// 	<canvas id="preview" class='userOutline' ></canvas>
+	// 	<div class="modal fade" id="changeModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+	// 		<div class="modal-dialog">
+	// 			<div class="modal-content">
+	// 				<div class="modal-header">
+	// 					<h1 class="modal-title fs-5" id="modalHeader"></h1>
+	// 					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+	// 				</div>
+	// 				<div class="modal-body">
+	// 					<h2 class="modal-title fs-5" id="modalDialog"></h2>
+	// 				</div>
+	// 				<div id="modalFooter" class="modal-footer d-none">
+	// 					<button class="btn btn-primary" id="modalsavebtn">Save changes</button>
+	// 					<button class="btn btn-primary" id="gotomainbtn">Go to main without saving</button>
+	// 				</div>
+	// 			</div>
+	// 		</div>
+	// 	</div>
+	// </div>
 
 	addCustomizationEventListeners() {
 		const leftColor = document.getElementById("leftColor");
@@ -127,7 +151,7 @@ export default class CustomizeView {
 
 	addEventListeners() {
 		window.app.addNavEventListeners();
-		this.addCustomizationEventListeners();
+		//this.addCustomizationEventListeners();
 		window.addEventListener("popstate", () => {
 			if (this.previewGame) {
 				this.previewGame.destroy();

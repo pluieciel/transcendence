@@ -58,15 +58,10 @@ export default class MainView {
 					</div>
 					<button id="start-button" type="submit"><i class="fa-solid fa-gamepad"></i> Play</button>
 				</div>
+				<div id="chatBoxContainer"></div>
+				<div id="tournamentContainer"></div>
+				<div id="gameContainer"></div>
 			</main>
-			<!-- ChatBox container -->
-			<div id="chatBoxContainer"></div>
-
-			<!-- Tournament container -->
-			<div id="tournamentContainer"></div>
-
-			<!-- Game container -->
-			<div id="gameContainer"></div>
 		`;
 	}
 
