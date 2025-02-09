@@ -39,7 +39,7 @@ class AdminConsumer(AsyncHttpConsumer):
 	def get_admin_view(self):
 		return """<header>
 				<h1 id="header-title">P
-					<button id="credit-button">
+					<button id="credits-button">
 						<i class="fa-solid fa-table-tennis-paddle-ball fa-xs"></i>
 					</button>
 					N G

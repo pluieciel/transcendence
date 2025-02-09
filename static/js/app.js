@@ -107,7 +107,7 @@ class App {
 		let header = `
 			<header>
 				<h1 id="header-title">P
-					<button id="credit-button" ${creditsDisabled ? 'disabled' : ''}>
+					<button id="credits-button" ${creditsDisabled ? 'disabled' : ''}>
 						<i class="fa-solid fa-table-tennis-paddle-ball fa-xs"></i>
 					</button>
 					N G
@@ -163,7 +163,7 @@ class App {
 	}
 
 	addNavEventListeners() {
-		const creditButton = document.getElementById("credit-button");
+		const creditButton = document.getElementById("credits-button");
 		const playButton = document.getElementById("play-button");
 		const customizeButton = document.getElementById("customize-button");
 		const leaderboardButton = document.getElementById("leaderboard-button");

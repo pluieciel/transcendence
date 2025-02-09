@@ -108,7 +108,11 @@ export default class CustomizeView {
 		});
 
 		leftQuality.addEventListener("click", () => {
-			if (this.settings.quality == 0) return;
+			rightQuality.style.backgroundColor = "var(--selector-color)";
+			if (this.settings.quality == 0)
+				return;
+			if (this.settings.quality == 1)
+				leftQuality.style.backgroundColor = "var(--hover-color)";
 			this.settings.quality -= 1;
 			window.app.settings.quality = this.settings.quality;
 			addUserData(this.settings);
@@ -116,7 +120,10 @@ export default class CustomizeView {
 		});
 
 		rightQuality.addEventListener("click", () => {
+			leftQuality.style.backgroundColor = "var(--selector-color)";
 			if (this.settings.quality == 2) return;
+			if (this.settings.quality == 1)
+				rightQuality.style.backgroundColor = "var(--hover-color)";
 			this.settings.quality += 1;
 			window.app.settings.quality = this.settings.quality;
 			addUserData(this.settings);

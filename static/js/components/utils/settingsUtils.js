@@ -22,11 +22,9 @@ export async function addUserData(settings) {
 		1: 'Medium',
 		2: 'High',
 	};
-	if (qualityIndex == 0) qualityLeftArrow.classList.add("disabled");
-	else qualityLeftArrow.classList.remove("disabled");
-	
-	if (qualityIndex == 2) qualityRightArrow.classList.add("disabled");
-	else qualityRightArrow.classList.remove("disabled");
+
+	qualityLeftArrow.disabled = qualityIndex == 0;
+	qualityRightArrow.disabled = qualityIndex == 2;
 
 	window.app.setColor(colorIndex);
 	color.style.color = window.app.getColor(colorIndex);

@@ -132,6 +132,12 @@ nav button:disabled {
 	cursor: not-allowed;
 }
 
+#credits-button:disabled i {
+	color: var(--header-disabled-color);
+	text-shadow: 0 0 5px var(--header-disabled-color);
+	cursor: not-allowed;
+}
+
 nav i {
 	padding: 1rem;
 	display: block;
@@ -338,6 +344,7 @@ form button:hover:not(:disabled) {
 	background-color: transparent;
 	border: none;
 	color: var(--secondary-color);
+	text-shadow: 0 0 5px var(--secondary-color);
 	text-decoration: underline;
 	text-underline-offset: 0.25rem;
 	padding: 0;
@@ -524,6 +531,44 @@ hr::after {
 	width: 100%;
 	height: 100%;
 	padding: 0 2.5rem;
+}
+
+#selector-right-arrow:disabled {
+	background-color: var(--hover-color);
+	cursor: not-allowed;
+}
+
+#selector-left-arrow:disabled {
+	background-color: var(--hover-color);
+	cursor: not-allowed;
+}
+
+/* ******************************** */
+/*                Credits           */
+/* ******************************** */
+
+#credits-card, #about-us-card {
+	text-align: center;
+	width: 30rem;
+}
+
+#tooltip-github {
+	font-size: 0.8rem;
+	opacity: 0.5;
+}
+
+#github-links {
+	color: var(--secondary-color);
+	background-color: var(--accent-color);
+}
+
+#github-links a {
+	text-decoration: none;
+	color: var(--secondary-color);
+	opacity: 0.5;
+	text-decoration: underline;
+	text-underline-offset: 0.25rem;
+	text-shadow: 0 0 5px var(--secondary-color);
 }
 
 /* ******************************** */
