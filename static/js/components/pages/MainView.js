@@ -70,21 +70,6 @@ export default class MainView {
 		`;
 	}
 
-// 	<div class="game-buttons userOutline">
-// 	<div class="row game-selector">
-// 		<button id="classic" class="game-btn">classic</button>
-// 		<button id="rumble" class="disabled game-btn">rumble</button>
-// 	</div>
-// 	<button id="playAI">AI</button>
-// 	<button id="quickMatch" class="nav-link" data-view="game" data-bs-toggle="modal" data-bs-target="#matchSearch">Ranked</button>
-// 	<button id="tournamentButton" data-bs-toggle="modal" data-bs-target="#tournamentModal">Tournament</button>
-// </div>
-
-	showLeaderboard() {
-		const mainContent = this.container.querySelector("#mainContent");
-		mainContent.innerHTML = "<h2>Leaderboard View</h2>";
-	}
-
 	initComponents() {
 		const tournamentContainer = this.container.querySelector("#tournamentContainer");
 		if (!window.app.tournament) {
@@ -116,6 +101,7 @@ export default class MainView {
 	}
 
 	addGameTypeSelectorEventListeners() {
+		const playButton = document.getElementById("start-button");
 		const leftArrow = document.getElementById("selector-left-arrow");
 		const rightArrow = document.getElementById("selector-right-arrow");
 
@@ -126,6 +112,7 @@ export default class MainView {
 		];
 
 		let currentIndex = 0;
+		window.app.settings["game-type"] = "ai";
 
 		gameTypes.forEach((type, index) => {
 			type.style.display = index === currentIndex ? "block" : "none";
@@ -135,6 +122,29 @@ export default class MainView {
 			gameTypes[currentIndex].style.display = "none";
 			currentIndex = newIndex;
 			gameTypes[currentIndex].style.display = "block";
+
+			switch (currentIndex) {
+				case 0:
+					window.app.settings["game-type"] = "ai";
+					playButton.removeAttribute("data-bs-toggle");
+					playButton.removeAttribute("data-bs-target");
+					playButton.removeAttribute("data-view");
+					break;
+				case 1:
+					window.app.settings["game-type"] = "ranked";
+					playButton.setAttribute("data-bs-toggle", "modal");
+					playButton.setAttribute("data-bs-target", "#matchSearch");
+					playButton.setAttribute("data-view", "game");
+					break;
+				case 2:
+					window.app.settings["game-type"] = "tournament";
+					playButton.setAttribute("data-bs-toggle", "modal");
+					playButton.setAttribute("data-bs-target", "#tournamentModal");
+					playButton.removeAttribute("data-view");
+					break;
+				default:
+					break;
+			}
 		};
 
 		leftArrow.addEventListener("click", () => {
@@ -148,33 +158,9 @@ export default class MainView {
 		});
 	}
 
-	addPlayButtonEventListeners() {
-		const playButton = document.getElementById("start-button");
-
-		const checkbox = document.getElementById("game-mode-checkbox");
-		const gameTypes = [
-			document.getElementById("game-type-ai"),
-			document.getElementById("game-type-ranked"),
-			document.getElementById("game-type-tournament")
-		];
-
-		playButton.addEventListener("click", () => {
-			if (checkbox.checked)
-				window.app.settings["game-mode"] = "rumble";
-			else
-				window.app.settings["game-mode"] = "classic";
-
-			gameTypes.forEach((type) => {
-				if (type.style.display === "block")
-					window.app.settings["game-type"] = type.dataset.gameType;
-			});
-		});
-	}
-
 	addEventListeners() {
 		window.app.addNavEventListeners();
 		this.addGameTypeSelectorEventListeners();
-		this.addPlayButtonEventListeners();
 	}
 
 	checkForBackdrop() {
