@@ -225,21 +225,21 @@ export default class ProfileView {
 	}
 	
 	add2FAEventListeners() {
-        const submit = this.container.querySelector('#totpForm');
-        const errorDiv = this.container.querySelector('#totpError');
+		const submit = this.container.querySelector('#totpForm');
+		const errorDiv = this.container.querySelector('#totpError');
 
-        submit.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const totp = this.container.querySelector('#totpInput').value;
-            try {
+		submit.addEventListener('submit', async (e) => {
+			e.preventDefault();
+			const totp = this.container.querySelector('#totpInput').value;
+			try {
 				const response = await fetch('/api/settings/2fa/enable', {
 					method: 'POST',
-				    headers: {
-				        'Content-Type': 'application/json'
+					headers: {
+						'Content-Type': 'application/json'
 					},
-				    body: JSON.stringify({
-				        totp: totp,
-				    })
+					body: JSON.stringify({
+						totp: totp,
+					})
 				});
 				const data = await response.json();
 				if (data.success) {
@@ -275,13 +275,13 @@ export default class ProfileView {
 					console.log(response.message);
 				} else {
 					errorDiv.textContent = data['message'] || 'Login failed';
-                    errorDiv.classList.remove('d-none');
+					errorDiv.classList.remove('d-none');
 				}
-            } catch (error) {
+			} catch (error) {
 				errorDiv.textContent = 'An error occurred: ' + error;
-                errorDiv.classList.remove('d-none');
-            }
-        });
+				errorDiv.classList.remove('d-none');
+			}
+		});
 	}
 
 	addProfileEventListeners() {
@@ -314,11 +314,11 @@ export default class ProfileView {
 					console.log(data.message);
 				} else {
 					totpError.textContent = data.message;
-                    totpError.classList.remove('d-none');
+					totpError.classList.remove('d-none');
 				}
 			} catch (error) {
 				totpError.textContent = 'An error occurred: ' + error;
-                totpError.classList.remove('d-none');
+				totpError.classList.remove('d-none');
 			}
 		});
 
@@ -468,12 +468,12 @@ export default class ProfileView {
 		});
 	}
 	
-    addEventListeners() {
+	addEventListeners() {
 		window.app.addNavEventListeners();
 		this.addProfileEventListeners();
 		this.add2FAEventListeners();
 		this.addSecurityEventListeners();
-    }
+	}
 
 	addHistory(data) {
 		let	card = "";

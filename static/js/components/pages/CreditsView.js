@@ -57,6 +57,6 @@ export default class CreditsView {
 					</div>
 				</div>
 			</div>
-						`;
+	`;
 	};
 }
