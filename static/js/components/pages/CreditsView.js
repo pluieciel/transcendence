@@ -37,8 +37,17 @@ export default class CreditsView {
 							We're using Nginx as our webserv <i class="fas fa-server"></i><br>
 							Javascript <i class="fab fa-js"></i> is used for the Frontend<br>
 							The backend is built in Python <i class="fa-brands fa-python"></i> with Django and<br>
-							PostgreSQL for the Database <i class="fas fa-database"></i><br><br>
-							<strong>Two Ways to Play:</strong><br>
+							PostgreSQL for the Database <i class="fas fa-database"></i><br>
+							<div id="github-links">
+								You can find the source code of the project on <a href="https://github.com/pluieciel/transcendence" target="_blank" rel="noopener noreferrer"><i class="fab fa-github"></i> GitHub</a>
+							</div>
+						</p>
+					</div>
+					</div>
+				<div id="how-to-play-card" class="card">
+					<h2 id="card-title">HOW TO PLAY</h2>
+					<div id="how-to-play-content">
+						<p>
 							<i class="fa-solid fa-star"></i> <strong>Classic Mode</strong><br>
 								Master the fundamentals of speed and precision<br>
 								Experience pure, competitive Pong action<br>
@@ -66,12 +75,12 @@ export default class CreditsView {
 							take on a classic game.<br>
 						</p>
 						<div id="github-links">
-							Created by:<br>
+							<strong>Created by:</strong><br>
 							<p id="tooltip-github">click on the links to check out our own github profiles</p>
-							<a href="https://github.com/jlefonde" target="_blank" rel="noopener noreferrer">Joris Lefondeur</a><br>
-							<a href="https://github.com/pluieciel" target="_blank" rel="noopener noreferrer">Yue Zhao</a><br>
-							<a href="https://github.com/siul008" target="_blank" rel="noopener noreferrer">Julien Nunes</a><br>
-							<a href="https://github.com/neutrou" target="_blank" rel="noopener noreferrer">Victor Algranti</a><br>
+							<a href="https://github.com/jlefonde" target="_blank" rel="noopener noreferrer"><i class="fab fa-github"></i> Joris Lefondeur</a><br>
+							<a href="https://github.com/pluieciel" target="_blank" rel="noopener noreferrer"><i class="fab fa-github"></i> Yue Zhao</a><br>
+							<a href="https://github.com/siul008" target="_blank" rel="noopener noreferrer"><i class="fab fa-github"></i> Julien Nunes</a><br>
+							<a href="https://github.com/neutrou" target="_blank" rel="noopener noreferrer"><i class="fab fa-github"></i> Victor Algranti</a><br>
 						</div>
 						<br>
 						<p>
