@@ -24,33 +24,23 @@ export default class LeaderboardView {
 	render() {
 		window.app.renderHeader(this.container, "leaderboard");
 		this.container.innerHTML += `
-			<div id="leaderboard-page-container">
-				<div id="leaderboard-content" class="userOutline">
-					<h2 id="leaderboard-title">Leaderboard</h2>
+			<main>
+				<div id="leaderboard-card" class="card">
+					<h2 id="card-title">LEADERBOARD</h2>
+					<div id="leaderboard-content">
 						<div class="lb-card-header">
-							<div class="lb-card-pos lb-card-att round-left">Rank</div>
-							<div class="lb-card-user lb-card-att">User</div>
-							<div class="lb-card-elo lb-card-att">Elo</div>
-							<div class="lb-card-winrate lb-card-att">Winrate</div>
-							<div class="lb-card-games lb-card-att">Games</div>
-							<div class="lb-card-icon lb-card-att round-right">Profile</div>
+							<div class="lb-card-pos lb-card-att"><i class="fa-solid fa-ranking-star"></i> Rank</div>
+							<div class="lb-card-user lb-card-att"><i class="fa-solid fa-user"></i> User</div>
+							<div class="lb-card-elo lb-card-att"><i class="fa-solid fa-chart-line"></i> Elo</div>
+							<div class="lb-card-winrate lb-card-att"><i class="fa-solid fa-percent"></i> Winrate</div>
+							<div class="lb-card-games lb-card-att"><i class="fa-solid fa-gamepad"></i> Games</div>
 						</div>
-						<div id="leaderboard-table">
-						</div>
+						<div id="leaderboard-table"></div>
 					</div>
 				</div>
-			</div>
+			</main>
 		`;
 	}
-						// <div class="lb-card">
-						// 	<div class="lb-card">
-						// 	<div class="lb-card-pos lb-card-att">1</div>
-						// 	<div class="lb-card-user lb-card-att"><img class="lb-card-avatar" src="https://cdn.intra.42.fr/users/6256bf3b76f8634f1e0df573022b0b72/valgrant.JPG"></img> valgrant</div>
-						// 	<div class="lb-card-elo lb-card-att">9999</div>
-						// 	<div class="lb-card-winrate lb-card-att">100%</div>
-						// 	<div class="lb-card-games lb-card-att">69420</div>
-						// 	<div class="lb-card-icon lb-card-att"><i class="fa-solid fa-user fa-xs"></i></div>
-						// </div>
 
 	async addContent() {
 		try {
@@ -68,9 +58,6 @@ export default class LeaderboardView {
 				let i = 0;
 				while (i < data.users.length)
 					this.addUserToLB(data.users[i], ++i);
-				document.getElementById('lb-card-1').classList.add('lb-card-first');
-				let cardid = "lb-card-" + i;
-				document.getElementById(cardid).classList.add('lb-card-last');
 			}
 			else {
 				console.log(data['message']);
@@ -83,26 +70,19 @@ export default class LeaderboardView {
 
 	addUserToLB(data, place) {
 		let		card = "";
-		let		id = "lb-card-link-" + place;
 		const	lb = document.getElementById('leaderboard-table');
 		
 		card += "<div id=\"lb-card-" + place + "\"class=\"lb-card\">";
 		card += "<div class=\"lb-card-pos lb-card-att\">" + place + "</div>";
 		if (data['avatar'])
-			card += "<div class=\"lb-card-user lb-card-att\"><img class=\"lb-card-avatar\" src=\"" + data['avatar'] + "\"></img>  " + data['username'] + "</div>";
+			card += "<div class=\"lb-card-user lb-card-att\"><img class=\"lb-card-avatar\" src=\"" + data['avatar'] + "\"></img> &nbsp;&nbsp;" + data['username'] + "</div>";
 		else
 			card += "<div class=\"lb-card-user lb-card-att\">" + data['username'] + "</div>";
 		card += "<div class=\"lb-card-elo lb-card-att\">" + data['elo'] + "</div>";
 		card += "<div class=\"lb-card-winrate lb-card-att\">" + data['winrate'] + "</div>";
 		card += "<div class=\"lb-card-games lb-card-att\">" + data['games'] + "</div>";
-		card += "<div class=\"lb-card-icon lb-card-att\" id=\"lb-card-link-" + place + "\"><i class=\"fa-solid fa-user fa-xl\"></i></div>";
 		card += "</div>";
 
 		lb.insertAdjacentHTML("beforeend", card);
-
-		document.getElementById(id).addEventListener("click", () => {
-			console.log('test');
-			window.app.router.navigateTo(data['link']);
-		});
 	}
 }
