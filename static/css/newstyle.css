@@ -569,7 +569,7 @@ hr::after {
 }
 
 /* ******************************** */
-/*                Leaderboard       */
+/*             Leaderboard          */
 /* ******************************** */
 
 #leaderboard-card {
@@ -656,6 +656,27 @@ hr::after {
 
 .lb-card-winrate {
 	width: 15%;
+}
+
+#lb-card-1 .lb-card-pos:before {
+    content: '\f5a2';
+    color: #FFD700;
+	font-family: "Font Awesome 5 Free";
+	margin-right: 0.5rem;
+}
+
+#lb-card-2 .lb-card-pos:before {
+    content: '\f5a2';
+    color: #C0C0C0;
+	font-family: "Font Awesome 5 Free";
+	margin-right: 0.5rem;
+}
+
+#lb-card-3 .lb-card-pos:before {
+    content: '\f5a2';
+    color: #CD7F32;
+	font-family: "Font Awesome 5 Free";
+	margin-right: 0.5rem;
 }
 
 /* ******************************** */
