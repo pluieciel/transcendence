@@ -17,6 +17,22 @@
 	--selector-color: #1e1e1e;
 }
 
+/* TODO: Modify scrollbar for chrome */
+/* ::-webkit-scrollbar {
+	width: 10px;
+}
+  
+::-webkit-scrollbar-track {
+	background: transparent;
+	border-radius: 5px;
+    margin-bottom: 20px;
+}
+
+::-webkit-scrollbar-thumb {
+	border-radius: 5px;
+	background: var(--secondary-color);
+} */
+
 html, body {
 	height: 100%;
 }
@@ -323,6 +339,12 @@ form button:hover:not(:disabled) {
 	height: 3rem;
 }
 
+#start-button:hover, #save-button:hover {
+	border: 1px solid var(--user-color);
+	box-shadow: 0 0 15px var(--user-color);
+	transition: all 0.3s ease;
+}
+
 /* ******************************** */
 /*           Login & Signup         */
 /* ******************************** */
@@ -395,22 +417,19 @@ hr::after {
 	height: 3rem;
 }
 
+#upload-avatar:hover {
+	border: 1px solid var(--user-color);
+	box-shadow: 0 0 15px var(--user-color);
+	transition: all 0.3s ease;
+}
+
 #upload-avatar label {
 	width: 100%;
 	cursor: pointer;
 }
 
 #upload-avatar label i{
-	padding-right: 0.4rem;
 	cursor: pointer;
-}
-
-#upload-avatar:hover {
-	background-color: var(--hover-color);
-}
-
-#upload-avatar:hover label {
-	opacity: 0.5;
 }
 
 #recaptcha {
@@ -565,12 +584,13 @@ hr::after {
 #leaderboard-content {
 	width: 100%;
 	height: 100%;
-	overflow: hidden;
 }
 
 #leaderboard-table {
 	width: 100%;
-	overflow: auto;
+	height: 100%;
+	overflow-y: auto;
+	max-height: 65vh;
 }
 
 .lb-card-header {
