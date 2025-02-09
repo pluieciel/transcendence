@@ -415,6 +415,7 @@ class GameBackend:
 			self.logger.info(f"Announcing event {self.game.event.name} and {self.game.event.description}")
 			events.append({
 				"type": "event",
+				"icon": self.game.event.icon,
 				"announce" : self.game.announceEvent,
 				"name": self.game.event.name,
 				"description": self.game.event.description,
@@ -472,6 +473,7 @@ class GameBackend:
 			self.game.event.action = 'none'
 			events.append({
 				"type": "event",
+				"icon": self.game.event.icon,
 				"name": self.game.event.name,
 				"announce" : False,
 				"description": self.game.event.description,

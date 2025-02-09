@@ -150,7 +150,7 @@ export class Game {
 					try {
 						console.log(event);
 						if (event.announce) {
-							this.showBanner(event.name, event.description);
+							this.showBanner(event.icon, event.name, event.description);
 						}
 						if (event.action != "none") {
 							console.log("Activating event");

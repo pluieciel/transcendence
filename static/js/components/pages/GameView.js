@@ -78,12 +78,12 @@ export default class GameView {
 		});
 	}
 
-	showBanner(title, description) {
+	showBanner(icon, title, description) {
 		const banner = document.getElementById("banner");
 		const bannerTitle = document.getElementById("bannerTitle");
 		const bannerDescription = document.getElementById("bannerDescription");
 
-		bannerTitle.textContent = title;
+		bannerTitle.innerHTML = `<i class="${icon}"></i> ${title}`;
 		bannerDescription.textContent = description;
 
 		banner.style.opacity = 0;
