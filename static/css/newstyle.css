@@ -721,6 +721,12 @@ hr::after {
 	text-shadow: 0 0 5px var(--user-color);
 }
 
+#subject-pdf {
+	width: 100%;
+	height: 100%;
+	border-radius: 0.3rem;
+}
+
 /* ******************************** */
 /*                Admin             */
 /* ******************************** */

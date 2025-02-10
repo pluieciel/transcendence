@@ -50,6 +50,7 @@ export default class CreditsView {
 				</div>
 				<div id="subject-card" class="card">
 					<h2 id="card-title"><i class="fa-solid fa-file-pdf"></i> SUBJECT</h2>
+						<iframe id="subject-pdf" src="https://cdn.intra.42.fr/pdf/pdf/134058/en.subject.pdf#toolbar=0&navpanes=0">
 				</div>
 			</main>
 		`;
