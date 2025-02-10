@@ -159,11 +159,10 @@ class GameConsumer(AsyncWebsocketConsumer):
 		recipient = query_params.get("recipient", [None])[0]
 		#for tournament
 		round = query_params.get("round", [None])[0]
-		self.logger.info(f"User : {user}")
-		self.user = user
 
 		user = await jwt_to_user(self.scope['headers'])
-		if not user:
+		self.user = user
+		if not self.user:
 			await self.send(text_data=json.dumps({
 				"type": "handle_error",
 				"message": "Invalid JWT"
