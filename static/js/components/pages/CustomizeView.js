@@ -5,7 +5,7 @@ import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
 import { OrbitControls } from "https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js";
 
 export default class CustomizeView {
-    constructor(container) {
+	constructor(container) {
 		this.container = container;
 		this.username = window.app.state.username;
 		this.previewGame = null;
@@ -13,26 +13,18 @@ export default class CustomizeView {
 	}
 
 	async init() {
+		await window.app.getSettings();
 		this.render();
+		window.app.checkForAdmin();
 		this.addEventListeners();
-		await this.getSettings();
-		if (window.app.settings.is_admin) {
-			const adminButton = document.getElementById("admin-button");
-			adminButton.style.display = "block";
-		}
-		await addUserData(this.settings);
-		const canvas = document.getElementById("previewCanvas");
-		this.previewGame = new PreviewGame(canvas);
-		await this.previewGame.initialize();
-	}
-
-	async getSettings() {
-		if (!window.app.settings["fetched"]) await window.app.getPreferences();
 		this.settings = {
 			color: window.app.settings.color,
 			quality: window.app.settings.quality,
 		};
-		return;
+		await addUserData(this.settings);
+		const canvas = document.getElementById("preview");
+		this.previewGame = new PreviewGame(canvas);
+		await this.previewGame.initialize();
 	}
 
 	async refresh_settings() {
@@ -40,55 +32,32 @@ export default class CustomizeView {
 	}
 
 	render() {
-		this.container.innerHTML = `
-<header>
-				<h1 id="pong">P
-					<button id="credit-button">
-						<i class="fa-solid fa-table-tennis-paddle-ball fa-xs"></i>
-					</button>
-					 N G
-				</h1>
-				<div id="nav-buttons">
-					<button class="nav-button" id="play-button">
-						<i class="fa-solid fa-gamepad fa-xl"></i>Play
-					</button>
-					<button class="nav-button nav-button-disabled" id="customize-button">
-						<i class="fa-solid fa-palette fa-xl"></i>Customize
-					</button>
-					<button class="nav-button" id="leaderboard-button">
-						<i class="fa-solid fa-medal fa-xl"></i>Leaderboard
-					</button>
-					<button class="nav-button" id="achievements-button">
-						<i class="fa-solid fa-trophy fa-xl"></i>Achievements
-					</button>
-					<button class="nav-button" id="profile-button">
-						<i class="fa-solid fa-user fa-xl"></i>Profile
-					</button>
-					<button class="nav-button" id="admin-button">
-						<i class="fa-solid fa-user-tie fa-xl"></i>Admin
-					</button>
-					<button class="nav-button" id="logout-button">
-						<i class="fa-solid fa-right-from-bracket fa-xl"></i>Log Out
-					</button>
+		window.app.renderHeader(this.container, "customize");
+		this.container.innerHTML += `
+			<main>
+				<div id="customize-card" class="card">
+					<h2 id="card-title">CUSTOMIZE</h2>
+					<div id="color">
+						<button id="selector-left-arrow"><i class="fa-solid fa-arrow-left fa-lg"></i></button>
+						<div id="selector-middle">
+							<span id="color-span"></span>
+						</div>
+						<button id="selector-right-arrow"><i class="fa-solid fa-arrow-right fa-lg"></i></button>
+					</div>
+					<div id="quality">
+						<button id="selector-left-arrow"><i class="fa-solid fa-arrow-left fa-lg"></i></button>
+						<div id="selector-middle">
+							<span id="quality-span"></span>
+						</div>
+						<button id="selector-right-arrow"><i class="fa-solid fa-arrow-right fa-lg"></i></button>
+					</div>
+					<button id="save-button" type="submit"><i class="fa-solid fa-floppy-disk"></i> Save</button>
 				</div>
-			</header>
-	<div class ="contentCustomize">
-		<div class="containerGame userOutline">
-			<h3>Game customization</h3>
-			<div id="row">
-				<button id="leftColor" class="arrow"><</button>
-				<div id="colorDiv"></div>
-				<button id="rightColor"class="arrow">></button>
-			</div>
-			<div id="row">
-				<button id="leftQuality" class="arrow"><</button>
-				<div id="qualityDiv"></div>
-				<button id="rightQuality"class="arrow">></button>
-			</div>
-			<button id="savebtn">Save changes</button>
-		</div>
-		<canvas id="previewCanvas" class='userOutline' ></canvas>
-		<div class="modal fade" id="changeModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+				<div id="preview-card" class="card">
+					<canvas id="preview"></canvas>
+				</div>
+			</main>
+			<div class="modal fade" id="changeModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
 			<div class="modal-dialog">
 				<div class="modal-content">
 					<div class="modal-header">
@@ -104,20 +73,15 @@ export default class CustomizeView {
 					</div>
 				</div>
 			</div>
-		</div>
-
-
-					`;
+		`;
 	}
 
 	addCustomizationEventListeners() {
-		const leftColor = document.getElementById("leftColor");
-		const rightColor = document.getElementById("rightColor");
-		const leftQuality = document.getElementById("leftQuality");
-		const rightQuality = document.getElementById("rightQuality");
-		const saveChanges = document.getElementById("savebtn");
-		const saveChanges2 = document.getElementById("modalsavebtn");
-		const gotomain = document.getElementById("gotomainbtn");
+		const leftColor = document.querySelector("#color #selector-left-arrow");
+		const rightColor = document.querySelector("#color #selector-right-arrow");
+		const leftQuality = document.querySelector("#quality #selector-left-arrow");
+		const rightQuality = document.querySelector("#quality #selector-right-arrow");
+		const saveChanges = document.getElementById("save-button");
 
 		leftColor.addEventListener("click", () => {
 			if (this.settings.color == 0) this.settings.color = 8;
@@ -136,7 +100,11 @@ export default class CustomizeView {
 		});
 
 		leftQuality.addEventListener("click", () => {
-			if (this.settings.quality == 0) return;
+			rightQuality.style.backgroundColor = "var(--selector-color)";
+			if (this.settings.quality == 0)
+				return;
+			if (this.settings.quality == 1)
+				leftQuality.style.backgroundColor = "var(--hover-color)";
 			this.settings.quality -= 1;
 			window.app.settings.quality = this.settings.quality;
 			addUserData(this.settings);
@@ -144,7 +112,10 @@ export default class CustomizeView {
 		});
 
 		rightQuality.addEventListener("click", () => {
+			leftQuality.style.backgroundColor = "var(--selector-color)";
 			if (this.settings.quality == 2) return;
+			if (this.settings.quality == 1)
+				rightQuality.style.backgroundColor = "var(--hover-color)";
 			this.settings.quality += 1;
 			window.app.settings.quality = this.settings.quality;
 			addUserData(this.settings);
@@ -156,85 +127,9 @@ export default class CustomizeView {
 		});
 	}
 
-	addNavEventListeners() {
-		const creditButton = document.getElementById("credit-button");
-		const playButton = document.getElementById("play-button");
-		const customizeButton = document.getElementById("customize-button");
-		const leaderboardButton = document.getElementById("leaderboard-button");
-		const achievementsButton = document.getElementById("achievements-button");
-		const profileButton = document.getElementById("profile-button");
-		const adminButton = document.getElementById("admin-button");
-		const logoutButton = document.getElementById("logout-button");
-
-		creditButton.addEventListener("click", async () => {
-			if (this.previewGame) {
-				this.previewGame.destroy();
-				await this.refresh_settings();
-			}
-			window.app.router.navigateTo("/credits");
-		});
-
-		playButton.addEventListener("click", async () => {
-			if (this.previewGame) {
-				this.previewGame.destroy();
-				await this.refresh_settings();
-			}
-			window.app.router.navigateTo("/index");
-		});
-
-		customizeButton.addEventListener("click", async () => {
-			if (this.previewGame) {
-				this.previewGame.destroy();
-				await this.refresh_settings();
-			}
-			window.app.router.navigateTo("/customize");
-		});
-
-		leaderboardButton.addEventListener("click", async () => {
-			if (this.previewGame) {
-				this.previewGame.destroy();
-				await this.refresh_settings();
-			}
-			window.app.router.navigateTo("/leaderboard");
-		});
-
-		achievementsButton.addEventListener("click", async () => {
-			if (this.previewGame) {
-				this.previewGame.destroy();
-				await this.refresh_settings();
-			}
-			window.app.router.navigateTo("/achievements");
-		});
-
-		profileButton.addEventListener("click", async () => {
-			if (this.previewGame) {
-				this.previewGame.destroy();
-				await this.refresh_settings();
-			}
-			window.app.router.navigateTo("/profile");
-		});
-
-		adminButton.addEventListener("click", async () => {
-			if (this.previewGame) {
-				this.previewGame.destroy();
-				await this.refresh_settings();
-			}
-			window.app.router.navigateTo("/admin");
-		});
-
-		logoutButton.addEventListener("click", async () => {
-			if (this.previewGame) {
-				this.previewGame.destroy();
-				await this.refresh_settings();
-			}
-			window.app.chatBox.disconnect();
-			window.app.logout();
-		});
-	}
-
 	addEventListeners() {
+		window.app.addNavEventListeners();
 		this.addCustomizationEventListeners();
-		this.addNavEventListeners();
 		window.addEventListener("popstate", () => {
 			if (this.previewGame) {
 				this.previewGame.destroy();

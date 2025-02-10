@@ -24,22 +24,28 @@ export default class GameComponent {
 		`;
 	}
 
-	addEventListeners() {
-		window.app.settings["game-selector"]; //rumble || classic
-		const quickMatch = document.getElementById("quickMatch");
-		const playAI = document.getElementById("playAI");
-		const matchSearchModal = document.getElementById("matchSearch");
+	addPlayButtonEventListeners() {
+		const playButton = document.getElementById("start-button");
+		const checkbox = document.getElementById("game-mode-checkbox");
+
+		playButton.addEventListener("click", () => {
+			window.app.settings["game-mode"] = checkbox.checked ? "rumble" : "classic";
+
+			console.log("game-type: " + window.app.settings["game-type"]);
+			console.log("game-mode: " + window.app.settings["game-mode"]);
+
+			if (window.app.settings["game-type"] === "ai") {
+				this.playBot(1);
+			}
+
+			if (window.app.settings["game-type"] === "ranked") {
+				this.searchGame();
+			}
+		});
+	}
+
+	addCancelGameSearchEventListener() {
 		const cancelGameSearch = document.getElementById("gameSearchCancel");
-
-		if (quickMatch) {
-			quickMatch.setAttribute("data-bs-toggle", "modal");
-			quickMatch.setAttribute("data-bs-target", "#matchSearch");
-			quickMatch.addEventListener("click", () => this.searchGame());
-		}
-
-		if (playAI) {
-			playAI.addEventListener("click", () => this.playBot(1)); // TODO: Select difficulty
-		}
 
 		if (cancelGameSearch) {
 			cancelGameSearch.addEventListener("click", () => {
@@ -51,10 +57,15 @@ export default class GameComponent {
 		}
 	}
 
+	addEventListeners() {
+		this.addPlayButtonEventListeners();
+		this.addCancelGameSearchEventListener();
+	}
+
 	searchGame() {
 		const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
 		const host = window.location.host;
-		const wsUrl = `${protocol}//${host}/ws/game/?mode=${window.app.settings["game-selector"]}`;
+		const wsUrl = `${protocol}//${host}/ws/game/?mode=${window.app.settings["game-mode"]}`;
 
 		this.initializeWebSocket(wsUrl);
 		this.startSearchGameTimer();
@@ -63,7 +74,7 @@ export default class GameComponent {
 	playBot(difficulty) {
 		const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
 		const host = window.location.host;
-		const wsUrl = `${protocol}//${host}/ws/game/?bot=${difficulty}&mode=${window.app.settings["game-selector"]}`;
+		const wsUrl = `${protocol}//${host}/ws/game/?bot=${difficulty}&mode=${window.app.settings["game-mode"]}`;
 
 		this.initializeWebSocket(wsUrl);
 	}

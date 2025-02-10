@@ -10,91 +10,51 @@ export default class MainView {
 		this.timerInterval = null;
 
 		this.username = window.app.state.username;
-		window.app.settings["game-selector"] = "classic";
+		window.app.settings["game-type"] = "classic";
 		this.init();
 	}
 
 	async init() {
+		await window.app.getSettings();
 		this.render();
+		window.app.checkForAdmin();
 		this.initComponents();
-		if (!window.app.settings["fetched"]) window.app.getPreferences();
 		this.checkForBackdrop();
 		this.addEventListeners();
-		await this.getSettings();
-	}
-
-	async getSettings() {
-		if (!window.app.settings["fetched"]) await window.app.getPreferences();
-		if (window.app.settings.is_admin) {
-			const adminButton = document.getElementById("admin-button");
-			adminButton.style.display = "block";
-		}
 	}
 
 	render() {
-		this.container.innerHTML = `
-			<header>
-				<h1 id="pong">P
-					<button id="credit-button">
-						<i class="fa-solid fa-table-tennis-paddle-ball fa-xs"></i>
-					</button>
-					 N G
-				</h1>
-				<div id="nav-buttons">
-					<button class="nav-button nav-button-disabled" id="play-button">
-						<i class="fa-solid fa-gamepad fa-xl"></i>Play
-					</button>
-					<button class="nav-button" id="customize-button">
-						<i class="fa-solid fa-palette fa-xl"></i>Customize
-					</button>
-					<button class="nav-button" id="leaderboard-button">
-						<i class="fa-solid fa-medal fa-xl"></i>Leaderboard
-					</button>
-					<button class="nav-button" id="achievements-button">
-						<i class="fa-solid fa-trophy fa-xl"></i>Achievements
-					</button>
-					<button class="nav-button" id="profile-button">
-						<i class="fa-solid fa-user fa-xl"></i>Profile
-					</button>
-					<button class="nav-button" id="admin-button">
-						<i class="fa-solid fa-user-tie fa-xl"></i>Admin
-					</button>
-					<button class="nav-button" id="logout-button">
-						<i class="fa-solid fa-right-from-bracket fa-xl"></i>Log Out
-					</button>
-				</div>
-			</header>
-
-			<div id="mainPage">
-				<div class="content">
-					<div class="game-buttons userOutline">
-						<h2 id="play">PLAY!</h2>
-						<div class="row game-selector">
-							<button id="classic" class="game-btn">classic</button>
-							<button id="rumble" class="disabled game-btn">rumble</button>
+		window.app.renderHeader(this.container, "play");
+		this.container.innerHTML += `
+			<main>
+				<div id="play-card" class="card">
+					<h2 id="card-title">PLAY</h2>
+					<div id="game-mode">
+						<div class="checkbox-button">
+							<input type="checkbox" id="game-mode-checkbox" class="checkbox">
+							<div class="knobs">
+								<span id="game-mode-classic"><i class="fa-solid fa-star"></i> Classic</span>
+								<span id="game-mode-rumble"><i class="fa-solid fa-bolt"></i> Rumble</span>
+							</div>
+							<div class="layer"></div>
 						</div>
-						<button id="playAI">AI</button>
-						<button id="quickMatch" class="nav-link" data-view="game" data-bs-toggle="modal" data-bs-target="#matchSearch">Ranked</button>
-						<button id="tournamentButton" data-bs-toggle="modal" data-bs-target="#tournamentModal">Tournament</button>
 					</div>
-
+					<div id="game-type">
+						<button id="selector-left-arrow"><i class="fa-solid fa-arrow-left fa-lg"></i></button>
+						<div id="selector-middle">
+							<span id="game-type-ai" data-game-type="ai"><i class="fa-solid fa-robot"></i> AI</span>
+							<span id="game-type-ranked" data-game-type="ranked"><i class="fa-solid fa-ranking-star"></i> Ranked</span>
+							<span id="game-type-tournament" data-game-type="tournament"><i class="fa-solid fa-crown"></i> Tournament</span>
+						</div>
+						<button id="selector-right-arrow"><i class="fa-solid fa-arrow-right fa-lg"></i></button>
+					</div>
+					<button id="start-button" type="submit"><i class="fa-solid fa-gamepad"></i> Play</button>
 				</div>
-			</div>
-			<!-- ChatBox container -->
-			<div id="chatBoxContainer"></div>
-
-			<!-- Tournament container -->
-			<div id="tournamentContainer"></div>
-
-			<!-- Game container -->
-			<div id="gameContainer"></div>
-
-        `;
-	}
-
-	showLeaderboard() {
-		const mainContent = this.container.querySelector("#mainContent");
-		mainContent.innerHTML = "<h2>Leaderboard View</h2>";
+				<div id="chatBoxContainer"></div>
+				<div id="tournamentContainer"></div>
+				<div id="gameContainer"></div>
+			</main>
+		`;
 	}
 
 	initComponents() {
@@ -127,82 +87,71 @@ export default class MainView {
 		}
 	}
 
-	addEventListeners() {
-		const selectorRumble = document.getElementById("rumble");
-		const selectorClassic = document.getElementById("classic");
+	addGameTypeSelectorEventListeners() {
+		const playButton = document.getElementById("start-button");
+		const leftArrow = document.getElementById("selector-left-arrow");
+		const rightArrow = document.getElementById("selector-right-arrow");
 
-		this.addNavEventListeners();
+		const gameTypes = [
+			document.getElementById("game-type-ai"),
+			document.getElementById("game-type-ranked"),
+			document.getElementById("game-type-tournament")
+		];
 
-		selectorRumble.addEventListener("click", () => {
-			window.app.settings["game-selector"] = "rumble";
-			this.addSelector();
+		let currentIndex = 0;
+		window.app.settings["game-type"] = "ai";
+
+		gameTypes.forEach((type, index) => {
+			type.style.display = index === currentIndex ? "block" : "none";
 		});
 
-		selectorClassic.addEventListener("click", () => {
-			window.app.settings["game-selector"] = "classic";
-			this.addSelector();
+		const updateDisplay = (newIndex) => {
+			gameTypes[currentIndex].style.display = "none";
+			currentIndex = newIndex;
+			gameTypes[currentIndex].style.display = "block";
+
+			switch (currentIndex) {
+				case 0:
+					window.app.settings["game-type"] = "ai";
+					playButton.removeAttribute("data-bs-toggle");
+					playButton.removeAttribute("data-bs-target");
+					playButton.removeAttribute("data-view");
+					break;
+				case 1:
+					window.app.settings["game-type"] = "ranked";
+					playButton.setAttribute("data-bs-toggle", "modal");
+					playButton.setAttribute("data-bs-target", "#matchSearch");
+					playButton.setAttribute("data-view", "game");
+					break;
+				case 2:
+					window.app.settings["game-type"] = "tournament";
+					playButton.setAttribute("data-bs-toggle", "modal");
+					playButton.setAttribute("data-bs-target", "#tournamentModal");
+					playButton.removeAttribute("data-view");
+					break;
+				default:
+					break;
+			}
+		};
+
+		leftArrow.addEventListener("click", () => {
+			const newIndex = (currentIndex - 1 + gameTypes.length) % gameTypes.length;
+			updateDisplay(newIndex);
+		});
+
+		rightArrow.addEventListener("click", () => {
+			const newIndex = (currentIndex + 1) % gameTypes.length;
+			updateDisplay(newIndex);
 		});
 	}
 
-	addSelector() {
-		const selectorRumble = document.getElementById("rumble");
-		const selectorClassic = document.getElementById("classic");
-
-		if (window.app.settings["game-selector"] == "rumble") {
-			selectorRumble.classList.remove("disabled");
-			selectorClassic.classList.add("disabled");
-		} else {
-			selectorRumble.classList.add("disabled");
-			selectorClassic.classList.remove("disabled");
-		}
+	addEventListeners() {
+		window.app.addNavEventListeners();
+		this.addGameTypeSelectorEventListeners();
 	}
 
 	checkForBackdrop() {
 		const el = document.querySelector(".modal-backdrop");
 		if (el) el.remove();
-	}
-
-	addNavEventListeners() {
-		const creditButton = document.getElementById("credit-button");
-		const playButton = document.getElementById("play-button");
-		const customizeButton = document.getElementById("customize-button");
-		const leaderboardButton = document.getElementById("leaderboard-button");
-		const achievementsButton = document.getElementById("achievements-button");
-		const profileButton = document.getElementById("profile-button");
-		const adminButton = document.getElementById("admin-button");
-		const logoutButton = document.getElementById("logout-button");
-
-		creditButton.addEventListener("click", () => {
-			window.app.router.navigateTo("/credits");
-		});
-
-		playButton.addEventListener("click", () => {
-			window.app.router.navigateTo("/index");
-		});
-
-		customizeButton.addEventListener("click", () => {
-			window.app.router.navigateTo("/customize");
-		});
-
-		leaderboardButton.addEventListener("click", () => {
-			window.app.router.navigateTo("/leaderboard");
-		});
-
-		achievementsButton.addEventListener("click", () => {
-			window.app.router.navigateTo("/achievements");
-		});
-
-		profileButton.addEventListener("click", () => {
-			window.app.router.navigateTo("/profile");
-		});
-
-		adminButton.addEventListener("click", () => {
-			window.app.router.navigateTo("/admin");
-		});
-
-		logoutButton.addEventListener("click", () => {
-			window.app.chatBox.disconnect();
-			window.app.logout();
-		});
 	}
 }

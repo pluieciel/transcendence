@@ -6,132 +6,81 @@ export default class CreditsView {
 	}
 
 	async init() {
+		await window.app.getSettings();
 		this.render();
-		this.addNavEventListeners();
-		await this.getSettings();
-	}
-	
-	async getSettings() {
-		if (!window.app.settings['fetched'])
-			await window.app.getPreferences();
-		if (window.app.settings.is_admin) {
-			const adminButton = document.getElementById("admin-button");
-			adminButton.style.display = "block";
-		}
+		window.app.checkForAdmin();
+		window.app.addNavEventListeners();
 	}
 
 	render() {
-		this.container.innerHTML = `
-			<header>
-				<h1 id="pong">P 
-					<button id="credit-button">
-						<i class="fa-solid fa-table-tennis-paddle-ball fa-xs"></i>
-					</button>
-					 N G
-				</h1>
-				<div id="nav-buttons">
-					<button class="nav-button" id="play-button">
-						<i class="fa-solid fa-gamepad fa-xl"></i>Play
-					</button>
-					<button class="nav-button" id="customize-button">
-						<i class="fa-solid fa-palette fa-xl"></i>Customize
-					</button>
-					<button class="nav-button" id="leaderboard-button">
-						<i class="fa-solid fa-medal fa-xl"></i>Leaderboard
-					</button>
-					<button class="nav-button" id="achievements-button">
-						<i class="fa-solid fa-trophy fa-xl"></i>Achievements
-					</button>
-					<button class="nav-button" id="profile-button">
-						<i class="fa-solid fa-user fa-xl"></i>Profile
-					</button>
-					<button class="nav-button" id="admin-button">
-						<i class="fa-solid fa-user-tie fa-xl"></i>Admin
-					</button>
-					<button class="nav-button" id="logout-button">
-						<i class="fa-solid fa-right-from-bracket fa-xl"></i>Log Out
-					</button>
-				</div>
-			</header>
-
-			<div id="mainPage">
-				<div class="credits-container">
-					<div class="credits userOutline">
-						<h2>Credits</h2>
+		window.app.renderHeader(this.container, "credits", true, true);
+		this.container.innerHTML += `
+			<main>
+				<div id="credits-card" class="card">
+					<h2 id="card-title">CREDITS</h2>
+					<div id="credits-content">
 						<p>
 							Welcome to <strong>ft_transcendence</strong>,<br>
-							the final project of the 42 common core curriculum!<br>
+							the final project of the <img src="imgs/42_logo.png" id="oauth-logo"> common core curriculum!<br>
 							This project is our version of the classic <b>Pong</b> game<br><br>
 							The main goal was to build a full-stack application running as a Single Page Application [SPA]<br><br>
-							Ressources used:<br>
-							The whole project is running in docker <i class="fab fa-docker"></i><br>
-							We're using nginx as our webserv <i class="fas fa-server"></i><br>
+							<strong>Ressources used:</strong><br>
+							The whole project is running in Docker <i class="fab fa-docker"></i><br>
+							We're using Nginx as our webserv <i class="fas fa-server"></i><br>
 							Javascript <i class="fab fa-js"></i> is used for the Frontend<br>
-							The backend is built in python <i class="fa-brands fa-python"></i> with Django<br>
-							PostgreSQL for the Database <i class="fas fa-database"></i><br><br>
-							What to do for the best user experience:<br>Check out our user customization options,<br>invite a few friends to play with you,<br>and have fun.<br><br>
+							The backend is built in Python <i class="fa-brands fa-python"></i> with Django and<br>
+							PostgreSQL for the Database <i class="fas fa-database"></i><br>
+							<div id="github-links">
+								You can find the source code of the project on <a href="https://github.com/pluieciel/transcendence" target="_blank" rel="noopener noreferrer"><i class="fab fa-github"></i> GitHub</a>
+							</div>
+						</p>
+					</div>
+					</div>
+				<div id="how-to-play-card" class="card">
+					<h2 id="card-title">HOW TO PLAY</h2>
+					<div id="how-to-play-content">
+						<p>
+							<i class="fa-solid fa-star"></i> <strong>Classic Mode</strong><br>
+								Master the fundamentals of speed and precision<br>
+								Experience pure, competitive Pong action<br>
+								Perfect your paddle control and timing<br>
+							<br>
+							<i class="fa-solid fa-bolt"></i> <strong>Rumble Mode</strong><br>
+								Unleash chaos with random events<br>
+								Test your reaction time and adaptability<br>
+								Enjoy a more dynamic and unpredictable game<br>
+							<br>
+							<i class="fa-solid fa-medal"></i> Climb the ranks in both modes<br>
+							<i class="fa-solid fa-users"></i> Challenge friends or compete globally<br>
+							<i class="fa-solid fa-palette"></i> Pick your style and dominate the game!<br>
+							<i class="fa-solid fa-trophy"></i> Earn achievements and show off your skills!<br>
+						</p>
+					</div>
+				</div>
+				<div id="about-us-card" class="card">
+					<h2 id="card-title">ABOUT US</h2>
+					<div id="about-us-content">
+						<p>
+							The team behind <strong>ft_transcendence</strong>!<br>
+							As students at <img src="imgs/42_logo.png" id="oauth-logo"> <strong>Luxembourg</strong>, we united our<br>
+							skills and creativity to bring you this modern<br>
+							take on a classic game.<br>
+						</p>
+						<div id="github-links">
+							<strong>Created by:</strong><br>
+							<p id="tooltip-github">click on the links to check out our own github profiles</p>
+							<a href="https://github.com/jlefonde" target="_blank" rel="noopener noreferrer"><i class="fab fa-github"></i> Joris Lefondeur</a><br>
+							<a href="https://github.com/pluieciel" target="_blank" rel="noopener noreferrer"><i class="fab fa-github"></i> Yue Zhao</a><br>
+							<a href="https://github.com/siul008" target="_blank" rel="noopener noreferrer"><i class="fab fa-github"></i> Julien Nunes</a><br>
+							<a href="https://github.com/neutrou" target="_blank" rel="noopener noreferrer"><i class="fab fa-github"></i> Victor Algranti</a><br>
+						</div>
+						<br>
+						<p>
 							We hope you enjoy exploring our project!
 						</p>
 					</div>
-					<div class="col-container">
-						<div class="github-links userOutline">
-							Created by:<br>
-							<p id="tooltip-github">click on the links to check out our own githubs profiles<p>
-							<a href="https://github.com/jlefonde" target="_blank" rel="noopener noreferrer">Joris Lefondeur</a><br>
-							<a href="https://github.com/pluieciel" target="_blank" rel="noopener noreferrer">Yue Zhao</a><br>
-							<a href="https://github.com/siul008" target="_blank" rel="noopener noreferrer">Julien Nunes</a><br>
-							<a href="https://github.com/neutrou" target="_blank" rel="noopener noreferrer">Victor Algranti</a><br>
-						</div>
-						<iframe id="pdf" class="userOutline"
-						src=
-						"https://cdn.intra.42.fr/pdf/pdf/134058/en.subject.pdf#toolbar=0&navpanes=0">
-					</div>
 				</div>
-			</div>
-						`;
+			</main>
+		`;
 	};
-
-	addNavEventListeners() {
-		const creditButton = document.getElementById("credit-button");
-		const playButton = document.getElementById("play-button");
-		const customizeButton = document.getElementById("customize-button");
-		const leaderboardButton = document.getElementById("leaderboard-button");
-		const achievementsButton = document.getElementById("achievements-button");
-		const profileButton = document.getElementById("profile-button");
-		const adminButton = document.getElementById("admin-button");
-		const logoutButton = document.getElementById("logout-button");
-
-		creditButton.addEventListener("click", () => {
-			window.app.router.navigateTo("/credits");
-		});
-
-		playButton.addEventListener("click", () => {
-			window.app.router.navigateTo("/index");
-		});
-
-		customizeButton.addEventListener("click", () => {
-			window.app.router.navigateTo("/customize");
-		});
-		
-		leaderboardButton.addEventListener("click", () => {
-			window.app.router.navigateTo("/leaderboard");
-		});
-
-		achievementsButton.addEventListener("click", () => {
-			window.app.router.navigateTo("/achievements");
-		});
-
-		profileButton.addEventListener("click", () => {
-			window.app.router.navigateTo("/profile");
-		});
-
-		adminButton.addEventListener("click", () => {
-			window.app.router.navigateTo("/admin");
-		});
-
-		logoutButton.addEventListener("click", () => {
-			window.app.chatBox.disconnect();
-			window.app.logout();
-		});
-	}
 }

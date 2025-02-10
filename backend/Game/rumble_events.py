@@ -47,6 +47,7 @@ class GameEvent(ABC):
 class InvertedControlsEvent(GameEvent):
 	def __init__(self, game: 'RumbleGameInstance'):
 		self.game = game
+		self.icon = "fa-solid fa-arrows-rotate"
 		self.name = "Inverted Controls"
 		self.description = "Controls are inverted !"
 		self.ball_accel_mult = 1
@@ -66,6 +67,7 @@ class InvertedControlsEvent(GameEvent):
 class RandomBouncesEvent(GameEvent):
 	def __init__(self, game: 'RumbleGameInstance'):
 		self.game = game
+		self.icon = "fa-solid fa-shuffle"
 		self.name = "Random Bounces"
 		self.description = "All bounces from the ball are random !"
 		self.ball_accel_mult = 1
@@ -82,6 +84,7 @@ class RandomBouncesEvent(GameEvent):
 class MirrorBallEvent(GameEvent):
 	def __init__(self, game: 'RumbleGameInstance'):
 		self.game = game
+		self.icon = "fa-solid fa-arrow-down-up-across-line"
 		self.name = "Mirror Ball"
 		self.description = "The ball teleports to the opposite wall instead of bouncing"
 		self.ball_accel_mult = 1
@@ -98,6 +101,7 @@ class MirrorBallEvent(GameEvent):
 class LightsOutEvent(GameEvent):
 	def __init__(self, game: 'RumbleGameInstance'):
 		self.game = game
+		self.icon = "fa-solid fa-lightbulb"
 		self.name = "Lights Out"
 		self.description = "The lights turned off"
 		self.ball_accel_mult = 1
@@ -114,6 +118,7 @@ class LightsOutEvent(GameEvent):
 class SmokeCloudEvent(GameEvent):
 	def __init__(self, game: 'RumbleGameInstance'):
 		self.game = game
+		self.icon = "fa-solid fa-smog"
 		self.name = "SmokeCloud"
 		self.action = 'smoke'
 		self.description = "The ball disappears when in the middle of the field !"
@@ -130,8 +135,9 @@ class SmokeCloudEvent(GameEvent):
 class InfiniteSpeedEvent(GameEvent):
 	def __init__(self, game: 'RumbleGameInstance'):
 		self.game = game
-		self.name = "Random Bounces"
-		self.description = "All bounces from the ball are random !"
+		self.icon = "fa-solid fa-gauge-high"
+		self.name = "Infinite Speed"
+		self.description = "The ball can go infinitely fast !"
 		self.action = 'none'
 		self.ball_accel_mult = 1
 		self.ball_basespeed_mult = 1.2
@@ -147,6 +153,7 @@ class InfiniteSpeedEvent(GameEvent):
 class ReverseBallEvent(GameEvent):
 	def __init__(self, game: 'RumbleGameInstance'):
 		self.game = game
+		self.icon = "fa-solid fa-backward"
 		self.name = "Reverse Ball"
 		self.description = "The ball can randomly reverse its direction"
 		self.action = 'none'
@@ -180,6 +187,7 @@ class ReverseBallEvent(GameEvent):
 class ShrinkingPaddleEvent(GameEvent):
 	def __init__(self, game: 'RumbleGameInstance'):
 		self.game = game
+		self.icon = "fa-solid fa-arrows-left-right-to-line"
 		self.name = "Shrinking Paddles"
 		self.action = 'none'
 		self.description = "Each hit will shrink your paddle !"
@@ -199,6 +207,7 @@ class ShrinkingPaddleEvent(GameEvent):
 class NoStoppingEvent(GameEvent):
 	def __init__(self, game: 'RumbleGameInstance'):
 		self.game = game
+		self.icon = "fa-solid fa-forward"
 		self.name = "No Stopping"
 		self.description = "You cannot stop moving once you start!"
 		self.ball_accel_mult = 1
@@ -218,6 +227,7 @@ class NoStoppingEvent(GameEvent):
 class KillerBallEvent(GameEvent):
 	def __init__(self, game: 'RumbleGameInstance'):
 		self.game = game
+		self.icon = "fa-solid fa-skull"
 		self.action = 'none'
 		self.name = "Killer Ball"
 		self.description = "Do not get hit by the ball !"
@@ -235,6 +245,7 @@ class KillerBallEvent(GameEvent):
 class IcyPaddlesEvent(GameEvent):
 	def __init__(self, game: 'RumbleGameInstance'):
 		self.game = game
+		self.icon = "fa-solid fa-snowflake"
 		self.name = "Icy Paddle"
 		self.action = 'none'
 		self.description = "Your paddle is now slippery !"
@@ -255,6 +266,7 @@ class IcyPaddlesEvent(GameEvent):
 class VisibleTrajectoryEvent(GameEvent):
 	def __init__(self, game: 'RumbleGameInstance'):
 		self.game = game
+		self.icon = "fa-solid fa-arrow-trend-up"
 		self.name = "Visible Trajectory"
 		self.action = 'none'
 		self.description = "You can now see the ball trajectory, but it goes faster !"
@@ -272,6 +284,7 @@ class VisibleTrajectoryEvent(GameEvent):
 class BreathingTimeEvent(GameEvent):
 	def __init__(self, game: 'RumbleGameInstance'):
 		self.game = game
+		self.icon = "fa-solid fa-stopwatch"
 		self.name = "Breathing Time"
 		self.action = 'none'
 		self.description = "Nothing happens"

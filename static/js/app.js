@@ -39,37 +39,31 @@ class App {
 	}
 
 	setColor(color) {
+		document.documentElement.style.setProperty("--user-color", this.getColor(color));
+	}
+
+	getColor(color) {
 		switch (color) {
 			case 0:
-				document.documentElement.style.setProperty("--user-color", "#3E27F8");
-				break; //Blue
+				return "#3E27F8"; //Blue
 			case 1:
-				document.documentElement.style.setProperty("--user-color", "#00BDD1");
-				break; //Cyan
+				return "#00BDD1"; //Cyan
 			case 2:
-				document.documentElement.style.setProperty("--user-color", "#00AD06");
-				break; //Green
+				return "#00AD06"; //Green
 			case 3:
-				document.documentElement.style.setProperty("--user-color", "#E67E00");
-				break; //Orrange
+				return "#E67E00"; //Orange
 			case 4:
-				document.documentElement.style.setProperty("--user-color", "#E6008F");
-				break; //Pink
+				return "#E6008F"; //Pink
 			case 5:
-				document.documentElement.style.setProperty("--user-color", "#6400C4");
-				break; //Purple
+				return "#6400C4"; //Purple
 			case 6:
-				document.documentElement.style.setProperty("--user-color", "#E71200");
-				break; //Red
+				return "#E71200"; //Red
 			case 7:
-				document.documentElement.style.setProperty("--user-color", "#0EC384");
-				break; //Soft Green
+				return "#0EC384"; //Soft Green
 			case 8:
-				document.documentElement.style.setProperty("--user-color", "#E6E3E1");
-				break; //White
+				return "#E6E3E1"; //White
 			default:
-				document.documentElement.style.setProperty("--user-color", "#00BDD1");
-				break;
+				return "#00BDD1";
 		}
 	}
 
@@ -101,6 +95,129 @@ class App {
 		this.settings.is_admin = data['is_admin'];
 		this.settings.fetched = true;
 		this.setColor(this.settings.color);
+	}
+
+	showErrorMsg(selector, msg) {
+		const errorDiv = document.querySelector(selector);
+		errorDiv.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ${msg}`;
+		errorDiv.style.display = 'block';
+	}
+
+	renderHeader(container, disableBtn = null, withNav = true, creditsDisabled = false, inLogin = false) {
+		let header = `
+			<header>
+				<h1 id="header-title">P
+					<button id="${inLogin ? 'login-credits-button' : 'credits-button'}" ${creditsDisabled ? 'disabled' : ''}>
+						<i class="fa-solid fa-table-tennis-paddle-ball fa-xs"></i>
+					</button>
+					N G
+				</h1>
+		`;
+
+		if (withNav)
+		{
+			header += `
+				<nav>
+					<ul>
+						<li>
+							<button id="play-button" ${disableBtn === "play" ? 'disabled' : ''}>
+								<i class="fa-solid fa-gamepad fa-xl"></i>Play
+							</button>
+						</li>
+						<li>
+							<button id="customize-button" ${disableBtn === "customize" ? 'disabled' : ''}>
+								<i class="fa-solid fa-palette fa-xl"></i>Customize
+							</button>
+						</li>
+						<li>
+							<button id="leaderboard-button" ${disableBtn === "leaderboard" ? 'disabled' : ''}>
+								<i class="fa-solid fa-medal fa-xl"></i>Leaderboard
+							</button>
+						</li>
+						<li>
+							<button id="achievements-button" ${disableBtn === "achievements" ? 'disabled' : ''}>
+								<i class="fa-solid fa-trophy fa-xl"></i>Achievements
+							</button>
+						</li>
+						<li>
+							<button id="profile-button" ${disableBtn === "profile" ? 'disabled' : ''}>
+								<i class="fa-solid fa-user fa-xl"></i>Profile
+							</button>
+						</li>
+						<li style="display: ${this.settings.is_admin ? 'block' : 'none'}">
+							<button id="admin-button" ${disableBtn === "admin" ? 'disabled' : ''}>
+								<i class="fa-solid fa-user-tie fa-xl"></i>Admin
+							</button>
+						</li>
+						<li>
+							<button id="logout-button">
+								<i class="fa-solid fa-right-from-bracket fa-xl"></i>Log Out
+							</button>
+						</li>
+					</ul>
+				</nav>
+			`;
+		}
+		header += `</header>`;
+		container.innerHTML = header;
+	}
+
+	addNavEventListeners() {
+		const creditButton = document.getElementById("credits-button");
+		const playButton = document.getElementById("play-button");
+		const customizeButton = document.getElementById("customize-button");
+		const leaderboardButton = document.getElementById("leaderboard-button");
+		const achievementsButton = document.getElementById("achievements-button");
+		const profileButton = document.getElementById("profile-button");
+		const adminButton = document.getElementById("admin-button");
+		const logoutButton = document.getElementById("logout-button");
+
+		if (creditButton) {
+			creditButton.addEventListener("click", () => {
+				window.app.router.navigateTo("/credits");
+			});
+		}
+
+		playButton.addEventListener("click", () => {
+			window.app.router.navigateTo("/index");
+		});
+
+		customizeButton.addEventListener("click", () => {
+			window.app.router.navigateTo("/customize");
+		});
+
+		leaderboardButton.addEventListener("click", () => {
+			window.app.router.navigateTo("/leaderboard");
+		});
+
+		achievementsButton.addEventListener("click", () => {
+			window.app.router.navigateTo("/achievements");
+		});
+
+		profileButton.addEventListener("click", () => {
+			window.app.router.navigateTo("/profile");
+		});
+
+		adminButton.addEventListener("click", () => {
+			window.app.router.navigateTo("/admin");
+		});
+
+		logoutButton.addEventListener("click", () => {
+			window.app.chatBox.disconnect();
+			window.app.logout();
+		});
+	}
+
+	async getSettings() {
+		if (!window.app.settings["fetched"]) 
+			await window.app.getPreferences();
+	}
+
+	checkForAdmin() {
+		if (window.app.settings.is_admin) {
+			const adminButton = document.querySelector("li:has(button[id='admin-button'])");
+			adminButton.style.display = "block";
+		}
 	}
 
 	login(data) {
