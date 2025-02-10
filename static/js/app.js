@@ -87,14 +87,18 @@ class App {
 			},
 		});
 		const data = await response.json();
-		if (!data.success)
-			return;
-		this.settings.color = data['color'];
-		this.settings.quality = data['quality'];
-		this.settings.is_2fa_enabled = data['is_2fa_enabled'];
-		this.settings.is_admin = data['is_admin'];
-		this.settings.fetched = true;
-		this.setColor(this.settings.color);
+		if (data.success)
+		{
+			this.settings.color = data['color'];
+			this.settings.quality = data['quality'];
+			this.settings.is_2fa_enabled = data['is_2fa_enabled'];
+			this.settings.is_admin = data['is_admin'];
+			this.settings.fetched = true;
+			this.setColor(this.settings.color);
+		}
+		else
+			// TODO: add error handling
+		;
 	}
 
 	showErrorMsg(selector, msg) {

@@ -159,14 +159,14 @@ class GameConsumer(AsyncWebsocketConsumer):
 		recipient = query_params.get("recipient", [None])[0]
 		#for tournament
 		round = query_params.get("round", [None])[0]
-		user = await jwt_to_user(self.scope['headers'])
 		self.logger.info(f"User : {user}")
 		self.user = user
 
+		user = await jwt_to_user(self.scope['headers'])
 		if not user:
 			await self.send(text_data=json.dumps({
 				"type": "handle_error",
-				"message": "User not found or invalid token."
+				"message": "Invalid JWT"
 			}))
 			return
 		game_manager._get_game_history_model()

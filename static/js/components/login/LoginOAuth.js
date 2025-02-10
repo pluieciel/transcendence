@@ -50,7 +50,7 @@ class LoginOAuth {
             if (data.success)
 				window.app.login(data);
             else
-                this.showError(data.message || 'Sign up || Log in failed.');
+                this.showError(data.message);
         } catch (error) {
             console.error("Error during fetch:", error);
             this.showError("An error occurred during authentication.");

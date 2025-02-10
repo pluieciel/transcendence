@@ -43,8 +43,11 @@ export async function eraseInDB() {
 
 		const data = await response.json();
 		
-		message(data.success, data['message']);
-		return (data.success);
+		if (data.success)
+			message(data.success, data.message);
+		else
+			// TODO: show error msg
+		;
 	} catch (error) {
 		console.error('An error occurred: ', error);
 		return false;
