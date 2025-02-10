@@ -125,8 +125,8 @@ class App {
 							</button>
 						</li>
 						<li>
-							<button id="customize-button" ${disableBtn === "customize" ? 'disabled' : ''}>
-								<i class="fa-solid fa-palette fa-xl"></i>Customize
+							<button id="tournament-button" ${disableBtn === "tournament" ? 'disabled' : ''}>
+								<i class="fa-solid fa-crown fa-xl"></i>Tournament
 							</button>
 						</li>
 						<li>
@@ -137,6 +137,11 @@ class App {
 						<li>
 							<button id="achievements-button" ${disableBtn === "achievements" ? 'disabled' : ''}>
 								<i class="fa-solid fa-trophy fa-xl"></i>Achievements
+							</button>
+						</li>
+						<li>
+							<button id="customize-button" ${disableBtn === "customize" ? 'disabled' : ''}>
+								<i class="fa-solid fa-palette fa-xl"></i>Customize
 							</button>
 						</li>
 						<li>
@@ -165,9 +170,10 @@ class App {
 	addNavEventListeners() {
 		const creditButton = document.getElementById("credits-button");
 		const playButton = document.getElementById("play-button");
-		const customizeButton = document.getElementById("customize-button");
+		const tournamentButton = document.getElementById("tournament-button");
 		const leaderboardButton = document.getElementById("leaderboard-button");
 		const achievementsButton = document.getElementById("achievements-button");
+		const customizeButton = document.getElementById("customize-button");
 		const profileButton = document.getElementById("profile-button");
 		const adminButton = document.getElementById("admin-button");
 		const logoutButton = document.getElementById("logout-button");
@@ -182,16 +188,20 @@ class App {
 			window.app.router.navigateTo("/index");
 		});
 
-		customizeButton.addEventListener("click", () => {
-			window.app.router.navigateTo("/customize");
+		tournamentButton.addEventListener("click", () => {
+			window.app.router.navigateTo("/tournament");
 		});
 
 		leaderboardButton.addEventListener("click", () => {
 			window.app.router.navigateTo("/leaderboard");
 		});
-
+		
 		achievementsButton.addEventListener("click", () => {
 			window.app.router.navigateTo("/achievements");
+		});
+		
+		customizeButton.addEventListener("click", () => {
+			window.app.router.navigateTo("/customize");
 		});
 
 		profileButton.addEventListener("click", () => {

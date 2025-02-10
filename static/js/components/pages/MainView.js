@@ -41,10 +41,10 @@ export default class MainView {
 								Test your reaction time and adaptability<br>
 								Enjoy a more dynamic and unpredictable game<br>
 							<br>
-							<i class="fa-solid fa-palette"></i> Pick your style and dominate the game<br>
-							<i class="fa-solid fa-medal"></i> Climb the ranks in both modes<br>
 							<i class="fa-solid fa-crown"></i> Join epic tournaments and compete for glory<br>
+							<i class="fa-solid fa-medal"></i> Climb the ranks in both modes<br>
 							<i class="fa-solid fa-trophy"></i> Earn achievements and show off your skills<br>
+							<i class="fa-solid fa-palette"></i> Pick your style and dominate the game<br>
 							<i class="fa-solid fa-users"></i> Challenge friends or compete globally<br>
 						</p>
 					</div>
