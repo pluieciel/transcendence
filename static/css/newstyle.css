@@ -204,6 +204,8 @@ main {
 }
 
 #card-title {
+	width: 100%;
+	text-align: center;
 	margin-bottom: 2rem;
 	font-weight: bold;
 }
@@ -361,15 +363,11 @@ form button:hover:not(:disabled) {
 	width: 100%;
 }
 
-#signup-link, #login-link {
-	opacity: 0.5;
-}
-
 #signup-link button, #login-link button {
 	background-color: transparent;
 	border: none;
 	color: var(--secondary-color);
-	text-shadow: 0 0 5px var(--secondary-color);
+	text-shadow: 0 0 5px var(--user-color);
 	text-decoration: underline;
 	text-underline-offset: 0.25rem;
 	padding: 0;
@@ -407,6 +405,7 @@ hr::after {
 	width: 100%;
 	margin-bottom: 1rem;
 	background-color: var(--primary-color);
+	border: 1px solid var(--primary-color);
 	border-radius: 0.3rem;
 	padding: 0.5rem 1rem;
 	text-align: center;
@@ -689,7 +688,6 @@ hr::after {
 
 #tooltip-github {
 	font-size: 0.8rem;
-	opacity: 0.5;
 }
 
 #github-links {
@@ -700,10 +698,51 @@ hr::after {
 #github-links a {
 	text-decoration: none;
 	color: var(--secondary-color);
-	opacity: 0.5;
 	text-decoration: underline;
 	text-underline-offset: 0.25rem;
-	text-shadow: 0 0 5px var(--secondary-color);
+	text-shadow: 0 0 5px var(--user-color);
+}
+
+/* ******************************** */
+/*                Admin             */
+/* ******************************** */
+
+.service-card {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	width: 20rem;
+	height: 25rem;
+}
+
+.service-logo {
+	width: 2rem;
+    height: 2rem;
+    position: relative;
+    top: -0.2rem;
+}
+
+.service-button {
+	width: 100%;
+	color: var(--secondary-color);
+	background-color: var(--primary-color);
+	border: 1px solid var(--primary-color);
+	border-radius: 0.3rem;
+	padding: 0.4rem;
+	transition: all 0.3s ease;
+	font-weight: bold;
+	height: 3rem;
+}
+
+.service-button:hover {
+	border: 1px solid var(--user-color);
+	box-shadow: 0 0 15px var(--user-color);
+	transition: all 0.3s ease;
+}
+
+#admin-view {
+	flex-wrap: wrap;
 }
 
 /* ******************************** */
