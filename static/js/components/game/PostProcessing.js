@@ -77,11 +77,11 @@ export class PostProcessing {
 		const height = window.innerHeight;
 		const pixelRatio = Math.min(window.devicePixelRatio, 2);
 
-		camera.aspect = width / height;
-		camera.updateProjectionMatrix();
+		this.camera.aspect = width / height;
+		this.camera.updateProjectionMatrix();
 
-		renderer.setSize(width, height);
-		renderer.setPixelRatio(pixelRatio);
+		this.renderer.setSize(width, height);
+		this.renderer.setPixelRatio(pixelRatio);
 
 		this.renderTarget.setSize(width * pixelRatio, height * pixelRatio);
 
