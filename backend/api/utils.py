@@ -2,6 +2,7 @@ from django.http import QueryDict
 from django.core.files.base import ContentFile
 from django.contrib.auth import get_user_model
 from channels.db import database_sync_to_async
+from api.db_utils import get_user
 import os
 import jwt
 import re
@@ -14,25 +15,21 @@ import base64
 
 def get_cookie(headers, name):
 	cookies = headers.get('cookie', None)
-	return re.search(f'{name}=([^;]+)', cookies)
+	if cookies:
+		return re.search(f'{name}=([^;]+)', cookies)
+	return None
 
 async def jwt_to_user(headers):
-	@database_sync_to_async
-	def get_user(user_id):
-		User = get_user_model()
-		return User.objects.get(id=user_id)
-
 	try:
 		headers_dict = dict((key.decode('utf-8'), value.decode('utf-8')) for key, value in headers)
 		jwt_cookie = get_cookie(headers_dict, 'jwt')
+		user = None
 		if jwt_cookie:
 			token = jwt_cookie.group(1)
 			jwt_secret = get_secret_from_file('JWT_SECRET_KEY_FILE')
 			payload = jwt.decode(token, jwt_secret, ['HS256'])
 			user = await get_user(payload.get('id'))
-			if user:
-				return user
-		return False
+		return user if user is not None else False
 
 	except jwt.ExpiredSignatureError:
 		return False
