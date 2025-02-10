@@ -27,8 +27,30 @@ export default class MainView {
 		window.app.renderHeader(this.container, "play");
 		this.container.innerHTML += `
 			<main>
+				<div id="how-to-play-card" class="card">
+					<h2 id="card-title"><i class="fa-regular fa-circle-question"></i> HOW TO PLAY</h2>
+					<div id="how-to-play-content">
+						<p>
+							<i class="fa-solid fa-star"></i> <strong>Classic Mode</strong><br>
+								Master the fundamentals of speed and precision<br>
+								Experience pure, competitive Pong action<br>
+								Perfect your paddle control and timing<br>
+							<br>
+							<i class="fa-solid fa-bolt"></i> <strong>Rumble Mode</strong><br>
+								Unleash chaos with random events<br>
+								Test your reaction time and adaptability<br>
+								Enjoy a more dynamic and unpredictable game<br>
+							<br>
+							<i class="fa-solid fa-palette"></i> Pick your style and dominate the game<br>
+							<i class="fa-solid fa-medal"></i> Climb the ranks in both modes<br>
+							<i class="fa-solid fa-crown"></i> Join epic tournaments and compete for glory<br>
+							<i class="fa-solid fa-trophy"></i> Earn achievements and show off your skills<br>
+							<i class="fa-solid fa-users"></i> Challenge friends or compete globally<br>
+						</p>
+					</div>
+				</div>
 				<div id="play-card" class="card">
-					<h2 id="card-title">PLAY</h2>
+					<h2 id="card-title"><i class="fa-solid fa-gamepad"></i> PLAY</h2>
 					<div id="game-mode">
 						<div class="checkbox-button">
 							<input type="checkbox" id="game-mode-checkbox" class="checkbox">
@@ -50,10 +72,10 @@ export default class MainView {
 					</div>
 					<button id="start-button" type="submit"><i class="fa-solid fa-gamepad"></i> Play</button>
 				</div>
-				<div id="chatBoxContainer"></div>
-				<div id="tournamentContainer"></div>
-				<div id="gameContainer"></div>
-			</main>
+				</main>
+			<div id="chatBoxContainer"></div>
+			<div id="tournamentContainer"></div>
+			<div id="gameContainer"></div>
 		`;
 	}
 

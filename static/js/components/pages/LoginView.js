@@ -17,7 +17,7 @@ export default class LoginView {
 			<main>
 				<div id="login-card" class="card">
 					<form id="login-form">
-						<h2 id="card-title">LOG IN</h2>
+						<h2 id="card-title"><i class="fa-solid fa-right-to-bracket"></i> LOG IN</h2>
 						<div class="input-container">
 							<i class="fa-solid fa-user input-icon"></i>
 							<input type="text" id="username-input" placeholder="Username" maxlength="16" required>

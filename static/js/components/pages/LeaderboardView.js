@@ -18,7 +18,7 @@ export default class LeaderboardView {
 		this.container.innerHTML += `
 			<main>
 				<div id="leaderboard-card" class="card">
-					<h2 id="card-title">LEADERBOARD</h2>
+					<h2 id="card-title"><i class="fa-solid fa-medal"></i> LEADERBOARD</h2>
 					<div id="leaderboard-content">
 						<div class="lb-card-header">
 							<div class="lb-card-pos lb-card-att"><i class="fa-solid fa-ranking-star"></i> Rank</div>
