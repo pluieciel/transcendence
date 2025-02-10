@@ -13,6 +13,8 @@ export class PostProcessing {
 		let antiAliasing = quality > 1;
 		let bloom = quality > 0;
 		this.renderTarget = null;
+		this.renderer = renderer;
+		this.camera = camera;
 
 		let bloomParams = {
 			exposure: 0,
@@ -50,6 +52,7 @@ export class PostProcessing {
 		renderPass.clearAlpha = 0;
 		this.composer.addPass(renderPass);
 
+
 		if (bloom) {
 			const bloomPass = new UnrealBloomPass(
 				new THREE.Vector2(window.innerWidth, window.innerHeight),
@@ -68,8 +71,8 @@ export class PostProcessing {
 			const smaaPass = new SMAAPass(window.innerWidth * renderer.getPixelRatio(), window.innerHeight * renderer.getPixelRatio());
 			this.composer.addPass(smaaPass);
 		}
-
-		window.addEventListener("resize", this.onWindowResize.bind(this));
+		if (!preview)
+			window.addEventListener("resize", this.onWindowResize.bind(this));
 	}
 
 	onWindowResize() {
@@ -77,16 +80,19 @@ export class PostProcessing {
 		const height = window.innerHeight;
 		const pixelRatio = Math.min(window.devicePixelRatio, 2);
 
-		this.camera.aspect = width / height;
-		this.camera.updateProjectionMatrix();
+		if (this.camera) {
 
-		this.renderer.setSize(width, height);
-		this.renderer.setPixelRatio(pixelRatio);
+			this.camera.aspect = width / height;
+			this.camera.updateProjectionMatrix();
 
-		this.renderTarget.setSize(width * pixelRatio, height * pixelRatio);
+			this.renderer.setSize(width, height);
+			this.renderer.setPixelRatio(pixelRatio);
 
-		this.composer.setSize(width, height);
-		this.composer.setPixelRatio(pixelRatio);
+			this.renderTarget.setSize(width * pixelRatio, height * pixelRatio);
+
+			this.composer.setSize(width, height);
+			this.composer.setPixelRatio(pixelRatio);
+		}
 	}
 
 	dispose() {
