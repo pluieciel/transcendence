@@ -19,6 +19,7 @@ export default class MainView {
 		window.app.checkForAdmin();
 		this.initComponents();
 		this.checkForBackdrop();
+		window.app.addNavEventListeners();
 	}
 
 	render() {
