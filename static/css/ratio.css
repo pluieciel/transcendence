@@ -23,7 +23,7 @@
 }
 
 #progress-bar-percentage span {
-	bottom: -4px;
+	/* bottom: -4px; */
 	font-size: 1.75rem;
 	display: inline-block;
 	position: absolute;
