@@ -52,7 +52,9 @@ export default class AchievementView {
 								<div class="cheevo-title">Speed of light</div>
 								<div class="cheevo-row">
 									<div class="cheevo-body">Have a ball going to 400kph or more</div>
-									<div class="cheevo-reward"></div>
+									<div class="cheevo-reward">
+										<span class="tooltip">Reward:<br>white color</span>
+									</div>
 								</div>
 									<div class="progress-bar">
 										<div class="progress-bar-percentage" style="width: 0%"><span>0/1</span></div>
@@ -63,13 +65,16 @@ export default class AchievementView {
 							<div class="cheevo-icon"><i class="fa-solid fa-trophy fa-xl"></i></div>
 							<div class="cheevo-container">
 								<div class="cheevo-title">Speed of light</div>
-								<div class="cheevo-body">Have a ball going to 400kph or more</div>
 								<div class="cheevo-row">
+									<div class="cheevo-body">Have a ball going to 400kph or more</div>
+									<div class="cheevo-reward">
+										<span class="tooltip">Reward:<br>white color</span>
+									</div>
+								</div>
 									<div class="progress-bar">
 										<div class="progress-bar-percentage" style="width: 100%"><span>1/1</span></div>
 									</div>
 								</div>
-							</div>
 						</div>
 						<div class="cheevo">
 							<div class="cheevo-icon"><i class="fa-solid fa-trophy fa-xl"></i></div>
