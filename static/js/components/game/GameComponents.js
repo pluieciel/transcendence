@@ -26,21 +26,17 @@ export default class GameComponent {
 
 	addPlayButtonEventListeners() {
 		const playButton = document.getElementById("start-button");
-		const checkbox = document.getElementById("game-mode-checkbox");
+		const gameModeCheckbox = document.getElementById("game-mode-checkbox");
+		const gameTypeCheckbox = document.getElementById("game-type-checkbox");
 
 		playButton.addEventListener("click", () => {
-			window.app.settings["game-mode"] = checkbox.checked ? "rumble" : "classic";
+			window.app.settings["game-mode"] = gameModeCheckbox.checked ? "rumble" : "classic";
+			window.app.settings["game-type"] = gameTypeCheckbox.checked ? "ranked" : "ai";
 
-			console.log("game-type: " + window.app.settings["game-type"]);
-			console.log("game-mode: " + window.app.settings["game-mode"]);
-
-			if (window.app.settings["game-type"] === "ai") {
+			if (window.app.settings["game-type"] === "ai")
 				this.playBot(1);
-			}
-
-			if (window.app.settings["game-type"] === "ranked") {
+			else if (window.app.settings["game-type"] === "ranked")
 				this.searchGame();
-			}
 		});
 	}
 
