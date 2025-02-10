@@ -18,7 +18,6 @@ export default class AdminView {
 				await window.app.getSettings();
 				window.app.renderHeader(this.container, "admin");
 				this.container.innerHTML += data.admin_view;
-				window.app.checkForAdmin();
 				this.addEventListeners();
 			} else if (response.status == 401 && !data.is_jwt_valid) {
 				window.app.logout();
