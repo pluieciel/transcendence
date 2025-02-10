@@ -711,9 +711,9 @@ hr::after {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	justify-content: center;
-	width: 20rem;
-	height: 25rem;
+	justify-content: space-between;
+	width: 28rem;
+	height: 18rem;
 }
 
 .service-logo {
