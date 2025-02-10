@@ -206,7 +206,7 @@ class ClassicGameInstance:
 		self.announceEvent = True
 		self.ball.visible = False
 		self.ball.is_moving = False
-		self.ball.countdown = 5
+		self.ball.countdown = 2
 		self.scored = True
 
 		if (self.check_winner(winner)):
