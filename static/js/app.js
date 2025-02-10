@@ -165,10 +165,12 @@ class App {
 						</li>
 					</ul>
 				</nav>
-			`;
-		}
-		header += `</header>`;
-		container.innerHTML = header;
+				`;
+			}
+			header += `</header>`;
+			container.innerHTML = header;
+			if (withNav)
+				this.checkForAdmin();
 	}
 
 	addNavEventListeners() {

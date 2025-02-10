@@ -15,7 +15,6 @@ export default class CustomizeView {
 	async init() {
 		await window.app.getSettings();
 		this.render();
-		window.app.checkForAdmin();
 		this.addEventListeners();
 		this.settings = {
 			color: window.app.settings.color,
