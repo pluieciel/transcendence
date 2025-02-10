@@ -13,26 +13,18 @@ export default class CustomizeView {
 	}
 
 	async init() {
+		await window.app.getSettings();
 		this.render();
+		window.app.checkForAdmin();
 		this.addEventListeners();
-		await this.getSettings();
-		if (window.app.settings.is_admin) {
-			const adminButton = document.getElementById("admin-button");
-			adminButton.style.display = "block";
-		}
-		await addUserData(this.settings);
-		const canvas = document.getElementById("preview");
-		this.previewGame = new PreviewGame(canvas);
-		await this.previewGame.initialize();
-	}
-
-	async getSettings() {
-		if (!window.app.settings["fetched"]) await window.app.getPreferences();
 		this.settings = {
 			color: window.app.settings.color,
 			quality: window.app.settings.quality,
 		};
-		return;
+		await addUserData(this.settings);
+		const canvas = document.getElementById("preview");
+		this.previewGame = new PreviewGame(canvas);
+		await this.previewGame.initialize();
 	}
 
 	async refresh_settings() {

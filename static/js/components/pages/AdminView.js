@@ -1,17 +1,8 @@
 export default class AdminView {
     constructor(container) {
         this.container = container;
-		this.render();
+		this.render()
     }
-	
-	async getSettings() {
-		if (!window.app.settings['fetched'])
-			await window.app.getPreferences();
-		if (window.app.settings.is_admin) {
-			const adminButton = document.getElementById("admin-button");
-			adminButton.style.display = "block";
-		}
-	}
 
     async render() {
 		try {
@@ -24,9 +15,10 @@ export default class AdminView {
 
 			const data = await response.json();
 			if (data.success) {
+				await window.app.getSettings();
 				this.container.innerHTML = data.admin_view;
+				window.app.checkForAdmin();
 				this.addEventListeners();
-				await this.getSettings();
 			} else if (response.status == 409) {
 				console.log(data.message);
 			} else {

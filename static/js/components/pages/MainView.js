@@ -15,20 +15,12 @@ export default class MainView {
 	}
 
 	async init() {
+		await window.app.getSettings();
 		this.render();
+		window.app.checkForAdmin();
 		this.initComponents();
-		if (!window.app.settings["fetched"]) window.app.getPreferences();
 		this.checkForBackdrop();
 		this.addEventListeners();
-		await this.getSettings();
-	}
-
-	async getSettings() {
-		if (!window.app.settings["fetched"]) await window.app.getPreferences();
-		if (window.app.settings.is_admin) {
-			const adminButton = document.getElementById("admin-button");
-			adminButton.style.display = "block";
-		}
 	}
 
 	render() {

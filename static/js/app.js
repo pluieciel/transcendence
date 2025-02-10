@@ -208,6 +208,18 @@ class App {
 		});
 	}
 
+	async getSettings() {
+		if (!window.app.settings["fetched"]) 
+			await window.app.getPreferences();
+	}
+
+	checkForAdmin() {
+		if (window.app.settings.is_admin) {
+			const adminButton = document.querySelector("li:has(button[id='admin-button'])");
+			adminButton.style.display = "block";
+		}
+	}
+
 	login(data) {
 		this.state.isLoggedIn = true;
 		this.state.username = data.username;

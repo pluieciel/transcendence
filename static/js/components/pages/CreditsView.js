@@ -6,18 +6,10 @@ export default class CreditsView {
 	}
 
 	async init() {
+		await window.app.getSettings();
 		this.render();
+		window.app.checkForAdmin();
 		window.app.addNavEventListeners();
-		await this.getSettings();
-	}
-	
-	async getSettings() {
-		if (!window.app.settings['fetched'])
-			await window.app.getPreferences();
-		if (window.app.settings.is_admin) {
-			const adminButton = document.getElementById("admin-button");
-			adminButton.style.display = "block";
-		}
 	}
 
 	render() {

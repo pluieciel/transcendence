@@ -6,19 +6,11 @@ export default class LeaderboardView {
 	}
 
 	async init() {
+		await window.app.getSettings();
 		this.render();
+		window.app.checkForAdmin();
 		window.app.addNavEventListeners();
-		await this.getSettings();
 		this.addContent();
-	}
-	
-	async getSettings() {
-		if (!window.app.settings['fetched'])
-			await window.app.getPreferences();
-		if (window.app.settings.is_admin) {
-			const adminButton = document.getElementById("admin-button");
-			adminButton.style.display = "block";
-		}
 	}
 
 	render() {

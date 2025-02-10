@@ -8,19 +8,11 @@ export default class ProfileView {
 	}
 
 	async init() {
+		await window.app.getSettings();
 		this.render();
+		window.app.checkForAdmin();
 		this.addEventListeners();
 		this.setProfileFields();
-		await this.getSettings();
-	}
-	
-	async getSettings() {
-		if (!window.app.settings['fetched'])
-			await window.app.getPreferences();
-		if (window.app.settings.is_admin) {
-			const adminButton = document.getElementById("admin-button");
-			adminButton.style.display = "block";
-		}
 	}
 	
 	render() {
