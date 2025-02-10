@@ -9,7 +9,7 @@ export default class SignupView {
 	}
 
 	render() {
-		window.app.renderHeader(this.container, null, false, true);
+		window.app.renderHeader(this.container, null, false, true, true);
 		this.container.innerHTML += `
 			<main>
 				<div id="signup-card" class="card">

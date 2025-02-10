@@ -8,7 +8,7 @@
 	--accent-color: #353535;
 	--hover-color: #666;
 	--header-color: #090909;
-	--user-color: #0ff;
+	--user-color: #00BDD1;
 	--header-disabled-color: #535353;
 	--input-error-color: #461623;
 	--input-error-border-color: #68292a;
@@ -17,21 +17,19 @@
 	--selector-color: #1e1e1e;
 }
 
-/* TODO: Modify scrollbar for chrome */
-/* ::-webkit-scrollbar {
-	width: 10px;
+::-webkit-scrollbar {
+	width: 0.5rem;
 }
   
 ::-webkit-scrollbar-track {
 	background: transparent;
-	border-radius: 5px;
-    margin-bottom: 20px;
+	border-radius: 0.3rem;
 }
 
 ::-webkit-scrollbar-thumb {
-	border-radius: 5px;
-	background: var(--secondary-color);
-} */
+	border-radius: 0.3rem;
+	background: var(--hover-color);
+}
 
 html, body {
 	height: 100%;
@@ -223,7 +221,6 @@ input {
 
 input::placeholder {
 	color: var(--secondary-color);
-	padding: 0 0.7rem;
 }
 
 input:focus {

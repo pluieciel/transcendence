@@ -12,7 +12,7 @@ export default class LoginView {
 	}
 
 	render() {
-		window.app.renderHeader(this.container, null, false, true);
+		window.app.renderHeader(this.container, null, false, true, true);
 		this.container.innerHTML += `
 			<main>
 				<div id="login-card" class="card">

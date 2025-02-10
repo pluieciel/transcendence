@@ -103,11 +103,11 @@ class App {
 		errorDiv.style.display = 'block';
 	}
 
-	renderHeader(container, disableBtn = null, withNav = true, creditsDisabled = false) {
+	renderHeader(container, disableBtn = null, withNav = true, creditsDisabled = false, inLogin = false) {
 		let header = `
 			<header>
 				<h1 id="header-title">P
-					<button id="credits-button" ${creditsDisabled ? 'disabled' : ''}>
+					<button id="${inLogin ? 'login-credits-button' : 'credits-button'}" ${creditsDisabled ? 'disabled' : ''}>
 						<i class="fa-solid fa-table-tennis-paddle-ball fa-xs"></i>
 					</button>
 					N G
@@ -172,9 +172,11 @@ class App {
 		const adminButton = document.getElementById("admin-button");
 		const logoutButton = document.getElementById("logout-button");
 
-		creditButton.addEventListener("click", () => {
-			window.app.router.navigateTo("/credits");
-		});
+		if (creditButton) {
+			creditButton.addEventListener("click", () => {
+				window.app.router.navigateTo("/credits");
+			});
+		}
 
 		playButton.addEventListener("click", () => {
 			window.app.router.navigateTo("/index");
