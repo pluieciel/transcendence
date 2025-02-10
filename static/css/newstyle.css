@@ -51,7 +51,7 @@ body {
 	flex-wrap: wrap;
 }
 
-i {
+i:not(#chat-icon) {
 	margin-right: 0.2rem;
 }
 
@@ -531,6 +531,23 @@ hr::after {
     background-color: var(--selector-color);
 }
 
+#chat-icon {
+	color: var(--secondary-color);
+}
+
+#how-to-play-card {
+	position: absolute;
+	text-align: center;
+	top: 8.5rem;
+	right: 2.5rem;
+	width: 30rem;
+}
+
+#play-card {
+	margin: auto;
+	width: 30rem;
+}
+
 /* ******************************** */
 /*                Customize         */
 /* ******************************** */
@@ -679,15 +696,16 @@ hr::after {
 /*                Credits           */
 /* ******************************** */
 
-#credits-card, #about-us-card, #how-to-play-card {
+#credits-card, #subject-card {
 	text-align: center;
 	width: 30rem;
-	height: 30rem;
+	height: 45rem;
 	overflow: hidden;
 }
 
 #tooltip-github {
 	font-size: 0.8rem;
+	opacity: 0.5;
 }
 
 #github-links {
@@ -703,6 +721,12 @@ hr::after {
 	text-shadow: 0 0 5px var(--user-color);
 }
 
+#subject-pdf {
+	width: 100%;
+	height: 100%;
+	border-radius: 0.3rem;
+}
+
 /* ******************************** */
 /*                Admin             */
 /* ******************************** */
@@ -711,9 +735,9 @@ hr::after {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	justify-content: center;
-	width: 20rem;
-	height: 25rem;
+	justify-content: space-between;
+	width: 28rem;
+	height: 18rem;
 }
 
 .service-logo {
