@@ -37,57 +37,7 @@ class AdminConsumer(AsyncHttpConsumer):
 				headers=[(b"Content-Type", b"application/json")])
 
 	def get_admin_view(self):
-		return """<header>
-				<h1 id="header-title">P
-					<button id="credits-button">
-						<i class="fa-solid fa-table-tennis-paddle-ball fa-xs"></i>
-					</button>
-					N G
-				</h1>
-				<nav>
-					<ul>
-						<li>
-							<button id="play-button">
-								<i class="fa-solid fa-gamepad fa-xl"></i>Play
-							</button>
-						</li>
-						<li>
-							<button id="customize-button">
-								<i class="fa-solid fa-palette fa-xl"></i>Customize
-							</button>
-						</li>
-						<li>
-							<button id="leaderboard-button">
-								<i class="fa-solid fa-medal fa-xl"></i>Leaderboard
-							</button>
-						</li>
-						<li>
-							<button id="achievements-button">
-								<i class="fa-solid fa-trophy fa-xl"></i>Achievements
-							</button>
-						</li>
-						<li>
-							<button id="profile-button">
-								<i class="fa-solid fa-user fa-xl"></i>Profile
-							</button>
-						</li>
-						<li>
-							<button id="admin-button">
-								<i class="fa-solid fa-user-tie fa-xl" disabled></i>Admin
-							</button>
-						</li>
-						<li>
-							<button id="logout-button">
-								<i class="fa-solid fa-right-from-bracket fa-xl"></i>Log Out
-							</button>
-						</li>
-					</ul>
-				</nav>
-				</header>
-				<div class="welcome">
-					<p>Welcome to your admin dashboard, you can access all monitoring services here!</p>
-				</div>
-				<div id="services">
+		return """<div id="services">
 					<div id="services-container">
 						<div class="service userOutline">
 							<div class="service-header">

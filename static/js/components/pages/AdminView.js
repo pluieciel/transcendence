@@ -16,7 +16,8 @@ export default class AdminView {
 			const data = await response.json();
 			if (data.success) {
 				await window.app.getSettings();
-				this.container.innerHTML = data.admin_view;
+				window.app.renderHeader(this.container, "admin");
+				this.container.innerHTML += data.admin_view;
 				window.app.checkForAdmin();
 				this.addEventListeners();
 			} else if (response.status == 409) {
