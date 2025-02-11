@@ -21,22 +21,14 @@ class AvatarConsumer(AsyncHttpConsumer):
 				}
 				return await self.send_response(401, json.dumps(response_data).encode(),
 					headers=[(b"Content-Type", b"application/json")])
+			match = re.search(r'/api/get/avatar/(\w+)', self.scope['path'])
+			username = match.group(1)
+			avatar_user = await get_user_by_name(username)
 
-			path = self.scope['path']
-			match = re.search(r'/api/get/avatar/(\w+)', path)
-			user_name = match.group(1)
-			host = 'https://' + next((value.decode('utf-8') for key, value in self.scope['headers'] if key == b'x-forwarded-host'), 'localhost:9000')
-			if host == 'https://localhost:9000':
-				host = next((value.decode('utf-8') for key, value in self.scope['headers'] if key == b'origin'), 'localhost:9000')
 			response_data = {
-				'username': user.username,
 				'success': True,
-				'avatar' : f"{host}{user.avatar.url}" if user.avatar else f"{host}/default_avatar.png",
+				'avatar_url' : self.get_user_avatar_url(avatar_user, self.scope['headers']),
 			}
-			print(user.oauthlog, flush=True)
-			print(user.is42avatarused, flush=True)
-			if (user.is42avatarused):
-				response_data['avatar'] = user.avatar42
 			return await self.send_response(200, json.dumps(response_data).encode(),
 				headers=[(b"Content-Type", b"application/json")])
 
@@ -47,7 +39,15 @@ class AvatarConsumer(AsyncHttpConsumer):
 			}
 			return await self.send_response(500, json.dumps(response_data).encode(),
 				headers=[(b"Content-Type", b"application/json")])
-		
+
+	def get_user_avatar_url(self, user, headers):
+		if (user.is42avatarused):
+			return user.avatar42
+		host = next(value.decode('utf-8') for key, value in headers if key == b'x-forwarded-host')
+		port = next(value.decode('utf-8') for key, value in headers if key == b'x-forwarded-port')
+		url = f"https://{host}:{port}"
+		return f"{url}{user.avatar.url}" if user.avatar else f"{url}/imgs/default_avatar.png"
+
 class setAvatar(AsyncHttpConsumer):
 	async def handle(self, body):
 		try:

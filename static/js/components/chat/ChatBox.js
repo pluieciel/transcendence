@@ -385,15 +385,9 @@ export default class ChatBox {
 			this.allusers.map(async (user) => {
 				const avatar_div = this.container.querySelector(`#avatar_${user}`);
 				if (avatar_div) {
-					const response = await fetch(`/api/get/avatar/${user}`, {
-						method: "POST",
-						headers: {
-							"Content-Type": "application/json",
-						},
-					});
-					const data = await response.json();
-					if (data.avatar) {
-						avatar_div.innerHTML = `<img src="${data.avatar}" width="30" height="30"></img>`;
+					const avatarUrl = await window.app.getAvatar(user);
+					if (avatarUrl) {
+						avatar_div.innerHTML = `<img src="${avatarUrl}" width="30" height="30"></img>`;
 					}
 				}
 			});

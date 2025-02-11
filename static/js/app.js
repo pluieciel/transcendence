@@ -75,8 +75,9 @@ class App {
 			},
 		});
 		const data = await response.json();
-		this.avatarCache[username] = data.avatar;
-		return data.avatar;
+		console.log(data);
+		this.avatarCache[username] = data.avatar_url;
+		return data.avatar_url;
 	}
 
 	async getPreferences() {
