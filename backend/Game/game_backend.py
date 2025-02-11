@@ -40,10 +40,8 @@ class GameBackend:
 		self.chat_consumer = ChatConsumer
 	def handle_key_event(self, websocket, key, is_down):
 		if websocket == self.player_left.channel:
-			self.logger.info(f"Left player pressed {key}")
 			self.game.player_left.keys[key] = is_down
 		elif websocket == self.player_right.channel:
-			self.logger.info(f"Right player pressed {key}")
 			self.game.player_right.keys[key] = is_down
 
 	def get_game_instance(self, type):

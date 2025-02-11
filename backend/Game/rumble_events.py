@@ -2,6 +2,8 @@ import asyncio
 import random
 import logging
 from abc import ABC, abstractmethod
+
+from asyncio.base_events import time
 from .game_helper_class import DEFAULT_BALL_ACCELERATION, DEFAULT_BALL_BASE_SPEED, DEFAULT_PLAYER_SPEED
 from .rumble_custom_method import MirrorBounce, RandomBounce, IcyMovement, InvertedMovements, NoStoppingMovements, NormalBounce, NormalMovements, KillerBall
 
@@ -11,8 +13,9 @@ class GameEvent(ABC):
 		self.description = None
 		self.game = game
 		self.ball_accel_mult = 1
-		self.ball_basespeed_mult = 0.9
-		self.player_speed_mult = 1.1
+		self.ball_basespeed_mult = 1
+		self.player_speed_mult = 1
+		self.ball_maxspeed_mult = 1
 		self.is_active = False
 		self.action = 'none'
 
@@ -25,6 +28,8 @@ class GameEvent(ABC):
 		self.game.ball.baseSpeed *= self.ball_basespeed_mult
 		self.game.player_left.paddle_speed *= self.player_speed_mult
 		self.game.player_right.paddle_speed *= self.player_speed_mult
+		self.game.ball.maxSpeed = self.game.ball.calculate_max_safe_speed(self.game.player_left.paddle_speed) * self.ball_maxspeed_mult
+
 
 	@abstractmethod
 	def apply_specific(self):
@@ -39,6 +44,7 @@ class GameEvent(ABC):
 		self.game.ball.baseSpeed = DEFAULT_BALL_BASE_SPEED
 		self.game.player_left.paddle_speed = DEFAULT_PLAYER_SPEED
 		self.game.player_right.paddle_speed = DEFAULT_PLAYER_SPEED
+		self.game.ball.maxSpeed = self.game.ball.baseMaxSpeed
 
 	@abstractmethod
 	def revert_specific(self):
@@ -46,14 +52,11 @@ class GameEvent(ABC):
 
 class InvertedControlsEvent(GameEvent):
 	def __init__(self, game: 'RumbleGameInstance'):
+		super().__init__(game)
 		self.game = game
 		self.icon = "fa-solid fa-arrows-rotate"
 		self.name = "Inverted Controls"
 		self.description = "Controls are inverted !"
-		self.ball_accel_mult = 1
-		self.ball_basespeed_mult = 1
-		self.player_speed_mult = 1
-		self.action = 'none'
 
 	def apply_specific(self):
 		self.game.player_left.movement_method = InvertedMovements()
@@ -66,14 +69,14 @@ class InvertedControlsEvent(GameEvent):
 
 class RandomBouncesEvent(GameEvent):
 	def __init__(self, game: 'RumbleGameInstance'):
+		super().__init__(game)
 		self.game = game
 		self.icon = "fa-solid fa-shuffle"
 		self.name = "Random Bounces"
 		self.description = "All bounces from the ball are random !"
-		self.ball_accel_mult = 1
-		self.ball_basespeed_mult = 0.9
+		self.ball_accel_mult = 0.9
+		self.ball_basespeed_mult = 0.8
 		self.player_speed_mult = 1.1
-		self.action = 'none'
 
 	def apply_specific(self):
 		self.game.ball.bounce_methods = RandomBounce()
@@ -83,14 +86,11 @@ class RandomBouncesEvent(GameEvent):
 
 class MirrorBallEvent(GameEvent):
 	def __init__(self, game: 'RumbleGameInstance'):
+		super().__init__(game)
 		self.game = game
 		self.icon = "fa-solid fa-arrow-down-up-across-line"
 		self.name = "Mirror Ball"
 		self.description = "The ball teleports to the opposite wall instead of bouncing"
-		self.ball_accel_mult = 1
-		self.ball_basespeed_mult = 1
-		self.player_speed_mult = 1
-		self.action = 'none'
 
 	def apply_specific(self):
 		self.game.ball.bounce_methods = MirrorBounce()
@@ -100,13 +100,11 @@ class MirrorBallEvent(GameEvent):
 
 class LightsOutEvent(GameEvent):
 	def __init__(self, game: 'RumbleGameInstance'):
+		super().__init__(game)
 		self.game = game
 		self.icon = "fa-solid fa-lightbulb"
 		self.name = "Lights Out"
 		self.description = "The lights turned off"
-		self.ball_accel_mult = 1
-		self.ball_basespeed_mult = 1
-		self.player_speed_mult = 1
 
 	def apply_specific(self):
 		self.action = 'off'
@@ -117,14 +115,12 @@ class LightsOutEvent(GameEvent):
 
 class SmokeCloudEvent(GameEvent):
 	def __init__(self, game: 'RumbleGameInstance'):
+		super().__init__(game)
 		self.game = game
 		self.icon = "fa-solid fa-smog"
 		self.name = "SmokeCloud"
 		self.action = 'smoke'
 		self.description = "The ball disappears when in the middle of the field !"
-		self.ball_accel_mult = 1
-		self.ball_basespeed_mult = 1
-		self.player_speed_mult = 1
 
 	def apply_specific(self):
 		self.action = 'smoke'
@@ -132,23 +128,22 @@ class SmokeCloudEvent(GameEvent):
 	def revert_specific(self):
 		self.action = 'reset'
 
-class InfiniteSpeedEvent(GameEvent):
+class RampingBallEvent(GameEvent):
 	def __init__(self, game: 'RumbleGameInstance'):
+		super().__init__(game)
 		self.game = game
 		self.icon = "fa-solid fa-gauge-high"
-		self.name = "Infinite Speed"
-		self.description = "The ball can go infinitely fast !"
-		self.action = 'none'
-		self.ball_accel_mult = 1
-		self.ball_basespeed_mult = 1.2
+		self.name = "Ramping Ball"
+		self.description = "The ball accelerates really fast!"
+		self.ball_accel_mult = 2
 		self.player_speed_mult = 1.1
-		self.base_max_speed = self.game.ball.maxSpeed
+		self.ball_maxspeed_mult = 15
 
 	def apply_specific(self):
-		self.game.ball.maxSpeed = 500
+		pass
 
 	def revert_specific(self):
-		self.game.ball.maxSpeed = self.base_max_speed
+		pass
 
 class ReverseBallEvent(GameEvent):
 	def __init__(self, game: 'RumbleGameInstance'):
@@ -156,22 +151,29 @@ class ReverseBallEvent(GameEvent):
 		self.icon = "fa-solid fa-backward"
 		self.name = "Reverse Ball"
 		self.description = "The ball can randomly reverse its direction"
+		self.base_max_speed = self.game.ball.maxSpeed
 		self.action = 'none'
 		self.ball_accel_mult = 1
 		self.ball_basespeed_mult = 1
 		self.player_speed_mult = 1
-		self.base_max_speed = self.game.ball.maxSpeed
+		self.ball_maxspeed_mult = 1
+
 		self.reverse_task = None
-		self.reverse_interval = random.randint(2, 8)
+		self.normal_reverse_interval = (3, 6)
+		self.fast_reverse_interval = (1, 3)
+		self.fast_chance = 0.2
 
 	async def reverse_ball_direction(self):
 		try:
+			await asyncio.sleep(5)
 			while True:
+				if (random.random() < self.fast_chance):
+					self.reverse_interval = random.uniform(*self.fast_reverse_interval)
+				else:
+					self.reverse_interval = random.uniform(*self.normal_reverse_interval)
 				await asyncio.sleep(self.reverse_interval)
 				self.game.ball.velocity.x *= -1.5
 				self.game.ball.velocity.y *= -1.5
-				self.reverse_interval = random.randint(2, 8)
-				self.game.logger.info("Ball direction reversed!")
 		except asyncio.CancelledError:
 			self.game.logger.info("Reverse ball direction task cancelled")
 
@@ -189,10 +191,10 @@ class ShrinkingPaddleEvent(GameEvent):
 		self.game = game
 		self.icon = "fa-solid fa-arrows-left-right-to-line"
 		self.name = "Shrinking Paddles"
-		self.action = 'none'
 		self.description = "Each hit will shrink your paddle !"
-		self.ball_accel_mult = 0.9
-		self.ball_basespeed_mult = 0.9
+		self.ball_accel_mult = 0.8
+		self.ball_basespeed_mult = 0.8
+		self.ball_maxspeed_mult = 1
 		self.player_speed_mult = 1
 		self.paddle_height = self.game.player_left.paddle_height
 
@@ -213,6 +215,7 @@ class NoStoppingEvent(GameEvent):
 		self.ball_accel_mult = 1
 		self.ball_basespeed_mult = 1
 		self.player_speed_mult = 1
+		self.ball_maxspeed_mult = 1
 		self.action = 'none'
 
 	def apply_specific(self):
@@ -234,6 +237,7 @@ class KillerBallEvent(GameEvent):
 		self.ball_accel_mult = 1.1
 		self.ball_basespeed_mult = 0.9
 		self.player_speed_mult = 1.1
+		self.ball_maxspeed_mult = 1.2
 
 	def apply_specific(self):
 		self.game.ball.bounce_methods = KillerBall(self.game)
@@ -252,6 +256,7 @@ class IcyPaddlesEvent(GameEvent):
 		self.ball_accel_mult = 0.95
 		self.ball_basespeed_mult = 0.95
 		self.player_speed_mult = 1
+		self.ball_maxspeed_mult = 1
 
 	def apply_specific(self):
 		self.game.player_left.movement_method = IcyMovement()
@@ -266,11 +271,11 @@ class VisibleTrajectoryEvent(GameEvent):
 		self.game = game
 		self.icon = "fa-solid fa-arrow-trend-up"
 		self.name = "Visible Trajectory"
-		self.action = 'none'
 		self.description = "You can now see the ball trajectory, but it goes faster !"
 		self.ball_accel_mult = 1.3
 		self.ball_basespeed_mult = 1
 		self.player_speed_mult = 1.3
+		self.ball_maxspeed_mult = 1
 
 	def apply_specific(self):
 		pass
@@ -289,6 +294,44 @@ class BreathingTimeEvent(GameEvent):
 		self.ball_accel_mult = 1
 		self.ball_basespeed_mult = 1
 		self.player_speed_mult = 1
+		self.ball_maxspeed_mult = 1
+
+
+	def apply_specific(self):
+		pass
+
+	def revert_specific(self):
+		pass
+
+class SupersonicBallEvent(GameEvent):
+	def __init__(self, game: 'RumbleGameInstance'):
+		self.game = game
+		self.icon = "fa-solid fa-stopwatch"
+		self.name = "Supersonic Ball"
+		self.description = "The ball starts really fast"
+		self.action = 'none'
+		self.ball_accel_mult = 0.5
+		self.ball_basespeed_mult = 1.3
+		self.player_speed_mult = 1.2
+		self.ball_maxspeed_mult = 1
+
+	def apply_specific(self):
+		pass
+
+	def revert_specific(self):
+		pass
+
+class InfiniteSpeedEvent(GameEvent):
+	def __init__(self, game: 'RumbleGameInstance'):
+		self.game = game
+		self.icon = "fa-solid fa-stopwatch"
+		self.name = "Infinite Speed"
+		self.description = "The ball can accelerate beyond the max speed"
+		self.action = 'none'
+		self.ball_accel_mult = 1.1
+		self.ball_basespeed_mult = 1
+		self.player_speed_mult = 1.1
+		self.ball_maxspeed_mult = 15
 
 	def apply_specific(self):
 		pass

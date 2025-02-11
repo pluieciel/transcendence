@@ -296,7 +296,6 @@ class GameConsumer(AsyncWebsocketConsumer):
 				await self.send_initial_game_state(self.game)
 
 	async def receive(self, text_data):
-		logging.getLogger('game').info(text_data)
 		try:
 			data = json.loads(text_data)
 			if data["type"] in ["keydown", "keyup"]:
