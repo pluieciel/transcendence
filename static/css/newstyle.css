@@ -173,6 +173,11 @@ nav li:nth-last-child(2) img {
 	opacity: 0.6;
 }
 
+#nav-avatar {
+	border: 1px solid var(--user-color);
+	box-shadow: 0 0 12px var(--user-color);
+}
+
 nav button {
 	display: flex;
 	flex-direction: column;
