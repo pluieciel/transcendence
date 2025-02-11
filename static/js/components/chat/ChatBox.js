@@ -250,10 +250,6 @@ export default class ChatBox {
                     `
 							: `
                         <span class="d-flex align-items-center">
-                            <button class="btn btn-primary square-btn me-1" data-action="setting"
-                                data-bs-toggle="modal" data-bs-target="#usersetting">
-                                <i class="fa-solid fa-gear"></i>
-                            </button>
                             <button id="Donotdisturb" class="btn btn-primary square-btn me-1 ${this.waiting ? "" : "square-btn-red"}"
                                 data-action="waiting"
                                 data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Do not disturb">
