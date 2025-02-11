@@ -173,15 +173,19 @@ export default class ProfileView {
 					let toInsert = " [" + data['display'] + "]";
 					name.insertAdjacentHTML('beforeend', toInsert);
 				}
-			} else
+			} else if (response.status == 401 && !data.is_jwt_valid) {
+				window.app.logout();
+				window.app.router.navigateTo("/login");
+			} else {
 				throw new Error("Request failure");
-			} catch (e) {
-				elo.innerHTML = "Failed to load elo";
-				winrate.innerHTML = "Failed to load winrate";
-				ratio.innerHTML = "Failed to load ratio";
-				tourn.innerHTML = "Failed to load tournaments";
-				console.error("An error occurred: ", e);
 			}
+		} catch (e) {
+			elo.innerHTML = "Failed to load elo";
+			winrate.innerHTML = "Failed to load winrate";
+			ratio.innerHTML = "Failed to load ratio";
+			tourn.innerHTML = "Failed to load tournaments";
+			console.error("An error occurred: ", e);
+		}
 
 		try {
 			const response = await fetch(`/api/get/history/${this.username}`, {
@@ -209,6 +213,12 @@ export default class ProfileView {
 				this.addHistory(data.game[0]);
 				this.addHistory(data.game[0]);
 				this.addHistory(data.game[0]);
+			}
+			else if (response.status == 401 && !data.is_jwt_valid) {
+				window.app.logout();
+				window.app.router.navigateTo("/login");
+			} else {
+				// TODO: show error msg
 			}
 		}
 		catch (e) {
@@ -263,10 +273,13 @@ export default class ProfileView {
 
 						new bootstrap.Modal(this.container.querySelector('#recoveryModal')).show();
 					}
+				} else if (response.status == 401 && !data.is_jwt_valid) {
+					window.app.logout();
+					window.app.router.navigateTo("/login");
 				} else if (response.status == 409) {
-					console.log(response.message);
+					// TODO: show error msg
 				} else {
-					errorDiv.textContent = data['message'] || 'Login failed';
+					errorDiv.textContent = data.message;
 					errorDiv.classList.remove('d-none');
 				}
 			} catch (error) {
@@ -302,8 +315,11 @@ export default class ProfileView {
 					new bootstrap.Modal(this.container.querySelector('#totpModal')).show();
 					const qrCode = this.container.querySelector('#qrCode');
 					qrCode.innerHTML = data.qr_code;
+				} else if (response.status == 401 && !data.is_jwt_valid) {
+					window.app.logout();
+					window.app.router.navigateTo("/login");
 				} else if (response.status == 409) {
-					console.log(data.message);
+					// TODO: show error msg
 				} else {
 					totpError.textContent = data.message;
 					totpError.classList.remove('d-none');
@@ -330,8 +346,11 @@ export default class ProfileView {
 					const	disable2FA = this.container.querySelector('#disable2FA');
 					enable2FA.style.display = "block";
 					disable2FA.style.display = "none";
+				} else if (response.status == 401 && !data.is_jwt_valid) {
+					window.app.logout();
+					window.app.router.navigateTo("/login");
 				} else if (response.status == 409) {
-					console.log(data.message);
+					// TODO: show error msg
 				} else {
 					console.log(data.message);
 				}

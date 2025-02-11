@@ -18,12 +18,14 @@ export default class AdminView {
 				await window.app.getSettings();
 				await window.app.renderHeader(this.container, "admin");
 				this.container.innerHTML += data.admin_view;
-				window.app.checkForAdmin();
 				this.addEventListeners();
+			} else if (response.status == 401 && !data.is_jwt_valid) {
+				window.app.logout();
+				window.app.router.navigateTo("/login");
 			} else if (response.status == 409) {
-				console.log(data.message);
+				// TODO: show error msg
 			} else {
-				console.log(data.message);
+				// TODO: show error msg
 			}
 		} catch (error) {
 			console.log('An error occurred: ' + error);

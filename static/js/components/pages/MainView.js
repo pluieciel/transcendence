@@ -10,7 +10,6 @@ export default class MainView {
 		this.timerInterval = null;
 
 		this.username = window.app.state.username;
-		window.app.settings["game-type"] = "classic";
 		this.init();
 	}
 
@@ -20,7 +19,7 @@ export default class MainView {
 		window.app.checkForAdmin();
 		this.initComponents();
 		this.checkForBackdrop();
-		this.addEventListeners();
+		window.app.addNavEventListeners();
 	}
 
 	async render() {
@@ -62,15 +61,16 @@ export default class MainView {
 						</div>
 					</div>
 					<div id="game-type">
-						<button id="selector-left-arrow"><i class="fa-solid fa-arrow-left fa-lg"></i></button>
-						<div id="selector-middle">
-							<span id="game-type-ai" data-game-type="ai"><i class="fa-solid fa-robot"></i> AI</span>
-							<span id="game-type-ranked" data-game-type="ranked"><i class="fa-solid fa-ranking-star"></i> Ranked</span>
-							<span id="game-type-tournament" data-game-type="tournament"><i class="fa-solid fa-crown"></i> Tournament</span>
+						<div class="checkbox-button">
+							<input type="checkbox" id="game-type-checkbox" class="checkbox">
+							<div class="knobs">
+								<span id="game-type-ai"><i class="fa-solid fa-robot"></i> AI</span>
+								<span id="game-type-ranked"><i class="fa-solid fa-ranking-star"></i> Ranked</span>
+							</div>
+							<div class="layer"></div>
 						</div>
-						<button id="selector-right-arrow"><i class="fa-solid fa-arrow-right fa-lg"></i></button>
 					</div>
-					<button id="start-button" type="submit"><i class="fa-solid fa-gamepad"></i> Play</button>
+					<button type="submit" id="start-button" data-bs-toggle="modal" data-bs-target="#matchSearch"><i class="fa-solid fa-gamepad"></i> Play</button>
 				</div>
 				</main>
 			<div id="chatBoxContainer"></div>
@@ -101,75 +101,6 @@ export default class MainView {
 		}
 
 		new GameComponent(this.container.querySelector("#gameContainer"));
-
-		const quickMatchButton = this.container.querySelector("#quickMatch");
-		if (quickMatchButton) {
-			quickMatchButton.setAttribute("data-bs-toggle", "modal");
-			quickMatchButton.setAttribute("data-bs-target", "#matchSearch");
-		}
-	}
-
-	addGameTypeSelectorEventListeners() {
-		const playButton = document.getElementById("start-button");
-		const leftArrow = document.getElementById("selector-left-arrow");
-		const rightArrow = document.getElementById("selector-right-arrow");
-
-		const gameTypes = [
-			document.getElementById("game-type-ai"),
-			document.getElementById("game-type-ranked"),
-			document.getElementById("game-type-tournament")
-		];
-
-		let currentIndex = 0;
-		window.app.settings["game-type"] = "ai";
-
-		gameTypes.forEach((type, index) => {
-			type.style.display = index === currentIndex ? "block" : "none";
-		});
-
-		const updateDisplay = (newIndex) => {
-			gameTypes[currentIndex].style.display = "none";
-			currentIndex = newIndex;
-			gameTypes[currentIndex].style.display = "block";
-
-			switch (currentIndex) {
-				case 0:
-					window.app.settings["game-type"] = "ai";
-					playButton.removeAttribute("data-bs-toggle");
-					playButton.removeAttribute("data-bs-target");
-					playButton.removeAttribute("data-view");
-					break;
-				case 1:
-					window.app.settings["game-type"] = "ranked";
-					playButton.setAttribute("data-bs-toggle", "modal");
-					playButton.setAttribute("data-bs-target", "#matchSearch");
-					playButton.setAttribute("data-view", "game");
-					break;
-				case 2:
-					window.app.settings["game-type"] = "tournament";
-					playButton.setAttribute("data-bs-toggle", "modal");
-					playButton.setAttribute("data-bs-target", "#tournamentModal");
-					playButton.removeAttribute("data-view");
-					break;
-				default:
-					break;
-			}
-		};
-
-		leftArrow.addEventListener("click", () => {
-			const newIndex = (currentIndex - 1 + gameTypes.length) % gameTypes.length;
-			updateDisplay(newIndex);
-		});
-
-		rightArrow.addEventListener("click", () => {
-			const newIndex = (currentIndex + 1) % gameTypes.length;
-			updateDisplay(newIndex);
-		});
-	}
-
-	addEventListeners() {
-		window.app.addNavEventListeners();
-		this.addGameTypeSelectorEventListeners();
 	}
 
 	checkForBackdrop() {

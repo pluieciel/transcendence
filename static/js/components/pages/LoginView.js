@@ -117,6 +117,8 @@ export default class LoginView {
 					window.location.href = data.auth_url;
 				});
 			}
+			else
+				window.app.showErrorMsg('#input-error', data.message);
 		} catch (error) {
 			window.app.showErrorMsg('#input-error', 'An error occurred: ' + error);
 		}
@@ -168,9 +170,8 @@ export default class LoginView {
 					if (modal)
 						modal.hide();
 					window.app.login(data);
-				} else {
+				} else
 					window.app.showErrorMsg('#totpError', data.message);
-				}
 			} catch (error) {
 				window.app.showErrorMsg('#totpError', 'An error occurred: ' + error);
 			}
@@ -202,9 +203,8 @@ export default class LoginView {
 						new bootstrap.Modal(this.container.querySelector('#totpModal')).show();
 					else
 						window.app.login(data);
-				} else {
+				} else
 					window.app.showErrorMsg('#input-error', data.message);
-				}
 			} catch (error) {
 				window.app.showErrorMsg('#input-error', 'An error occurred: ' + error);
 			}

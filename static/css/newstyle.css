@@ -322,7 +322,7 @@ form button:hover:not(:disabled) {
 	justify-content: center;
 }
 
-#game-type, #color, #quality {
+#color, #quality {
 	width: 100%;
 	display: flex;
 	flex-direction: row;
@@ -469,11 +469,7 @@ hr::after {
 /*                Play              */
 /* ******************************** */
 
-#game-type-ranked, #game-type-tournament {
-	display: none;
-}
-
-#game-mode
+#game-mode, #game-type
 {
 	margin-bottom: 1rem;
     position: relative;
@@ -543,16 +539,16 @@ hr::after {
     background-color: var(--selector-color);
 }
 
-#game-mode-rumble {
+#game-mode-rumble, #game-type-ranked {
 	left: 50%;
 	color: var(--checkbox-unchecked-color);
 }
 
-.checkbox-button .checkbox:checked + .knobs #game-mode-rumble {
+.checkbox-button .checkbox:checked + .knobs #game-mode-rumble, .checkbox-button .checkbox:checked + .knobs #game-type-ranked {
     color: var(--secondary-color);
 }
 
-.checkbox-button .checkbox:checked + .knobs #game-mode-classic {
+.checkbox-button .checkbox:checked + .knobs #game-mode-classic, .checkbox-button .checkbox:checked + .knobs #game-type-ai {
     color: var(--checkbox-unchecked-color);
 }
 
