@@ -9,14 +9,14 @@ export default class ProfileView {
 
 	async init() {
 		await window.app.getSettings();
-		this.render();
+		await this.render();
 		window.app.checkForAdmin();
 		this.addEventListeners();
 		this.setProfileFields();
 	}
 	
-	render() {
-		window.app.renderHeader(this.container, "profile");
+	async render() {
+		await window.app.renderHeader(this.container, "profile");
 		this.container.innerHTML += `
 			<div id="mainPage">
 				<div class="profile-container">

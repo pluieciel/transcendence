@@ -5,7 +5,11 @@ export default class GameView {
 		this.container = container;
 		this.game = null;
 		this.render();
-		this.getSettings();
+		window.app.getSettings();
+		this.settings = {
+			color: window.app.settings.color,
+			quality: window.app.settings.quality,
+		};
 		this.addEventListeners();
 		this.handlePopState = this.handlePopState.bind(this);
 		window.addEventListener("popstate", this.handlePopState);
@@ -19,14 +23,6 @@ export default class GameView {
 		if (els) els.remove();
 	}
 
-	async getSettings() {
-		if (!window.app.settings.fetched) await window.app.getPreferences();
-		this.settings = {
-			color: window.app.settings.color,
-			quality: window.app.settings.quality,
-		};
-		return;
-	}
 	render() {
 		this.container.innerHTML = `
 			<div id="gameDiv">

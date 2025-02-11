@@ -7,14 +7,14 @@ export default class LeaderboardView {
 
 	async init() {
 		await window.app.getSettings();
-		this.render();
+		await this.render();
 		window.app.checkForAdmin();
-		window.app.addNavEventListeners();
+		await window.app.addNavEventListeners();
 		this.addContent();
 	}
 
-	render() {
-		window.app.renderHeader(this.container, "leaderboard");
+	async render() {
+		await window.app.renderHeader(this.container, "leaderboard");
 		this.container.innerHTML += `
 			<main>
 				<div id="leaderboard-card" class="card">

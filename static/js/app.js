@@ -103,7 +103,7 @@ class App {
 		errorDiv.style.display = 'block';
 	}
 
-	renderHeader(container, disableBtn = null, withNav = true, creditsDisabled = false, inLogin = false) {
+	async renderHeader(container, disableBtn = null, withNav = true, creditsDisabled = false, inLogin = false) {
 		let header = `
 			<header>
 				<h1 id="header-title">P
@@ -116,6 +116,7 @@ class App {
 
 		if (withNav)
 		{
+			const avatar = await this.getAvatar(this.state.username);
 			header += `
 				<nav>
 					<ul>
@@ -155,6 +156,15 @@ class App {
 							</button>
 						</li>
 						<li>
+							<div id="nav-user-avatar-container">
+								<div id="nav-username-container">
+									<div id="nav-username">${this.state.username}</div>
+									<div id="nav-display-name">Taiyo</div>
+								</div>
+								<img src="${avatar}" alt="User Avatar" id="nav-user-avatar">
+							</div>
+						</li>
+						<li>
 							<button id="logout-button">
 								<i class="fa-solid fa-right-from-bracket fa-xl"></i>Log Out
 							</button>
@@ -167,7 +177,7 @@ class App {
 		container.innerHTML = header;
 	}
 
-	addNavEventListeners() {
+	async addNavEventListeners() {
 		const creditButton = document.getElementById("credits-button");
 		const playButton = document.getElementById("play-button");
 		const tournamentButton = document.getElementById("tournament-button");

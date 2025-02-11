@@ -7,13 +7,13 @@ export default class CreditsView {
 
 	async init() {
 		await window.app.getSettings();
-		this.render();
+		await this.render();
 		window.app.checkForAdmin();
 		window.app.addNavEventListeners();
 	}
 
-	render() {
-		window.app.renderHeader(this.container, "credits", true, true);
+	async render() {
+		await window.app.renderHeader(this.container, "credits", true, true);
 		this.container.innerHTML += `
 			<main id="credits-view">
 				<div id="credits-card" class="card">

@@ -14,7 +14,7 @@ export default class CustomizeView {
 
 	async init() {
 		await window.app.getSettings();
-		this.render();
+		await this.render();
 		window.app.checkForAdmin();
 		this.addEventListeners();
 		this.settings = {
@@ -31,8 +31,8 @@ export default class CustomizeView {
 		await window.app.getPreferences();
 	}
 
-	render() {
-		window.app.renderHeader(this.container, "customize");
+	async render() {
+		await window.app.renderHeader(this.container, "customize");
 		this.container.innerHTML += `
 			<main>
 				<div id="customize-card" class="card">
