@@ -254,10 +254,8 @@ class IcyPaddlesEvent(GameEvent):
 		self.player_speed_mult = 1
 
 	def apply_specific(self):
-		logging.getLogger('game').info(self.game.player_left.movement_method)
 		self.game.player_left.movement_method = IcyMovement()
 		self.game.player_right.movement_method = IcyMovement()
-		logging.getLogger('game').info(self.game.player_left.movement_method)
 
 	def revert_specific(self):
 		self.game.player_left.movement_method = NormalMovements()
