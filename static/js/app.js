@@ -75,7 +75,6 @@ class App {
 			},
 		});
 		const data = await response.json();
-		console.log(data);
 		this.avatarCache[username] = data.avatar_url;
 		return data.avatar_url;
 	}
