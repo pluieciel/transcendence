@@ -164,10 +164,13 @@ nav li:nth-last-child(2) img {
 	margin-right: 1rem;
 }
 
+#nav-username {
+	font-size: 1.1rem;
+}
+
 #nav-display-name {
 	font-weight: bold;
-	font-size: 0.8rem;
-	opacity: 0.8;
+	opacity: 0.6;
 }
 
 nav button {
