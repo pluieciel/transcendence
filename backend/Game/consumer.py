@@ -385,13 +385,13 @@ class GameConsumer(AsyncWebsocketConsumer):
 		else:
 			avatarLeft = '/default_avatar.png'
 
-		if (instance.player_left.user.display):
-			usernameLeft = instance.player_left.user.display
+		if (instance.player_left.user.display_name):
+			usernameLeft = instance.player_left.user.display_name
 		else:
 			usernameLeft = instance.player_left.user.username
 
-		if (instance.player_right.user.display):
-			usernameRight = instance.player_right.user.display
+		if (instance.player_right.user.display_name):
+			usernameRight = instance.player_right.user.display_name
 		else:
 			usernameRight = instance.player_right.user.username
 

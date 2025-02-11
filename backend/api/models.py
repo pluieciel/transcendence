@@ -20,7 +20,7 @@ class CustomUserManager(BaseUserManager):
     def	create_user_oauth(self, username, avatarUrl):
         if not username:
             raise ValueError('Users must have a username')
-        user = self.model(username=username, oauthlog=True, avatar42=avatarUrl, is42avatarused=True)
+        user = self.model(username=username, is_oauth_user=True, avatar42=avatarUrl, is_42_avatar_used=True)
         user.save(using=self._db)
         return user
 
@@ -34,19 +34,14 @@ class CustomUserManager(BaseUserManager):
         return user
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
-    oauthlog = models.BooleanField(default=False)
-    is_active = models.BooleanField(default=True)
+    is_oauth_user = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
-    is_connected = models.BooleanField(default=False)
     is_playing = models.BooleanField(default=False)
     is_2fa_enabled = models.BooleanField(default=False)
-    is42avatarused = models.BooleanField(default=False)
+    is_42_avatar_used = models.BooleanField(default=False)
     username = models.CharField(max_length=16, unique=True)
-    language = models.CharField(max_length=4, unique=False, default="en")
-    theme = models.CharField(default="dark", max_length=5)
+    display_name = models.CharField(max_length=16, null=True)
     avatar42 = models.CharField(null=True)
-    totp_secret = models.CharField(max_length=64, unique=True, null=True)
-    display = models.CharField(max_length=30, null=True)
     elo = models.IntegerField(default=1000)
     wins = models.IntegerField(default=0)
     looses = models.IntegerField(default=0)
@@ -54,7 +49,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     tourn_win = models.IntegerField(default=0)
     tourn_joined = models.IntegerField(default=0)
     totp_secret = models.CharField(max_length=32, unique=True, null=True)
-    is_2fa_enabled = models.BooleanField(default=False)
     recovery_codes_generated = models.BooleanField(default=False)
     color = models.IntegerField(default=1)
     quality = models.IntegerField(default=1)

@@ -88,6 +88,14 @@ def get_secret_from_file(env_var):
 def hash_password(password):
 	return hashlib.sha256(password.encode()).hexdigest()
 
+def get_user_avatar_url(user, headers):
+	if (user.is_42_avatar_used):
+		return user.avatar42
+	host = next(value.decode('utf-8') for key, value in headers if key == b'x-forwarded-host')
+	port = next(value.decode('utf-8') for key, value in headers if key == b'x-forwarded-port')
+	url = f"https://{host}:{port}"
+	return f"{url}{user.avatar.url}" if user.avatar else f"{url}/imgs/default_avatar.png"
+
 async def parse_multipart_form_data(body):
 	"""Parse multipart form data and return a dictionary."""
 	#from djangoapi.utils.datastructures import MultiValueDict

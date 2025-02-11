@@ -60,8 +60,8 @@
   fields:
       username: jlefonde
       is_admin: true
-      oauthlog: true
-      is42avatarused: true
+      is_oauth_user: true
+      is_42_avatar_used: true
       avatar42: https://cdn.intra.42.fr/users/aa8d5641c13c2fbf3d51ae1f9a85fdde/jlefonde.jpg
       created_at: "2025-01-01T00:00:00Z"
 - model: api.customuser
@@ -69,8 +69,8 @@
   fields:
       username: valgrant
       is_admin: true
-      oauthlog: true
-      is42avatarused: true
+      is_oauth_user: true
+      is_42_avatar_used: true
       avatar42: https://cdn.intra.42.fr/users/6256bf3b76f8634f1e0df573022b0b72/valgrant.JPG
       created_at: "2025-01-01T00:00:00Z"
 - model: api.customuser
@@ -78,8 +78,8 @@
   fields:
       username: jnunes
       is_admin: true
-      oauthlog: true
-      is42avatarused: true
+      is_oauth_user: true
+      is_42_avatar_used: true
       avatar42: https://cdn.intra.42.fr/users/67da051bad2511d2fdfa7edafbd2cc10/jnunes.jpg
       created_at: "2025-01-01T00:00:00Z"
 - model: api.customuser
@@ -87,8 +87,8 @@
   fields:
       username: yuzhao
       is_admin: true
-      oauthlog: true
-      is42avatarused: true
+      is_oauth_user: true
+      is_42_avatar_used: true
       avatar42: https://cdn.intra.42.fr/users/d8221528b165c21340f94f59f223807f/yuzhao.jpg
       created_at: "2025-01-01T00:00:00Z"
 - model: api.recoverycode

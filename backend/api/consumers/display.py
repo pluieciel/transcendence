@@ -27,8 +27,8 @@ class setDisplay(AsyncHttpConsumer):
 
 			response_data = {
 				'success': True,
-				'displayName': user.display,
-				'message': 'Display name changed to \'' + user.display + '\''
+				'displayName': user.display_name,
+				'message': 'Display name changed to \'' + user.display_name + '\''
 			}
 			return await self.send_response(200, json.dumps(response_data).encode(),
 				headers=[(b"Content-Type", b"application/json")])
@@ -44,7 +44,7 @@ class setDisplay(AsyncHttpConsumer):
 	@database_sync_to_async
 	def change_name(self, user, newDisplay):
 		try:
-			user.display = newDisplay
+			user.display_name = newDisplay
 			user.save()
 			return True
 		except Exception as e:

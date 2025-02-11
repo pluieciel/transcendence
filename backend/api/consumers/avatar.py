@@ -3,7 +3,7 @@ from channels.generic.http import AsyncHttpConsumer
 from django.core.files.base import ContentFile
 from django.utils.timezone import now
 from channels.db import database_sync_to_async
-from api.utils import jwt_to_user, parse_multipart_form_data
+from api.utils import jwt_to_user, get_user_avatar_url, parse_multipart_form_data
 from api.db_utils import get_user_by_name
 import json
 import re
@@ -27,7 +27,7 @@ class AvatarConsumer(AsyncHttpConsumer):
 
 			response_data = {
 				'success': True,
-				'avatar_url' : self.get_user_avatar_url(avatar_user, self.scope['headers']),
+				'avatar_url' : get_user_avatar_url(avatar_user, self.scope['headers']),
 			}
 			return await self.send_response(200, json.dumps(response_data).encode(),
 				headers=[(b"Content-Type", b"application/json")])
@@ -39,14 +39,6 @@ class AvatarConsumer(AsyncHttpConsumer):
 			}
 			return await self.send_response(500, json.dumps(response_data).encode(),
 				headers=[(b"Content-Type", b"application/json")])
-
-	def get_user_avatar_url(self, user, headers):
-		if (user.is42avatarused):
-			return user.avatar42
-		host = next(value.decode('utf-8') for key, value in headers if key == b'x-forwarded-host')
-		port = next(value.decode('utf-8') for key, value in headers if key == b'x-forwarded-port')
-		url = f"https://{host}:{port}"
-		return f"{url}{user.avatar.url}" if user.avatar else f"{url}/imgs/default_avatar.png"
 
 class setAvatar(AsyncHttpConsumer):
 	async def handle(self, body):
@@ -84,7 +76,7 @@ class setAvatar(AsyncHttpConsumer):
 			
 			print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", flush=True)
 			print(user, flush=True)
-			print(user.is42avatarused, flush=True)
+			print(user.is_42_avatar_used, flush=True)
 
 			response_data = {
 				'success': True,
@@ -106,8 +98,8 @@ class setAvatar(AsyncHttpConsumer):
 		try:
 			if user.avatar:
 				user.avatar.delete(save=False)
-			if user.oauthlog:
-				user.is42avatarused = False
+			if user.is_oauth_user:
+				user.is_42_avatar_used = False
 			user.avatar = avatar
 			user.save()
 			return True
