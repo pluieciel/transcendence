@@ -118,7 +118,7 @@ export default class GameView {
 
 		window.app.ingame = false;
 		sessionStorage.setItem("ingame", "false");
-		window.app.router.navigateTo("/index");
+		window.app.router.navigateTo("/play");
 	}
 
 	hideWaitingMessage() {

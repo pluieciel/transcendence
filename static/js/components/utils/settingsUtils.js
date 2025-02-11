@@ -75,7 +75,7 @@ export async function saveUserChanges(main, settings) {
 			if (!main)
 				message(true, 'Theme and quality changes saved!');
 			else
-				window.app.router.navigateTo('/index');
+				window.app.router.navigateTo('/play');
 		}
 		else
 			throw new Error(data['message']);

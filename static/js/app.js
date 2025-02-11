@@ -17,7 +17,7 @@ class App {
 			{ path: '/', component: LoginView },
 			{ path: '/login', component: LoginView },
 			{ path: '/signup', component: SignupView },
-			{ path: '/index', component: MainView },
+			{ path: '/play', component: MainView },
 			{ path: '/customize', component: CustomizeView },
 			{ path: '/credits', component: CreditsView },
 			{ path: '/profile', component: ProfileView },
@@ -218,7 +218,7 @@ class App {
 		}
 
 		playButton.addEventListener("click", () => {
-			window.app.router.navigateTo("/index");
+			window.app.router.navigateTo("/play");
 		});
 
 		tournamentButton.addEventListener("click", () => {
@@ -269,7 +269,7 @@ class App {
 		sessionStorage.setItem("isLoggedIn", "true");
 		sessionStorage.setItem("username", data.username);
 		this.getPreferences();
-		this.router.navigateTo("/index");
+		this.router.navigateTo("/play");
 	}
 
 	logout() {
