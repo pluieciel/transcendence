@@ -196,7 +196,7 @@ nav i {
 
 #input-error {
 	width: 100%;
-	height: 3rem;
+	min-height: 3rem;
 	background-color: var(--input-error-color);
 	border: 1px solid var(--input-error-border-color);
 	color: var(--input-error-text-color);
@@ -442,7 +442,7 @@ hr::after {
 	padding: 0.5rem 1rem;
 	text-align: center;
 	font-weight: bold;
-	height: 3rem;
+	min-height: 3rem;
 }
 
 #upload-avatar:hover {
