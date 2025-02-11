@@ -121,63 +121,80 @@ class App {
 
 		if (withNav)
 		{
-			const avatar = await this.getAvatar(this.state.username);
-			header += `
-				<nav>
-					<ul>
-						<li>
-							<button id="play-button" ${disableBtn === "play" ? 'disabled' : ''}>
-								<i class="fa-solid fa-gamepad fa-xl"></i>Play
-							</button>
-						</li>
-						<li>
-							<button id="tournament-button" ${disableBtn === "tournament" ? 'disabled' : ''}>
-								<i class="fa-solid fa-crown fa-xl"></i>Tournament
-							</button>
-						</li>
-						<li>
-							<button id="leaderboard-button" ${disableBtn === "leaderboard" ? 'disabled' : ''}>
-								<i class="fa-solid fa-medal fa-xl"></i>Leaderboard
-							</button>
-						</li>
-						<li>
-							<button id="achievements-button" ${disableBtn === "achievements" ? 'disabled' : ''}>
-								<i class="fa-solid fa-trophy fa-xl"></i>Achievements
-							</button>
-						</li>
-						<li>
-							<button id="customize-button" ${disableBtn === "customize" ? 'disabled' : ''}>
-								<i class="fa-solid fa-palette fa-xl"></i>Customize
-							</button>
-						</li>
-						<li>
-							<button id="profile-button" ${disableBtn === "profile" ? 'disabled' : ''}>
-								<i class="fa-solid fa-user fa-xl"></i>Profile
-							</button>
-						</li>
-						<li style="display: ${this.settings.is_admin ? 'block' : 'none'}">
-							<button id="admin-button" ${disableBtn === "admin" ? 'disabled' : ''}>
-								<i class="fa-solid fa-user-tie fa-xl"></i>Admin
-							</button>
-						</li>
-						<li>
-							<div id="nav-user-avatar-container">
-								<div id="nav-username-container">
-									<div id="nav-username">${this.state.username}</div>
-									<div id="nav-display-name">Taiyo</div>
-								</div>
-								<img src="${avatar}" alt="User Avatar" id="nav-user-avatar">
-							</div>
-						</li>
-						<li>
-							<button id="logout-button">
-								<i class="fa-solid fa-right-from-bracket fa-xl"></i>Log Out
-							</button>
-						</li>
-					</ul>
-				</nav>
-				`;
+			try {
+				const response = await fetch('/api/get/nav/profile', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+				});
+				const data = await response.json();
+				
+				if (data.success) {
+					header += `
+						<nav>
+							<ul>
+								<li>
+									<button id="play-button" ${disableBtn === "play" ? 'disabled' : ''}>
+										<i class="fa-solid fa-gamepad fa-xl"></i>Play
+									</button>
+								</li>
+								<li>
+									<button id="tournament-button" ${disableBtn === "tournament" ? 'disabled' : ''}>
+										<i class="fa-solid fa-crown fa-xl"></i>Tournament
+									</button>
+								</li>
+								<li>
+									<button id="leaderboard-button" ${disableBtn === "leaderboard" ? 'disabled' : ''}>
+										<i class="fa-solid fa-medal fa-xl"></i>Leaderboard
+									</button>
+								</li>
+								<li>
+									<button id="achievements-button" ${disableBtn === "achievements" ? 'disabled' : ''}>
+										<i class="fa-solid fa-trophy fa-xl"></i>Achievements
+									</button>
+								</li>
+								<li>
+									<button id="customize-button" ${disableBtn === "customize" ? 'disabled' : ''}>
+										<i class="fa-solid fa-palette fa-xl"></i>Customize
+									</button>
+								</li>
+								<li>
+									<button id="profile-button" ${disableBtn === "profile" ? 'disabled' : ''}>
+										<i class="fa-solid fa-user fa-xl"></i>Profile
+									</button>
+								</li>
+								<li style="display: ${this.settings.is_admin ? 'block' : 'none'}">
+									<button id="admin-button" ${disableBtn === "admin" ? 'disabled' : ''}>
+										<i class="fa-solid fa-user-tie fa-xl"></i>Admin
+									</button>
+								</li>
+								<li>
+									<div id="nav-user-avatar-container">
+										<div id="nav-username-container">
+											<div id="nav-username">${data.username}</div>
+											<div id="nav-display-name" style="display: ${data.display_name ? 'block' : 'none'}">${data.display_name}</div>
+										</div>
+										<img src="${data.avatar_url}" alt="User Avatar" id="nav-user-avatar">
+									</div>
+								</li>
+								<li>
+									<button id="logout-button">
+										<i class="fa-solid fa-right-from-bracket fa-xl"></i>Log Out
+									</button>
+								</li>
+							</ul>
+						</nav>
+					`;
+				} else if (response.status == 401 && !data.is_jwt_valid) {
+					window.app.logout();
+					window.app.router.navigateTo("/login");
+				} else 
+					window.app.showErrorMsg('#input-error', data.message);
+			} catch (error) {
+				window.app.showErrorMsg('#input-error', 'An error occurred: ' + error);
 			}
+		}
 			header += `</header>`;
 			container.innerHTML = header;
 			if (withNav)

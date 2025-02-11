@@ -11,24 +11,28 @@
   pk: 2
   fields:
       username: user1
+      display_name: Joris
       password: pbkdf2_sha256$600000$1KhwQjfzxnhiqP0WlEG0Uf$Ycu+CjFC6YqNVR7/ml42INNbddbsxCfkBxnD6vc12XU=
       created_at: "2025-01-01T00:00:00Z"
 - model: api.customuser
   pk: 3
   fields:
       username: user2
+      display_name: Julien
       password: pbkdf2_sha256$600000$E80wKu5RJCEznR1qDscn5b$Z2SlKyLhFZ27REnA6xvlhNKwb7x+cbGHUJpkHngKDfE=
       created_at: "2025-01-01T00:00:00Z"
 - model: api.customuser
   pk: 4
   fields:
       username: user3
+      display_name: Victor
       password: pbkdf2_sha256$600000$C4UK2HGGXIZyUiN6vIUnzu$HcmTzZ777NqbMue20BgqTqKZUPfd1wmg8OCC2Ums5O4=
       created_at: "2025-01-01T00:00:00Z"
 - model: api.customuser
   pk: 5
   fields:
       username: user4
+      display_name: Yue
       password: pbkdf2_sha256$600000$1UA46BbtyaROQIu4XQLuQV$oZvSpECYzL3PuR5sxF/PzRRHQFTSxTeNCfy7LaVB9+g=
       created_at: "2025-01-01T00:00:00Z"
 - model: api.customuser
@@ -59,6 +63,7 @@
   pk: 10
   fields:
       username: jlefonde
+      display_name: Taiyo
       is_admin: true
       is_oauth_user: true
       is_42_avatar_used: true
@@ -68,6 +73,7 @@
   pk: 11
   fields:
       username: valgrant
+      display_name: neutrou
       is_admin: true
       is_oauth_user: true
       is_42_avatar_used: true
@@ -77,6 +83,7 @@
   pk: 12
   fields:
       username: jnunes
+      display_name: Siul008
       is_admin: true
       is_oauth_user: true
       is_42_avatar_used: true
@@ -86,6 +93,7 @@
   pk: 13
   fields:
       username: yuzhao
+      display_name: pluieciel
       is_admin: true
       is_oauth_user: true
       is_42_avatar_used: true

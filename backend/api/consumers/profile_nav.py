@@ -2,7 +2,7 @@ from channels.generic.http import AsyncHttpConsumer
 from api.utils import jwt_to_user, get_user_avatar_url
 import json
 
-class NavProfileConsumer(AsyncHttpConsumer):
+class ProfileNavConsumer(AsyncHttpConsumer):
 	async def handle(self, body):
 		try:
 			user = await jwt_to_user(self.scope['headers'])
