@@ -67,7 +67,7 @@ export default class LeaderboardView {
 		card += "<div id=\"lb-card-" + place + "\"class=\"lb-card\">";
 		card += "<div class=\"lb-card-pos lb-card-att\">" + place + "</div>";
 		if (data['avatar'])
-			card += "<div class=\"lb-card-user lb-card-att\"><img class=\"lb-card-avatar\" src=\"" + data['avatar'] + "\"></img> &nbsp;&nbsp;" + data['username'] + "</div>";
+			card += "<div class=\"lb-card-user lb-card-att\"><img class=\"lb-card-avatar avatar\" src=\"" + data['avatar'] + "\"></img> &nbsp;&nbsp;" + data['username'] + "</div>";
 		else
 			card += "<div class=\"lb-card-user lb-card-att\">" + data['username'] + "</div>";
 		card += "<div class=\"lb-card-elo lb-card-att\">" + data['elo'] + "</div>";

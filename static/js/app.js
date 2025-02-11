@@ -169,12 +169,12 @@ class App {
 									</button>
 								</li>
 								<li>
-									<div id="nav-user-avatar-container">
-										<div id="nav-username-container">
+									<div id="nav-profile">
+										<div id="nav-user">
 											<div id="nav-username">${data.username}</div>
 											<div id="nav-display-name" style="display: ${data.display_name ? 'block' : 'none'}">${data.display_name}</div>
 										</div>
-										<img src="${data.avatar_url}" alt="User Avatar" id="nav-user-avatar">
+										<img src="${data.avatar_url}" id="nav-avatar" class="avatar">
 									</div>
 								</li>
 								<li>

@@ -143,13 +143,13 @@ nav li:nth-last-child(2) img {
 	margin-right: 0.5rem;
 }
 
-#nav-user-avatar-container {
+#nav-profile {
 	display: flex;
 	align-items: center;
 	justify-content: center;
 }
 
-#nav-username-container {
+#nav-user {
 	display: flex;
 	flex-direction: column;
 	align-items: flex-end;
@@ -177,10 +177,9 @@ nav button:disabled {
 	cursor: not-allowed;
 }
 
-#nav-user-avatar {
+#nav-avatar {
 	width: 3.2rem;
 	height: 3.2rem;
-	border-radius: 50%;
 }
 
 #credits-button:disabled i {
@@ -208,6 +207,12 @@ nav i {
 
 #input-error i {
 	padding: 0 0.5rem;
+}
+
+.avatar {
+	object-fit: cover;
+	object-position: top center;
+	border-radius:50%;
 }
 
 /* ******************************** */
@@ -684,7 +689,6 @@ hr::after {
 .lb-card-avatar {
 	width: 2rem;
 	height: 2rem;
-	border-radius: 50%;
 }
 
 .lb-card-elo {
