@@ -1,66 +1,57 @@
 - model: api.customuser
   pk: 1
   fields:
-      username: admin
-      password: pbkdf2_sha256$600000$THm8MpIw3Z3EBARsKHbUZq$kMwOPjElcUCbFYQTfiiqUPIr3T/xRZWh+UzE9XF/y7s=
-      is_admin: true
-      is_2fa_enabled: true
-      totp_secret: YCMP4DRPDR3Z64BIHRW47HTMHRTZT5CV
-      created_at: "2025-01-01T00:00:00Z"
-- model: api.customuser
-  pk: 2
-  fields:
       username: user1
       display_name: Joris
       password: pbkdf2_sha256$600000$1KhwQjfzxnhiqP0WlEG0Uf$Ycu+CjFC6YqNVR7/ml42INNbddbsxCfkBxnD6vc12XU=
       created_at: "2025-01-01T00:00:00Z"
 - model: api.customuser
-  pk: 3
+  pk: 2
   fields:
       username: user2
       display_name: Julien
       password: pbkdf2_sha256$600000$E80wKu5RJCEznR1qDscn5b$Z2SlKyLhFZ27REnA6xvlhNKwb7x+cbGHUJpkHngKDfE=
       created_at: "2025-01-01T00:00:00Z"
 - model: api.customuser
-  pk: 4
+  pk: 3
   fields:
       username: user3
       display_name: Victor
       password: pbkdf2_sha256$600000$C4UK2HGGXIZyUiN6vIUnzu$HcmTzZ777NqbMue20BgqTqKZUPfd1wmg8OCC2Ums5O4=
       created_at: "2025-01-01T00:00:00Z"
 - model: api.customuser
-  pk: 5
+  pk: 4
   fields:
       username: user4
       display_name: Yue
       password: pbkdf2_sha256$600000$1UA46BbtyaROQIu4XQLuQV$oZvSpECYzL3PuR5sxF/PzRRHQFTSxTeNCfy7LaVB9+g=
       created_at: "2025-01-01T00:00:00Z"
 - model: api.customuser
-  pk: 6
+  pk: 5
   fields:
       username: user5
       password: pbkdf2_sha256$600000$GmGrynXJojWSPj2p1LuWR4$jkxXKYFmi+/94C+AFA20BpZjyRp3qTM2lYt3JnamGYk=
       created_at: "2025-01-01T00:00:00Z"
 - model: api.customuser
-  pk: 7
+  pk: 6
   fields:
       username: user6
       password: pbkdf2_sha256$600000$xiZs0vJ4GahlaOq0A5DrqB$moGgt2PI9GB7DA89cOVH6XDZEgaN7ZYo/3pjtUWCGTc=
       created_at: "2025-01-01T00:00:00Z"
 - model: api.customuser
-  pk: 8
+  pk: 7
   fields:
       username: user7
       password: pbkdf2_sha256$600000$d6ofjtQBBKtgucI4JgBHtE$kUX37bM4WCuIxgEokuR3entEw1GCMLLmaG5muEHMjlw=
       created_at: "2025-01-01T00:00:00Z"
 - model: api.customuser
-  pk: 9
+  pk: 8
   fields:
       username: user8
       password: pbkdf2_sha256$600000$thQGAsFB3FGIrTWZyPtVgg$SwO1oXSYS6gQGWfauFuhTudKWwCabsOVciqeTV1c3Vc=
       created_at: "2025-01-01T00:00:00Z"
 - model: api.customuser
-  pk: 10
+  pk: 9
   fields:
       username: jlefonde
       display_name: Taiyo
@@ -70,7 +61,7 @@
       avatar42: https://cdn.intra.42.fr/users/aa8d5641c13c2fbf3d51ae1f9a85fdde/jlefonde.jpg
       created_at: "2025-01-01T00:00:00Z"
 - model: api.customuser
-  pk: 11
+  pk: 10
   fields:
       username: valgrant
       display_name: neutrou
@@ -80,7 +71,7 @@
       avatar42: https://cdn.intra.42.fr/users/6256bf3b76f8634f1e0df573022b0b72/valgrant.JPG
       created_at: "2025-01-01T00:00:00Z"
 - model: api.customuser
-  pk: 12
+  pk: 11
   fields:
       username: jnunes
       display_name: Siul008
@@ -90,7 +81,7 @@
       avatar42: https://cdn.intra.42.fr/users/67da051bad2511d2fdfa7edafbd2cc10/jnunes.jpg
       created_at: "2025-01-01T00:00:00Z"
 - model: api.customuser
-  pk: 13
+  pk: 12
   fields:
       username: yuzhao
       display_name: pluieciel
@@ -98,40 +89,4 @@
       is_oauth_user: true
       is_42_avatar_used: true
       avatar42: https://cdn.intra.42.fr/users/d8221528b165c21340f94f59f223807f/yuzhao.jpg
-      created_at: "2025-01-01T00:00:00Z"
-- model: api.recoverycode
-  pk: 1
-  fields:
-      recovery_code: ff61e963cccb7821e72d15fc7738afec6ad0151769e2181171afb25ea4f0a7d0 #cbf578f4111bdd6f
-      user_id: 1
-      created_at: "2025-01-01T00:00:00Z"
-- model: api.recoverycode
-  pk: 2
-  fields:
-      recovery_code: aba6f4b81b8c3cdc9326d134abd72d809f15b97c208ae4fe8a069c092ca786cf #1d56e43f75f9b338
-      user_id: 1
-      created_at: "2025-01-01T00:00:00Z"
-- model: api.recoverycode
-  pk: 3
-  fields:
-      recovery_code: aae2c6dab2b50f0c8cfa5ff9105064ccbfbadbce6206b10c70ea96c1a484d627 #99e241a2806bd9c9
-      user_id: 1
-      created_at: "2025-01-01T00:00:00Z"
-- model: api.recoverycode
-  pk: 4
-  fields:
-      recovery_code: 93c8d3ff756deea131c5d68633ef342acd033a1f66dd2d56a27e298239251f2e #bd446b4087e88fd3
-      user_id: 1
-      created_at: "2025-01-01T00:00:00Z"
-- model: api.recoverycode
-  pk: 5
-  fields:
-      recovery_code: 423b13f9e2bebfd5aff53c0e5f6dfb77e1bd999ea517ed9eea0a45c347a00860 #a116116d0ba4482f
-      user_id: 1
-      created_at: "2025-01-01T00:00:00Z"
-- model: api.recoverycode
-  pk: 6
-  fields:
-      recovery_code: 987fcf350ea893c158640c2ae1b5f8f56416ea0146a2cfbfdd8a269d7333e305 #71518c49789bf0b8
-      user_id: 1
       created_at: "2025-01-01T00:00:00Z"
