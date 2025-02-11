@@ -209,6 +209,7 @@ class App {
 		const customizeButton = document.getElementById("customize-button");
 		const profileButton = document.getElementById("profile-button");
 		const adminButton = document.getElementById("admin-button");
+		const navProfile = document.getElementById("nav-profile");
 		const logoutButton = document.getElementById("logout-button");
 
 		if (creditButton) {
@@ -241,8 +242,13 @@ class App {
 			window.app.router.navigateTo("/profile");
 		});
 
+		
 		adminButton.addEventListener("click", () => {
 			window.app.router.navigateTo("/admin");
+		});
+		
+		navProfile.addEventListener("click", () => {
+			window.app.router.navigateTo("/profile");
 		});
 
 		logoutButton.addEventListener("click", () => {

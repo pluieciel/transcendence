@@ -147,6 +147,13 @@ nav li:nth-last-child(2) img {
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	padding: 1rem 0;
+}
+
+#nav-profile:hover {
+	filter: brightness(0.5);
+	transition: all 0.3s ease;
+	cursor: pointer;
 }
 
 #nav-user {
