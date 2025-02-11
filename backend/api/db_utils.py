@@ -2,8 +2,6 @@ from django.contrib.auth import get_user_model
 from channels.db import database_sync_to_async
 import logging
 
-
-
 @database_sync_to_async
 def user_update_game(user, isplaying, game_id):
 	user.isplaying = isplaying

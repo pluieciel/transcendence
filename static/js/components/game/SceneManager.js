@@ -9,6 +9,7 @@ export class SceneManager {
 		this.rightPaddle = null;
 		this.ball = null;
 		this.base_paddle_height = 0.75;
+		this.base_ball_scale = 0.44;
 		this.base_debug_height = 0;
 		this.quality = quality;
 

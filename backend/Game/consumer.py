@@ -159,14 +159,13 @@ class GameConsumer(AsyncWebsocketConsumer):
 		recipient = query_params.get("recipient", [None])[0]
 		#for tournament
 		round = query_params.get("round", [None])[0]
-		user = await jwt_to_user(self.scope['headers'])
-		self.logger.info(f"User : {user}")
-		self.user = user
 
-		if not user:
+		user = await jwt_to_user(self.scope['headers'])
+		self.user = user
+		if not self.user:
 			await self.send(text_data=json.dumps({
 				"type": "handle_error",
-				"message": "User not found or invalid token."
+				"message": "Invalid JWT"
 			}))
 			return
 		game_manager._get_game_history_model()
@@ -297,7 +296,6 @@ class GameConsumer(AsyncWebsocketConsumer):
 				await self.send_initial_game_state(self.game)
 
 	async def receive(self, text_data):
-		logging.getLogger('game').info(text_data)
 		try:
 			data = json.loads(text_data)
 			if data["type"] in ["keydown", "keyup"]:

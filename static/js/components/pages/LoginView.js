@@ -17,7 +17,7 @@ export default class LoginView {
 			<main>
 				<div id="login-card" class="card">
 					<form id="login-form">
-						<h2 id="card-title">LOG IN</h2>
+						<h2 id="card-title"><i class="fa-solid fa-right-to-bracket"></i> LOG IN</h2>
 						<div class="input-container">
 							<i class="fa-solid fa-user input-icon"></i>
 							<input type="text" id="username-input" placeholder="Username" maxlength="16" required>
@@ -117,6 +117,8 @@ export default class LoginView {
 					window.location.href = data.auth_url;
 				});
 			}
+			else
+				window.app.showErrorMsg('#input-error', data.message);
 		} catch (error) {
 			window.app.showErrorMsg('#input-error', 'An error occurred: ' + error);
 		}
@@ -168,9 +170,8 @@ export default class LoginView {
 					if (modal)
 						modal.hide();
 					window.app.login(data);
-				} else {
+				} else
 					window.app.showErrorMsg('#totpError', data.message);
-				}
 			} catch (error) {
 				window.app.showErrorMsg('#totpError', 'An error occurred: ' + error);
 			}
@@ -202,9 +203,8 @@ export default class LoginView {
 						new bootstrap.Modal(this.container.querySelector('#totpModal')).show();
 					else
 						window.app.login(data);
-				} else {
+				} else
 					window.app.showErrorMsg('#input-error', data.message);
-				}
 			} catch (error) {
 				window.app.showErrorMsg('#input-error', 'An error occurred: ' + error);
 			}

@@ -35,7 +35,7 @@ export default class ChatBox {
                     data-bs-toggle="offcanvas"
                     data-bs-target="#offcanvas"
 					id="chatIcon">
-                <i class="fas fa-comment"></i>
+                <i id="chat-icon" class="fas fa-comment"></i>
                 <span id="newMessageIndicator" class="new-message-dot" style="display: none;"></span>
             </button>
 
@@ -798,71 +798,6 @@ export default class ChatBox {
 					window.app.ingame = false;
 					sessionStorage.setItem("ingame", "false");
 				};
-			}
-		});
-
-		// submit user info update
-		const updateSubmitButton = this.container.querySelector("#sendUpdateForm");
-		updateSubmitButton.addEventListener("click", async (e) => {
-			const infoForm = this.container.querySelector("#updateForm");
-			const password = infoForm.querySelector("#password").value;
-			const confirmPassword = infoForm.querySelector("#confirmPassword").value;
-			const nickname = infoForm.querySelector("#nickname").value;
-			const errorDiv = this.container.querySelector("#passwordError");
-
-			if (password !== confirmPassword) {
-				errorDiv.textContent = "Passwords do not match";
-				errorDiv.classList.remove("d-none");
-				return;
-			}
-			const formData = new FormData();
-			const originalFile = this.container.querySelector("#avatar").files[0];
-			const hashedPassword = CryptoJS.SHA256(password).toString();
-			if (password !== "") formData.append("password", hashedPassword);
-			if (nickname !== "") formData.append("nickname", nickname);
-			if (originalFile) {
-				const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1 MB
-				if (originalFile.size > MAX_FILE_SIZE) {
-					errorDiv.textContent = "File size exceeds the 1MB limit";
-					errorDiv.classList.remove("d-none");
-					return;
-				}
-				const extension = originalFile.name.split(".").pop();
-				const newFilename = `${this.username}.${extension}`;
-				const modifiedFile = new File([originalFile], newFilename, {
-					type: originalFile.type,
-					lastModified: originalFile.lastModified,
-				});
-				formData.append("avatar", modifiedFile);
-				delete window.app.avatarCache[this.username]; // delete cache to force update
-			}
-
-			if (!formData.has("password") && !formData.has("nickname") && !formData.has("avatar")) {
-				errorDiv.textContent = "Nothing to update";
-				errorDiv.classList.remove("d-none");
-				return;
-			}
-
-			try {
-				const response = await fetch("/api/update/", {
-					method: "POST",
-					body: formData,
-				});
-
-				const data = await response.json();
-
-				// This code runs only after getting response from server
-				if (data.success) {
-					errorDiv.textContent = data.message;
-					errorDiv.classList.remove("d-none");
-				} else {
-					errorDiv.textContent = data.message || "Signup failed";
-					errorDiv.classList.remove("d-none");
-				}
-			} catch (error) {
-				// Handles any errors during the async operation
-				errorDiv.textContent = "An error occurred";
-				errorDiv.classList.remove("d-none");
 			}
 		});
 	}

@@ -51,7 +51,7 @@ body {
 	flex-wrap: wrap;
 }
 
-i {
+i:not(#chat-icon) {
 	margin-right: 0.2rem;
 }
 
@@ -291,7 +291,7 @@ form button:hover:not(:disabled) {
 	justify-content: center;
 }
 
-#game-type, #color, #quality {
+#color, #quality {
 	width: 100%;
 	display: flex;
 	flex-direction: row;
@@ -438,11 +438,7 @@ hr::after {
 /*                Play              */
 /* ******************************** */
 
-#game-type-ranked, #game-type-tournament {
-	display: none;
-}
-
-#game-mode
+#game-mode, #game-type
 {
 	margin-bottom: 1rem;
     position: relative;
@@ -512,16 +508,16 @@ hr::after {
     background-color: var(--selector-color);
 }
 
-#game-mode-rumble {
+#game-mode-rumble, #game-type-ranked {
 	left: 50%;
 	color: var(--checkbox-unchecked-color);
 }
 
-.checkbox-button .checkbox:checked + .knobs #game-mode-rumble {
+.checkbox-button .checkbox:checked + .knobs #game-mode-rumble, .checkbox-button .checkbox:checked + .knobs #game-type-ranked {
     color: var(--secondary-color);
 }
 
-.checkbox-button .checkbox:checked + .knobs #game-mode-classic {
+.checkbox-button .checkbox:checked + .knobs #game-mode-classic, .checkbox-button .checkbox:checked + .knobs #game-type-ai {
     color: var(--checkbox-unchecked-color);
 }
 
@@ -529,6 +525,23 @@ hr::after {
 {
 	left: 50%;
     background-color: var(--selector-color);
+}
+
+#chat-icon {
+	color: var(--secondary-color);
+}
+
+#how-to-play-card {
+	position: absolute;
+	text-align: center;
+	top: 8.5rem;
+	right: 2.5rem;
+	width: 30rem;
+}
+
+#play-card {
+	margin: auto;
+	width: 30rem;
 }
 
 /* ******************************** */
@@ -679,15 +692,16 @@ hr::after {
 /*                Credits           */
 /* ******************************** */
 
-#credits-card, #about-us-card, #how-to-play-card {
+#credits-card, #subject-card {
 	text-align: center;
 	width: 30rem;
-	height: 30rem;
+	height: 45rem;
 	overflow: hidden;
 }
 
 #tooltip-github {
 	font-size: 0.8rem;
+	opacity: 0.5;
 }
 
 #github-links {
@@ -703,6 +717,12 @@ hr::after {
 	text-shadow: 0 0 5px var(--user-color);
 }
 
+#subject-pdf {
+	width: 100%;
+	height: 100%;
+	border-radius: 0.3rem;
+}
+
 /* ******************************** */
 /*                Admin             */
 /* ******************************** */
@@ -711,9 +731,9 @@ hr::after {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	justify-content: center;
-	width: 20rem;
-	height: 25rem;
+	justify-content: space-between;
+	width: 28rem;
+	height: 18rem;
 }
 
 .service-logo {

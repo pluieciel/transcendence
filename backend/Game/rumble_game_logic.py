@@ -5,7 +5,7 @@ import math
 import logging
 from .game_helper_class import BounceMethods, MovementMethod, Vector2D, DEFAULT_BALL_POS, RIGHT_SIDE_DIR, LEFT_SIDE_DIR, DEFAULT_BALL_ACCELERATION, DEFAULT_BALL_BASE_SPEED, DEFAULT_PLAYER_SPEED, random_angle
 from .rumble_custom_method import MirrorBounce, RandomBounce, IcyMovement, InvertedMovements, NoStoppingMovements, NormalBounce, NormalMovements, KillerBall
-from .rumble_events import InvertedControlsEvent, RandomBouncesEvent, MirrorBallEvent, LightsOutEvent, SmokeCloudEvent, InfiniteSpeedEvent, ReverseBallEvent, ShrinkingPaddleEvent, IcyPaddlesEvent, NoStoppingEvent, VisibleTrajectoryEvent, KillerBallEvent, BreathingTimeEvent
+from .rumble_events import InvertedControlsEvent, RandomBouncesEvent, MirrorBallEvent, LightsOutEvent, SmokeCloudEvent, ReverseBallEvent, ShrinkingPaddleEvent, IcyPaddlesEvent, NoStoppingEvent, VisibleTrajectoryEvent, KillerBallEvent, BreathingTimeEvent, SupersonicBallEvent, InfiniteSpeedEvent, RampingBallEvent
 
 
 
@@ -15,8 +15,9 @@ class Ball:
 		self.velocity = Vector2D()
 		self.baseSpeed = DEFAULT_BALL_BASE_SPEED
 		self.speed = self.baseSpeed
-		self.maxSpeedMult = 0.7
-		self.maxSpeed = 999#self.calculate_max_safe_speed(self.maxSpeedMult)
+		self.reaction_time = 0.2
+		self.maxSpeed = self.calculate_max_safe_speed()
+		self.baseMaxSpeed = self.calculate_max_safe_speed()
 		self.radius = 0.5
 		self.bounds = GameBounds()
 		self.countdown = 6
@@ -26,17 +27,16 @@ class Ball:
 		self.bounce_methods = NormalBounce()
 		self.lastHitter = "NONE"
 
-	def calculate_max_safe_speed(self, maxSpeedMult):
+	def calculate_max_safe_speed(self, paddle_speed=35):
 		bounds = GameBounds()
 		court_height = bounds.top.y - bounds.bottom.y
 		court_width = bounds.right.x - bounds.left.x
-		paddle_speed = 35
-		max_paddle_travel = court_height - 4
+		max_paddle_travel = court_height - 5.006
 		paddle_travel_time = max_paddle_travel / paddle_speed
-		ball_travel_distance = math.sqrt(court_width**2 + court_height**2)
-		max_safe_speed = ball_travel_distance / paddle_travel_time
-
-		return (max_safe_speed * self.maxSpeedMult)
+		ball_travel_distance = court_width
+		max_safe_speed = ball_travel_distance / (paddle_travel_time + self.reaction_time)
+		logging.getLogger('game').info(f"Max safe speed: {max_safe_speed}")
+		return (max_safe_speed)
 
 	def predict_trajectory(self):
 		if not self.is_moving:
@@ -88,22 +88,24 @@ class Player:
 		self.paddle_speed = 35
 		self.paddle_height = 5.006
 		self.paddle_thickness = 0.8
+		self.movable = False
 		self.game_bounds = game_bounds
 		self.startPos = Vector2D(0, 0, 0)
 		self.movement_method = NormalMovements()
 
 	def update(self, delta_time):
-		movement = 0
-		if self.keys["ArrowUp"]:
-			movement = 1
-		if self.keys["ArrowDown"]:
-			movement = -1
+		if (self.movable):
+			movement = 0
+			if self.keys["ArrowUp"]:
+				movement = 1
+			if self.keys["ArrowDown"]:
+				movement = -1
 
-		movement_amount = self.movement_method.calculate_movement(movement, self.paddle_speed, delta_time)
-		self.position.y += movement_amount
-		self.position.y = min(max(self.position.y,
-								self.game_bounds.bottom.y + self.paddle_height/2 + 0.1),
-							self.game_bounds.top.y - self.paddle_height/2 - 0.1)
+			movement_amount = self.movement_method.calculate_movement(movement, self.paddle_speed, delta_time)
+			self.position.y += movement_amount
+			self.position.y = min(max(self.position.y,
+									self.game_bounds.bottom.y + self.paddle_height/2 + 0.1),
+								self.game_bounds.top.y - self.paddle_height/2 - 0.1)
 
 class GameBounds:
 	def __init__(self):
@@ -118,6 +120,9 @@ class RumbleGameInstance:
 		self.player_left = Player(Vector2D(self.bounds.left.x + 2, -3+10.5, -15), 0,{"ArrowUp": False, "ArrowDown": False}, self.bounds)
 		self.player_right = Player(Vector2D(self.bounds.right.x - 2, -3+10.5, -15), 0,{"ArrowUp": False, "ArrowDown": False}, self.bounds)
 		self.ball = Ball()
+		self.original_ball_acceleration = self.ball.acceleration
+		self.original_ball_base_speed = self.ball.baseSpeed
+		self.original_player_speed = DEFAULT_PLAYER_SPEED
 		self.event = self.get_event()
 		self.event.apply()
 		self.paused = False
@@ -144,8 +149,10 @@ class RumbleGameInstance:
 
 		if ball_pos.y >= self.bounds.top.y - ball.radius:
 			ball.bounce_methods.BounceWall(ball, True)
+			self.logger.info(f"Ball speed : {ball.speed}")
 		elif ball_pos.y <= self.bounds.bottom.y + ball.radius:
 			ball.bounce_methods.BounceWall(ball, False)
+			self.logger.info(f"Ball speed : {ball.speed}")
 
 		right_paddle = self.player_right
 		if (ball_pos.x <= right_paddle.position.x + right_paddle.paddle_thickness/2 + ball.radius and
@@ -155,6 +162,7 @@ class RumbleGameInstance:
 					if ball.velocity.x > 0:
 						ball.position.x = right_paddle.position.x - right_paddle.paddle_thickness/2 - ball.radius
 						await ball.bounce_methods.BouncePaddle(ball, right_paddle.position.x, right_paddle.position.y)
+						self.logger.info(f"Ball speed : {ball.speed}")
 
 						if (self.event.name == 'Shrinking Paddles' and self.player_right.paddle_height > 2.25):
 							self.player_right.paddle_height *= 0.9
@@ -170,6 +178,7 @@ class RumbleGameInstance:
 					if ball.velocity.x < 0:
 						ball.position.x = left_paddle.position.x + left_paddle.paddle_thickness/2 + ball.radius
 						await ball.bounce_methods.BouncePaddle(ball, left_paddle.position.x, left_paddle.position.y)
+						self.logger.info(f"Ball speed : {ball.speed}")
 
 						if (self.event.name == 'Shrinking Paddles' and self.player_left.paddle_height > 2.25):
 							self.player_left.paddle_height *= 0.9
@@ -183,6 +192,7 @@ class RumbleGameInstance:
 					random_angle(ball)
 					ball.position.x = ball.bounds.right.x - ball.radius
 					self.ball.lastHitter = "RIGHT"
+					self.logger.info(f"Ball speed : {ball.speed}")
 				else:
 					await self.on_score("LEFT")
 			elif ball_pos.x <= self.bounds.left.x:
@@ -190,10 +200,20 @@ class RumbleGameInstance:
 					random_angle(ball)
 					ball.position.x = ball.bounds.left.x + ball.radius
 					self.ball.lastHitter = "LEFT"
+					self.logger.info(f"Ball speed : {ball.speed}")
 				else:
 					await self.on_score("RIGHT")
 
 	async def on_score(self, winner):
+		self.logger.info('on score called')
+		self.event.revert()
+		self.logger.info('on score event after revert')
+		await self.revert_event_fun()
+		self.logger.info('on score event after async revert')
+		self.event = self.get_event()
+		self.event.apply()
+		self.logger.info('on score event after')
+
 		if winner == "LEFT":
 			self.player_left.score += 1
 			self.scorePos = Vector2D(self.ball.position.x, self.ball.position.y, self.ball.position.z)
@@ -206,11 +226,13 @@ class RumbleGameInstance:
 			self.ball.start(RIGHT_SIDE_DIR, DEFAULT_BALL_POS)
 			self.ball.lastHitter = "LEFT"
 			self.scorer = "RIGHT"
-		self.event.revert()
-		await self.revert_event_fun()
-		self.event = self.get_event()
-		self.event.apply()
 		self.announceEvent = True
+		self.player_right.position.x = self.bounds.right.x - 2
+		self.player_right.position.y = -3+10.5
+		self.player_right.position.z = -15
+		self.player_left.position.x = self.bounds.left.x + 2
+		self.player_left.position.y = -3+10.5
+		self.player_left.position.z = -15
 		self.ball.visible = False
 		self.ball.is_moving = False
 		self.ball.countdown = 5
@@ -252,7 +274,6 @@ class RumbleGameInstance:
 	def start(self):
 		self.is_running = True
 		self.last_update_time = time.time()
-		self.logger.info(f"rumble self : {self}")
 		self.ball.start(random.choice([LEFT_SIDE_DIR, RIGHT_SIDE_DIR]), DEFAULT_BALL_POS)
 		self.loop_task = asyncio.create_task(self.game_loop())
 
@@ -265,7 +286,12 @@ class RumbleGameInstance:
 				current_time = time.time()
 				delta_time = current_time - self.last_update_time
 				self.last_update_time = current_time
-				self.logger.info('Game loop running')
+				if (self.ball.countdown >= 0.3):
+					self.player_left.movable = False
+					self.player_right.movable = False
+				else:
+					self.player_left.movable = True
+					self.player_right.movable = True
 
 				if not self.paused:
 					self.player_left.update(delta_time)
@@ -301,18 +327,20 @@ class RumbleGameInstance:
 
 	def get_event(self):
 		events = [
-			InvertedControlsEvent(self),
-			RandomBouncesEvent(self),
-			MirrorBallEvent(self),
-			LightsOutEvent(self),
-			SmokeCloudEvent(self),
-			InfiniteSpeedEvent(self),
-			ReverseBallEvent(self),
-			ShrinkingPaddleEvent(self),
-			IcyPaddlesEvent(self),
-			NoStoppingEvent(self),
-			VisibleTrajectoryEvent(self),
-			KillerBallEvent(self),
-			BreathingTimeEvent(self)
+			# InvertedControlsEvent(self),
+			# RandomBouncesEvent(self),
+			# MirrorBallEvent(self),
+			# LightsOutEvent(self),
+			# SmokeCloudEvent(self),
+			# InfiniteSpeedEvent(self),
+			# ReverseBallEvent(self),
+			# ShrinkingPaddleEvent(self),
+			# IcyPaddlesEvent(self),
+			# NoStoppingEvent(self),
+			# VisibleTrajectoryEvent(self),
+			# KillerBallEvent(self),
+			# BreathingTimeEvent(self),
+			# SupersonicBallEvent(self),
+			RampingBallEvent(self)
 		]
 		return random.choice(events)

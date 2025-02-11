@@ -8,16 +8,15 @@ export default class CreditsView {
 	async init() {
 		await window.app.getSettings();
 		this.render();
-		window.app.checkForAdmin();
 		window.app.addNavEventListeners();
 	}
 
 	render() {
 		window.app.renderHeader(this.container, "credits", true, true);
 		this.container.innerHTML += `
-			<main>
+			<main id="credits-view">
 				<div id="credits-card" class="card">
-					<h2 id="card-title">CREDITS</h2>
+					<h2 id="card-title"><i class="fa-solid fa-table-tennis-paddle-ball"></i> CREDITS</h2>
 					<div id="credits-content">
 						<p>
 							Welcome to <strong>ft_transcendence</strong>,<br>
@@ -34,38 +33,6 @@ export default class CreditsView {
 								You can find the source code of the project on <a href="https://github.com/pluieciel/transcendence" target="_blank" rel="noopener noreferrer"><i class="fab fa-github"></i> GitHub</a>
 							</div>
 						</p>
-					</div>
-					</div>
-				<div id="how-to-play-card" class="card">
-					<h2 id="card-title">HOW TO PLAY</h2>
-					<div id="how-to-play-content">
-						<p>
-							<i class="fa-solid fa-star"></i> <strong>Classic Mode</strong><br>
-								Master the fundamentals of speed and precision<br>
-								Experience pure, competitive Pong action<br>
-								Perfect your paddle control and timing<br>
-							<br>
-							<i class="fa-solid fa-bolt"></i> <strong>Rumble Mode</strong><br>
-								Unleash chaos with random events<br>
-								Test your reaction time and adaptability<br>
-								Enjoy a more dynamic and unpredictable game<br>
-							<br>
-							<i class="fa-solid fa-medal"></i> Climb the ranks in both modes<br>
-							<i class="fa-solid fa-users"></i> Challenge friends or compete globally<br>
-							<i class="fa-solid fa-palette"></i> Pick your style and dominate the game!<br>
-							<i class="fa-solid fa-trophy"></i> Earn achievements and show off your skills!<br>
-						</p>
-					</div>
-				</div>
-				<div id="about-us-card" class="card">
-					<h2 id="card-title">ABOUT US</h2>
-					<div id="about-us-content">
-						<p>
-							The team behind <strong>ft_transcendence</strong>!<br>
-							As students at <img src="imgs/42_logo.png" id="oauth-logo"> <strong>Luxembourg</strong>, we united our<br>
-							skills and creativity to bring you this modern<br>
-							take on a classic game.<br>
-						</p>
 						<div id="github-links">
 							<strong>Created by:</strong><br>
 							<p id="tooltip-github">click on the links to check out our own github profiles</p>
@@ -79,6 +46,9 @@ export default class CreditsView {
 							We hope you enjoy exploring our project!
 						</p>
 					</div>
+				</div>
+				<div id="subject-card" class="card">
+					<iframe id="subject-pdf" src="https://cdn.intra.42.fr/pdf/pdf/134058/en.subject.pdf#toolbar=0&navpanes=0">
 				</div>
 			</main>
 		`;

@@ -11,7 +11,8 @@ class Disable2FAConsumer(AsyncHttpConsumer):
 			if not user:
 				response_data = {
 					'success': False,
-					'message': 'Invalid token or User not found'
+					'is_jwt_valid': False,
+					'message': 'Invalid JWT'
 				}
 				return await self.send_response(401, json.dumps(response_data).encode(),
 					headers=[(b"Content-Type", b"application/json")])

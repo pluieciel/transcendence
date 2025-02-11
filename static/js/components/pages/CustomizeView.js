@@ -15,7 +15,6 @@ export default class CustomizeView {
 	async init() {
 		await window.app.getSettings();
 		this.render();
-		window.app.checkForAdmin();
 		this.addEventListeners();
 		this.settings = {
 			color: window.app.settings.color,
@@ -36,7 +35,7 @@ export default class CustomizeView {
 		this.container.innerHTML += `
 			<main>
 				<div id="customize-card" class="card">
-					<h2 id="card-title">CUSTOMIZE</h2>
+					<h2 id="card-title"><i class="fa-solid fa-palette"></i> CUSTOMIZE</h2>
 					<div id="color">
 						<button id="selector-left-arrow"><i class="fa-solid fa-arrow-left fa-lg"></i></button>
 						<div id="selector-middle">
