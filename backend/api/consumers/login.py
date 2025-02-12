@@ -3,7 +3,7 @@ from django.core.cache import cache
 from channels.generic.http import AsyncHttpConsumer
 from channels.db import database_sync_to_async
 from api.db_utils import get_user_exists
-from api.utils import generate_jwt_cookie, hash_password
+from api.utils import generate_jwt_cookie, sha256_hash
 import json
 
 class LoginConsumer(AsyncHttpConsumer):
@@ -50,9 +50,7 @@ class LoginConsumer(AsyncHttpConsumer):
 				return await self.send_response(400, json.dumps(response_data).encode(),
 					headers=[(b"Content-Type", b"application/json")])
 
-			password_hash = hash_password(password)
-
-			user = await self.authenticate_user(username, password_hash)
+			user = await self.authenticate_user(username, password)
 			if not user:
 				response_data = {
 					'success': False,

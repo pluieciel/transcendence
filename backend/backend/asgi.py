@@ -27,7 +27,7 @@ from api.consumers.login_oauth import LoginOAuthConsumer
 from api.consumers.profile import ProfileConsumer
 from api.consumers.profile2 import ProfileConsumer2
 from api.consumers.profile_nav import ProfileNavConsumer
-from api.consumers.settings import GetSettingsConsumer
+from api.consumers.settings import GetSettingsConsumer, SetSettingsConsumer
 from api.consumers.avatar import AvatarConsumer, setAvatar
 from api.consumers.login import LoginConsumer
 from api.consumers.signup import SignupConsumer
@@ -65,6 +65,7 @@ http_patterns = [
     path('api/get/nav/profile', ProfileNavConsumer.as_asgi()),
     path('api/get/leaderboard', getLeaderboard.as_asgi()),
     path('api/get/settings', GetSettingsConsumer.as_asgi()),
+    path('api/set/settings', SetSettingsConsumer.as_asgi()),
 	path('api/settings/set/preferences', setPreferences.as_asgi()),
 	path('api/settings/get/preferences', getPreferences.as_asgi()),
     path('api/delete/user', DeleteUserConsumer.as_asgi()),

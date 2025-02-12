@@ -85,8 +85,12 @@ def get_secret_from_file(env_var):
 	with open(file_path, 'r') as file:
 		return file.read().strip()
 
-def hash_password(password):
-	return hashlib.sha256(password.encode()).hexdigest()
+def is_valid_password(password):
+	regex = r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,32}$'
+	return bool(re.match(regex, password))
+
+def sha256_hash(data):
+	return hashlib.sha256(data.encode()).hexdigest()
 
 def get_user_avatar_url(user, headers):
 	if (user.is_42_avatar_used):
