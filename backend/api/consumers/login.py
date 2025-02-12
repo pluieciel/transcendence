@@ -45,7 +45,7 @@ class LoginConsumer(AsyncHttpConsumer):
 			if not await get_user_exists(username):
 				response_data = {
 					'success': False,
-					'message': 'Username doesn\'t exist'
+					'message': 'Invalid credentials'
 				}
 				return await self.send_response(400, json.dumps(response_data).encode(),
 					headers=[(b"Content-Type", b"application/json")])

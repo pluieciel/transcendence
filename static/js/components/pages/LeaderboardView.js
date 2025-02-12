@@ -50,6 +50,10 @@ export default class LeaderboardView {
 				while (i < data.users.length)
 					this.addUserToLB(data.users[i], ++i);
 			}
+			else if (response.status === 401 && !data.is_jwt_valid) {
+				window.app.logout();
+				window.app.router.navigateTo("/login");
+			}
 			else {
 				console.log(data['message']);
 			}

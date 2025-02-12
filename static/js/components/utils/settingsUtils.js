@@ -32,27 +32,6 @@ export async function addUserData(settings) {
 	quality.innerHTML = "<i class=\"fa-solid fa-wrench\"></i> " + qualityArray[qualityIndex];
 };
 
-export async function eraseInDB() {
-	try {
-		const response = await fetch('/api/del/user', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-		});
-
-		const data = await response.json();
-		
-		if (data.success)
-			message(data.success, data.message);
-		else
-			// TODO: show error msg
-		;
-	} catch (error) {
-		console.error('An error occurred: ', error);
-		return false;
-	}
-}
 
 export async function saveUserChanges(main, settings) {
 	try {

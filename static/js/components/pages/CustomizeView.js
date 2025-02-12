@@ -1,4 +1,4 @@
-import { addUserData, message, message2, saveUserChanges, eraseInDB } from "../utils/settingsUtils.js";
+import { addUserData, message, message2, saveUserChanges } from "../utils/settingsUtils.js";
 import { SceneManager } from "../game/SceneManager.js";
 import { Renderer } from "../game/Renderer.js";
 import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
