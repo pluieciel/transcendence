@@ -1,4 +1,4 @@
-import { addUserData, message, message2, saveUserChanges } from "../utils/settingsUtils.js";
+import { addUserData } from "../utils/settingsUtils.js";
 import { SceneManager } from "../game/SceneManager.js";
 import { Renderer } from "../game/Renderer.js";
 import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
@@ -50,28 +50,13 @@ export default class CustomizeView {
 						</div>
 						<button id="selector-right-arrow"><i class="fa-solid fa-arrow-right fa-lg"></i></button>
 					</div>
+					<div id="input-message"></div>
 					<button id="save-button" type="submit"><i class="fa-solid fa-floppy-disk"></i> Save</button>
 				</div>
 				<div id="preview-card" class="card">
 					<canvas id="preview"></canvas>
 				</div>
 			</main>
-			<div class="modal fade" id="changeModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-			<div class="modal-dialog">
-				<div class="modal-content">
-					<div class="modal-header">
-						<h1 class="modal-title fs-5" id="modalHeader"></h1>
-						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-					</div>
-					<div class="modal-body">
-						<h2 class="modal-title fs-5" id="modalDialog"></h2>
-					</div>
-					<div id="modalFooter" class="modal-footer d-none">
-						<button class="btn btn-primary" id="modalsavebtn">Save changes</button>
-						<button class="btn btn-primary" id="gotomainbtn">Go to main without saving</button>
-					</div>
-				</div>
-			</div>
 		`;
 	}
 
@@ -122,7 +107,37 @@ export default class CustomizeView {
 		});
 
 		saveChanges.addEventListener("click", async () => {
-			await saveUserChanges(false, this.settings);
+			try {
+				const inputMessage = document.getElementById('input-message');
+				inputMessage.innerHTML = '';
+				inputMessage.style.display = 'none';
+
+				const response = await fetch('/api/settings/preferences/update/', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({
+						'newColor': this.settings.color,
+						'newQuality': this.settings.quality,
+					}),			
+				});
+					
+				const data = await response.json();
+		
+				if (data.success) {
+					window.app.settings.color = this.settings.color;
+					window.app.settings.quality = this.settings.quality;
+					window.app.showSuccessMsg('#input-message', 'Updated successfully');
+				} else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
+					window.app.logout();
+					window.app.router.navigateTo("/login");
+				} else {
+					window.app.showErrorMsg('#input-message', data.message);
+				}
+			} catch (error) {
+				console.error("An error occurred: " + error);
+			};
 		});
 	}
 
