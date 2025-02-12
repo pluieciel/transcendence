@@ -112,39 +112,51 @@ class App {
 
 	showErrorMsg(errorSelector, msg, timeout = 10000) {
 		const errorDiv = document.querySelector(errorSelector);
+		if (errorDiv.timeoutId) {
+			clearTimeout(errorDiv.timeoutId);
+		}
+		
 		errorDiv.innerHTML = `<i class="fa-solid fa-xmark"></i> ${msg}`;
 		errorDiv.style.backgroundColor = 'var(--input-error-color)';
 		errorDiv.style.border = `1px solid var(--input-error-border-color)`;
 		errorDiv.style.color = 'var(--input-error-text-color)';
 		errorDiv.style.display = 'block';
 
-		setTimeout(() => {
+		errorDiv.timeoutId = setTimeout(() => {
 			errorDiv.style.display = 'none';
 		}, timeout);
 	}
 
 	showSuccessMsg(successSelector, msg, timeout = 10000) {
 		const successDiv = document.querySelector(successSelector);
+		if (successDiv.timeoutId) {
+			clearTimeout(successDiv.timeoutId);
+		}
+
 		successDiv.innerHTML = `<i class="fa-solid fa-check"></i> ${msg}`;
 		successDiv.style.backgroundColor = 'var(--input-success-color)';
 		successDiv.style.border = `1px solid var(--input-success-border-color)`;
 		successDiv.style.color = 'var(--input-success-text-color)';
 		successDiv.style.display = 'block';
 
-		setTimeout(() => {
+		successDiv.timeoutId = setTimeout(() => {
 			successDiv.style.display = 'none';
 		}, timeout);
 	}
 
 	showWarningMsg(warningSelector, msg, timeout = 10000) {
 		const warningDiv = document.querySelector(warningSelector);
+		if (warningDiv.timeoutId) {
+			clearTimeout(warningDiv.timeoutId);
+		}
+
 		warningDiv.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ${msg}`;
 		warningDiv.style.backgroundColor = 'var(--input-warning-color)';
 		warningDiv.style.border = `1px solid var(--input-warning-border-color)`;
 		warningDiv.style.color = 'var(--input-warning-text-color)';
 		warningDiv.style.display = 'block';
 
-		setTimeout(() => {
+		warningDiv.timeoutId = setTimeout(() => {
 			warningDiv.style.display = 'none';
 		}, timeout);
 	}

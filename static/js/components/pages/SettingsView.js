@@ -124,14 +124,17 @@ export default class SettingsView {
 	addSettingsFormEventListeners() {
 		const form = document.getElementById('settings-form');
 		const avatar = document.getElementById('upload-avatar');
-		const fileInput = document.getElementById('avatar-input');
-		let	file;
+		const avatarInput = document.getElementById('avatar-input');
+		let file = null;
 
-		fileInput.addEventListener('change', function(event) {
+		const handleAvatarChange = (event) => {
 			file = event.target.files[0];
-			if (file)
+			if (file) {
 				avatar.textContent = "Avatar selected: " + file.name;
-		});
+			}
+		};
+
+		avatarInput.addEventListener('change', handleAvatarChange);
 
 		form.addEventListener('submit', async (e) => {
 			e.preventDefault();
@@ -172,17 +175,22 @@ export default class SettingsView {
 						window.app.showWarningMsg('#input-message', data.message);
 					else
 						window.app.showSuccessMsg('#input-message', data.message);
+					
 					const passwordInput = document.getElementById('password-input');
 					const confirmPasswordInput = document.getElementById('confirm-password-input');
-					const avatarSpan = document.getElementById('upload-avatar');
 					passwordInput.value = '';
 					confirmPasswordInput.value = '';
-					avatarSpan.innerHTML = `
+					
+					file = null;
+					avatar.innerHTML = `
 						<label for="avatar-input">
 							<i class="fa-solid fa-arrow-up-from-bracket"></i> Upload Avatar
 						</label>
 						<input type="file" id="avatar-input" accept="image/*" hidden>
 					`;
+					const newAvatarInput = document.getElementById('avatar-input');
+					newAvatarInput.addEventListener('change', handleAvatarChange);
+					
 					await this.refreshNavProvile();
 				} else {
 					window.app.showErrorMsg('#input-message', data.message);
