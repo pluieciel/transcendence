@@ -55,6 +55,7 @@ class App {
 			case 6: return "#E71200";
 			case 7: return "#0EC384";
 			case 8: return "#E6E3E1";
+			case 9: return "#D5DA2B";
 			default: return "#00BDD1";
 		}
 	}

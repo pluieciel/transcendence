@@ -15,7 +15,8 @@ export async function addUserData(settings) {
 		5: 'Purple',
 		6: 'Red',
 		7: 'Soft Green',
-		8: 'White'
+		8: 'White',
+		9: 'Yellow',
 	};
 	let qualityArray = {
 		0: 'Low',
