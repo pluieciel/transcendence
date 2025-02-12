@@ -51,7 +51,7 @@ body {
 	flex-wrap: wrap;
 }
 
-i:not(#chat-icon) {
+main i:not(#chat-icon) {
 	margin-right: 0.2rem;
 }
 
