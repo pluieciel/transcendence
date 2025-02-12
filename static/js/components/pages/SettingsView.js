@@ -6,8 +6,10 @@ export default class SettingsView {
 	}
 
 	async init() {
+		await window.app.getSettings();
 		await this.render();
 		this.addEventListeners();
+		await this.getSettings();
 	}
 
 	async render() {
@@ -37,10 +39,51 @@ export default class SettingsView {
 						<input type="file" id="avatar-input" accept="image/*" hidden>
 					</span>
 					<button id="save-button" type="submit"><i class="fa-solid fa-floppy-disk"></i> Save</button>
-					<button id="toggle-2fa-button" type="button"><i class="fa-solid fa-key"></i> Enable 2FA</button>
+					<button id="toggle-2fa-button" type="button"></button>
 					<button id="delete-account-button" type="submit"><i class="fa-solid fa-trash-can"></i> Delete Account</button>
 				</div>
 			</main>
+			<div class="modal fade" id="totpModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h1 class="modal-title fs-5" id="staticBackdropLabel">Two-Factor Authentication</h1>
+							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+						</div>
+						<form id="totpForm">
+							<div class="modal-body">
+									<div class="mb-3">
+										<div id="qrCode"></div>
+										<div id="qrCodeError" class="alert alert-danger d-none"></div>
+									</div>
+									<div class="mb-3">
+										<input id="totpInput" class="form-control" maxlength="6" placeholder="Enter 2FA code" required>
+									</div>
+									<div id="totpError" class="alert alert-danger d-none"></div>
+							</div>
+							<div class="modal-footer">
+								<button type="submit" class="btn btn-primary" id="totpSubmit">Submit</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+			<div class="modal fade" id="recoveryModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h1 class="modal-title fs-5" id="staticBackdropLabel">Recovery codes</h1>
+							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+						</div>
+						<form id="recoveryForm">
+							<div class="modal-body">
+								<ul id="recoveryCodes">
+								</ul>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
 		`;
 	}
 
@@ -48,6 +91,8 @@ export default class SettingsView {
 		window.app.addNavEventListeners();
 		this.addPasswordToggleEventListeners();
 		this.addDeleteAccountButtonEventListeners();
+		this.addToggle2FAButtonEventListeners();
+		this.add2FAEventListeners();
 	}
 
 	addPasswordToggleEventListeners() {
@@ -73,6 +118,69 @@ export default class SettingsView {
 		});
 	}
 
+	async disable2FA() {
+		try {
+			const response = await fetch('/api/settings/2fa/disable', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+			});
+
+			const data = await response.json();
+			if (data.success) {
+				const toggle2FAButton = document.getElementById("toggle-2fa-button");
+				toggle2FAButton.innerHTML = '<i class="fa-solid fa-key"></i> Enable 2FA';
+				toggle2FAButton.setAttribute("data-is-2fa-enabled", "false");
+			} else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
+				window.app.logout();
+				window.app.router.navigateTo("/login");
+			} else if (response.status == 409) {
+				// TODO: show error msg
+			} else {
+				// TODO: show error msg
+			}
+		} catch (error) {
+			// TODO: show error msg
+		}
+	}
+
+	async enable2FA() {
+		try {
+			const response = await fetch('/api/settings/2fa/generate/qr', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+			});
+
+			const data = await response.json();
+
+			if (data.success) {
+				new bootstrap.Modal(this.container.querySelector('#totpModal')).show();
+				const qrCode = this.container.querySelector('#qrCode');
+				qrCode.innerHTML = data.qr_code;
+			} else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
+				window.app.logout();
+				window.app.router.navigateTo("/login");
+			} else if (response.status == 409) {
+				// TODO: show error msg
+			} else {
+				// TODO: show error msg
+			}
+		} catch (error) {
+			// TODO: show error msg
+		}
+	}
+
+	addToggle2FAButtonEventListeners() {
+		const toggle2FAButton = document.getElementById("toggle-2fa-button");
+
+		toggle2FAButton.addEventListener("click", async () => {
+			toggle2FAButton.getAttribute("data-is-2fa-enabled") === "true" ? await this.disable2FA() : await this.enable2FA();
+		});
+	}
+
 	addDeleteAccountButtonEventListeners() {
 		const deleteAccountButton = document.getElementById("delete-account-button");
 
@@ -93,8 +201,95 @@ export default class SettingsView {
 					// TODO: Show error message
 				}
 			} catch (error) {
-				console.error("Error deleting account:", error);
+				// TODO: Show error message
 			}
 		});
+	}
+
+	add2FAEventListeners() {
+		const submit = this.container.querySelector('#totpForm');
+		const errorDiv = this.container.querySelector('#totpError');
+
+		submit.addEventListener('submit', async (e) => {
+			e.preventDefault();
+			const totp = this.container.querySelector('#totpInput').value;
+			try {
+				const response = await fetch('/api/settings/2fa/enable', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify({
+						totp: totp,
+					})
+				});
+				const data = await response.json();
+				if (data.success) {
+					const toggle2FAButton = document.getElementById("toggle-2fa-button");
+					toggle2FAButton.innerHTML = '<i class="fa-solid fa-key"></i> Disable 2FA';
+					toggle2FAButton.setAttribute("data-is-2fa-enabled", "true");
+					await this.getSettings();
+					const modal = bootstrap.Modal.getInstance(this.container.querySelector('#totpModal'));
+					if (modal)
+					{
+						modal.hide();
+						const response = await fetch('/api/settings/2fa/generate/recovery', {
+							method: 'POST',
+							headers: {
+								'Content-Type': 'application/json'
+							},
+						});
+
+						const data = await response.json();
+
+						const recoveryCodes = this.container.querySelector('#recoveryCodes');
+						recoveryCodes.innerHTML = '';
+						recoveryCodes.append(Object.assign(document.createElement('li'), {textContent: data.recovery_code_1}));
+						recoveryCodes.append(Object.assign(document.createElement('li'), {textContent: data.recovery_code_2}));
+						recoveryCodes.append(Object.assign(document.createElement('li'), {textContent: data.recovery_code_3}));
+						recoveryCodes.append(Object.assign(document.createElement('li'), {textContent: data.recovery_code_4}));
+						recoveryCodes.append(Object.assign(document.createElement('li'), {textContent: data.recovery_code_5}));
+						recoveryCodes.append(Object.assign(document.createElement('li'), {textContent: data.recovery_code_6}));
+
+						new bootstrap.Modal(this.container.querySelector('#recoveryModal')).show();
+					}
+				} else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
+					window.app.logout();
+					window.app.router.navigateTo("/login");
+				} else if (response.status == 409) {
+					// TODO: show error msg
+				} else {
+					// TODO: Show error message
+				}
+			} catch (error) {
+				// TODO: Show error message
+			}
+		});
+	}
+
+	async getSettings() {
+		try {
+			const response = await fetch("/api/get/settings", {
+				method: "GET",
+			});
+
+			const data = await response.json();
+			if (data.success) {	
+				const displayNameInput = document.getElementById("display-name-input");
+				const toggle2FAButton = document.getElementById("toggle-2fa-button");
+
+				displayNameInput.value = data.display_name;
+				toggle2FAButton.innerHTML = '<i class="fa-solid fa-key"></i> ';
+				toggle2FAButton.innerHTML += data.is_2fa_enabled ? "Disable 2FA" : "Enable 2FA";
+				toggle2FAButton.setAttribute("data-is-2fa-enabled", data.is_2fa_enabled);
+			} else if (response.status === 401 && !data.is_jwt_valid) {
+				window.app.logout();
+				window.app.router.navigateTo("/login");
+			} else {
+				// TODO: Show error message
+			}
+		} catch (error) {
+			// TODO: Show error message
+		}
 	}
 }

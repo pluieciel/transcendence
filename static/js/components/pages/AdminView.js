@@ -19,7 +19,7 @@ export default class AdminView {
 				await window.app.renderHeader(this.container, "admin");
 				this.container.innerHTML += data.admin_view;
 				this.addEventListeners();
-			} else if (response.status == 401 && !data.is_jwt_valid) {
+			} else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
 				window.app.logout();
 				window.app.router.navigateTo("/login");
 			} else if (response.status == 409) {

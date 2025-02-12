@@ -191,7 +191,7 @@ class App {
 							</ul>
 						</nav>
 					`;
-				} else if (response.status == 401 && !data.is_jwt_valid) {
+				} else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
 					window.app.logout();
 					window.app.router.navigateTo("/login");
 				} else 

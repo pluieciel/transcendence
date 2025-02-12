@@ -172,7 +172,7 @@ export default class ProfileView {
 					let toInsert = " [" + data['display'] + "]";
 					name.insertAdjacentHTML('beforeend', toInsert);
 				}
-			} else if (response.status == 401 && !data.is_jwt_valid) {
+			} else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
 				window.app.logout();
 				window.app.router.navigateTo("/login");
 			} else {
@@ -213,7 +213,7 @@ export default class ProfileView {
 				this.addHistory(data.game[0]);
 				this.addHistory(data.game[0]);
 			}
-			else if (response.status == 401 && !data.is_jwt_valid) {
+			else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
 				window.app.logout();
 				window.app.router.navigateTo("/login");
 			} else {
@@ -272,7 +272,7 @@ export default class ProfileView {
 
 						new bootstrap.Modal(this.container.querySelector('#recoveryModal')).show();
 					}
-				} else if (response.status == 401 && !data.is_jwt_valid) {
+				} else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
 					window.app.logout();
 					window.app.router.navigateTo("/login");
 				} else if (response.status == 409) {
@@ -314,7 +314,7 @@ export default class ProfileView {
 					new bootstrap.Modal(this.container.querySelector('#totpModal')).show();
 					const qrCode = this.container.querySelector('#qrCode');
 					qrCode.innerHTML = data.qr_code;
-				} else if (response.status == 401 && !data.is_jwt_valid) {
+				} else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
 					window.app.logout();
 					window.app.router.navigateTo("/login");
 				} else if (response.status == 409) {
@@ -345,7 +345,7 @@ export default class ProfileView {
 					const	disable2FA = this.container.querySelector('#disable2FA');
 					enable2FA.style.display = "block";
 					disable2FA.style.display = "none";
-				} else if (response.status == 401 && !data.is_jwt_valid) {
+				} else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
 					window.app.logout();
 					window.app.router.navigateTo("/login");
 				} else if (response.status == 409) {
