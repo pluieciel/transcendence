@@ -92,7 +92,6 @@ class App {
 			this.settings.color = data['color'];
 			this.settings.quality = data['quality'];
 			this.settings.is_2fa_enabled = data['is_2fa_enabled'];
-			this.settings.is_admin = data['is_admin'];
 			this.settings.fetched = true;
 			this.setColor(this.settings.color);
 		}
@@ -163,11 +162,6 @@ class App {
 										<i class="fa-solid fa-user fa-xl"></i>Profile
 									</button>
 								</li>
-								<li style="display: ${this.settings.is_admin ? 'block' : 'none'}">
-									<button id="admin-button" ${disableBtn === "admin" ? 'disabled' : ''}>
-										<i class="fa-solid fa-user-tie fa-xl"></i>Admin
-									</button>
-								</li>
 								<li>
 									<div id="nav-profile">
 										<div id="nav-user">
@@ -176,6 +170,11 @@ class App {
 										</div>
 										<img src="${data.avatar_url}" id="nav-avatar" class="avatar">
 									</div>
+								</li>
+								<li style="display: ${data.is_admin ? 'block' : 'none'}">
+									<button id="admin-button" ${disableBtn === "admin" ? 'disabled' : ''}>
+										<i class="fa-solid fa-user-tie fa-xl"></i>Admin
+									</button>
 								</li>
 								<li>
 									<button id="logout-button">
@@ -196,8 +195,6 @@ class App {
 		}
 			header += `</header>`;
 			container.innerHTML = header;
-			if (withNav)
-				this.checkForAdmin();
 	}
 
 	async addNavEventListeners() {
@@ -260,13 +257,6 @@ class App {
 	async getSettings() {
 		if (!window.app.settings["fetched"]) 
 			await window.app.getPreferences();
-	}
-
-	checkForAdmin() {
-		if (window.app.settings.is_admin) {
-			const adminButton = document.querySelector("li:has(button[id='admin-button'])");
-			adminButton.style.display = "block";
-		}
 	}
 
 	login(data) {

@@ -16,7 +16,6 @@ export default class MainView {
 	async init() {
 		await window.app.getSettings();
 		await this.render();
-		window.app.checkForAdmin();
 		this.initComponents();
 		this.checkForBackdrop();
 		window.app.addNavEventListeners();

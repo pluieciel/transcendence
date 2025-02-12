@@ -10,7 +10,6 @@ export default class ProfileView {
 	async init() {
 		await window.app.getSettings();
 		await this.render();
-		window.app.checkForAdmin();
 		this.addEventListeners();
 		this.setProfileFields();
 	}

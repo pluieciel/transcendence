@@ -19,6 +19,7 @@ class ProfileNavConsumer(AsyncHttpConsumer):
 				'username': user.username,
 				'display_name': user.display_name,
 				'avatar_url': get_user_avatar_url(user, self.scope['headers']),
+				'is_admin': user.is_admin,
 			}
 			return await self.send_response(200, json.dumps(response_data).encode(),
 				headers=[(b"Content-Type", b"application/json")])

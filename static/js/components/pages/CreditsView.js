@@ -8,7 +8,6 @@ export default class CreditsView {
 	async init() {
 		await window.app.getSettings();
 		await this.render();
-		window.app.checkForAdmin();
 		window.app.addNavEventListeners();
 	}
 

@@ -8,7 +8,6 @@ export default class LeaderboardView {
 	async init() {
 		await window.app.getSettings();
 		await this.render();
-		window.app.checkForAdmin();
 		await window.app.addNavEventListeners();
 		this.addContent();
 	}

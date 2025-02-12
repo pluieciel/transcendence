@@ -134,12 +134,12 @@ nav li {
 	height: 100%;
 }
 
-nav li:nth-last-child(2) {
+nav li:nth-last-child(3) {
 	margin-left: auto;
 	font-weight: bold;
 }
 
-nav li:nth-last-child(2) img {
+nav li:nth-last-child(3) img {
 	margin-right: 0.5rem;
 }
 
