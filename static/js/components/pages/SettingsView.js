@@ -41,7 +41,7 @@ export default class SettingsView {
 							</label>
 							<input type="file" id="avatar-input" accept="image/*" hidden>
 						</span>
-						<div id="input-error"><i class="fa-solid fa-xmark"></i></div>
+						<div id="input-message"></div>
 						<button id="save-button" type="submit"><i class="fa-solid fa-floppy-disk"></i> Save</button>
 					</form>
 					<button id="toggle-2fa-button" type="button"></button>
@@ -140,7 +140,7 @@ export default class SettingsView {
 			const confirmPassword = document.getElementById('confirm-password-input').value;
 
 			if (password !== confirmPassword) {
-				window.app.showErrorMsg('#input-error', 'Passwords do not match');
+				window.app.showErrorMsg('#input-message', 'Passwords do not match');
 				return;
 			}
 
@@ -165,9 +165,16 @@ export default class SettingsView {
 				const data = await response.json();
 			
 				if (data.success) {
-					window.app.settings.fetched = false;
+					if (data.message === 'No changes made')
+						window.app.showWarningMsg('#input-message', data.message);
+					else
+						window.app.showSuccessMsg('#input-message', data.message);
+					const passwordInput = document.getElementById('password-input');
+					const confirmPasswordInput = document.getElementById('confirm-password-input');
+					passwordInput.value = '';
+					confirmPasswordInput.value = '';
 				} else {
-					window.app.showErrorMsg('#input-error', data.message);
+					window.app.showErrorMsg('#input-message', data.message);
 				}
 			} catch (error) {
 				console.error("An error occurred: " + error);

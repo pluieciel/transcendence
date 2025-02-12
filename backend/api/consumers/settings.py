@@ -83,7 +83,7 @@ class SetSettingsConsumer(AsyncHttpConsumer):
 			if not password and not confirm_password:
 				response_data = {
 					'success': True,
-					'message': 'Settings updated successfully' if settings_updated else 'No changes made'
+					'message': 'Updated successfully' if settings_updated else 'No changes made'
 				}
 				return await self.send_response(201, json.dumps(response_data).encode(),
 					headers=[(b"Content-Type", b"application/json")])
@@ -128,7 +128,7 @@ class SetSettingsConsumer(AsyncHttpConsumer):
 
 			response_data = {
 				'success': True,
-				'message': 'Settings updated successfully'
+				'message': 'Updated successfully'
 			}
 			return await self.send_response(201, json.dumps(response_data).encode(),
 				headers=[(b"Content-Type", b"application/json")])

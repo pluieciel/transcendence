@@ -13,6 +13,12 @@
 	--input-error-color: #461623;
 	--input-error-border-color: #68292a;
 	--input-error-text-color: #b3373a;
+	--input-success-color: #164623;
+	--input-success-border-color: #296837;
+	--input-success-text-color: #37b346;
+	--input-warning-color: #463516;
+	--input-warning-border-color: #684e29;
+	--input-warning-text-color: #b37737;
 	--checkbox-unchecked-color: #4e4e4e;
 	--selector-color: #1e1e1e;
 }
@@ -208,19 +214,16 @@ nav i {
 	display: block;
 }
 
-#input-error {
+#input-message {
 	width: 100%;
 	min-height: 3rem;
-	background-color: var(--input-error-color);
-	border: 1px solid var(--input-error-border-color);
-	color: var(--input-error-text-color);
 	border-radius: 0.3rem;
 	padding: 0.5rem;
 	margin-bottom: 1rem;
 	display: none;
 }
 
-#input-error i {
+#input-message i {
 	padding: 0 0.5rem;
 }
 

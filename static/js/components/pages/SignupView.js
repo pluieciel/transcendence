@@ -38,7 +38,7 @@ export default class SignupView {
 							<input type="file" id="avatar-input" accept="image/*" hidden>
 						</span>
 						<div id="recaptcha"></div>
-						<div id="input-error"><i class="fa-solid fa-xmark"></i></div>
+						<div id="input-message"><i class="fa-solid fa-xmark"></i></div>
 						<button id="signup-button" type="submit"><i class="fa-solid fa-user-plus"></i> Sign Up</button>
 						<div id="login-link">Already have an account? <button type="button" id="login-button"> Log In</button></div>
 					</form>
@@ -73,7 +73,7 @@ export default class SignupView {
 				recaptcha.style.display = 'block';
 			}
 		} catch (error) {
-			window.app.showErrorMsg('#input-error', 'An error occurred: ' + error);
+			window.app.showErrorMsg('#input-message', 'An error occurred: ' + error);
 		}
 	}
 
@@ -97,11 +97,11 @@ export default class SignupView {
 			const recaptchaToken = grecaptcha.getResponse(this.recaptchaWidgetId);
 
 			if (password !== confirmPassword) {
-				window.app.showErrorMsg('#input-error', 'Passwords do not match');
+				window.app.showErrorMsg('#input-message', 'Passwords do not match');
 				return;
 			}
 			else if (!recaptchaToken) {
-				window.app.showErrorMsg('#input-error', 'Please verify that you are not a robot');
+				window.app.showErrorMsg('#input-message', 'Please verify that you are not a robot');
 				return;
 			}
 
@@ -129,7 +129,7 @@ export default class SignupView {
 					window.app.router.navigateTo('/login');
 				} else {
 					grecaptcha.reset(this.recaptchaWidgetId);
-					window.app.showErrorMsg('#input-error', data.message);
+					window.app.showErrorMsg('#input-message', data.message);
 				}
 			} catch (error) {
 				console.error("An error occurred: " + error);

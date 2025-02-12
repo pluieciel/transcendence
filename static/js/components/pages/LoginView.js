@@ -27,7 +27,7 @@ export default class LoginView {
 							<input type="password" id="password-input" placeholder="Password" maxlength="32" required>
 							<i class="fa-solid fa-eye" id="password-toggle"></i>
 						</div>
-						<div id="input-error"><i class="fa-solid fa-xmark"></i></div>
+						<div id="input-message"><i class="fa-solid fa-xmark"></i></div>
 						<button id="login-button" type="submit"><i class="fa-solid fa-right-to-bracket"></i> Log In</button>
 						<hr />
 						<button id="login42-button" type="button"><img src="imgs/42_logo.png" id="oauth-logo"> Login In with 42</button>
@@ -118,7 +118,7 @@ export default class LoginView {
 				});
 			}
 			else
-				window.app.showErrorMsg('#input-error', data.message);
+				window.app.showErrorMsg('#input-message', data.message);
 		} catch (error) {
 			console.error("An error occurred: " + error);
 		}
@@ -204,7 +204,7 @@ export default class LoginView {
 					else
 						window.app.login(data);
 				} else
-					window.app.showErrorMsg('#input-error', data.message);
+					window.app.showErrorMsg('#input-message', data.message);
 			} catch (error) {
 				console.error("An error occurred: " + error);
 			}

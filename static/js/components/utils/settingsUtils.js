@@ -38,13 +38,13 @@ export function checkAvatarFile(file, username)
 	const MAX_FILE_SIZE = 2 * 1024 * 1024;
 
 	if (file.size > MAX_FILE_SIZE) {
-		window.app.showErrorMsg('#input-error', 'File size exceeds the 2MB limit');
+		window.app.showErrorMsg('#input-message', 'File size exceeds the 2MB limit');
 		return false;
 	}
 	const allowed_extensions = ["jpg", "jpeg", "png"]
 	const extension = file.name.split('.').pop();
 	if (!allowed_extensions.includes(extension)) {
-		window.app.showErrorMsg('#input-error', 'Avatar in jpg, jpeg, or png format only');
+		window.app.showErrorMsg('#input-message', 'Avatar in jpg, jpeg, or png format only');
 		return false;
 	}
 	const newFilename = `${username}.${extension}`;

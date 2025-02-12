@@ -110,10 +110,43 @@ class App {
 		}
 	}
 
-	showErrorMsg(selector, msg) {
-		const errorDiv = document.querySelector(selector);
-		errorDiv.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ${msg}`;
+	showErrorMsg(errorSelector, msg, timeout = 10000) {
+		const errorDiv = document.querySelector(errorSelector);
+		errorDiv.innerHTML = `<i class="fa-solid fa-xmark"></i> ${msg}`;
+		errorDiv.style.backgroundColor = 'var(--input-error-color)';
+		errorDiv.style.border = `1px solid var(--input-error-border-color)`;
+		errorDiv.style.color = 'var(--input-error-text-color)';
 		errorDiv.style.display = 'block';
+
+		setTimeout(() => {
+			errorDiv.style.display = 'none';
+		}, timeout);
+	}
+
+	showSuccessMsg(successSelector, msg, timeout = 10000) {
+		const successDiv = document.querySelector(successSelector);
+		successDiv.innerHTML = `<i class="fa-solid fa-check"></i> ${msg}`;
+		successDiv.style.backgroundColor = 'var(--input-success-color)';
+		successDiv.style.border = `1px solid var(--input-success-border-color)`;
+		successDiv.style.color = 'var(--input-success-text-color)';
+		successDiv.style.display = 'block';
+
+		setTimeout(() => {
+			successDiv.style.display = 'none';
+		}, timeout);
+	}
+
+	showWarningMsg(warningSelector, msg, timeout = 10000) {
+		const warningDiv = document.querySelector(warningSelector);
+		warningDiv.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ${msg}`;
+		warningDiv.style.backgroundColor = 'var(--input-warning-color)';
+		warningDiv.style.border = `1px solid var(--input-warning-border-color)`;
+		warningDiv.style.color = 'var(--input-warning-text-color)';
+		warningDiv.style.display = 'block';
+
+		setTimeout(() => {
+			warningDiv.style.display = 'none';
+		}, timeout);
 	}
 
 	async renderHeader(container, disableBtn = null, withNav = true, creditsDisabled = false, inLogin = false) {
