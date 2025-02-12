@@ -10,7 +10,7 @@ import CreditsView from './components/pages/CreditsView.js';
 import CustomizeView from './components/pages/CustomizeView.js';
 import LeaderboardView from './components/pages/LeaderboardView.js';
 import GameView from './components/pages/GameView.js';
-import AchievementView from './components/pages/AchievementView.js';
+import AchievementsView from './components/pages/AchievementsView.js';
 
 
 class App {
@@ -24,7 +24,7 @@ class App {
 			{ path: '/credits', component: CreditsView },
 			{ path: '/profile', component: ProfileView },
 			{ path: '/settings', component: SettingsView },
-			{ path: '/achievements', component: AchievementView},
+			{ path: '/achievements', component: AchievementsView},
 			{ path: '/leaderboard', component: LeaderboardView },
 			{ path: '/admin', component: AdminView },
 			{ path: '/login/oauth', component: LoginOAuth },
