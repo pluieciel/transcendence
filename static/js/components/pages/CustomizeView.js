@@ -173,7 +173,7 @@ class PreviewGame {
 	getColor(color) {
 		switch (color) {
 			case 0:
-				return "#3E27F8";
+				return "#447AFF";
 			case 1:
 				return "#00BDD1";
 			case 2:

@@ -458,7 +458,7 @@ export class SceneManager {
 				rightTexture: "/js/components/game/Textures/TextureRightCyan.png",
 			},
 			//Blue
-			"#3E27F8": {
+			"#447AFF": {
 				leftTexture: "/js/components/game/Textures/TextureLeftBlue.png",
 				rightTexture: "/js/components/game/Textures/TextureRightBlue.png",
 			},
