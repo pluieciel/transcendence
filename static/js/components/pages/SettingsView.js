@@ -138,6 +138,9 @@ export default class SettingsView {
 			const display_name = document.getElementById('display-name-input').value;
 			const password = document.getElementById('password-input').value;
 			const confirmPassword = document.getElementById('confirm-password-input').value;
+			const inputMessage = document.getElementById('input-message');
+			inputMessage.innerHTML = '';
+			inputMessage.style.display = 'none';
 
 			if (password !== confirmPassword) {
 				window.app.showErrorMsg('#input-message', 'Passwords do not match');
@@ -171,8 +174,16 @@ export default class SettingsView {
 						window.app.showSuccessMsg('#input-message', data.message);
 					const passwordInput = document.getElementById('password-input');
 					const confirmPasswordInput = document.getElementById('confirm-password-input');
+					const avatarSpan = document.getElementById('upload-avatar');
 					passwordInput.value = '';
 					confirmPasswordInput.value = '';
+					avatarSpan.innerHTML = `
+						<label for="avatar-input">
+							<i class="fa-solid fa-arrow-up-from-bracket"></i> Upload Avatar
+						</label>
+						<input type="file" id="avatar-input" accept="image/*" hidden>
+					`;
+					await this.refreshNavProvile();
 				} else {
 					window.app.showErrorMsg('#input-message', data.message);
 				}
@@ -180,6 +191,32 @@ export default class SettingsView {
 				console.error("An error occurred: " + error);
 			}
 		});
+	}
+
+	async refreshNavProvile() {
+		try {
+			const navUsername = document.getElementById("nav-username");
+			const navDisplayName = document.getElementById("nav-display-name");
+			const navAvatar = document.getElementById("nav-avatar");
+
+			const response = await fetch('/api/get/nav/profile', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+			});
+			const data = await response.json();
+			if (data.success) {
+				navUsername.innerHTML = data.username;
+				navDisplayName.style.display = data.display_name ? "block" : "none";
+				navDisplayName.innerHTML = data.display_name;
+				navAvatar.setAttribute("src", data.avatar_url);
+			} else {
+				// TODO: add error msg
+			}
+		} catch (error) {
+			console.error("An error occurred: " + error);
+		}
 	}
 
 	addPasswordToggleEventListeners() {
