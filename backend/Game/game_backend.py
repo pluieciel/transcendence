@@ -279,7 +279,8 @@ class GameBackend:
 			5: "#6400C4",
 			6: "#E71200",
 			7: "#0EC384",
-			8: "#E6E3E1"
+			8: "#E6E3E1",
+			9: "#D5DA2B"
 		}
 		try:
 			color = color_map.get(user.color)

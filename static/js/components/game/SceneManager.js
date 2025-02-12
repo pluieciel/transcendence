@@ -487,6 +487,11 @@ export class SceneManager {
 				leftTexture: "/js/components/game/Textures/TextureLeftPurple.png",
 				rightTexture: "/js/components/game/Textures/TextureRightPurple.png",
 			},
+			//Yellow
+			"#D5DA2B": {
+				leftTexture: "/js/components/game/Textures/TextureLeftYellow.png",
+				rightTexture: "/js/components/game/Textures/TextureRightYellow.png",
+			},
 		};
 		return this.colorTextureMap;
 	}

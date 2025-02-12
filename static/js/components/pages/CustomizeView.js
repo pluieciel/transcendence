@@ -83,7 +83,7 @@ export default class CustomizeView {
 		const saveChanges = document.getElementById("save-button");
 
 		leftColor.addEventListener("click", () => {
-			if (this.settings.color == 0) this.settings.color = 8;
+			if (this.settings.color == 0) this.settings.color = 9;
 			else this.settings.color -= 1;
 			window.app.settings.color = this.settings.color;
 			addUserData(this.settings);
@@ -91,7 +91,7 @@ export default class CustomizeView {
 		});
 
 		rightColor.addEventListener("click", () => {
-			if (this.settings.color == 8) this.settings.color = 0;
+			if (this.settings.color == 9) this.settings.color = 0;
 			else this.settings.color += 1;
 			window.app.settings.color = this.settings.color;
 			addUserData(this.settings);
@@ -190,6 +190,8 @@ class PreviewGame {
 				return "#0EC384";
 			case 8:
 				return "#E6E3E1";
+			case 9:
+				return "#D5DA2B";
 			default:
 				return "#00BDD1";
 		}
