@@ -156,6 +156,9 @@ class SetSettingsConsumer(AsyncHttpConsumer):
 
 	@database_sync_to_async
 	def update_avatar(self, user, avatar):
-		user.avatar.delete(save=False)
+		if user.avatar:
+			user.avatar.delete(save=False)
+		if user.is_oauth_user:
+			user.is_42_avatar_used = False
 		user.avatar = avatar
 		user.save()

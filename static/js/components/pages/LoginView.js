@@ -102,7 +102,7 @@ export default class LoginView {
 
 	async addOAuthEventListeners() {
 		try {
-			const response = await fetch('/api/get/oauth/redirect');
+			const response = await fetch('/api/auth/login/oauth/redirect/');
 
 			const data = await response.json();
 			if (data.success) {
@@ -137,7 +137,7 @@ export default class LoginView {
 				const username = this.container.querySelector('#username-input').value;
 				let response = null;
 				if (recovery_code) {
-					response = await fetch('/api/login/2fa/recovery', {
+					response = await fetch('/api/auth/login/2fa/recovery/', {
 						method: 'POST',
 						headers: {
 							'Content-Type': 'application/json',
@@ -148,7 +148,7 @@ export default class LoginView {
 						})
 					});
 				} else {
-					response = await fetch('/api/login/2fa/', {
+					response = await fetch('/api/auth/login/2fa/', {
 						method: 'POST',
 						headers: {
 							'Content-Type': 'application/json',
@@ -181,7 +181,7 @@ export default class LoginView {
 			const password = this.container.querySelector('#password-input').value;
 
 			try {
-				const response = await fetch('/api/login/', {
+				const response = await fetch('/api/auth/login/', {
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json'

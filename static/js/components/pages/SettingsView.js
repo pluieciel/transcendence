@@ -163,7 +163,7 @@ export default class SettingsView {
 			}
 
 			try {
-				const response = await fetch('/api/set/settings', {
+				const response = await fetch('/api/settings/update/', {
 					method: 'POST',
 					body: formData
 				});
@@ -210,7 +210,7 @@ export default class SettingsView {
 			const navDisplayName = document.getElementById("nav-display-name");
 			const navAvatar = document.getElementById("nav-avatar");
 
-			const response = await fetch('/api/get/nav/profile');
+			const response = await fetch('/api/profiles/me/nav/');
 			const data = await response.json();
 			if (data.success) {
 				navUsername.innerHTML = data.username;
@@ -253,7 +253,7 @@ export default class SettingsView {
 
 	async disable2FA() {
 		try {
-			const response = await fetch('/api/settings/2fa/disable');
+			const response = await fetch('/api/settings/2fa/disable/');
 
 			const data = await response.json();
 			if (data.success) {
@@ -275,7 +275,7 @@ export default class SettingsView {
 
 	async enable2FA() {
 		try {
-			const response = await fetch('/api/settings/2fa/generate/qr');
+			const response = await fetch('/api/settings/2fa/qr/generate/');
 
 			const data = await response.json();
 
@@ -309,7 +309,7 @@ export default class SettingsView {
 
 		deleteAccountButton.addEventListener("click", async () => {
 			try {
-				const response = await fetch("/api/delete/user", {
+				const response = await fetch("/api/users/delete/", {
 					method: "POST",
 					body: JSON.stringify({ username: this.username }),
 				});
@@ -337,7 +337,7 @@ export default class SettingsView {
 			e.preventDefault();
 			const totp = this.container.querySelector('#totpInput').value;
 			try {
-				const response = await fetch('/api/settings/2fa/enable', {
+				const response = await fetch('/api/settings/2fa/enable/', {
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json'
@@ -356,7 +356,7 @@ export default class SettingsView {
 					if (modal)
 					{
 						modal.hide();
-						const response = await fetch('/api/settings/2fa/generate/recovery');
+						const response = await fetch('/api/settings/2fa/recovery/generate/');
 
 						const data = await response.json();
 
@@ -387,7 +387,7 @@ export default class SettingsView {
 
 	async getSettings() {
 		try {
-			const response = await fetch("/api/get/settings", {
+			const response = await fetch("/api/settings/", {
 				method: "GET",
 			});
 

@@ -64,7 +64,7 @@ class App {
 
 	async getAvatar(username) {
 		try {
-			const response = await fetch(`/api/get/avatar/${username}`);
+			const response = await fetch(`/api/profiles/${username}/avatar/`);
 
 			const data = await response.json();
 			if (data.success)
@@ -82,7 +82,7 @@ class App {
 
 	async getPreferences() {
 		try {
-			const response = await fetch(`/api/settings/get/preferences`);
+			const response = await fetch(`/api/settings/preferences/`);
 
 			const data = await response.json();
 			if (data.success)
@@ -165,7 +165,7 @@ class App {
 		if (withNav)
 		{
 			try {
-				const response = await fetch('/api/get/nav/profile');
+				const response = await fetch('/api/profiles/me/nav/');
 
 				const data = await response.json();
 				if (data.success) {

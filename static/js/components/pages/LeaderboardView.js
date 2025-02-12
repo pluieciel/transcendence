@@ -35,7 +35,7 @@ export default class LeaderboardView {
 
 	async addContent() {
 		try {
-			const response = await fetch(`/api/get/leaderboard`);
+			const response = await fetch(`/api/leaderboard/`);
 	
 			const data = await response.json();
 	

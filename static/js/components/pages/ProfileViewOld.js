@@ -134,7 +134,7 @@ export default class ProfileView {
 		else {enable2FA.style.display = "blon";disable2FA.style.display = "none";}
 
 		try {
-			const response = await fetch("/api/get/profile", {
+			const response = await fetch("/api/profiles/me/", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
@@ -187,7 +187,7 @@ export default class ProfileView {
 		}
 
 		try {
-			const response = await fetch(`/api/get/history/${this.username}`, {
+			const response = await fetch(`/api/profiles/${this.username}/history/`, {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
@@ -233,7 +233,7 @@ export default class ProfileView {
 			e.preventDefault();
 			const totp = this.container.querySelector('#totpInput').value;
 			try {
-				const response = await fetch('/api/settings/2fa/enable', {
+				const response = await fetch('/api/settings/2fa/enable/', {
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json'
@@ -252,7 +252,7 @@ export default class ProfileView {
 					if (modal)
 					{
 						modal.hide();
-						const response = await fetch('/api/settings/2fa/generate/recovery', {
+						const response = await fetch('/api/settings/2fa/recovery/generate/', {
 							method: 'POST',
 							headers: {
 								'Content-Type': 'application/json'
@@ -301,7 +301,7 @@ export default class ProfileView {
 		enable2FA.addEventListener('click', async (e) => {
 			e.preventDefault();
 			try {
-				const response = await fetch('/api/settings/2fa/generate/qr', {
+				const response = await fetch('/api/settings/2fa/qr/generate/', {
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json',
@@ -332,7 +332,7 @@ export default class ProfileView {
 		disable2FA.addEventListener('click', async (e) => {
 			e.preventDefault();
 			try {
-				const response = await fetch('/api/settings/2fa/disable', {
+				const response = await fetch('/api/settings/2fa/disable/', {
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json',

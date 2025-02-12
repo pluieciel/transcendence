@@ -56,7 +56,7 @@ export default class SignupView {
 
 	async loadReCaptcha() {
 		try {
-			const response = await fetch('/api/get/recaptcha');
+			const response = await fetch('/api/recaptcha/');
 			const data = await response.json();
 
 			if (data.success) {
@@ -113,7 +113,7 @@ export default class SignupView {
 			}
 
 			try {
-				const response = await fetch('/api/signup/', {
+				const response = await fetch('/api/auth/signup/', {
 					method: 'POST',
 					body: formData
 				});

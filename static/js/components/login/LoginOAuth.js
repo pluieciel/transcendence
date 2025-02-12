@@ -37,7 +37,7 @@ class LoginOAuth {
         }
 
         try {
-            const response = await fetch("/api/login/oauth", {
+            const response = await fetch("/api/auth/login/oauth/", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

@@ -57,7 +57,7 @@ export function checkAvatarFile(file, username)
 
 export async function saveUserChanges(main, settings) {
 	try {
-		const response = await fetch('/api/settings/set/preferences', {
+		const response = await fetch('/api/settings/preferences/update/', {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
