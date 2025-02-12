@@ -275,6 +275,7 @@ input {
 
 input::placeholder {
 	color: var(--secondary-color);
+	opacity: 0.5;
 }
 
 input:focus {
@@ -335,7 +336,7 @@ form button:hover:not(:disabled) {
 	z-index: 1;
 }
 
-#play-card, #customize-card {
+#play-card, #customize-card, #settings-card {
 	width: 30rem;
 	display: flex;
 	flex-direction: column;
@@ -377,7 +378,7 @@ form button:hover:not(:disabled) {
 	align-self: flex-end;
 }
 
-#start-button, #save-button {
+#start-button, #save-button, #toggle-2fa-button, #delete-account-button {
 	width: 100%;
 	margin-bottom: 1rem;
 	color: var(--secondary-color);
@@ -390,7 +391,7 @@ form button:hover:not(:disabled) {
 	height: 3rem;
 }
 
-#start-button:hover, #save-button:hover {
+#start-button:hover, #save-button:hover, #toggle-2fa-button:hover {
 	border: 1px solid var(--user-color);
 	box-shadow: 0 0 15px var(--user-color);
 	transition: all 0.3s ease;
@@ -737,6 +738,39 @@ hr::after {
     color: #CD7F32;
 	font-family: "Font Awesome 5 Free";
 	margin-right: 0.5rem;
+}
+
+/* ******************************** */
+/*                Profile           */
+/* ******************************** */
+
+#profile-view {
+	justify-content: flex-start;
+}
+
+#settings-card, #profile-card {
+	align-self: flex-start;
+}
+
+#profile-card {
+	width: 50rem;
+	height: 100%;
+}
+
+#toggle-2fa-button {
+	margin-top: 2rem;
+}
+
+#delete-account-button {
+	background-color: var(--input-error-color);
+	border: 1px solid var(--input-error-border-color);
+	color: var(--input-error-text-color);
+}
+
+#delete-account-button:hover {
+	border: 1px solid var(--input-error-text-color);
+	box-shadow: 0 0 15px var(--input-error-text-color);
+	transition: all 0.3s ease;
 }
 
 /* ******************************** */
