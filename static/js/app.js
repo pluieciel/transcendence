@@ -63,42 +63,92 @@ class App {
 	}
 
 	async getAvatar(username) {
-		const response = await fetch(`/api/get/avatar/${username}`, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-		});
-		const data = await response.json();
-		this.avatarCache[username] = data.avatar_url;
-		return data.avatar_url;
+		try {
+			const response = await fetch(`/api/profiles/${username}/avatar/`);
+
+			const data = await response.json();
+			if (data.success)
+			{
+				this.avatarCache[username] = data.avatar_url;
+				return data.avatar_url;
+			}
+			else {
+				// TODO: add error msg
+			}
+		} catch (error) {
+			console.error("An error occurred: " + error);
+		}
 	}
 
 	async getPreferences() {
-		const response = await fetch(`/api/settings/get/preferences`, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-		});
-		const data = await response.json();
-		if (data.success)
-		{
-			this.settings.color = data['color'];
-			this.settings.quality = data['quality'];
-			this.settings.is_2fa_enabled = data['is_2fa_enabled'];
-			this.settings.fetched = true;
-			this.setColor(this.settings.color);
+		try {
+			const response = await fetch(`/api/settings/preferences/`);
+
+			const data = await response.json();
+			if (data.success)
+			{
+				this.settings.color = data['color'];
+				this.settings.quality = data['quality'];
+				this.settings.fetched = true;
+				this.setColor(this.settings.color);
+				}
+				else {
+					// TODO: add error msg
+				}
+		} catch (error) {
+			console.error("An error occurred: " + error);
 		}
-		else
-			// TODO: add error handling
-		;
 	}
 
-	showErrorMsg(selector, msg) {
-		const errorDiv = document.querySelector(selector);
-		errorDiv.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ${msg}`;
+	showErrorMsg(errorSelector, msg, timeout = 10000) {
+		const errorDiv = document.querySelector(errorSelector);
+		if (errorDiv.timeoutId) {
+			clearTimeout(errorDiv.timeoutId);
+		}
+		
+		errorDiv.innerHTML = `<i class="fa-solid fa-xmark"></i> ${msg}`;
+		errorDiv.style.backgroundColor = 'var(--input-error-color)';
+		errorDiv.style.border = `1px solid var(--input-error-border-color)`;
+		errorDiv.style.color = 'var(--input-error-text-color)';
 		errorDiv.style.display = 'block';
+
+		errorDiv.timeoutId = setTimeout(() => {
+			errorDiv.style.display = 'none';
+		}, timeout);
+	}
+
+	showSuccessMsg(successSelector, msg, timeout = 10000) {
+		const successDiv = document.querySelector(successSelector);
+		if (successDiv.timeoutId) {
+			clearTimeout(successDiv.timeoutId);
+		}
+
+		successDiv.innerHTML = `<i class="fa-solid fa-check"></i> ${msg}`;
+		successDiv.style.backgroundColor = 'var(--input-success-color)';
+		successDiv.style.border = `1px solid var(--input-success-border-color)`;
+		successDiv.style.color = 'var(--input-success-text-color)';
+		successDiv.style.display = 'block';
+
+		successDiv.timeoutId = setTimeout(() => {
+			successDiv.style.display = 'none';
+		}, timeout);
+	}
+
+	showWarningMsg(warningSelector, msg, timeout = 10000) {
+		const warningDiv = document.querySelector(warningSelector);
+		if (warningDiv.timeoutId) {
+			clearTimeout(warningDiv.timeoutId);
+		}
+
+		warningDiv.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ${msg}`;
+		warningDiv.style.backgroundColor = 'var(--input-warning-color)';
+		warningDiv.style.border = `1px solid var(--input-warning-border-color)`;
+		warningDiv.style.color = 'var(--input-warning-text-color)';
+		warningDiv.style.display = 'block';
+
+		warningDiv.timeoutId = setTimeout(() => {
+			warningDiv.style.display = 'none';
+		}, timeout);
 	}
 
 	async renderHeader(container, disableBtn = null, withNav = true, creditsDisabled = false, inLogin = false) {
@@ -115,14 +165,9 @@ class App {
 		if (withNav)
 		{
 			try {
-				const response = await fetch('/api/get/nav/profile', {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json'
-					},
-				});
+				const response = await fetch('/api/profiles/me/nav/');
+
 				const data = await response.json();
-				
 				if (data.success) {
 					header += `
 						<nav>
@@ -187,14 +232,15 @@ class App {
 				} else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
 					window.app.logout();
 					window.app.router.navigateTo("/login");
-				} else 
-					window.app.showErrorMsg('#input-error', data.message);
+				} else {
+					// TODO: add error msg
+				}
 			} catch (error) {
-				window.app.showErrorMsg('#input-error', 'An error occurred: ' + error);
+				console.error("An error occurred: " + error);
 			}
 		}
-			header += `</header>`;
-			container.innerHTML = header;
+		header += `</header>`;
+		container.innerHTML = header;
 	}
 
 	async addNavEventListeners() {
@@ -277,7 +323,7 @@ class App {
 		this.state.isLoggedIn = false;
 		this.ingame = false;
 		sessionStorage.clear();
-		this.router.navigateTo("/");
+		this.router.navigateTo("/login");
 	}
 
 	getIsLoggedIn() {

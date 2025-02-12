@@ -35,12 +35,7 @@ export default class LeaderboardView {
 
 	async addContent() {
 		try {
-			const response = await fetch(`/api/get/leaderboard`, {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-			});
+			const response = await fetch(`/api/leaderboard/`);
 	
 			const data = await response.json();
 	
@@ -50,7 +45,7 @@ export default class LeaderboardView {
 				while (i < data.users.length)
 					this.addUserToLB(data.users[i], ++i);
 			}
-			else if (response.status === 401 && !data.is_jwt_valid) {
+			else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
 				window.app.logout();
 				window.app.router.navigateTo("/login");
 			}

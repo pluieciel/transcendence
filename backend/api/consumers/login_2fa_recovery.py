@@ -1,6 +1,6 @@
 from channels.generic.http import AsyncHttpConsumer
 from channels.db import database_sync_to_async
-from api.utils import generate_jwt_cookie, hash_password
+from api.utils import generate_jwt_cookie, sha256_hash
 from api.db_utils import get_user_by_name
 import json
 
@@ -21,7 +21,7 @@ class Login2FARecoveryConsumer(AsyncHttpConsumer):
 				return await self.send_response(401, json.dumps(response_data).encode(),
 					headers=[(b"Content-Type", b"application/json")])
 
-			hashed_recovery_code = hash_password(recovery_code)
+			hashed_recovery_code = sha256_hash(recovery_code)
 
 			is_recovery_code_valid = await self.verify_recovery_code(user, hashed_recovery_code)
 

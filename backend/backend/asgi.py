@@ -25,17 +25,15 @@ from api.consumers.generate_2fa_recovery import Generate2FARecoveryConsumer
 from api.consumers.oauth import OAuthConsumer
 from api.consumers.login_oauth import LoginOAuthConsumer
 from api.consumers.profile import ProfileConsumer
-from api.consumers.profile2 import ProfileConsumer2
 from api.consumers.profile_nav import ProfileNavConsumer
-from api.consumers.settings import GetSettingsConsumer
-from api.consumers.avatar import AvatarConsumer, setAvatar
+from api.consumers.settings import GetSettingsConsumer, SetSettingsConsumer
+from api.consumers.avatar import AvatarConsumer
 from api.consumers.login import LoginConsumer
 from api.consumers.signup import SignupConsumer
 from api.consumers.recaptcha import RecaptchaConsumer
 from api.consumers.preferences import getPreferences, setPreferences
 from api.consumers.delete_user import DeleteUserConsumer
 from api.consumers.admin import AdminConsumer
-from api.consumers.display import setDisplay
 from django.contrib import admin
 from django.conf.urls.static import static
 from django.conf import settings
@@ -49,30 +47,32 @@ websocket_patterns = [
 ]
 
 http_patterns = [
-    path('api/signup/', SignupConsumer.as_asgi()),
-    path('api/login/', LoginConsumer.as_asgi()),
-    path('api/login/2fa/', Login2FAConsumer.as_asgi()),
-    path('api/login/2fa/recovery', Login2FARecoveryConsumer.as_asgi()),
-    path('api/login/oauth', LoginOAuthConsumer.as_asgi()),
-    path('api/settings/2fa/generate/qr', Generate2FAQRConsumer.as_asgi()),
-    path('api/settings/2fa/generate/recovery', Generate2FARecoveryConsumer.as_asgi()),
-    path('api/settings/2fa/enable', Enable2FAConsumer.as_asgi()),
-    path('api/settings/2fa/disable', Disable2FAConsumer.as_asgi()),
-    re_path(r'^api/get/profile/.*$', ProfileConsumer2.as_asgi()),
-    re_path(r'^api/get/avatar/.*$', AvatarConsumer.as_asgi()),
-    re_path(r'^api/get/history/.*$', getHistory.as_asgi()),
-    path('api/get/profile', ProfileConsumer.as_asgi()),
-    path('api/get/nav/profile', ProfileNavConsumer.as_asgi()),
-    path('api/get/leaderboard', getLeaderboard.as_asgi()),
-    path('api/get/settings', GetSettingsConsumer.as_asgi()),
-	path('api/settings/set/preferences', setPreferences.as_asgi()),
-	path('api/settings/get/preferences', getPreferences.as_asgi()),
-    path('api/delete/user', DeleteUserConsumer.as_asgi()),
-    path('api/get/oauth/redirect', OAuthConsumer.as_asgi()),
-    path('api/get/recaptcha', RecaptchaConsumer.as_asgi()),
-	path('api/settings/set/display', setDisplay.as_asgi()),
-	path('api/settings/set/avatar', setAvatar.as_asgi()),
-	path('api/admin', AdminConsumer.as_asgi()),
+    path('api/auth/signup/', SignupConsumer.as_asgi()),
+    path('api/auth/login/', LoginConsumer.as_asgi()),
+    path('api/auth/login/2fa/', Login2FAConsumer.as_asgi()),
+    path('api/auth/login/2fa/recovery/', Login2FARecoveryConsumer.as_asgi()),
+    path('api/auth/login/oauth/', LoginOAuthConsumer.as_asgi()),
+    path('api/auth/login/oauth/redirect/', OAuthConsumer.as_asgi()),
+
+    re_path(r'^api/profiles/(?P<username>.*)/avatar/$', AvatarConsumer.as_asgi()),
+    re_path(r'^api/profiles/(?P<username>.*)/history/$', getHistory.as_asgi()),
+    path('api/profiles/me/', ProfileConsumer.as_asgi()),
+    path('api/profiles/me/nav/', ProfileNavConsumer.as_asgi()),
+
+    path('api/settings/', GetSettingsConsumer.as_asgi()),
+    path('api/settings/update/', SetSettingsConsumer.as_asgi()),
+	path('api/settings/preferences/', getPreferences.as_asgi()),
+	path('api/settings/preferences/update/', setPreferences.as_asgi()),
+
+    path('api/settings/2fa/qr/generate/', Generate2FAQRConsumer.as_asgi()),
+    path('api/settings/2fa/recovery/generate/', Generate2FARecoveryConsumer.as_asgi()),
+    path('api/settings/2fa/enable/', Enable2FAConsumer.as_asgi()),
+    path('api/settings/2fa/disable/', Disable2FAConsumer.as_asgi()),
+
+    path('api/leaderboard/', getLeaderboard.as_asgi()),
+    path('api/recaptcha/', RecaptchaConsumer.as_asgi()),
+    path('api/users/delete/', DeleteUserConsumer.as_asgi()),
+	path('api/admin/', AdminConsumer.as_asgi()),
     path('admin/', get_asgi_application()),
 ]
 

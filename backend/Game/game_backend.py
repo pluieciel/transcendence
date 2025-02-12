@@ -321,7 +321,7 @@ class GameBackend:
 			elif (self.game.winner.avatar):
 				avatar = self.game.winner.avatar.url
 			else:
-				avatar = '/default_avatar.png'
+				avatar = '/imgs/default_avatar.png'
 
 			self.logger.info(f"Appending winner info with {self.game.winner.username}")
 			if (self.game.winner.display_name):
@@ -395,7 +395,7 @@ class GameBackend:
 			elif (self.game.winner.avatar):
 				avatar = self.game.winner.avatar.url
 			else:
-				avatar = '/default_avatar.png'
+				avatar = '/imgs/default_avatar.png'
 
 			self.logger.info(f"Appending winner info with {self.game.winner.username}")
 			if (self.game.winner.display_name):

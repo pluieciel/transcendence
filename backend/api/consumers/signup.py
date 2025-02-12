@@ -4,7 +4,7 @@ from django.core.cache import cache
 from channels.generic.http import AsyncHttpConsumer
 from channels.db import database_sync_to_async
 from api.db_utils import get_user_exists
-from api.utils import get_secret_from_file, hash_password, parse_multipart_form_data
+from api.utils import get_secret_from_file, is_valid_password, sha256_hash, parse_multipart_form_data
 import json
 import re
 import io
@@ -75,7 +75,7 @@ class SignupConsumer(AsyncHttpConsumer):
 				return await self.send_response(400, json.dumps(response_data).encode(),
 					headers=[(b"Content-Type", b"application/json")])
 			
-			if not (self.is_valid_password(password)):
+			if not is_valid_password(password):
 				response_data = {
 					'success': False,
 					'message': 'Password invalid: \
@@ -127,9 +127,7 @@ class SignupConsumer(AsyncHttpConsumer):
 				return await self.send_response(401, json.dumps(response_data).encode(),
 					headers=[(b"Content-Type", b"application/json")])
 
-			password_hash = hash_password(password)
-
-			await self.create_user(username, password_hash, avatar)
+			await self.create_user(username, password, avatar)
 
 			response_data = {
 				'success': True,
@@ -151,10 +149,6 @@ class SignupConsumer(AsyncHttpConsumer):
 	def is_valid_username(self, username):
 		regex = r'^[a-zA-Z0-9]{1,16}$'
 		return bool(re.match(regex, username))
-
-	def is_valid_password(self, password):
-		regex = r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,32}$'
-		return bool(re.match(regex, password))
 
 	@database_sync_to_async
 	def create_user(self, username, password, avatar):

@@ -272,24 +272,6 @@ export default class ChatBox {
 						avatar_div.innerHTML = `<img src="${avatarUrl}" class="avatar" width="30" height="30"></img>`;
 					}
 				}
-				const elo_div = this.container.querySelector(`#elo_${user}`);
-				const wr_div = this.container.querySelector(`#wr_${user}`);
-				const tn_div = this.container.querySelector(`#tn_${user}`);
-				if (elo_div) {
-					const response = await fetch(`/api/get/profile/${user}`, {
-						method: "POST",
-						headers: {
-							"Content-Type": "application/json",
-						},
-					});
-					const data = await response.json();
-					//console.log(data);
-					if (data.elo) {
-						elo_div.innerHTML = `Elo: ${data.elo}`;
-						wr_div.innerHTML = `Winrate: ${data.winrate}%`;
-						tn_div.innerHTML = `Tournaments won: ${data["tourn"]}`;
-					}
-				}
 			});
 
 			setTimeout(() => {
@@ -396,25 +378,6 @@ export default class ChatBox {
 					const avatarUrl = await window.app.getAvatar(user);
 					if (avatarUrl) {
 						avatar_div.innerHTML = `<img src="${avatarUrl}" class="avatar" width="30" height="30"></img>`;
-					}
-				}
-				const elo_div = this.container.querySelector(`#elof_${user}`);
-				//console.log(elo_div);
-				const wr_div = this.container.querySelector(`#wrf_${user}`);
-				const tn_div = this.container.querySelector(`#tnf_${user}`);
-				if (elo_div) {
-					const response = await fetch(`/api/get/profile/${user}`, {
-						method: "POST",
-						headers: {
-							"Content-Type": "application/json",
-						},
-					});
-					const data = await response.json();
-					//console.log(data);
-					if (data.elo) {
-						elo_div.innerHTML = `Elo: ${data.elo}`;
-						wr_div.innerHTML = `Winrate: ${data.winrate}%`;
-						tn_div.innerHTML = `Tournaments won: ${data["tourn"]}`;
 					}
 				}
 			});

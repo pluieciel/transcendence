@@ -142,3 +142,7 @@
 .cheevo-reward:hover .tooltip {
     opacity: 1;
 }
+
+.cheevo-icon i {
+	margin-right: 0 !important;
+}

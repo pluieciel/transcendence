@@ -1,3 +1,5 @@
+import {checkAvatarFile} from "../utils/settingsUtils.js"
+
 export default class SignupView {
 	constructor(container) {
 		this.container = container;
@@ -36,7 +38,7 @@ export default class SignupView {
 							<input type="file" id="avatar-input" accept="image/*" hidden>
 						</span>
 						<div id="recaptcha"></div>
-						<div id="input-error"><i class="fa-solid fa-xmark"></i></div>
+						<div id="input-message"><i class="fa-solid fa-xmark"></i></div>
 						<button id="signup-button" type="submit"><i class="fa-solid fa-user-plus"></i> Sign Up</button>
 						<div id="login-link">Already have an account? <button type="button" id="login-button"> Log In</button></div>
 					</form>
@@ -54,12 +56,7 @@ export default class SignupView {
 
 	async loadReCaptcha() {
 		try {
-			const response = await fetch('/api/get/recaptcha', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-			});
+			const response = await fetch('/api/recaptcha/');
 			const data = await response.json();
 
 			if (data.success) {
@@ -71,7 +68,7 @@ export default class SignupView {
 				recaptcha.style.display = 'block';
 			}
 		} catch (error) {
-			window.app.showErrorMsg('#input-error', 'An error occurred: ' + error);
+			window.app.showErrorMsg('#input-message', 'An error occurred: ' + error);
 		}
 	}
 
@@ -80,8 +77,6 @@ export default class SignupView {
 		const avatar = this.container.querySelector('#upload-avatar');
 		const fileInput = document.getElementById('avatar-input');
 		let	file;
-		
-		const MAX_FILE_SIZE = 1 * 1024 * 1024;
 
 		fileInput.addEventListener('change', function(event) {
 			file = event.target.files[0];
@@ -97,11 +92,11 @@ export default class SignupView {
 			const recaptchaToken = grecaptcha.getResponse(this.recaptchaWidgetId);
 
 			if (password !== confirmPassword) {
-				window.app.showErrorMsg('#input-error', 'Passwords do not match');
+				window.app.showErrorMsg('#input-message', 'Passwords do not match');
 				return;
 			}
 			else if (!recaptchaToken) {
-				window.app.showErrorMsg('#input-error', 'Please verify that you are not a robot');
+				window.app.showErrorMsg('#input-message', 'Please verify that you are not a robot');
 				return;
 			}
 
@@ -111,26 +106,14 @@ export default class SignupView {
 			formData.append('confirm_password', confirmPassword);
 			formData.append('recaptcha_token', recaptchaToken);
 			if (file) {
-				if (file.size > MAX_FILE_SIZE) {
-					window.app.showErrorMsg('#input-error', 'File size exceeds the 2MB limit');
+				const modifiedFile = checkAvatarFile(file, this.username);
+				if (!modifiedFile)
 					return;
-				}
-				const allowed_extensions = ["jpg", "jpeg", "png"]
-				const extension = file.name.split('.').pop();
-				if (!allowed_extensions.includes(extension)) {
-					window.app.showErrorMsg('#input-error', 'Avatar in jpg, jpeg, or png format only');
-					return;
-				}
-				const newFilename = `${username}.${extension}`;
-				const modifiedFile = new File([file], newFilename, {
-					type: file.type,
-					lastModified: file.lastModified
-				});
 				formData.append('avatar', modifiedFile);
 			}
 
 			try {
-				const response = await fetch('/api/signup/', {
+				const response = await fetch('/api/auth/signup/', {
 					method: 'POST',
 					body: formData
 				});
@@ -141,10 +124,10 @@ export default class SignupView {
 					window.app.router.navigateTo('/login');
 				} else {
 					grecaptcha.reset(this.recaptchaWidgetId);
-					window.app.showErrorMsg('#input-error', data.message);
+					window.app.showErrorMsg('#input-message', data.message);
 				}
 			} catch (error) {
-				window.app.showErrorMsg('#input-error', 'An error occurred: ' + error);
+				console.error("An error occurred: " + error);
 			}
 		});
 	}

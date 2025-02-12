@@ -27,7 +27,7 @@ export default class LoginView {
 							<input type="password" id="password-input" placeholder="Password" maxlength="32" required>
 							<i class="fa-solid fa-eye" id="password-toggle"></i>
 						</div>
-						<div id="input-error"><i class="fa-solid fa-xmark"></i></div>
+						<div id="input-message"><i class="fa-solid fa-xmark"></i></div>
 						<button id="login-button" type="submit"><i class="fa-solid fa-right-to-bracket"></i> Log In</button>
 						<hr />
 						<button id="login42-button" type="button"><img src="imgs/42_logo.png" id="oauth-logo"> Login In with 42</button>
@@ -102,14 +102,9 @@ export default class LoginView {
 
 	async addOAuthEventListeners() {
 		try {
-			const response = await fetch('/api/get/oauth/redirect', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-			});
-			const data = await response.json();
+			const response = await fetch('/api/auth/login/oauth/redirect/');
 
+			const data = await response.json();
 			if (data.success) {
 				const login42 = this.container.querySelector('#login42-button');
 
@@ -118,9 +113,9 @@ export default class LoginView {
 				});
 			}
 			else
-				window.app.showErrorMsg('#input-error', data.message);
+				window.app.showErrorMsg('#input-message', data.message);
 		} catch (error) {
-			window.app.showErrorMsg('#input-error', 'An error occurred: ' + error);
+			console.error("An error occurred: " + error);
 		}
 	}
 
@@ -142,7 +137,7 @@ export default class LoginView {
 				const username = this.container.querySelector('#username-input').value;
 				let response = null;
 				if (recovery_code) {
-					response = await fetch('/api/login/2fa/recovery', {
+					response = await fetch('/api/auth/login/2fa/recovery/', {
 						method: 'POST',
 						headers: {
 							'Content-Type': 'application/json',
@@ -153,7 +148,7 @@ export default class LoginView {
 						})
 					});
 				} else {
-					response = await fetch('/api/login/2fa/', {
+					response = await fetch('/api/auth/login/2fa/', {
 						method: 'POST',
 						headers: {
 							'Content-Type': 'application/json',
@@ -173,7 +168,7 @@ export default class LoginView {
 				} else
 					window.app.showErrorMsg('#totpError', data.message);
 			} catch (error) {
-				window.app.showErrorMsg('#totpError', 'An error occurred: ' + error);
+				console.error("An error occurred: " + error);
 			}
 		});
 	}
@@ -186,7 +181,7 @@ export default class LoginView {
 			const password = this.container.querySelector('#password-input').value;
 
 			try {
-				const response = await fetch('/api/login/', {
+				const response = await fetch('/api/auth/login/', {
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json'
@@ -204,9 +199,9 @@ export default class LoginView {
 					else
 						window.app.login(data);
 				} else
-					window.app.showErrorMsg('#input-error', data.message);
+					window.app.showErrorMsg('#input-message', data.message);
 			} catch (error) {
-				window.app.showErrorMsg('#input-error', 'An error occurred: ' + error);
+				console.error("An error occurred: " + error);
 			}
 		});
 	}

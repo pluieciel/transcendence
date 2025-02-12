@@ -37,7 +37,7 @@ class LoginOAuth {
         }
 
         try {
-            const response = await fetch("/api/login/oauth", {
+            const response = await fetch("/api/auth/login/oauth/", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -52,8 +52,7 @@ class LoginOAuth {
             else
                 this.showError(data.message);
         } catch (error) {
-            console.error("Error during fetch:", error);
-            this.showError("An error occurred during authentication.");
+            console.error("An error occurred during authentication: " + error);
         }
     }
 

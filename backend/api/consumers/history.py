@@ -51,8 +51,6 @@ class getHistory(AsyncHttpConsumer):
 				return await self.send_response(401, json.dumps(response_data).encode(),
 					headers=[(b"Content-Type", b"application/json")])
 
-			path = self.scope['path']
-			match = re.search(r'/api/get/avatar/(\w+)', path)
 			host = 'https://' + next((value.decode('utf-8') for key, value in self.scope['headers'] if key == b'x-forwarded-host'), 'localhost:9000')
 			if host == 'https://localhost:9000':
 				host = next((value.decode('utf-8') for key, value in self.scope['headers'] if key == b'origin'), 'localhost:9000')

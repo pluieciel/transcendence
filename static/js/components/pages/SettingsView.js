@@ -1,3 +1,5 @@
+import {checkAvatarFile} from "../utils/settingsUtils.js"
+
 export default class SettingsView {
 	constructor(container) {
 		this.container = container;
@@ -18,27 +20,30 @@ export default class SettingsView {
 			<main>
 				<div id="settings-card" class="card">
 					<h2 id="card-title"><i class="fa-solid fa-gear"></i> SETTINGS</h2>
-					<div class="input-container">
-						<i class="fa-solid fa-user-tag input-icon"></i>
-						<input type="text" id="display-name-input" placeholder="Display Name" maxlength="16">
-					</div>
-					<div class="input-container">
-						<i class="fa-solid fa-lock input-icon"></i>
-						<input type="password" id="password-input" placeholder="New Password" maxlength="32">
-						<i class="fa-solid fa-eye" id="password-toggle"></i>
-					</div>
-					<div class="input-container">
-						<i class="fa-solid fa-lock input-icon"></i>
-						<input type="password" id="confirm-password-input" placeholder="Confirm New Password" maxlength="32">
-						<i class="fa-solid fa-eye" id="confirm-password-toggle"></i>
-					</div>
-					<span id="upload-avatar">
-						<label for="avatar-input">
-							<i class="fa-solid fa-arrow-up-from-bracket"></i> Upload Avatar
-						</label>
-						<input type="file" id="avatar-input" accept="image/*" hidden>
-					</span>
-					<button id="save-button" type="submit"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+					<form id="settings-form">
+						<div class="input-container">
+							<i class="fa-solid fa-user-tag input-icon"></i>
+							<input type="text" id="display-name-input" placeholder="Display Name" maxlength="16">
+						</div>
+						<div class="input-container">
+							<i class="fa-solid fa-lock input-icon"></i>
+							<input type="password" id="password-input" placeholder="New Password" maxlength="32">
+							<i class="fa-solid fa-eye" id="password-toggle"></i>
+						</div>
+						<div class="input-container">
+							<i class="fa-solid fa-lock input-icon"></i>
+							<input type="password" id="confirm-password-input" placeholder="Confirm New Password" maxlength="32">
+							<i class="fa-solid fa-eye" id="confirm-password-toggle"></i>
+						</div>
+						<span id="upload-avatar">
+							<label for="avatar-input">
+								<i class="fa-solid fa-arrow-up-from-bracket"></i> Upload Avatar
+							</label>
+							<input type="file" id="avatar-input" accept="image/*" hidden>
+						</span>
+						<div id="input-message"></div>
+						<button id="save-button" type="submit"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+					</form>
 					<button id="toggle-2fa-button" type="button"></button>
 					<button id="delete-account-button" type="submit"><i class="fa-solid fa-trash-can"></i> Delete Account</button>
 				</div>
@@ -52,14 +57,14 @@ export default class SettingsView {
 						</div>
 						<form id="totpForm">
 							<div class="modal-body">
-									<div class="mb-3">
-										<div id="qrCode"></div>
-										<div id="qrCodeError" class="alert alert-danger d-none"></div>
-									</div>
-									<div class="mb-3">
-										<input id="totpInput" class="form-control" maxlength="6" placeholder="Enter 2FA code" required>
-									</div>
-									<div id="totpError" class="alert alert-danger d-none"></div>
+								<div class="mb-3">
+									<div id="qrCode"></div>
+									<div id="qrCodeError" class="alert alert-danger d-none"></div>
+								</div>
+								<div class="mb-3">
+									<input id="totpInput" class="form-control" maxlength="6" placeholder="Enter 2FA code" required>
+								</div>
+								<div id="totpError" class="alert alert-danger d-none"></div>
 							</div>
 							<div class="modal-footer">
 								<button type="submit" class="btn btn-primary" id="totpSubmit">Submit</button>
@@ -93,6 +98,134 @@ export default class SettingsView {
 		this.addDeleteAccountButtonEventListeners();
 		this.addToggle2FAButtonEventListeners();
 		this.add2FAEventListeners();
+		this.addSettingsFormEventListeners();
+		this.addPassordRequiredEventListeners();
+	}
+
+	addPassordRequiredEventListeners() {
+		const passwordInput = document.getElementById('password-input');
+		const confirmPasswordInput = document.getElementById('confirm-password-input');
+
+		passwordInput.addEventListener('input', () => {
+			if (passwordInput.value.length > 0)
+				confirmPasswordInput.required = true;
+			else
+				confirmPasswordInput.required = false;
+		});
+
+		confirmPasswordInput.addEventListener('input', () => {
+			if (confirmPasswordInput.value.length > 0)
+				passwordInput.required = true;
+			else
+				passwordInput.required = false;
+		});
+	}
+
+	addSettingsFormEventListeners() {
+		const form = document.getElementById('settings-form');
+		const avatar = document.getElementById('upload-avatar');
+		const avatarInput = document.getElementById('avatar-input');
+		let file = null;
+
+		const handleAvatarChange = (event) => {
+			file = event.target.files[0];
+			if (file) {
+				avatar.textContent = "Avatar selected: " + file.name;
+			}
+		};
+
+		avatarInput.addEventListener('change', handleAvatarChange);
+
+		form.addEventListener('submit', async (e) => {
+			e.preventDefault();
+			const display_name = document.getElementById('display-name-input').value;
+			const password = document.getElementById('password-input').value;
+			const confirmPassword = document.getElementById('confirm-password-input').value;
+			const inputMessage = document.getElementById('input-message');
+			inputMessage.innerHTML = '';
+			inputMessage.style.display = 'none';
+
+			if (password !== confirmPassword) {
+				window.app.showErrorMsg('#input-message', 'Passwords do not match');
+				return;
+			}
+
+			const formData = new FormData();
+			formData.append('display_name', display_name);
+			formData.append('password', password);
+			formData.append('confirm_password', confirmPassword);
+
+			if (file) {
+				const modifiedFile = checkAvatarFile(file, this.username);
+				if (!modifiedFile)
+					return;
+				formData.append('avatar', modifiedFile);
+			}
+
+			try {
+				const response = await fetch('/api/settings/update/', {
+					method: 'POST',
+					body: formData
+				});
+			
+				const data = await response.json();
+			
+				if (data.success) {
+					if (data.message === 'No changes made')
+						window.app.showWarningMsg('#input-message', data.message);
+					else
+						window.app.showSuccessMsg('#input-message', data.message);
+					
+					const passwordInput = document.getElementById('password-input');
+					const confirmPasswordInput = document.getElementById('confirm-password-input');
+					passwordInput.value = '';
+					confirmPasswordInput.value = '';
+					
+					file = null;
+					avatar.innerHTML = `
+						<label for="avatar-input">
+							<i class="fa-solid fa-arrow-up-from-bracket"></i> Upload Avatar
+						</label>
+						<input type="file" id="avatar-input" accept="image/*" hidden>
+					`;
+					const newAvatarInput = document.getElementById('avatar-input');
+					newAvatarInput.addEventListener('change', handleAvatarChange);
+					
+					await this.refreshNavProvile();
+				} else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
+					window.app.logout();
+					window.app.router.navigateTo("/login");
+				} else {
+					window.app.showErrorMsg('#input-message', data.message);
+				}
+			} catch (error) {
+				console.error("An error occurred: " + error);
+			}
+		});
+	}
+
+	async refreshNavProvile() {
+		try {
+			const navUsername = document.getElementById("nav-username");
+			const navDisplayName = document.getElementById("nav-display-name");
+			const navAvatar = document.getElementById("nav-avatar");
+
+			const response = await fetch('/api/profiles/me/nav/');
+			const data = await response.json();
+			if (data.success) {
+				navUsername.innerHTML = data.username;
+				navDisplayName.style.display = data.display_name ? "block" : "none";
+				navDisplayName.innerHTML = data.display_name;
+				navAvatar.setAttribute("src", data.avatar_url);
+			} else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
+				window.app.logout();
+				window.app.router.navigateTo("/login");
+			} else {
+				// TODO: add error msg
+			}
+		} catch (error) {
+			console.error("An error occurred: " + error);
+		}
 	}
 
 	addPasswordToggleEventListeners() {
@@ -120,12 +253,7 @@ export default class SettingsView {
 
 	async disable2FA() {
 		try {
-			const response = await fetch('/api/settings/2fa/disable', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-			});
+			const response = await fetch('/api/settings/2fa/disable/');
 
 			const data = await response.json();
 			if (data.success) {
@@ -141,18 +269,13 @@ export default class SettingsView {
 				// TODO: show error msg
 			}
 		} catch (error) {
-			// TODO: show error msg
+			console.error("An error occurred: " + error);
 		}
 	}
 
 	async enable2FA() {
 		try {
-			const response = await fetch('/api/settings/2fa/generate/qr', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-			});
+			const response = await fetch('/api/settings/2fa/qr/generate/');
 
 			const data = await response.json();
 
@@ -169,7 +292,7 @@ export default class SettingsView {
 				// TODO: show error msg
 			}
 		} catch (error) {
-			// TODO: show error msg
+			console.error("An error occurred: " + error);
 		}
 	}
 
@@ -186,7 +309,7 @@ export default class SettingsView {
 
 		deleteAccountButton.addEventListener("click", async () => {
 			try {
-				const response = await fetch("/api/delete/user", {
+				const response = await fetch("/api/users/delete/", {
 					method: "POST",
 					body: JSON.stringify({ username: this.username }),
 				});
@@ -194,14 +317,14 @@ export default class SettingsView {
 				const data = await response.json();
 				if (data.success) {
 					window.app.router.navigateTo("/login");
-				} else if (response.status === 401 && !data.is_jwt_valid) {
+				} else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
 					window.app.logout();
 					window.app.router.navigateTo("/login");
 				} else {
 					// TODO: Show error message
 				}
 			} catch (error) {
-				// TODO: Show error message
+				console.error("An error occurred: " + error);
 			}
 		});
 	}
@@ -214,7 +337,7 @@ export default class SettingsView {
 			e.preventDefault();
 			const totp = this.container.querySelector('#totpInput').value;
 			try {
-				const response = await fetch('/api/settings/2fa/enable', {
+				const response = await fetch('/api/settings/2fa/enable/', {
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json'
@@ -233,12 +356,7 @@ export default class SettingsView {
 					if (modal)
 					{
 						modal.hide();
-						const response = await fetch('/api/settings/2fa/generate/recovery', {
-							method: 'POST',
-							headers: {
-								'Content-Type': 'application/json'
-							},
-						});
+						const response = await fetch('/api/settings/2fa/recovery/generate/');
 
 						const data = await response.json();
 
@@ -262,14 +380,14 @@ export default class SettingsView {
 					// TODO: Show error message
 				}
 			} catch (error) {
-				// TODO: Show error message
+				console.error("An error occurred: " + error);
 			}
 		});
 	}
 
 	async getSettings() {
 		try {
-			const response = await fetch("/api/get/settings", {
+			const response = await fetch("/api/settings/", {
 				method: "GET",
 			});
 
@@ -282,14 +400,14 @@ export default class SettingsView {
 				toggle2FAButton.innerHTML = '<i class="fa-solid fa-key"></i> ';
 				toggle2FAButton.innerHTML += data.is_2fa_enabled ? "Disable 2FA" : "Enable 2FA";
 				toggle2FAButton.setAttribute("data-is-2fa-enabled", data.is_2fa_enabled);
-			} else if (response.status === 401 && !data.is_jwt_valid) {
+			} else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
 				window.app.logout();
 				window.app.router.navigateTo("/login");
 			} else {
 				// TODO: Show error message
 			}
 		} catch (error) {
-			// TODO: Show error message
+			console.error("An error occurred: " + error);
 		}
 	}
 }
