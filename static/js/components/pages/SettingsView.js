@@ -192,6 +192,9 @@ export default class SettingsView {
 					newAvatarInput.addEventListener('change', handleAvatarChange);
 					
 					await this.refreshNavProvile();
+				} else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
+					window.app.logout();
+					window.app.router.navigateTo("/login");
 				} else {
 					window.app.showErrorMsg('#input-message', data.message);
 				}
@@ -219,6 +222,9 @@ export default class SettingsView {
 				navDisplayName.style.display = data.display_name ? "block" : "none";
 				navDisplayName.innerHTML = data.display_name;
 				navAvatar.setAttribute("src", data.avatar_url);
+			} else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
+				window.app.logout();
+				window.app.router.navigateTo("/login");
 			} else {
 				// TODO: add error msg
 			}
@@ -326,7 +332,7 @@ export default class SettingsView {
 				const data = await response.json();
 				if (data.success) {
 					window.app.router.navigateTo("/login");
-				} else if (response.status === 401 && !data.is_jwt_valid) {
+				} else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
 					window.app.logout();
 					window.app.router.navigateTo("/login");
 				} else {
@@ -414,7 +420,7 @@ export default class SettingsView {
 				toggle2FAButton.innerHTML = '<i class="fa-solid fa-key"></i> ';
 				toggle2FAButton.innerHTML += data.is_2fa_enabled ? "Disable 2FA" : "Enable 2FA";
 				toggle2FAButton.setAttribute("data-is-2fa-enabled", data.is_2fa_enabled);
-			} else if (response.status === 401 && !data.is_jwt_valid) {
+			} else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
 				window.app.logout();
 				window.app.router.navigateTo("/login");
 			} else {
