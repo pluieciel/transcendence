@@ -5,6 +5,7 @@ import LoginView from './components/pages/LoginView.js';
 import SignupView from './components/pages/SignupView.js';
 import LoginOAuth from './components/login/LoginOAuth.js';
 import ProfileView from './components/pages/ProfileView.js';
+import SettingsView from './components/pages/SettingsView.js';
 import CreditsView from './components/pages/CreditsView.js';
 import CustomizeView from './components/pages/CustomizeView.js';
 import LeaderboardView from './components/pages/LeaderboardView.js';
@@ -18,10 +19,11 @@ class App {
 			{ path: '/', component: LoginView },
 			{ path: '/login', component: LoginView },
 			{ path: '/signup', component: SignupView },
-			{ path: '/index', component: MainView },
+			{ path: '/play', component: MainView },
 			{ path: '/customize', component: CustomizeView },
 			{ path: '/credits', component: CreditsView },
 			{ path: '/profile', component: ProfileView },
+			{ path: '/settings', component: SettingsView },
 			{ path: '/achievements', component: AchievementView},
 			{ path: '/leaderboard', component: LeaderboardView },
 			{ path: '/admin', component: AdminView },
@@ -68,8 +70,8 @@ class App {
 			},
 		});
 		const data = await response.json();
-		this.avatarCache[username] = data.avatar;
-		return data.avatar;
+		this.avatarCache[username] = data.avatar_url;
+		return data.avatar_url;
 	}
 
 	async getPreferences() {
@@ -85,7 +87,6 @@ class App {
 			this.settings.color = data['color'];
 			this.settings.quality = data['quality'];
 			this.settings.is_2fa_enabled = data['is_2fa_enabled'];
-			this.settings.is_admin = data['is_admin'];
 			this.settings.fetched = true;
 			this.setColor(this.settings.color);
 		}
@@ -100,7 +101,7 @@ class App {
 		errorDiv.style.display = 'block';
 	}
 
-	renderHeader(container, disableBtn = null, withNav = true, creditsDisabled = false, inLogin = false) {
+	async renderHeader(container, disableBtn = null, withNav = true, creditsDisabled = false, inLogin = false) {
 		let header = `
 			<header>
 				<h1 id="header-title">P
@@ -113,60 +114,90 @@ class App {
 
 		if (withNav)
 		{
-			header += `
-				<nav>
-					<ul>
-						<li>
-							<button id="play-button" ${disableBtn === "play" ? 'disabled' : ''}>
-								<i class="fa-solid fa-gamepad fa-xl"></i>Play
-							</button>
-						</li>
-						<li>
-							<button id="tournament-button" ${disableBtn === "tournament" ? 'disabled' : ''}>
-								<i class="fa-solid fa-crown fa-xl"></i>Tournament
-							</button>
-						</li>
-						<li>
-							<button id="leaderboard-button" ${disableBtn === "leaderboard" ? 'disabled' : ''}>
-								<i class="fa-solid fa-medal fa-xl"></i>Leaderboard
-							</button>
-						</li>
-						<li>
-							<button id="achievements-button" ${disableBtn === "achievements" ? 'disabled' : ''}>
-								<i class="fa-solid fa-trophy fa-xl"></i>Achievements
-							</button>
-						</li>
-						<li>
-							<button id="customize-button" ${disableBtn === "customize" ? 'disabled' : ''}>
-								<i class="fa-solid fa-palette fa-xl"></i>Customize
-							</button>
-						</li>
-						<li>
-							<button id="profile-button" ${disableBtn === "profile" ? 'disabled' : ''}>
-								<i class="fa-solid fa-user fa-xl"></i>Profile
-							</button>
-						</li>
-						<li style="display: ${this.settings.is_admin ? 'block' : 'none'}">
-							<button id="admin-button" ${disableBtn === "admin" ? 'disabled' : ''}>
+			try {
+				const response = await fetch('/api/get/nav/profile', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+				});
+				const data = await response.json();
+				
+				if (data.success) {
+					header += `
+						<nav>
+							<ul>
+								<li>
+									<button id="play-button" ${disableBtn === "play" ? 'disabled' : ''}>
+										<i class="fa-solid fa-gamepad fa-xl"></i>Play
+									</button>
+								</li>
+								<li>
+									<button id="tournament-button" ${disableBtn === "tournament" ? 'disabled' : ''}>
+										<i class="fa-solid fa-crown fa-xl"></i>Tournament
+									</button>
+								</li>
+								<li>
+									<button id="leaderboard-button" ${disableBtn === "leaderboard" ? 'disabled' : ''}>
+										<i class="fa-solid fa-medal fa-xl"></i>Leaderboard
+									</button>
+								</li>
+								<li>
+									<button id="achievements-button" ${disableBtn === "achievements" ? 'disabled' : ''}>
+										<i class="fa-solid fa-trophy fa-xl"></i>Achievements
+									</button>
+								</li>
+								<li>
+									<button id="customize-button" ${disableBtn === "customize" ? 'disabled' : ''}>
+										<i class="fa-solid fa-palette fa-xl"></i>Customize
+									</button>
+								</li>
+								<li>
+									<button id="profile-button" ${disableBtn === "profile" ? 'disabled' : ''}>
+										<i class="fa-solid fa-user fa-xl"></i>Profile
+									</button>
+								</li>
+								<li>
+									<div id="nav-profile">
+										<div id="nav-user">
+											<div id="nav-username">${data.username}</div>
+											<div id="nav-display-name" style="display: ${data.display_name ? 'block' : 'none'}">${data.display_name}</div>
+										</div>
+										<img src="${data.avatar_url}" id="nav-avatar" class="avatar">
+									</div>
+								</li>
+								<li style="display: ${data.is_admin ? 'block' : 'none'}">
+								<button id="admin-button" ${disableBtn === "admin" ? 'disabled' : ''}>
 								<i class="fa-solid fa-user-tie fa-xl"></i>Admin
-							</button>
-						</li>
-						<li>
-							<button id="logout-button">
-								<i class="fa-solid fa-right-from-bracket fa-xl"></i>Log Out
-							</button>
-						</li>
-					</ul>
-				</nav>
-				`;
+								</button>
+								</li>
+								<li>
+									<button id="settings-button" ${disableBtn === "settings" ? 'disabled' : ''}>
+										<i class="fa-solid fa-gear fa-xl"></i>Settings
+									</button>
+								</li>
+								<li>
+									<button id="logout-button">
+										<i class="fa-solid fa-right-from-bracket fa-xl"></i>Log Out
+									</button>
+								</li>
+							</ul>
+						</nav>
+					`;
+				} else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
+					window.app.logout();
+					window.app.router.navigateTo("/login");
+				} else 
+					window.app.showErrorMsg('#input-error', data.message);
+			} catch (error) {
+				window.app.showErrorMsg('#input-error', 'An error occurred: ' + error);
 			}
+		}
 			header += `</header>`;
 			container.innerHTML = header;
-			if (withNav)
-				this.checkForAdmin();
 	}
 
-	addNavEventListeners() {
+	async addNavEventListeners() {
 		const creditButton = document.getElementById("credits-button");
 		const playButton = document.getElementById("play-button");
 		const tournamentButton = document.getElementById("tournament-button");
@@ -174,7 +205,9 @@ class App {
 		const achievementsButton = document.getElementById("achievements-button");
 		const customizeButton = document.getElementById("customize-button");
 		const profileButton = document.getElementById("profile-button");
+		const navProfile = document.getElementById("nav-profile");
 		const adminButton = document.getElementById("admin-button");
+		const settingsButton = document.getElementById("settings-button");
 		const logoutButton = document.getElementById("logout-button");
 
 		if (creditButton) {
@@ -184,7 +217,7 @@ class App {
 		}
 
 		playButton.addEventListener("click", () => {
-			window.app.router.navigateTo("/index");
+			window.app.router.navigateTo("/play");
 		});
 
 		tournamentButton.addEventListener("click", () => {
@@ -207,12 +240,20 @@ class App {
 			window.app.router.navigateTo("/profile");
 		});
 
+		navProfile.addEventListener("click", () => {
+			window.app.router.navigateTo("/profile");
+		});
+
 		adminButton.addEventListener("click", () => {
 			window.app.router.navigateTo("/admin");
 		});
 
+		settingsButton.addEventListener("click", () => {
+			window.app.router.navigateTo("/settings");
+		});
+
 		logoutButton.addEventListener("click", () => {
-			window.app.chatBox.disconnect();
+			//window.app.chatBox.disconnect();
 			window.app.logout();
 		});
 	}
@@ -222,20 +263,13 @@ class App {
 			await window.app.getPreferences();
 	}
 
-	checkForAdmin() {
-		if (window.app.settings.is_admin) {
-			const adminButton = document.querySelector("li:has(button[id='admin-button'])");
-			adminButton.style.display = "block";
-		}
-	}
-
 	login(data) {
 		this.state.isLoggedIn = true;
 		this.state.username = data.username;
 		sessionStorage.setItem("isLoggedIn", "true");
 		sessionStorage.setItem("username", data.username);
 		this.getPreferences();
-		this.router.navigateTo("/index");
+		this.router.navigateTo("/play");
 	}
 
 	logout() {

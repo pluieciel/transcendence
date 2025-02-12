@@ -54,6 +54,6 @@ class getLeaderboard(AsyncHttpConsumer):
 			elif (user.avatar):
 				return (user.avatar.url)
 			else:
-				return ('/default_avatar.png')
+				return ('imgs/default_avatar.png')
 		except Exception as e:
 			return str(e)

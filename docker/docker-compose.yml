@@ -55,6 +55,8 @@ services:
         image: django
         container_name: django_ws
         depends_on:
+            django:
+                condition: service_started
             postgres:
                 condition: service_healthy
             redis:

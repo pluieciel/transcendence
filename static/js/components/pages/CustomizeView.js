@@ -1,4 +1,4 @@
-import { addUserData, message, message2, saveUserChanges, eraseInDB } from "../utils/settingsUtils.js";
+import { addUserData, message, message2, saveUserChanges } from "../utils/settingsUtils.js";
 import { SceneManager } from "../game/SceneManager.js";
 import { Renderer } from "../game/Renderer.js";
 import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
@@ -14,7 +14,7 @@ export default class CustomizeView {
 
 	async init() {
 		await window.app.getSettings();
-		this.render();
+		await this.render();
 		this.addEventListeners();
 		this.settings = {
 			color: window.app.settings.color,
@@ -30,8 +30,8 @@ export default class CustomizeView {
 		await window.app.getPreferences();
 	}
 
-	render() {
-		window.app.renderHeader(this.container, "customize");
+	async render() {
+		await window.app.renderHeader(this.container, "customize");
 		this.container.innerHTML += `
 			<main>
 				<div id="customize-card" class="card">

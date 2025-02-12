@@ -16,14 +16,14 @@ export default class MainView {
 
 	async init() {
 		await window.app.getSettings();
-		this.render();
+		await this.render();
 		this.initComponents();
 		this.checkForBackdrop();
 		window.app.addNavEventListeners();
 	}
 
-	render() {
-		window.app.renderHeader(this.container, "play");
+	async render() {
+		await window.app.renderHeader(this.container, "play");
 		this.container.innerHTML += `
 			<main>
 				<div id="how-to-play-card" class="card">

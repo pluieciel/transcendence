@@ -26,12 +26,14 @@ from api.consumers.oauth import OAuthConsumer
 from api.consumers.login_oauth import LoginOAuthConsumer
 from api.consumers.profile import ProfileConsumer
 from api.consumers.profile2 import ProfileConsumer2
+from api.consumers.profile_nav import ProfileNavConsumer
+from api.consumers.settings import GetSettingsConsumer
 from api.consumers.avatar import AvatarConsumer, setAvatar
 from api.consumers.login import LoginConsumer
 from api.consumers.signup import SignupConsumer
 from api.consumers.recaptcha import RecaptchaConsumer
 from api.consumers.preferences import getPreferences, setPreferences
-from api.consumers.remove import RemoveConsumer
+from api.consumers.delete_user import DeleteUserConsumer
 from api.consumers.admin import AdminConsumer
 from api.consumers.display import setDisplay
 from django.contrib import admin
@@ -60,10 +62,12 @@ http_patterns = [
     re_path(r'^api/get/avatar/.*$', AvatarConsumer.as_asgi()),
     re_path(r'^api/get/history/.*$', getHistory.as_asgi()),
     path('api/get/profile', ProfileConsumer.as_asgi()),
+    path('api/get/nav/profile', ProfileNavConsumer.as_asgi()),
     path('api/get/leaderboard', getLeaderboard.as_asgi()),
+    path('api/get/settings', GetSettingsConsumer.as_asgi()),
 	path('api/settings/set/preferences', setPreferences.as_asgi()),
 	path('api/settings/get/preferences', getPreferences.as_asgi()),
-    path('api/del/user', RemoveConsumer.as_asgi()),
+    path('api/delete/user', DeleteUserConsumer.as_asgi()),
     path('api/get/oauth/redirect', OAuthConsumer.as_asgi()),
     path('api/get/recaptcha', RecaptchaConsumer.as_asgi()),
 	path('api/settings/set/display', setDisplay.as_asgi()),

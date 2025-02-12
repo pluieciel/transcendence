@@ -75,6 +75,7 @@ header {
 	z-index: 100;
 	height: 90px;
 	min-width: 1040px;
+	overflow: hidden;
 }
 
 header button {
@@ -130,11 +131,51 @@ nav li {
 	display: inline;
 	list-style: none;
 	margin-left: 1rem;
+	height: 100%;
 }
 
-nav li:last-child {
+nav li:nth-last-child(4) {
 	margin-left: auto;
-	align-self: flex-end;
+	font-weight: bold;
+}
+
+nav li:nth-last-child(4) img {
+	margin-right: 0.5rem;
+}
+
+#nav-profile {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 1rem 0;
+}
+
+#nav-profile:hover {
+	filter: brightness(0.5);
+	transition: all 0.3s ease;
+	cursor: pointer;
+}
+
+#nav-user {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	justify-content: center;
+	margin-right: 1rem;
+}
+
+#nav-username {
+	font-size: 1.1rem;
+}
+
+#nav-display-name {
+	font-weight: bold;
+	opacity: 0.6;
+}
+
+#nav-avatar {
+	border: 1px solid var(--user-color);
+	box-shadow: 0 0 12px var(--user-color);
 }
 
 nav button {
@@ -151,6 +192,11 @@ nav button:disabled {
 	cursor: not-allowed;
 }
 
+#nav-avatar {
+	width: 3.2rem;
+	height: 3.2rem;
+}
+
 #credits-button:disabled i {
 	color: var(--header-disabled-color);
 	text-shadow: 0 0 5px var(--header-disabled-color);
@@ -164,7 +210,7 @@ nav i {
 
 #input-error {
 	width: 100%;
-	height: 3rem;
+	min-height: 3rem;
 	background-color: var(--input-error-color);
 	border: 1px solid var(--input-error-border-color);
 	color: var(--input-error-text-color);
@@ -176,6 +222,12 @@ nav i {
 
 #input-error i {
 	padding: 0 0.5rem;
+}
+
+.avatar {
+	object-fit: cover;
+	object-position: top center;
+	border-radius:50%;
 }
 
 /* ******************************** */
@@ -223,6 +275,7 @@ input {
 
 input::placeholder {
 	color: var(--secondary-color);
+	opacity: 0.5;
 }
 
 input:focus {
@@ -283,7 +336,7 @@ form button:hover:not(:disabled) {
 	z-index: 1;
 }
 
-#play-card, #customize-card {
+#play-card, #customize-card, #settings-card {
 	width: 30rem;
 	display: flex;
 	flex-direction: column;
@@ -325,7 +378,7 @@ form button:hover:not(:disabled) {
 	align-self: flex-end;
 }
 
-#start-button, #save-button {
+#start-button, #save-button, #toggle-2fa-button, #delete-account-button {
 	width: 100%;
 	margin-bottom: 1rem;
 	color: var(--secondary-color);
@@ -338,7 +391,7 @@ form button:hover:not(:disabled) {
 	height: 3rem;
 }
 
-#start-button:hover, #save-button:hover {
+#start-button:hover, #save-button:hover, #toggle-2fa-button:hover {
 	border: 1px solid var(--user-color);
 	box-shadow: 0 0 15px var(--user-color);
 	transition: all 0.3s ease;
@@ -410,7 +463,7 @@ hr::after {
 	padding: 0.5rem 1rem;
 	text-align: center;
 	font-weight: bold;
-	height: 3rem;
+	min-height: 3rem;
 }
 
 #upload-avatar:hover {
@@ -652,7 +705,6 @@ hr::after {
 .lb-card-avatar {
 	width: 2rem;
 	height: 2rem;
-	border-radius: 50%;
 }
 
 .lb-card-elo {
@@ -686,6 +738,26 @@ hr::after {
     color: #CD7F32;
 	font-family: "Font Awesome 5 Free";
 	margin-right: 0.5rem;
+}
+
+/* ******************************** */
+/*                Settings          */
+/* ******************************** */
+
+#toggle-2fa-button {
+	margin-top: 2rem;
+}
+
+#delete-account-button {
+	background-color: var(--input-error-color);
+	border: 1px solid var(--input-error-border-color);
+	color: var(--input-error-text-color);
+}
+
+#delete-account-button:hover {
+	border: 1px solid var(--input-error-text-color);
+	box-shadow: 0 0 15px var(--input-error-text-color);
+	transition: all 0.3s ease;
 }
 
 /* ******************************** */

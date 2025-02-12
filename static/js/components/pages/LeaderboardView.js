@@ -7,13 +7,13 @@ export default class LeaderboardView {
 
 	async init() {
 		await window.app.getSettings();
-		this.render();
-		window.app.addNavEventListeners();
+		await this.render();
+		await window.app.addNavEventListeners();
 		this.addContent();
 	}
 
-	render() {
-		window.app.renderHeader(this.container, "leaderboard");
+	async render() {
+		await window.app.renderHeader(this.container, "leaderboard");
 		this.container.innerHTML += `
 			<main>
 				<div id="leaderboard-card" class="card">
@@ -50,6 +50,10 @@ export default class LeaderboardView {
 				while (i < data.users.length)
 					this.addUserToLB(data.users[i], ++i);
 			}
+			else if (response.status === 401 && !data.is_jwt_valid) {
+				window.app.logout();
+				window.app.router.navigateTo("/login");
+			}
 			else {
 				console.log(data['message']);
 			}
@@ -66,7 +70,7 @@ export default class LeaderboardView {
 		card += "<div id=\"lb-card-" + place + "\"class=\"lb-card\">";
 		card += "<div class=\"lb-card-pos lb-card-att\">" + place + "</div>";
 		if (data['avatar'])
-			card += "<div class=\"lb-card-user lb-card-att\"><img class=\"lb-card-avatar\" src=\"" + data['avatar'] + "\"></img> &nbsp;&nbsp;" + data['username'] + "</div>";
+			card += "<div class=\"lb-card-user lb-card-att\"><img class=\"lb-card-avatar avatar\" src=\"" + data['avatar'] + "\"></img> &nbsp;&nbsp;" + data['username'] + "</div>";
 		else
 			card += "<div class=\"lb-card-user lb-card-att\">" + data['username'] + "</div>";
 		card += "<div class=\"lb-card-elo lb-card-att\">" + data['elo'] + "</div>";

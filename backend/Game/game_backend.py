@@ -324,8 +324,8 @@ class GameBackend:
 				avatar = '/default_avatar.png'
 
 			self.logger.info(f"Appending winner info with {self.game.winner.username}")
-			if (self.game.winner.display):
-				username = self.game.winner.display
+			if (self.game.winner.display_name):
+				username = self.game.winner.display_name
 			else:
 				username = self.game.winner.username
 			events.append({
@@ -398,8 +398,8 @@ class GameBackend:
 				avatar = '/default_avatar.png'
 
 			self.logger.info(f"Appending winner info with {self.game.winner.username}")
-			if (self.game.winner.display):
-				username = self.game.winner.display
+			if (self.game.winner.display_name):
+				username = self.game.winner.display_name
 			else:
 				username = self.game.winner.username
 			events.append({
