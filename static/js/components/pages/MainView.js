@@ -19,7 +19,7 @@ export default class MainView {
 		await this.render();
 		this.initComponents();
 		this.checkForBackdrop();
-		window.app.addNavEventListeners();
+		this.addEventListeners();
 	}
 
 	async render() {
@@ -70,6 +70,13 @@ export default class MainView {
 							<div class="layer"></div>
 						</div>
 					</div>
+					<div id="bot-difficulty">
+						<button id="selector-left-arrow"><i class="fa-solid fa-arrow-left fa-lg"></i></button>
+						<div id="selector-middle">
+							<span id="bot-difficulty-span"></span>
+						</div>
+						<button id="selector-right-arrow"><i class="fa-solid fa-arrow-right fa-lg"></i></button>
+					</div>
 					<button type="submit" id="start-button" data-bs-toggle="modal" data-bs-target="#matchSearch"><i class="fa-solid fa-gamepad"></i> Play</button>
 				</div>
 				</main>
@@ -106,5 +113,63 @@ export default class MainView {
 	checkForBackdrop() {
 		const el = document.querySelector(".modal-backdrop");
 		if (el) el.remove();
+	}
+
+	addEventListeners() {
+		window.app.addNavEventListeners();
+		this.addGameModeCheckboxEventListeners();
+		this.addGameTypeCheckboxEventListeners();
+		this.addBotDifficultySelectorEventListeners();
+	}
+
+	addGameModeCheckboxEventListeners() {
+		const gameModeCheckbox = document.getElementById("game-mode-checkbox");
+		gameModeCheckbox.addEventListener("change", () => {
+			window.app.settings["game-mode"] = gameModeCheckbox.checked ? "rumble" : "classic";
+		});
+	}
+
+	addGameTypeCheckboxEventListeners() {
+		const gameTypeCheckbox = document.getElementById("game-type-checkbox");
+		gameTypeCheckbox.addEventListener("change", () => {
+			window.app.settings["game-type"] = gameTypeCheckbox.checked ? "ranked" : "ai";
+			document.getElementById("bot-difficulty").style.display = gameTypeCheckbox.checked ? "none" : "";
+		});
+	}
+
+	addBotDifficultySelectorEventListeners() {
+		const leftDifficulty = document.querySelector("#bot-difficulty #selector-left-arrow");
+		const rightDifficulty = document.querySelector("#bot-difficulty #selector-right-arrow");
+		const difficultySpan = document.querySelector("#bot-difficulty-span");
+
+		const difficulties = ["Easy", "Medium", "Hard"];
+		const difficultyIcons = ["fa-smile", "fa-meh", "fa-frown"];
+		let currentDifficulty = 0;
+
+		difficultySpan.innerHTML = `<i class="fa-solid ${difficultyIcons[currentDifficulty]}"></i> ${difficulties[currentDifficulty]}`;
+		window.app.settings["bot-difficulty"] = currentDifficulty + 1;
+		leftDifficulty.disabled = true;
+
+		leftDifficulty.addEventListener("click", () => {
+			rightDifficulty.disabled = false;
+			if (currentDifficulty > 0) {
+				currentDifficulty--;
+				if (currentDifficulty == 0)
+					leftDifficulty.disabled = true;
+				difficultySpan.innerHTML = `<i class="fa-solid ${difficultyIcons[currentDifficulty]}"></i> ${difficulties[currentDifficulty]}`;
+				window.app.settings["bot-difficulty"] = currentDifficulty + 1;
+			}
+		});
+
+		rightDifficulty.addEventListener("click", () => {
+			leftDifficulty.disabled = false;
+			if (currentDifficulty < difficulties.length - 1) {
+				currentDifficulty++;
+				if (currentDifficulty == difficulties.length - 1)
+					rightDifficulty.disabled = true;
+				difficultySpan.innerHTML = `<i class="fa-solid ${difficultyIcons[currentDifficulty]}"></i> ${difficulties[currentDifficulty]}`;
+				window.app.settings["bot-difficulty"] = currentDifficulty + 1;
+			}
+		});
 	}
 }

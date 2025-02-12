@@ -344,7 +344,7 @@ form button:hover:not(:disabled) {
 	justify-content: center;
 }
 
-#color, #quality {
+#color, #quality, #bot-difficulty {
 	width: 100%;
 	display: flex;
 	flex-direction: row;
@@ -620,12 +620,7 @@ hr::after {
 	padding: 0 2.5rem;
 }
 
-#selector-right-arrow:disabled {
-	background-color: var(--hover-color);
-	cursor: not-allowed;
-}
-
-#selector-left-arrow:disabled {
+#selector-right-arrow:disabled, #selector-left-arrow:disabled {
 	background-color: var(--hover-color);
 	cursor: not-allowed;
 }
