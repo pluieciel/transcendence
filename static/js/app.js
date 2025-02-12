@@ -64,12 +64,7 @@ class App {
 
 	async getAvatar(username) {
 		try {
-			const response = await fetch(`/api/get/avatar/${username}`, {
-				method: "POST",
-				headers: {
-				"Content-Type": "application/json",
-			},
-			});
+			const response = await fetch(`/api/get/avatar/${username}`);
 
 			const data = await response.json();
 			if (data.success)
@@ -87,24 +82,19 @@ class App {
 
 	async getPreferences() {
 		try {
-			const response = await fetch(`/api/settings/get/preferences`, {
-				method: "POST",
-				headers: {
-				"Content-Type": "application/json",
-			},
-		});
+			const response = await fetch(`/api/settings/get/preferences`);
 
-		const data = await response.json();
-		if (data.success)
-		{
-			this.settings.color = data['color'];
-			this.settings.quality = data['quality'];
-			this.settings.fetched = true;
-			this.setColor(this.settings.color);
-			}
-			else {
-				// TODO: add error msg
-			}
+			const data = await response.json();
+			if (data.success)
+			{
+				this.settings.color = data['color'];
+				this.settings.quality = data['quality'];
+				this.settings.fetched = true;
+				this.setColor(this.settings.color);
+				}
+				else {
+					// TODO: add error msg
+				}
 		} catch (error) {
 			console.error("An error occurred: " + error);
 		}
@@ -175,12 +165,7 @@ class App {
 		if (withNav)
 		{
 			try {
-				const response = await fetch('/api/get/nav/profile', {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json'
-					},
-				});
+				const response = await fetch('/api/get/nav/profile');
 
 				const data = await response.json();
 				if (data.success) {

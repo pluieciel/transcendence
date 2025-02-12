@@ -35,12 +35,7 @@ export default class LeaderboardView {
 
 	async addContent() {
 		try {
-			const response = await fetch(`/api/get/leaderboard`, {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-			});
+			const response = await fetch(`/api/get/leaderboard`);
 	
 			const data = await response.json();
 	

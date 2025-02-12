@@ -276,12 +276,7 @@ export default class ChatBox {
 				const wr_div = this.container.querySelector(`#wr_${user}`);
 				const tn_div = this.container.querySelector(`#tn_${user}`);
 				if (elo_div) {
-					const response = await fetch(`/api/get/profile/${user}`, {
-						method: "POST",
-						headers: {
-							"Content-Type": "application/json",
-						},
-					});
+					const response = await fetch(`/api/get/profile/${user}`);
 					const data = await response.json();
 					//console.log(data);
 					if (data.elo) {
@@ -403,12 +398,7 @@ export default class ChatBox {
 				const wr_div = this.container.querySelector(`#wrf_${user}`);
 				const tn_div = this.container.querySelector(`#tnf_${user}`);
 				if (elo_div) {
-					const response = await fetch(`/api/get/profile/${user}`, {
-						method: "POST",
-						headers: {
-							"Content-Type": "application/json",
-						},
-					});
+					const response = await fetch(`/api/get/profile/${user}`);
 					const data = await response.json();
 					//console.log(data);
 					if (data.elo) {

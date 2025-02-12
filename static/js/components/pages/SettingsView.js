@@ -210,12 +210,7 @@ export default class SettingsView {
 			const navDisplayName = document.getElementById("nav-display-name");
 			const navAvatar = document.getElementById("nav-avatar");
 
-			const response = await fetch('/api/get/nav/profile', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-			});
+			const response = await fetch('/api/get/nav/profile');
 			const data = await response.json();
 			if (data.success) {
 				navUsername.innerHTML = data.username;
@@ -258,12 +253,7 @@ export default class SettingsView {
 
 	async disable2FA() {
 		try {
-			const response = await fetch('/api/settings/2fa/disable', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-			});
+			const response = await fetch('/api/settings/2fa/disable');
 
 			const data = await response.json();
 			if (data.success) {
@@ -285,12 +275,7 @@ export default class SettingsView {
 
 	async enable2FA() {
 		try {
-			const response = await fetch('/api/settings/2fa/generate/qr', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-			});
+			const response = await fetch('/api/settings/2fa/generate/qr');
 
 			const data = await response.json();
 
@@ -371,12 +356,7 @@ export default class SettingsView {
 					if (modal)
 					{
 						modal.hide();
-						const response = await fetch('/api/settings/2fa/generate/recovery', {
-							method: 'POST',
-							headers: {
-								'Content-Type': 'application/json'
-							},
-						});
+						const response = await fetch('/api/settings/2fa/generate/recovery');
 
 						const data = await response.json();
 

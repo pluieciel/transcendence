@@ -102,14 +102,9 @@ export default class LoginView {
 
 	async addOAuthEventListeners() {
 		try {
-			const response = await fetch('/api/get/oauth/redirect', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-			});
-			const data = await response.json();
+			const response = await fetch('/api/get/oauth/redirect');
 
+			const data = await response.json();
 			if (data.success) {
 				const login42 = this.container.querySelector('#login42-button');
 

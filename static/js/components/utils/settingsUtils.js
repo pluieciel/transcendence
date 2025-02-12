@@ -66,7 +66,7 @@ export async function saveUserChanges(main, settings) {
 				'newColor': settings.color,
 				'newQuality': settings.quality,
 			}),			
-			});
+		});
 			
 		const data = await response.json();
 

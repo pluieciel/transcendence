@@ -56,12 +56,7 @@ export default class SignupView {
 
 	async loadReCaptcha() {
 		try {
-			const response = await fetch('/api/get/recaptcha', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-			});
+			const response = await fetch('/api/get/recaptcha');
 			const data = await response.json();
 
 			if (data.success) {

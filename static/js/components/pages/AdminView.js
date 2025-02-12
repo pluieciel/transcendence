@@ -6,12 +6,7 @@ export default class AdminView {
 
     async render() {
 		try {
-			const response = await fetch('/api/admin', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-			});
+			const response = await fetch('/api/admin');
 
 			const data = await response.json();
 			if (data.success) {
