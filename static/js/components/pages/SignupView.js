@@ -1,3 +1,5 @@
+import {checkAvatarFile} from "../utils/settingsUtils.js"
+
 export default class SignupView {
 	constructor(container) {
 		this.container = container;
@@ -80,8 +82,6 @@ export default class SignupView {
 		const avatar = this.container.querySelector('#upload-avatar');
 		const fileInput = document.getElementById('avatar-input');
 		let	file;
-		
-		const MAX_FILE_SIZE = 1 * 1024 * 1024;
 
 		fileInput.addEventListener('change', function(event) {
 			file = event.target.files[0];
@@ -111,21 +111,9 @@ export default class SignupView {
 			formData.append('confirm_password', confirmPassword);
 			formData.append('recaptcha_token', recaptchaToken);
 			if (file) {
-				if (file.size > MAX_FILE_SIZE) {
-					window.app.showErrorMsg('#input-error', 'File size exceeds the 2MB limit');
+				const modifiedFile = checkAvatarFile(file, this.username);
+				if (!modifiedFile)
 					return;
-				}
-				const allowed_extensions = ["jpg", "jpeg", "png"]
-				const extension = file.name.split('.').pop();
-				if (!allowed_extensions.includes(extension)) {
-					window.app.showErrorMsg('#input-error', 'Avatar in jpg, jpeg, or png format only');
-					return;
-				}
-				const newFilename = `${username}.${extension}`;
-				const modifiedFile = new File([file], newFilename, {
-					type: file.type,
-					lastModified: file.lastModified
-				});
 				formData.append('avatar', modifiedFile);
 			}
 

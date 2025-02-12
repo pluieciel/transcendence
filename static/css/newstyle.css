@@ -51,7 +51,7 @@ body {
 	flex-wrap: wrap;
 }
 
-main i:not(#chat-icon) {
+main i:not(#chat-icon, #input-error i) {
 	margin-right: 0.2rem;
 }
 
@@ -336,7 +336,7 @@ form button:hover:not(:disabled) {
 	z-index: 1;
 }
 
-#play-card, #customize-card, #settings-card {
+#play-card, #customize-card {
 	width: 30rem;
 	display: flex;
 	flex-direction: column;
@@ -738,6 +738,21 @@ hr::after {
 /* ******************************** */
 /*                Settings          */
 /* ******************************** */
+
+#settings-form {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+}
+
+#settings-card {
+	width: 30rem;
+}
+
+#settings-card button {
+	width: 100%;
+}
 
 #toggle-2fa-button {
 	margin-top: 2rem;
