@@ -374,7 +374,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 			avatarRight = instance.player_right.user.avatar.url
 			self.logger.info("Avatar found")
 		else:
-			avatarRight = '/default_avatar.png'
+			avatarRight = '/imgs/default_avatar.png'
 
 		if (instance.player_left.user.avatar42):
 			self.logger.info("Avatar 42 found")
@@ -383,7 +383,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 			avatarLeft = instance.player_left.user.avatar.url
 			self.logger.info("Avatar found")
 		else:
-			avatarLeft = '/default_avatar.png'
+			avatarLeft = '/imgs/default_avatar.png'
 
 		if (instance.player_left.user.display_name):
 			usernameLeft = instance.player_left.user.display_name
