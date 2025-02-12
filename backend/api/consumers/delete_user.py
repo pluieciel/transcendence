@@ -5,7 +5,7 @@ from channels.db import database_sync_to_async
 from api.db_utils import get_user_exists
 import json
 
-class RemoveConsumer(AsyncHttpConsumer):
+class DeleteUserConsumer(AsyncHttpConsumer):
 	async def handle(self, body):
 		try:
 			user = await jwt_to_user(self.scope['headers'])
@@ -18,15 +18,7 @@ class RemoveConsumer(AsyncHttpConsumer):
 				return await self.send_response(401, json.dumps(response_data).encode(),
 					headers=[(b"Content-Type", b"application/json")])
 
-			if not await get_user_exists(user.username):
-				response_data = {
-					'success': False,
-					'message': 'Username doesnt exists'
-				}
-				return await self.send_response(400, json.dumps(response_data).encode(),
-					headers=[(b"Content-Type", b"application/json")])
-
-			if await self.remove_user(user.username, user.id):
+			if await self.delete_user(user.id):
 				response_data = {
 					'success': True,
 					'message': "Deleted user successfully"
@@ -35,11 +27,10 @@ class RemoveConsumer(AsyncHttpConsumer):
 					headers=[(b"Content-Type", b"application/json")])
 			response_data = {
 				'success': False,
-				'message': "Failed to remove the user from the database"
+				'message': "Failed to delete the user"
 			}
 			return await self.send_response(500, json.dumps(response_data).encode(),
 				headers=[(b"Content-Type", b"application/json")])
-
 
 		except Exception as e:
 			response_data = {
@@ -50,11 +41,10 @@ class RemoveConsumer(AsyncHttpConsumer):
 				headers=[(b"Content-Type", b"application/json")])
 
 	@database_sync_to_async
-	def remove_user(self, username, uid):
+	def delete_user(self, user_id):
 		try:
 			User = get_user_model()
-			u = User.objects.get(username = username, id = uid)
-			u.delete()
+			User.objects.get(id=user_id).delete()
 			return True
-		except Exception as e:
+		except Exception:
 			return False

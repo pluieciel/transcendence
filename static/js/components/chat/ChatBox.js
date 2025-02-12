@@ -117,57 +117,6 @@ export default class ChatBox {
                     </div>
                 </div>
             </div>
-
-            <!-- Modal for usersetting -->
-            <div class="modal fade" id="usersetting" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h1 class="modal-title fs-5" id="staticBackdropLabel">Update User Info</h1>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <form id="updateForm">
-                                <span>Change password</span>
-                                <div class="mb-3">
-                                    <input
-                                        type="password"
-                                        id="password"
-                                        placeholder="Enter password"
-                                        class="form-control">
-                                </div>
-                                <div class="mb-3">
-                                    <input
-                                        type="password"
-                                        id="confirmPassword"
-                                        placeholder="Confirm password"
-                                        class="form-control">
-                                </div>
-                                <span>Change display nickname</span>
-                                <div class="mb-3">
-                                    <input
-                                        type="nickname"
-                                        id="nickname"
-                                        placeholder="Enter nickname"
-                                        class="form-control">
-                                </div>
-                                <div class="mb-3">
-                                    Change Avatar:
-                                    <input
-                                        type="file"
-                                        id="avatar"
-                                        accept="image/*">
-                                </div>
-                                <div id="passwordError" class="alert alert-danger d-none"></div>
-                            </form>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-primary" id="sendUpdateForm">Submit</button>
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
         `;
 
 		// Initialize Bootstrap offcanvas
@@ -301,10 +250,6 @@ export default class ChatBox {
                     `
 							: `
                         <span class="d-flex align-items-center">
-                            <button class="btn btn-primary square-btn me-1" data-action="setting"
-                                data-bs-toggle="modal" data-bs-target="#usersetting">
-                                <i class="fa-solid fa-gear"></i>
-                            </button>
                             <button id="Donotdisturb" class="btn btn-primary square-btn me-1 ${this.waiting ? "" : "square-btn-red"}"
                                 data-action="waiting"
                                 data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Do not disturb">
@@ -324,7 +269,7 @@ export default class ChatBox {
 				if (avatar_div) {
 					const avatarUrl = await window.app.getAvatar(user);
 					if (avatarUrl) {
-						avatar_div.innerHTML = `<img src="${avatarUrl}" width="30" height="30"></img>`;
+						avatar_div.innerHTML = `<img src="${avatarUrl}" class="avatar" width="30" height="30"></img>`;
 					}
 				}
 				const elo_div = this.container.querySelector(`#elo_${user}`);
@@ -385,15 +330,9 @@ export default class ChatBox {
 			this.allusers.map(async (user) => {
 				const avatar_div = this.container.querySelector(`#avatar_${user}`);
 				if (avatar_div) {
-					const response = await fetch(`/api/get/avatar/${user}`, {
-						method: "POST",
-						headers: {
-							"Content-Type": "application/json",
-						},
-					});
-					const data = await response.json();
-					if (data.avatar) {
-						avatar_div.innerHTML = `<img src="${data.avatar}" width="30" height="30"></img>`;
+					const avatarUrl = await window.app.getAvatar(user);
+					if (avatarUrl) {
+						avatar_div.innerHTML = `<img src="${avatarUrl}" class="avatar" width="30" height="30"></img>`;
 					}
 				}
 			});
@@ -456,7 +395,7 @@ export default class ChatBox {
 				if (avatar_div) {
 					const avatarUrl = await window.app.getAvatar(user);
 					if (avatarUrl) {
-						avatar_div.innerHTML = `<img src="${avatarUrl}" width="30" height="30"></img>`;
+						avatar_div.innerHTML = `<img src="${avatarUrl}" class="avatar" width="30" height="30"></img>`;
 					}
 				}
 				const elo_div = this.container.querySelector(`#elof_${user}`);

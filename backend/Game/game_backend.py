@@ -271,7 +271,7 @@ class GameBackend:
 
 	def get_color(self, user):
 		color_map = {
-			0: '#3E27F8',
+			0: '#447AFF',
 			1: "#00BDD1",
 			2: "#00AD06",
 			3: "#E67E00",
@@ -279,7 +279,8 @@ class GameBackend:
 			5: "#6400C4",
 			6: "#E71200",
 			7: "#0EC384",
-			8: "#E6E3E1"
+			8: "#E6E3E1",
+			9: "#D5DA2B"
 		}
 		try:
 			color = color_map.get(user.color)
@@ -323,8 +324,8 @@ class GameBackend:
 				avatar = '/default_avatar.png'
 
 			self.logger.info(f"Appending winner info with {self.game.winner.username}")
-			if (self.game.winner.display):
-				username = self.game.winner.display
+			if (self.game.winner.display_name):
+				username = self.game.winner.display_name
 			else:
 				username = self.game.winner.username
 			events.append({
@@ -397,8 +398,8 @@ class GameBackend:
 				avatar = '/default_avatar.png'
 
 			self.logger.info(f"Appending winner info with {self.game.winner.username}")
-			if (self.game.winner.display):
-				username = self.game.winner.display
+			if (self.game.winner.display_name):
+				username = self.game.winner.display_name
 			else:
 				username = self.game.winner.username
 			events.append({

@@ -33,8 +33,10 @@ export default class GameComponent {
 			window.app.settings["game-mode"] = gameModeCheckbox.checked ? "rumble" : "classic";
 			window.app.settings["game-type"] = gameTypeCheckbox.checked ? "ranked" : "ai";
 
-			if (window.app.settings["game-type"] === "ai")
-				this.playBot(1);
+			if (window.app.settings["game-type"] === "ai") {
+				console.log(parseInt(window.app.settings["bot-difficulty"]));
+				this.playBot(parseInt(window.app.settings["bot-difficulty"]));
+			}
 			else if (window.app.settings["game-type"] === "ranked")
 				this.searchGame();
 		});

@@ -15,7 +15,8 @@ export async function addUserData(settings) {
 		5: 'Purple',
 		6: 'Red',
 		7: 'Soft Green',
-		8: 'White'
+		8: 'White',
+		9: 'Yellow',
 	};
 	let qualityArray = {
 		0: 'Low',
@@ -32,27 +33,6 @@ export async function addUserData(settings) {
 	quality.innerHTML = "<i class=\"fa-solid fa-wrench\"></i> " + qualityArray[qualityIndex];
 };
 
-export async function eraseInDB() {
-	try {
-		const response = await fetch('/api/del/user', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-		});
-
-		const data = await response.json();
-		
-		if (data.success)
-			message(data.success, data.message);
-		else
-			// TODO: show error msg
-		;
-	} catch (error) {
-		console.error('An error occurred: ', error);
-		return false;
-	}
-}
 
 export async function saveUserChanges(main, settings) {
 	try {
@@ -75,7 +55,7 @@ export async function saveUserChanges(main, settings) {
 			if (!main)
 				message(true, 'Theme and quality changes saved!');
 			else
-				window.app.router.navigateTo('/index');
+				window.app.router.navigateTo('/play');
 		}
 		else
 			throw new Error(data['message']);

@@ -1,4 +1,4 @@
-export default class AchievementView {
+export default class AchievementsView {
 	constructor(container) {
 		this.container = container;
 		this.username = window.app.state.username;
@@ -7,14 +7,12 @@ export default class AchievementView {
 
 	async init() {
 		await window.app.getSettings();
-		this.render();
-		window.app.checkForAdmin();
+		await this.render();
 		window.app.addNavEventListeners();
-		this.addContent();
 	}
 	
-	render() {
-		window.app.renderHeader(this.container, "achievements");
+	async render() {
+		await window.app.renderHeader(this.container, "achievements");
 		this.container.innerHTML += `
 		<main>
 		<div id="achievements-card" class="card">

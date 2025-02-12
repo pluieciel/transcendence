@@ -1,8 +1,8 @@
 from channels.generic.http import AsyncHttpConsumer
-from api.utils import jwt_to_user
+from api.utils import jwt_to_user, get_user_avatar_url
 import json
 
-class ProfileConsumer(AsyncHttpConsumer):
+class ProfileNavConsumer(AsyncHttpConsumer):
 	async def handle(self, body):
 		try:
 			user = await jwt_to_user(self.scope['headers'])
@@ -14,27 +14,15 @@ class ProfileConsumer(AsyncHttpConsumer):
 				}
 				return await self.send_response(401, json.dumps(response_data).encode(),
 					headers=[(b"Content-Type", b"application/json")])
-
-			tot_games = (user.wins + user.looses)
-			if tot_games == 0:
-				winrate = "No games found"
-			else:
-				winrate = (user.wins / tot_games) * 100
-				winrate = f"{winrate:.0f}%"
-
 			response_data = {
 				'success': True,
-				'elo': user.elo,
-				'wins': user.wins,
-				'looses': user.looses,
-				'winrate': winrate,
-				'tourn_won': user.tourn_win,
-				'tourn_joined': user.tourn_win, #need to fix this
+				'username': user.username,
 				'display_name': user.display_name,
+				'avatar_url': get_user_avatar_url(user, self.scope['headers']),
+				'is_admin': user.is_admin,
 			}
 			return await self.send_response(200, json.dumps(response_data).encode(),
 				headers=[(b"Content-Type", b"application/json")])
-
 		except Exception as e:
 			response_data = {
 				'success': False,

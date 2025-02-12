@@ -1,4 +1,4 @@
-import { addUserData, message, message2, saveUserChanges, eraseInDB } from "../utils/settingsUtils.js";
+import { addUserData, message, message2, saveUserChanges } from "../utils/settingsUtils.js";
 import { SceneManager } from "../game/SceneManager.js";
 import { Renderer } from "../game/Renderer.js";
 import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
@@ -14,7 +14,7 @@ export default class CustomizeView {
 
 	async init() {
 		await window.app.getSettings();
-		this.render();
+		await this.render();
 		this.addEventListeners();
 		this.settings = {
 			color: window.app.settings.color,
@@ -30,8 +30,8 @@ export default class CustomizeView {
 		await window.app.getPreferences();
 	}
 
-	render() {
-		window.app.renderHeader(this.container, "customize");
+	async render() {
+		await window.app.renderHeader(this.container, "customize");
 		this.container.innerHTML += `
 			<main>
 				<div id="customize-card" class="card">
@@ -83,7 +83,7 @@ export default class CustomizeView {
 		const saveChanges = document.getElementById("save-button");
 
 		leftColor.addEventListener("click", () => {
-			if (this.settings.color == 0) this.settings.color = 8;
+			if (this.settings.color == 0) this.settings.color = 9;
 			else this.settings.color -= 1;
 			window.app.settings.color = this.settings.color;
 			addUserData(this.settings);
@@ -91,7 +91,7 @@ export default class CustomizeView {
 		});
 
 		rightColor.addEventListener("click", () => {
-			if (this.settings.color == 8) this.settings.color = 0;
+			if (this.settings.color == 9) this.settings.color = 0;
 			else this.settings.color += 1;
 			window.app.settings.color = this.settings.color;
 			addUserData(this.settings);
@@ -99,11 +99,11 @@ export default class CustomizeView {
 		});
 
 		leftQuality.addEventListener("click", () => {
-			rightQuality.style.backgroundColor = "var(--selector-color)";
+			rightQuality.disabled = false;
 			if (this.settings.quality == 0)
 				return;
 			if (this.settings.quality == 1)
-				leftQuality.style.backgroundColor = "var(--hover-color)";
+				leftQuality.disabled = true;
 			this.settings.quality -= 1;
 			window.app.settings.quality = this.settings.quality;
 			addUserData(this.settings);
@@ -111,10 +111,10 @@ export default class CustomizeView {
 		});
 
 		rightQuality.addEventListener("click", () => {
-			leftQuality.style.backgroundColor = "var(--selector-color)";
+			leftQuality.disabled = false;
 			if (this.settings.quality == 2) return;
 			if (this.settings.quality == 1)
-				rightQuality.style.backgroundColor = "var(--hover-color)";
+				rightQuality.disabled = true;
 			this.settings.quality += 1;
 			window.app.settings.quality = this.settings.quality;
 			addUserData(this.settings);
@@ -173,7 +173,7 @@ class PreviewGame {
 	getColor(color) {
 		switch (color) {
 			case 0:
-				return "#3E27F8";
+				return "#447AFF";
 			case 1:
 				return "#00BDD1";
 			case 2:
@@ -190,6 +190,8 @@ class PreviewGame {
 				return "#0EC384";
 			case 8:
 				return "#E6E3E1";
+			case 9:
+				return "#D5DA2B";
 			default:
 				return "#00BDD1";
 		}
