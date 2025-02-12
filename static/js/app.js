@@ -48,7 +48,7 @@ class App {
 
 	getColor(color) {
 		switch (color) {
-			case 0: return "#3E27F8";
+			case 0: return "#447AFF";
 			case 1: return "#00BDD1";
 			case 2: return "#00AD06";
 			case 3: return "#E67E00";

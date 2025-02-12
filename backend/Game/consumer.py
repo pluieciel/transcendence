@@ -345,7 +345,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 
 	def get_color(self, user):
 		color_map = {
-			0: '#3E27F8',
+			0: '#447AFF',
 			1: "#00BDD1",
 			2: "#00AD06",
 			3: "#E67E00",
