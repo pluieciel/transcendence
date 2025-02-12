@@ -132,7 +132,7 @@ export default class SignupView {
 					window.app.showErrorMsg('#input-error', data.message);
 				}
 			} catch (error) {
-				window.app.showErrorMsg('#input-error', 'An error occurred: ' + error);
+				console.error("An error occurred: " + error);
 			}
 		});
 	}

@@ -63,24 +63,37 @@ class App {
 	}
 
 	async getAvatar(username) {
-		const response = await fetch(`/api/get/avatar/${username}`, {
-			method: "POST",
-			headers: {
+		try {
+			const response = await fetch(`/api/get/avatar/${username}`, {
+				method: "POST",
+				headers: {
 				"Content-Type": "application/json",
 			},
-		});
-		const data = await response.json();
-		this.avatarCache[username] = data.avatar_url;
-		return data.avatar_url;
+			});
+
+			const data = await response.json();
+			if (data.success)
+			{
+				this.avatarCache[username] = data.avatar_url;
+				return data.avatar_url;
+			}
+			else {
+				// TODO: add error msg
+			}
+		} catch (error) {
+			console.error("An error occurred: " + error);
+		}
 	}
 
 	async getPreferences() {
-		const response = await fetch(`/api/settings/get/preferences`, {
-			method: "POST",
-			headers: {
+		try {
+			const response = await fetch(`/api/settings/get/preferences`, {
+				method: "POST",
+				headers: {
 				"Content-Type": "application/json",
 			},
 		});
+
 		const data = await response.json();
 		if (data.success)
 		{
@@ -89,10 +102,13 @@ class App {
 			this.settings.is_2fa_enabled = data['is_2fa_enabled'];
 			this.settings.fetched = true;
 			this.setColor(this.settings.color);
+			}
+			else {
+				// TODO: add error msg
+			}
+		} catch (error) {
+			console.error("An error occurred: " + error);
 		}
-		else
-			// TODO: add error handling
-		;
 	}
 
 	showErrorMsg(selector, msg) {
@@ -121,8 +137,8 @@ class App {
 						'Content-Type': 'application/json'
 					},
 				});
+
 				const data = await response.json();
-				
 				if (data.success) {
 					header += `
 						<nav>
@@ -187,14 +203,15 @@ class App {
 				} else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
 					window.app.logout();
 					window.app.router.navigateTo("/login");
-				} else 
-					window.app.showErrorMsg('#input-error', data.message);
+				} else {
+					// TODO: add error msg
+				}
 			} catch (error) {
-				window.app.showErrorMsg('#input-error', 'An error occurred: ' + error);
+				console.error("An error occurred: " + error);
 			}
 		}
-			header += `</header>`;
-			container.innerHTML = header;
+		header += `</header>`;
+		container.innerHTML = header;
 	}
 
 	async addNavEventListeners() {

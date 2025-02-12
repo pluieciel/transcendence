@@ -28,7 +28,7 @@ export default class AdminView {
 				// TODO: show error msg
 			}
 		} catch (error) {
-			console.log('An error occurred: ' + error);
+			console.error("An error occurred: " + error);
 		}
     }
 

@@ -170,7 +170,7 @@ export default class SettingsView {
 					window.app.showErrorMsg('#input-error', data.message);
 				}
 			} catch (error) {
-				window.app.showErrorMsg('#input-error', 'An error occurred: ' + error);
+				console.error("An error occurred: " + error);
 			}
 		});
 	}
@@ -221,7 +221,7 @@ export default class SettingsView {
 				// TODO: show error msg
 			}
 		} catch (error) {
-			// TODO: show error msg
+			console.error("An error occurred: " + error);
 		}
 	}
 
@@ -249,7 +249,7 @@ export default class SettingsView {
 				// TODO: show error msg
 			}
 		} catch (error) {
-			// TODO: show error msg
+			console.error("An error occurred: " + error);
 		}
 	}
 
@@ -281,7 +281,7 @@ export default class SettingsView {
 					// TODO: Show error message
 				}
 			} catch (error) {
-				// TODO: Show error message
+				console.error("An error occurred: " + error);
 			}
 		});
 	}
@@ -342,7 +342,7 @@ export default class SettingsView {
 					// TODO: Show error message
 				}
 			} catch (error) {
-				// TODO: Show error message
+				console.error("An error occurred: " + error);
 			}
 		});
 	}
@@ -369,7 +369,7 @@ export default class SettingsView {
 				// TODO: Show error message
 			}
 		} catch (error) {
-			// TODO: Show error message
+			console.error("An error occurred: " + error);
 		}
 	}
 }
