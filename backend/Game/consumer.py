@@ -296,7 +296,6 @@ class GameConsumer(AsyncWebsocketConsumer):
 				await self.send_initial_game_state(self.game)
 
 	async def receive(self, text_data):
-		logging.getLogger('game').info(text_data)
 		try:
 			data = json.loads(text_data)
 			if data["type"] in ["keydown", "keyup"]:
@@ -354,7 +353,8 @@ class GameConsumer(AsyncWebsocketConsumer):
 			5: "#6400C4",
 			6: "#E71200",
 			7: "#0EC384",
-			8: "#E6E3E1"
+			8: "#E6E3E1",
+			9: "#D5DA2B"
 		}
 		try:
 			color = color_map.get(user.color)

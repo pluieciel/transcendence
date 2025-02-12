@@ -10,6 +10,7 @@ import CreditsView from './components/pages/CreditsView.js';
 import CustomizeView from './components/pages/CustomizeView.js';
 import LeaderboardView from './components/pages/LeaderboardView.js';
 import GameView from './components/pages/GameView.js';
+import AchievementView from './components/pages/AchievementView.js';
 
 
 class App {
@@ -23,6 +24,7 @@ class App {
 			{ path: '/credits', component: CreditsView },
 			{ path: '/profile', component: ProfileView },
 			{ path: '/settings', component: SettingsView },
+			{ path: '/achievements', component: AchievementView},
 			{ path: '/leaderboard', component: LeaderboardView },
 			{ path: '/admin', component: AdminView },
 			{ path: '/login/oauth', component: LoginOAuth },
@@ -46,26 +48,17 @@ class App {
 
 	getColor(color) {
 		switch (color) {
-			case 0:
-				return "#3E27F8"; //Blue
-			case 1:
-				return "#00BDD1"; //Cyan
-			case 2:
-				return "#00AD06"; //Green
-			case 3:
-				return "#E67E00"; //Orange
-			case 4:
-				return "#E6008F"; //Pink
-			case 5:
-				return "#6400C4"; //Purple
-			case 6:
-				return "#E71200"; //Red
-			case 7:
-				return "#0EC384"; //Soft Green
-			case 8:
-				return "#E6E3E1"; //White
-			default:
-				return "#00BDD1";
+			case 0: return "#3E27F8";
+			case 1: return "#00BDD1";
+			case 2: return "#00AD06";
+			case 3: return "#E67E00";
+			case 4: return "#E6008F";
+			case 5: return "#6400C4";
+			case 6: return "#E71200";
+			case 7: return "#0EC384";
+			case 8: return "#E6E3E1";
+			case 9: return "#D5DA2B";
+			default: return "#00BDD1";
 		}
 	}
 

@@ -34,7 +34,7 @@ export default class GameComponent {
 			window.app.settings["game-type"] = gameTypeCheckbox.checked ? "ranked" : "ai";
 
 			if (window.app.settings["game-type"] === "ai")
-				this.playBot(1);
+				this.playBot(parseInt(window.app.settings["bot-difficulty"]));
 			else if (window.app.settings["game-type"] === "ranked")
 				this.searchGame();
 		});

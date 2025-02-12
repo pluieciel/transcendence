@@ -12,6 +12,7 @@ class Ball:
 		self.baseSpeed = DEFAULT_BALL_BASE_SPEED
 		self.speed = self.baseSpeed
 		self.maxSpeedMult = 0.8
+		self.reaction_time = 0.2
 		self.maxSpeed = self.calculate_max_safe_speed(self.maxSpeedMult)
 		self.radius = 0.5
 		self.bounds = GameBounds()
@@ -26,12 +27,12 @@ class Ball:
 		court_height = bounds.top.y - bounds.bottom.y
 		court_width = bounds.right.x - bounds.left.x
 		paddle_speed = 35
-		max_paddle_travel = court_height - 4
+		max_paddle_travel = court_height - 5.006
 		paddle_travel_time = max_paddle_travel / paddle_speed
-		ball_travel_distance = math.sqrt(court_width**2 + court_height**2)
-		max_safe_speed = ball_travel_distance / paddle_travel_time
-
-		return (max_safe_speed * self.maxSpeedMult)
+		ball_travel_distance = court_width
+		max_safe_speed = ball_travel_distance / (paddle_travel_time + self.reaction_time)
+		logging.getLogger('game').info(f"Max safe speed: {max_safe_speed}")
+		return (max_safe_speed)
 
 	def BounceWall(self, is_top):
 		ball = self
@@ -169,6 +170,7 @@ class ClassicGameInstance:
 					if ball.velocity.x > 0:
 						ball.position.x = right_paddle.position.x - right_paddle.paddle_thickness/2 - ball.radius
 						self.ball.BouncePaddle(right_paddle.position.x, right_paddle.position.y)
+						self.logger.info(self.ball.speed)
 						ball.lastHitter = "RIGHT"
 						paddle_hit = True
 
@@ -180,6 +182,7 @@ class ClassicGameInstance:
 					if ball.velocity.x < 0:
 						ball.position.x = left_paddle.position.x + left_paddle.paddle_thickness/2 + ball.radius
 						self.ball.BouncePaddle(left_paddle.position.x, left_paddle.position.y)
+						self.logger.info(self.ball.speed)
 
 						ball.lastHitter = "LEFT"  # Add this line
 						paddle_hit = True
@@ -189,6 +192,7 @@ class ClassicGameInstance:
 					await self.on_score("LEFT")
 			elif ball_pos.x <= self.bounds.left.x:
 					await self.on_score("RIGHT")
+
 
 	async def on_score(self, winner):
 		if winner == "LEFT":

@@ -10,6 +10,7 @@ export default class MainView {
 		this.timerInterval = null;
 
 		this.username = window.app.state.username;
+		window.app.settings["bot-difficulty"] = 1;
 		this.init();
 	}
 

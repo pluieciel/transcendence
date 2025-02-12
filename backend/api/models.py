@@ -71,6 +71,24 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     def has_module_perms(self, app_label):
         return True
 
+    def unlock_achievement(self, achievement_name):
+        achievement = Achievement.objects.get(name=achievement_name)
+        UserAchievement.objects.create(user=self, achievement=achievement)
+
+    def get_unlocked_achievements(self):
+        return self.user_achievements.all()
+
+    def is_color_unlocked(self, color):
+        default_colors = ['#00AD06', '#00BDD1', '#3E27F8', '#6400C4']
+        if color in default_colors:
+            return True
+        return self.user_achievements.filter(achievement__color_unlocked=color).exists()
+
+    def get_unlocked_colors(self):
+        default_colors = ['#00AD06', '#00BDD1', '#3E27F8', '#6400C4']
+        user_unlocked_colors = self.user_achievements.filter(achievement__color_unlocked__isnull=False).values_list('achievement__color_unlocked', flat=True)
+        return list(set(default_colors).union(user_unlocked_colors))
+
 
 ######################## GAME INVITE ###########################
 
@@ -120,3 +138,20 @@ class RecoveryCode(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, related_name='user')
     recovery_code = models.CharField(max_length=128)
     created_at = models.DateTimeField(auto_now_add=True)
+
+
+class Achievement(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    description = models.TextField()
+    color_unlocked = models.CharField(max_length=7, null=True, blank=True)
+
+    def __str__(self):
+        return self.name
+
+class UserAchievement(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='user_achievements')
+    achievement = models.ForeignKey(Achievement, on_delete=models.CASCADE, related_name='user_achievements')
+    date_earned = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.achievement.name}"

@@ -9,6 +9,7 @@ export class SceneManager {
 		this.rightPaddle = null;
 		this.ball = null;
 		this.base_paddle_height = 0.75;
+		this.base_ball_scale = 0.44;
 		this.base_debug_height = 0;
 		this.quality = quality;
 
@@ -485,6 +486,11 @@ export class SceneManager {
 			"#6400C4": {
 				leftTexture: "/js/components/game/Textures/TextureLeftPurple.png",
 				rightTexture: "/js/components/game/Textures/TextureRightPurple.png",
+			},
+			//Yellow
+			"#D5DA2B": {
+				leftTexture: "/js/components/game/Textures/TextureLeftYellow.png",
+				rightTexture: "/js/components/game/Textures/TextureRightYellow.png",
 			},
 		};
 		return this.colorTextureMap;

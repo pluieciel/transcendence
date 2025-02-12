@@ -40,10 +40,8 @@ class GameBackend:
 		self.chat_consumer = ChatConsumer
 	def handle_key_event(self, websocket, key, is_down):
 		if websocket == self.player_left.channel:
-			self.logger.info(f"Left player pressed {key}")
 			self.game.player_left.keys[key] = is_down
 		elif websocket == self.player_right.channel:
-			self.logger.info(f"Right player pressed {key}")
 			self.game.player_right.keys[key] = is_down
 
 	def get_game_instance(self, type):
@@ -281,7 +279,8 @@ class GameBackend:
 			5: "#6400C4",
 			6: "#E71200",
 			7: "#0EC384",
-			8: "#E6E3E1"
+			8: "#E6E3E1",
+			9: "#D5DA2B"
 		}
 		try:
 			color = color_map.get(user.color)
