@@ -253,7 +253,7 @@ class App {
 		});
 
 		logoutButton.addEventListener("click", () => {
-			window.app.chatBox.disconnect();
+			//window.app.chatBox.disconnect();
 			window.app.logout();
 		});
 	}
