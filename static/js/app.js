@@ -5,6 +5,7 @@ import LoginView from './components/pages/LoginView.js';
 import SignupView from './components/pages/SignupView.js';
 import LoginOAuth from './components/login/LoginOAuth.js';
 import ProfileView from './components/pages/ProfileView.js';
+import SettingsView from './components/pages/SettingsView.js';
 import CreditsView from './components/pages/CreditsView.js';
 import CustomizeView from './components/pages/CustomizeView.js';
 import LeaderboardView from './components/pages/LeaderboardView.js';
@@ -21,6 +22,7 @@ class App {
 			{ path: '/customize', component: CustomizeView },
 			{ path: '/credits', component: CreditsView },
 			{ path: '/profile', component: ProfileView },
+			{ path: '/settings', component: SettingsView },
 			{ path: '/leaderboard', component: LeaderboardView },
 			{ path: '/admin', component: AdminView },
 			{ path: '/login/oauth', component: LoginOAuth },
@@ -172,8 +174,13 @@ class App {
 									</div>
 								</li>
 								<li style="display: ${data.is_admin ? 'block' : 'none'}">
-									<button id="admin-button" ${disableBtn === "admin" ? 'disabled' : ''}>
-										<i class="fa-solid fa-user-tie fa-xl"></i>Admin
+								<button id="admin-button" ${disableBtn === "admin" ? 'disabled' : ''}>
+								<i class="fa-solid fa-user-tie fa-xl"></i>Admin
+								</button>
+								</li>
+								<li>
+									<button id="settings-button" ${disableBtn === "settings" ? 'disabled' : ''}>
+										<i class="fa-solid fa-gear fa-xl"></i>Settings
 									</button>
 								</li>
 								<li>
@@ -205,8 +212,9 @@ class App {
 		const achievementsButton = document.getElementById("achievements-button");
 		const customizeButton = document.getElementById("customize-button");
 		const profileButton = document.getElementById("profile-button");
-		const adminButton = document.getElementById("admin-button");
 		const navProfile = document.getElementById("nav-profile");
+		const adminButton = document.getElementById("admin-button");
+		const settingsButton = document.getElementById("settings-button");
 		const logoutButton = document.getElementById("logout-button");
 
 		if (creditButton) {
@@ -239,13 +247,16 @@ class App {
 			window.app.router.navigateTo("/profile");
 		});
 
-		
+		navProfile.addEventListener("click", () => {
+			window.app.router.navigateTo("/profile");
+		});
+
 		adminButton.addEventListener("click", () => {
 			window.app.router.navigateTo("/admin");
 		});
-		
-		navProfile.addEventListener("click", () => {
-			window.app.router.navigateTo("/profile");
+
+		settingsButton.addEventListener("click", () => {
+			window.app.router.navigateTo("/settings");
 		});
 
 		logoutButton.addEventListener("click", () => {

@@ -134,12 +134,12 @@ nav li {
 	height: 100%;
 }
 
-nav li:nth-last-child(3) {
+nav li:nth-last-child(4) {
 	margin-left: auto;
 	font-weight: bold;
 }
 
-nav li:nth-last-child(3) img {
+nav li:nth-last-child(4) img {
 	margin-right: 0.5rem;
 }
 
@@ -741,21 +741,8 @@ hr::after {
 }
 
 /* ******************************** */
-/*                Profile           */
+/*                Settings          */
 /* ******************************** */
-
-#profile-view {
-	justify-content: flex-start;
-}
-
-#settings-card, #profile-card {
-	align-self: flex-start;
-}
-
-#profile-card {
-	width: 50rem;
-	height: 100%;
-}
 
 #toggle-2fa-button {
 	margin-top: 2rem;
