@@ -7,7 +7,7 @@ from channels.db import database_sync_to_async
 
 ######################## USER ###########################
 
-class CustomUserManager(BaseUserManager):
+class UserManager(BaseUserManager):
     def create_user(self, username, password=None, avatar=None):
         if not username:
             raise ValueError('Users must have a username')
@@ -35,7 +35,7 @@ class CustomUserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-class CustomUser(AbstractBaseUser, PermissionsMixin):
+class User(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=16, unique=True)
     display_name = models.CharField(max_length=16, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -57,7 +57,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     friends = models.ManyToManyField('self', symmetrical=False, related_name='friend_set', blank=True)
     invites = models.ManyToManyField('self', symmetrical=False, related_name='invite_set', blank=True)
 
-    objects = CustomUserManager()
+    objects = UserManager()
 
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = []
@@ -90,7 +90,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         return list(set(default_colors).union(user_unlocked_colors))
 
 class UserPreference(models.Model):
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, null=True, related_name='preference')
+    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, related_name='preference')
     color = models.IntegerField(default=1)
     quality = models.IntegerField(default=2)
     game_mode = models.CharField(max_length=16, default='classic')
@@ -99,8 +99,8 @@ class UserPreference(models.Model):
 ######################## GAME INVITE ###########################
 
 class GameInvite(models.Model):
-    sender = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='invite_sender')
-    recipient = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='invite_recipient')
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='invite_sender')
+    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='invite_recipient')
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -132,16 +132,16 @@ class GameHistory(models.Model):
     score_a = models.IntegerField(default=0)
     score_b = models.IntegerField(default=0)
     elo_change = models.IntegerField(default=0)
-    player_a = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, related_name='player_a')
-    player_b = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, related_name='player_b')
-    winner = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, related_name='winner')
+    player_a = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='player_a')
+    player_b = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='player_b')
+    winner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='winner')
     created_at = models.DateTimeField(auto_now_add=True)
     tournament_count = models.IntegerField(default=0)
     tournament_round2_game_id = models.IntegerField(default=-1)
     tournament_round2_place = models.IntegerField(default=-1)
 
 class RecoveryCode(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, related_name='recovery_codes')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, related_name='recovery_codes')
     recovery_code = models.CharField(max_length=128)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -155,7 +155,7 @@ class Achievement(models.Model):
         return self.name
 
 class UserAchievement(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='achievements')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='achievements')
     achievement = models.ForeignKey(Achievement, on_delete=models.CASCADE, related_name='achievements')
     date_earned = models.DateTimeField(auto_now_add=True)
 

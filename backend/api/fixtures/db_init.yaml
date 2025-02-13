@@ -1,56 +1,56 @@
-- model: api.customuser
+- model: api.user
   pk: 1
   fields:
       username: user1
       display_name: Joris
       password: pbkdf2_sha256$600000$zJQavEkN0MLJfen7uQQX1W$kyhoRlFt1mKHKe5EfSyYBB9UIV5URUWq4ENK7cGvdbE=
       created_at: "2025-01-01T00:00:00Z"
-- model: api.customuser
+- model: api.user
   pk: 2
   fields:
       username: user2
       display_name: Julien
       password: pbkdf2_sha256$600000$sX8wDG8SC1s1BIULY2FGQO$Aav++Cl99VcSW7nkSRliNfmT05gBVlDWW4q+g/IAeO4=
       created_at: "2025-01-01T00:00:00Z"
-- model: api.customuser
+- model: api.user
   pk: 3
   fields:
       username: user3
       display_name: Victor
       password: pbkdf2_sha256$600000$lqosUHg9CDz56AfuYzX5rl$SdhroDKAOWOp4qFmIyTzOiqA+M1Ua1ONBpWDfkHSdOE=
       created_at: "2025-01-01T00:00:00Z"
-- model: api.customuser
+- model: api.user
   pk: 4
   fields:
       username: user4
       display_name: Yue
       password: pbkdf2_sha256$600000$TiuwgO3cz8gUQ6ZvNXMmeW$V772Lv03EOa+4pqsnzWxjAeT0tKda7Doy1OF6F24j7I=
       created_at: "2025-01-01T00:00:00Z"
-- model: api.customuser
+- model: api.user
   pk: 5
   fields:
       username: user5
       password: pbkdf2_sha256$600000$Wbwid0fixrkNtwyvY23PTL$6XfeJB5pW3uVkp7YNcj2S8NDiaylDloKu2O0RFHBtus=
       created_at: "2025-01-01T00:00:00Z"
-- model: api.customuser
+- model: api.user
   pk: 6
   fields:
       username: user6
       password: pbkdf2_sha256$600000$7I8QqJUrt6tvVEftPEOeDA$5FiIEOyuNzlZbwGteJNCKStLFiPrlclPv6nHkyUzVbU=
       created_at: "2025-01-01T00:00:00Z"
-- model: api.customuser
+- model: api.user
   pk: 7
   fields:
       username: user7
       password: pbkdf2_sha256$600000$0fPgqZGTeOMGayiTJvkPWm$HZHoTIAg8Dhtw7BoFSPEcLOB2eWOic/IrXEM/UMeMhU=
       created_at: "2025-01-01T00:00:00Z"
-- model: api.customuser
+- model: api.user
   pk: 8
   fields:
       username: user8
       password: pbkdf2_sha256$600000$Kj6tM8qwSSJCGJXOKE8mUo$szkBpCzrkcIyVuF98ixOCeJDznum31yog2w9JjpvTZk=
       created_at: "2025-01-01T00:00:00Z"
-- model: api.customuser
+- model: api.user
   pk: 9
   fields:
       username: jlefonde
@@ -60,7 +60,7 @@
       is_42_avatar_used: true
       avatar_42: https://cdn.intra.42.fr/users/aa8d5641c13c2fbf3d51ae1f9a85fdde/jlefonde.jpg
       created_at: "2025-01-01T00:00:00Z"
-- model: api.customuser
+- model: api.user
   pk: 10
   fields:
       username: valgrant
@@ -70,7 +70,7 @@
       is_42_avatar_used: true
       avatar_42: https://cdn.intra.42.fr/users/6256bf3b76f8634f1e0df573022b0b72/valgrant.JPG
       created_at: "2025-01-01T00:00:00Z"
-- model: api.customuser
+- model: api.user
   pk: 11
   fields:
       username: jnunes
@@ -80,7 +80,7 @@
       is_42_avatar_used: true
       avatar_42: https://cdn.intra.42.fr/users/67da051bad2511d2fdfa7edafbd2cc10/jnunes.jpg
       created_at: "2025-01-01T00:00:00Z"
-- model: api.customuser
+- model: api.user
   pk: 12
   fields:
       username: yuzhao
@@ -90,3 +90,51 @@
       is_42_avatar_used: true
       avatar_42: https://cdn.intra.42.fr/users/d8221528b165c21340f94f59f223807f/yuzhao.jpg
       created_at: "2025-01-01T00:00:00Z"
+- model: api.userpreference
+  pk: 1
+  fields:
+      user: 1
+- model: api.userpreference
+  pk: 2
+  fields:
+      user: 2
+- model: api.userpreference
+  pk: 3
+  fields:
+      user: 3
+- model: api.userpreference
+  pk: 4
+  fields:
+      user: 4
+- model: api.userpreference
+  pk: 5
+  fields:
+      user: 5
+- model: api.userpreference
+  pk: 6
+  fields:
+      user: 6
+- model: api.userpreference
+  pk: 7
+  fields:
+      user: 7
+- model: api.userpreference
+  pk: 8
+  fields:
+      user: 8
+- model: api.userpreference
+  pk: 9
+  fields:
+      user: 9
+- model: api.userpreference
+  pk: 10
+  fields:
+      user: 10
+- model: api.userpreference
+  pk: 11
+  fields:
+      user: 11
+- model: api.userpreference
+  pk: 12
+  fields:
+      user: 12
