@@ -127,7 +127,7 @@ export default class SettingsView {
 		const avatarInput = document.getElementById('avatar-input');
 
 		avatarInput.addEventListener('change', (e) => {
-			this.file = handleAvatarChange(e, this.file, this.username);
+			this.file = handleAvatarChange(e, this.file);
 		});
 
 		form.addEventListener('submit', async (e) => {
@@ -198,7 +198,7 @@ export default class SettingsView {
 
 	refreshInputFields() {
 		refreshInputFields((e) => {
-			this.file = handleAvatarChange(e, this.file, this.username);
+			this.file = handleAvatarChange(e, this.file);
 		});
 		this.file = null;
 	}

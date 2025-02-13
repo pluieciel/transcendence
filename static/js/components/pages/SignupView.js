@@ -1,8 +1,9 @@
-import {checkAvatarFile} from "../utils/settingsUtils.js"
+import {checkAvatarFile, handleAvatarChange, refreshInputFields} from "../utils/settingsUtils.js"
 
 export default class SignupView {
 	constructor(container) {
 		this.container = container;
+		this.file = null;
 		this.render();
 		this.addEventListeners();
 		this.addLoginBtnEventListeners();
@@ -73,15 +74,11 @@ export default class SignupView {
 	}
 
 	addEventListeners() {
-		const form = this.container.querySelector('#signup-form');
-		const avatar = this.container.querySelector('#upload-avatar');
-		const fileInput = document.getElementById('avatar-input');
-		let	file;
+		const form = document.getElementById('signup-form');
+		const avatarInput = document.getElementById('avatar-input');
 
-		fileInput.addEventListener('change', function(event) {
-			file = event.target.files[0];
-			if (file)
-				avatar.textContent = "Avatar selected: " + file.name;
+		avatarInput.addEventListener('change', (e) => {
+			this.file = handleAvatarChange(e, this.file);
 		});
 
 		form.addEventListener('submit', async (e) => {
@@ -90,13 +87,20 @@ export default class SignupView {
 			const password = this.container.querySelector('#password-input').value;
 			const confirmPassword = this.container.querySelector('#confirm-password-input').value;
 			const recaptchaToken = grecaptcha.getResponse(this.recaptchaWidgetId);
+			const inputMessage = document.getElementById('input-message');
+			inputMessage.innerHTML = '';
+			inputMessage.style.display = 'none';
 
 			if (password !== confirmPassword) {
 				window.app.showErrorMsg('#input-message', 'Passwords do not match');
+				grecaptcha.reset(this.recaptchaWidgetId);
+				this.refreshInputFields();
 				return;
 			}
 			else if (!recaptchaToken) {
 				window.app.showErrorMsg('#input-message', 'Please verify that you are not a robot');
+				grecaptcha.reset(this.recaptchaWidgetId);
+				this.refreshInputFields();
 				return;
 			}
 
@@ -105,8 +109,9 @@ export default class SignupView {
 			formData.append('password', password);
 			formData.append('confirm_password', confirmPassword);
 			formData.append('recaptcha_token', recaptchaToken);
-			if (file) {
-				const modifiedFile = checkAvatarFile(file, this.username);
+
+			if (this.file) {
+				const modifiedFile = checkAvatarFile(this.file, this.username);
 				if (!modifiedFile)
 					return;
 				formData.append('avatar', modifiedFile);
@@ -121,15 +126,24 @@ export default class SignupView {
 				const data = await response.json();
 			
 				if (data.success) {
-					window.app.router.navigateTo('/login');
+					window.app.showSuccessMsg('#input-message', data.message);
+					window.app.router.navigateTo("/login");
 				} else {
-					grecaptcha.reset(this.recaptchaWidgetId);
 					window.app.showErrorMsg('#input-message', data.message);
+					grecaptcha.reset(this.recaptchaWidgetId);
+					this.refreshInputFields();
 				}
 			} catch (error) {
 				console.error("An error occurred: " + error);
 			}
 		});
+	}
+
+	refreshInputFields() {
+		refreshInputFields((e) => {
+			this.file = handleAvatarChange(e, this.file);
+		});
+		this.file = null;
 	}
 
 	addPasswordToggleEventListeners() {
