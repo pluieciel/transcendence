@@ -4,7 +4,7 @@ from api.utils import jwt_to_user
 from api.db_utils import get_user_preference
 import json
 
-class getPreferences(AsyncHttpConsumer):
+class GetCustomizeConsumer(AsyncHttpConsumer):
 	async def handle(self, body):
 		try:
 			user = await jwt_to_user(self.scope['headers'])
@@ -34,7 +34,7 @@ class getPreferences(AsyncHttpConsumer):
 			return await self.send_response(500, json.dumps(response_data).encode(),
 				headers=[(b"Content-Type", b"application/json")])
 
-class setPreferences(AsyncHttpConsumer):
+class SetCustomizeConsumer(AsyncHttpConsumer):
 	async def handle(self, body):
 		try:
 			user = await jwt_to_user(self.scope['headers'])
@@ -80,12 +80,12 @@ class setPreferences(AsyncHttpConsumer):
 				headers=[(b"Content-Type", b"application/json")])
 
 	@database_sync_to_async
-	def update_user_preferences_color(self, user, newcolor):
+	def update_user_preferences_color(self, user, color):
 		from api.models import UserPreference
 		user_preference = UserPreference.objects.get(user=user)
-		if user_preference.color == newcolor:
+		if user_preference.color == color:
 			return
-		user_preference.color = newcolor
+		user_preference.color = color
 		user_preference.save()
 
 	@database_sync_to_async

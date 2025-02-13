@@ -28,7 +28,7 @@ export default class CustomizeView {
 	}
 
 	async refresh_settings() {
-		await window.app.getPreferences();
+		await window.app.GetCustomizeConsumer();
 	}
 
 	async render() {
@@ -182,7 +182,7 @@ class PreviewGame {
 	}
 
 	async initialize() {
-		if (!window.app.settings.fetched) await window.app.getPreferences();
+		if (!window.app.settings.fetched) await window.app.GetCustomizeConsumer();
 		console.log("Initializing preview with settings:", window.app.settings);
 		this.renderer = new Renderer(this.canvas, true);
 		console.log("calling with " + window.app.settings.quality);

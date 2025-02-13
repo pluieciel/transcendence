@@ -76,7 +76,7 @@ class App {
 		}
 	}
 
-	async getPreferences() {
+	async GetCustomizeConsumer() {
 		try {
 			const response = await fetch(`/api/settings/preferences/`);
 
@@ -301,7 +301,7 @@ class App {
 
 	async getSettings() {
 		if (!window.app.settings["fetched"]) 
-			await window.app.getPreferences();
+			await window.app.GetCustomizeConsumer();
 	}
 
 	login(data) {
@@ -309,7 +309,7 @@ class App {
 		this.state.username = data.username;
 		sessionStorage.setItem("isLoggedIn", "true");
 		sessionStorage.setItem("username", data.username);
-		this.getPreferences();
+		this.GetCustomizeConsumer();
 		this.router.navigateTo("/play");
 	}
 
