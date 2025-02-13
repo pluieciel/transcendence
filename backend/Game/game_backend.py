@@ -272,15 +272,12 @@ class GameBackend:
 		elo_change = abs(new_elo_pleft - elo_pleft)
 		self.elo_change = round(elo_change)
 
-		match self.game_mode:
-			case "classic":
-				await self.update_user_statistic_classic_elo(self.player_left.user, new_elo_pleft)
-				await self.update_user_statistic_classic_elo(self.player_right.user, new_elo_pright)
-			case "rumble":
-				await self.update_user_statistic_rumble_elo(self.player_left.user, new_elo_pleft)
-				await self.update_user_statistic_rumble_elo(self.player_right.user, new_elo_pright)
-			case _:
-				self.logger.error(f"Invalid game mode: {self.game_mode}")
+		if (self.game_mode == "classic"):
+			await self.update_user_statistic_classic_elo(player_left_statistic, new_elo_pleft)
+			await self.update_user_statistic_classic_elo(player_right_statistic, new_elo_pright)
+		elif (self.game_mode == "rumble"):
+			await self.update_user_statistic_rumble_elo(player_left_statistic, new_elo_pleft)
+			await self.update_user_statistic_rumble_elo(player_right_statistic, new_elo_pright)
 
 	async def get_color(self, user):
 		color_map = {
