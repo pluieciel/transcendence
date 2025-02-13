@@ -174,24 +174,25 @@ export default class SettingsView {
 					if (data.message === 'No changes made')
 						window.app.showWarningMsg('#input-message', data.message);
 					else
+					{
 						window.app.showSuccessMsg('#input-message', data.message);
 					
-					const passwordInput = document.getElementById('password-input');
-					const confirmPasswordInput = document.getElementById('confirm-password-input');
-					passwordInput.value = '';
-					confirmPasswordInput.value = '';
-					
-					file = null;
-					avatar.innerHTML = `
-						<label for="avatar-input">
-							<i class="fa-solid fa-arrow-up-from-bracket"></i> Upload Avatar
-						</label>
-						<input type="file" id="avatar-input" accept="image/*" hidden>
-					`;
-					const newAvatarInput = document.getElementById('avatar-input');
-					newAvatarInput.addEventListener('change', handleAvatarChange);
-					
-					await this.refreshNavProvile();
+						const passwordInput = document.getElementById('password-input');
+						const confirmPasswordInput = document.getElementById('confirm-password-input');
+						passwordInput.value = '';
+						confirmPasswordInput.value = '';
+						
+						file = null;
+						avatar.innerHTML = `
+							<label for="avatar-input">
+								<i class="fa-solid fa-arrow-up-from-bracket"></i> Upload Avatar
+							</label>
+							<input type="file" id="avatar-input" accept="image/*" hidden>
+						`;
+						const newAvatarInput = document.getElementById('avatar-input');
+						newAvatarInput.addEventListener('change', handleAvatarChange);;
+						await this.refreshNavProvile();
+					}
 				} else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
 					window.app.logout();
 					window.app.router.navigateTo("/login");
@@ -216,7 +217,13 @@ export default class SettingsView {
 				navUsername.innerHTML = data.username;
 				navDisplayName.style.display = data.display_name ? "block" : "none";
 				navDisplayName.innerHTML = data.display_name;
-				navAvatar.setAttribute("src", data.avatar_url);
+				if (!data.is_42_avatar_used)
+				{
+					const cacheBuster = `?t=${new Date().getTime()}`;
+					navAvatar.setAttribute("src", data.avatar_url + cacheBuster);
+				}
+				else
+					navAvatar.setAttribute("src", data.avatar_url);
 			} else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
 				window.app.logout();
 				window.app.router.navigateTo("/login");

@@ -68,10 +68,7 @@ class App {
 
 			const data = await response.json();
 			if (data.success)
-			{
-				this.avatarCache[username] = data.avatar_url;
 				return data.avatar_url;
-			}
 			else {
 				// TODO: add error msg
 			}

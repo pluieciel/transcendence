@@ -45,19 +45,24 @@ class setPreferences(AsyncHttpConsumer):
 				return await self.send_response(401, json.dumps(response_data).encode(),
 					headers=[(b"Content-Type", b"application/json")])
 
+
 			data = json.loads(body.decode())
-			if not await self.change_color(user, data.get('newColor')) or not await self.change_quality(user, data.get('newQuality')):
+			if user.color == data.get('newColor') and user.quality == data.get('newQuality'):
 				response_data = {
-					'success': False,
-					'message': 'Failed to set color'
+					'success': True,
+					'message': 'No changes made'
 				}
-				return await self.send_response(500, json.dumps(response_data).encode(),
+				return await self.send_response(200, json.dumps(response_data).encode(),
 					headers=[(b"Content-Type", b"application/json")])
+
+			await self.change_color(user, data.get('newColor'))
+			await self.change_quality(user, data.get('newQuality'))
 
 			response_data = {
 				'success': True,
-				'color': user.color,
-				'message': 'Color set successfully'
+				'color': data.get('newColor'),
+				'quality': data.get('newQuality'),
+				'message': 'Updated successfully'
 			}
 			return await self.send_response(200, json.dumps(response_data).encode(),
 				headers=[(b"Content-Type", b"application/json")])
@@ -72,18 +77,15 @@ class setPreferences(AsyncHttpConsumer):
 
 	@database_sync_to_async
 	def change_color(self, user, newcolor):
-		try:
-			user.color = newcolor
-			user.save()
-			return True
-		except Exception as e:
-			return False
+		if user.color == newcolor:
+			return
+		user.color = newcolor
+		user.save()
 
 	@database_sync_to_async
 	def change_quality(self, user, quality):
-		try:
-			user.quality = quality
-			user.save()
-			return True
-		except Exception as e:
-			return False
+		if user.quality == quality:
+			return
+		user.quality = quality
+		user.save()
+
