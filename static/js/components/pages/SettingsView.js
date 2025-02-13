@@ -189,8 +189,7 @@ export default class SettingsView {
 						<input type="file" id="avatar-input" accept="image/*" hidden>
 					`;
 					const newAvatarInput = document.getElementById('avatar-input');
-					newAvatarInput.addEventListener('change', handleAvatarChange);
-					
+					newAvatarInput.addEventListener('change', handleAvatarChange);;
 					await this.refreshNavProvile();
 				} else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
 					window.app.logout();
@@ -216,7 +215,8 @@ export default class SettingsView {
 				navUsername.innerHTML = data.username;
 				navDisplayName.style.display = data.display_name ? "block" : "none";
 				navDisplayName.innerHTML = data.display_name;
-				navAvatar.setAttribute("src", data.avatar_url);
+				const cacheBuster = `?t=${new Date().getTime()}`;
+				navAvatar.setAttribute("src", data.avatar_url + cacheBuster);
 			} else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
 				window.app.logout();
 				window.app.router.navigateTo("/login");

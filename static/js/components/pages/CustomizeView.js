@@ -126,9 +126,13 @@ export default class CustomizeView {
 				const data = await response.json();
 		
 				if (data.success) {
-					window.app.settings.color = this.settings.color;
-					window.app.settings.quality = this.settings.quality;
-					window.app.showSuccessMsg('#input-message', 'Updated successfully');
+					if (data.message === 'No changes made')
+						window.app.showWarningMsg('#input-message', data.message);
+					else {
+						window.app.showSuccessMsg('#input-message', data.message);
+						window.app.settings.color = data.color;
+						window.app.settings.quality = data.quality;
+					}
 				} else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
 					window.app.logout();
 					window.app.router.navigateTo("/login");
