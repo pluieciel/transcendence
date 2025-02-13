@@ -1,4 +1,4 @@
-import {checkAvatarFile} from "../utils/settingsUtils.js"
+import {checkAvatarFile, handleAvatarChange, refreshInputFields} from "../utils/settingsUtils.js"
 
 export default class SettingsView {
 	constructor(container) {
@@ -126,7 +126,9 @@ export default class SettingsView {
 		const form = document.getElementById('settings-form');
 		const avatarInput = document.getElementById('avatar-input');
 
-		avatarInput.addEventListener('change', this.handleAvatarChange);
+		avatarInput.addEventListener('change', (e) => {
+			this.file = handleAvatarChange(e, this.file, this.username);
+		});
 
 		form.addEventListener('submit', async (e) => {
 			e.preventDefault();
@@ -139,6 +141,10 @@ export default class SettingsView {
 
 			if (password !== confirmPassword) {
 				window.app.showErrorMsg('#input-message', 'Passwords do not match');
+
+				this.refreshInputFields();
+				document.getElementById('password-input').required = false;
+				document.getElementById('confirm-password-input').required = false;
 				return;
 			}
 
@@ -190,30 +196,11 @@ export default class SettingsView {
 		});
 	}
 
-	handleAvatarChange = (event) => {
-		this.file = event.target.files[0];
-		const avatar = document.getElementById('upload-avatar');
-		if (this.file) {
-			avatar.textContent = "Avatar selected: " + this.file.name;
-		}
-	}
-
 	refreshInputFields() {
-		const passwordInput = document.getElementById('password-input');
-		const confirmPasswordInput = document.getElementById('confirm-password-input');
-		const avatar = document.getElementById('upload-avatar');
-		passwordInput.value = '';
-		confirmPasswordInput.value = '';
-		
+		refreshInputFields((e) => {
+			this.file = handleAvatarChange(e, this.file, this.username);
+		});
 		this.file = null;
-		avatar.innerHTML = `
-			<label for="avatar-input">
-				<i class="fa-solid fa-arrow-up-from-bracket"></i> Upload Avatar
-			</label>
-			<input type="file" id="avatar-input" accept="image/*" hidden>
-		`;
-		const avatarInput = document.getElementById('avatar-input');
-		avatarInput.addEventListener('change', this.handleAvatarChange);
 	}
 
 	async refreshNavProvile() {

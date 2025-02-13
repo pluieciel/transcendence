@@ -54,3 +54,29 @@ export function checkAvatarFile(file, username)
 	});
 	return modifiedFile;
 }
+
+export function handleAvatarChange(event, file) {
+	file = event.target.files[0];
+	const avatar = document.getElementById('upload-avatar');
+	if (file) {
+		avatar.textContent = "Avatar selected: " + file.name;
+	}
+	return file;
+}
+
+export function refreshInputFields(handleAvatarChange) {
+	const passwordInput = document.getElementById('password-input');
+	const confirmPasswordInput = document.getElementById('confirm-password-input');
+	const avatar = document.getElementById('upload-avatar');
+	passwordInput.value = '';
+	confirmPasswordInput.value = '';
+	
+	avatar.innerHTML = `
+		<label for="avatar-input">
+			<i class="fa-solid fa-arrow-up-from-bracket"></i> Upload Avatar
+		</label>
+		<input type="file" id="avatar-input" accept="image/*" hidden>
+	`;
+	const avatarInput = document.getElementById('avatar-input');
+	avatarInput.addEventListener('change', handleAvatarChange);
+}
