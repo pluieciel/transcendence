@@ -19,6 +19,7 @@ export default class CustomizeView {
 		this.settings = {
 			color: window.app.settings.color,
 			quality: window.app.settings.quality,
+			isSaved: false,
 		};
 		await addUserData(this.settings);
 		const canvas = document.getElementById("preview");
@@ -70,17 +71,17 @@ export default class CustomizeView {
 		leftColor.addEventListener("click", () => {
 			if (this.settings.color == 0) this.settings.color = 9;
 			else this.settings.color -= 1;
-			window.app.settings.color = this.settings.color;
 			addUserData(this.settings);
 			this.previewGame.updateColor(this.settings.color);
+			this.settings.isSaved = false;
 		});
 
 		rightColor.addEventListener("click", () => {
 			if (this.settings.color == 9) this.settings.color = 0;
 			else this.settings.color += 1;
-			window.app.settings.color = this.settings.color;
 			addUserData(this.settings);
 			this.previewGame.updateColor(this.settings.color);
+			this.settings.isSaved = false;
 		});
 
 		leftQuality.addEventListener("click", () => {
@@ -90,9 +91,9 @@ export default class CustomizeView {
 			if (this.settings.quality == 1)
 				leftQuality.disabled = true;
 			this.settings.quality -= 1;
-			window.app.settings.quality = this.settings.quality;
 			addUserData(this.settings);
 			this.previewGame.updateComposer(this.settings.quality);
+			this.settings.isSaved = false;
 		});
 
 		rightQuality.addEventListener("click", () => {
@@ -101,9 +102,9 @@ export default class CustomizeView {
 			if (this.settings.quality == 1)
 				rightQuality.disabled = true;
 			this.settings.quality += 1;
-			window.app.settings.quality = this.settings.quality;
 			addUserData(this.settings);
 			this.previewGame.updateComposer(this.settings.quality);
+			this.settings.isSaved = false;
 		});
 
 		saveChanges.addEventListener("click", async () => {
@@ -118,9 +119,9 @@ export default class CustomizeView {
 						'Content-Type': 'application/json',
 					},
 					body: JSON.stringify({
-						'newColor': this.settings.color,
-						'newQuality': this.settings.quality,
-					}),			
+						'color': this.settings.color,
+						'quality': this.settings.quality,
+					}),
 				});
 					
 				const data = await response.json();
@@ -130,8 +131,9 @@ export default class CustomizeView {
 						window.app.showWarningMsg('#input-message', data.message);
 					else {
 						window.app.showSuccessMsg('#input-message', data.message);
-						window.app.settings.color = data.color;
-						window.app.settings.quality = data.quality;
+						window.app.settings.color = this.settings.color;
+						window.app.settings.quality = this.settings.quality;
+						this.settings.isSaved = true;
 					}
 				} else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
 					window.app.logout();
@@ -145,14 +147,27 @@ export default class CustomizeView {
 		});
 	}
 
+	addRefreshOnNavEventListeners() {
+		const navButtons = document.querySelectorAll(".nav-button");
+		navButtons.forEach((button) => {
+			button.addEventListener("click", () => {
+				if (this.previewGame)
+					this.previewGame.destroy();
+				if (!this.settings.isSaved)
+					this.refresh_settings();
+			});
+		});
+	}
+
 	addEventListeners() {
 		window.app.addNavEventListeners();
 		this.addCustomizationEventListeners();
+		this.addRefreshOnNavEventListeners();
 		window.addEventListener("popstate", () => {
-			if (this.previewGame) {
+			if (this.previewGame)
 				this.previewGame.destroy();
+			if (!this.settings.isSaved)
 				this.refresh_settings();
-			}
 		});
 	}
 }

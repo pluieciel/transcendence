@@ -68,8 +68,11 @@ export default class SignupView {
 				const recaptcha = document.getElementById('recaptcha');
 				recaptcha.style.display = 'block';
 			}
+			else {
+				// TODO: add error message
+			}
 		} catch (error) {
-			window.app.showErrorMsg('#input-message', 'An error occurred: ' + error);
+			console.error("An error occurred: " + error);
 		}
 	}
 

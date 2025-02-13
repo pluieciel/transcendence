@@ -45,9 +45,10 @@ class setPreferences(AsyncHttpConsumer):
 				return await self.send_response(401, json.dumps(response_data).encode(),
 					headers=[(b"Content-Type", b"application/json")])
 
-
 			data = json.loads(body.decode())
-			if user.color == data.get('newColor') and user.quality == data.get('newQuality'):
+			color = data.get('color')
+			quality = data.get('quality')
+			if user.color == color and user.quality == quality:
 				response_data = {
 					'success': True,
 					'message': 'No changes made'
@@ -55,13 +56,11 @@ class setPreferences(AsyncHttpConsumer):
 				return await self.send_response(200, json.dumps(response_data).encode(),
 					headers=[(b"Content-Type", b"application/json")])
 
-			await self.change_color(user, data.get('newColor'))
-			await self.change_quality(user, data.get('newQuality'))
+			await self.change_color(user, color)
+			await self.change_quality(user, quality)
 
 			response_data = {
 				'success': True,
-				'color': data.get('newColor'),
-				'quality': data.get('newQuality'),
 				'message': 'Updated successfully'
 			}
 			return await self.send_response(200, json.dumps(response_data).encode(),
