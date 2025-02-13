@@ -78,7 +78,7 @@ class App {
 
 	async GetCustomizeConsumer() {
 		try {
-			const response = await fetch(`/api/settings/preferences/`);
+			const response = await fetch(`/api/settings/customize/`);
 
 			const data = await response.json();
 			if (data.success)

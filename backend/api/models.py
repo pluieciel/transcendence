@@ -16,6 +16,7 @@ class UserManager(BaseUserManager):
         user.set_password(password)
         user.save(using=self._db)
         UserPreference.objects.create(user=user)
+        UserStatistic.objects.create(user=user)
         return user
 
     def	create_user_oauth(self, username, avatarUrl):
@@ -24,6 +25,7 @@ class UserManager(BaseUserManager):
         user = self.model(username=username, is_42_user=True, avatar_42=avatarUrl, is_42_avatar_used=True)
         user.save(using=self._db)
         UserPreference.objects.create(user=user)
+        UserStatistic.objects.create(user=user)
         return user
 
     def create_superuser(self, username, password=None):
@@ -49,7 +51,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     recovery_codes_generated = models.BooleanField(default=False)
     is_playing = models.BooleanField(default=False)
     current_game_id = models.IntegerField(default=-1)
-    elo = models.IntegerField(default=1000)
     wins = models.IntegerField(default=0)
     looses = models.IntegerField(default=0)
     tournament_win = models.IntegerField(default=0)
@@ -90,11 +91,22 @@ class User(AbstractBaseUser, PermissionsMixin):
         return list(set(default_colors).union(user_unlocked_colors))
 
 class UserPreference(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, related_name='preference')
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='preference')
     color = models.IntegerField(default=1)
     quality = models.IntegerField(default=2)
     game_mode = models.CharField(max_length=16, default='classic')
     game_type = models.CharField(max_length=16, default='ai')
+
+class UserStatistic(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='statistic')
+    classic_elo = models.IntegerField(default=1000)
+    classic_wins = models.IntegerField(default=0)
+    classic_losses = models.IntegerField(default=0)
+    rumble_elo = models.IntegerField(default=1000)
+    rumble_wins = models.IntegerField(default=0)
+    rumble_losses = models.IntegerField(default=0)
+    tournament_wins = models.IntegerField(default=0)
+    tournament_participated = models.IntegerField(default=0)
 
 ######################## GAME INVITE ###########################
 

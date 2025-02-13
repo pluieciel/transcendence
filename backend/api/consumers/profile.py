@@ -1,5 +1,6 @@
 from channels.generic.http import AsyncHttpConsumer
 from api.utils import jwt_to_user
+from api.db_utils import get_user_statistic
 import json
 
 class ProfileConsumer(AsyncHttpConsumer):
@@ -22,14 +23,16 @@ class ProfileConsumer(AsyncHttpConsumer):
 				winrate = (user.wins / tot_games) * 100
 				winrate = f"{winrate:.0f}%"
 
+			user_statistic = await get_user_statistic(user)
+
 			response_data = {
 				'success': True,
-				'elo': user.elo,
+				'classic_elo': user_statistic.classic_elo,
 				'wins': user.wins,
 				'looses': user.looses,
 				'winrate': winrate,
-				'tourn_won': user.tournament_win,
-				'tournament_participated': user.tournament_win, #need to fix this
+				'tourn_won': user.tournament_wins,
+				'tournament_participated': user.tournament_wins, #need to fix this
 				'display_name': user.display_name,
 			}
 			return await self.send_response(200, json.dumps(response_data).encode(),

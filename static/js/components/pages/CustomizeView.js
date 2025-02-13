@@ -113,7 +113,7 @@ export default class CustomizeView {
 				inputMessage.innerHTML = '';
 				inputMessage.style.display = 'none';
 
-				const response = await fetch('/api/settings/preferences/update/', {
+				const response = await fetch('/api/settings/customize/update/', {
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json',

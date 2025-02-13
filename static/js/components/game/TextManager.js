@@ -26,8 +26,8 @@ export class TextManager {
 		await this.createInitialTexts(
 			data.player.left.name,
 			data.player.right.name,
-			"[" + data.player.left.rank.toString() + "]",
-			"[" + data.player.right.rank.toString() + "]",
+			"[" + data.player.left.elo.toString() + "]",
+			"[" + data.player.right.elo.toString() + "]",
 			data.player.left.color,
 			data.player.right.color,
 		);

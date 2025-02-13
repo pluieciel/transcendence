@@ -13,7 +13,7 @@ from api.db_utils import get_user_preference
 from channels.layers import get_channel_layer
 from datetime import datetime
 from time import sleep
-from api.db_utils import user_update_game, delete_game_history
+from api.db_utils import user_update_game, delete_game_history, get_user_statistic
 
 class GameManager:
 	def __init__(self):
@@ -397,6 +397,15 @@ class GameConsumer(AsyncWebsocketConsumer):
 		else:
 			usernameRight = instance.player_right.user.username
 
+		player_left_statistic = await get_user_statistic(instance.player_left.user)
+		player_right_statistic = await get_user_statistic(instance.player_right.user)
+
+		if (instance.game_mode == "classic"):
+			player_left_elo = player_left_statistic.classic_elo
+			player_right_elo = player_right_statistic.classic_elo
+		elif (instance.game_mode == "rumble"):
+			player_left_elo = player_left_statistic.rumble_elo
+			player_right_elo = player_right_statistic.rumble_elo
 
 		init_response = {
 			"type": "init",
@@ -415,14 +424,14 @@ class GameConsumer(AsyncWebsocketConsumer):
 					"player": {
 						"left": {
 							"name": usernameLeft,
-							"rank": instance.player_left.user.elo,
+							"elo": player_left_elo,
 							"score": instance.game.player_left.score,
 							"avatar" : avatarLeft,
 							"color": await self.get_color(instance.player_left.user)
 						},
 						"right": {
 							"name": usernameRight,
-							"rank": instance.player_right.user.elo,
+							"elo": player_right_elo,
 							"score": instance.game.player_right.score,
 							"avatar" : avatarRight,
 							"color" : await self.get_color(instance.player_right.user)

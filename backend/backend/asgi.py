@@ -61,8 +61,8 @@ http_patterns = [
 
     path('api/settings/', GetSettingsConsumer.as_asgi()),
     path('api/settings/update/', SetSettingsConsumer.as_asgi()),
-	path('api/settings/preferences/', GetCustomizeConsumer.as_asgi()),
-	path('api/settings/preferences/update/', SetCustomizeConsumer.as_asgi()),
+	path('api/settings/customize/', GetCustomizeConsumer.as_asgi()),
+	path('api/settings/customize/update/', SetCustomizeConsumer.as_asgi()),
 
     path('api/settings/2fa/qr/generate/', Generate2FAQRConsumer.as_asgi()),
     path('api/settings/2fa/recovery/generate/', Generate2FARecoveryConsumer.as_asgi()),

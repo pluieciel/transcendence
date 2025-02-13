@@ -6,7 +6,7 @@ from .normal_game_logic import ClassicGameInstance, GameBounds
 from .rumble_game_logic import RumbleGameInstance, GameBounds
 from channels.db import database_sync_to_async
 from .bot import Bot
-from api.db_utils import finish_game_history, user_update_game, update_user_elo, add_user_wins, add_user_looses, delete_game_history, get_user_preference
+from api.db_utils import finish_game_history, user_update_game, add_user_wins, add_user_looses, delete_game_history, get_user_preference, get_user_statistic
 from datetime import datetime
 import redis
 from channels.layers import get_channel_layer
@@ -21,8 +21,8 @@ class GameBackend:
 	def __init__(self, room_id, bot, manager, ranked, mode):
 		self.logger = logging.getLogger('game')
 		self.game_id = room_id
-		self.game_type = mode
-		self.game = self.get_game_instance(self.game_type)
+		self.game_mode = mode
+		self.game = self.get_game_instance(self.game_mode)
 		self.is_ranked = ranked
 		self.channel_layer = None
 		self.manager = manager
@@ -44,13 +44,13 @@ class GameBackend:
 		elif websocket == self.player_right.channel:
 			self.game.player_right.keys[key] = is_down
 
-	def get_game_instance(self, type):
-		if (type == "classic"):
+	def get_game_instance(self, mode):
+		if (mode == "classic"):
 			return ClassicGameInstance(self.broadcast_state, self.on_game_end)
-		elif (type == "rumble"):
+		elif (mode == "rumble"):
 			return RumbleGameInstance(self.rumble_broadcast_state, self.rumble_revert_event_broadcast, self.on_game_end)
 		else:
-			self.logger.error("Game type not found")
+			self.logger.error("Game mode not found")
 
 
 
@@ -154,7 +154,7 @@ class GameBackend:
 			else:
 				await finish_game_history(self.game_id, self.game.player_left.score, self.game.player_right.score, self.elo_change, self.game.winner)
 
-			if self.game_type == "classic":
+			if self.game_mode == "classic":
 				await self.broadcast_state()
 			else:
 				await self.rumble_broadcast_state()
@@ -243,8 +243,15 @@ class GameBackend:
 			self.logger.error(traceback.format_exc())
 
 	async def update_elo(self, winner):
-		elo_pleft = self.player_left.user.elo
-		elo_pright = self.player_right.user.elo
+		player_left_statistic = await get_user_statistic(self.player_left.user)
+		player_right_statistic = await get_user_statistic(self.player_right.user)
+
+		if (self.game_mode == "classic"):
+			elo_pleft = player_left_statistic.classic_elo
+			elo_pright = player_right_statistic.classic_elo
+		elif (self.game_mode == "rumble"):
+			elo_pleft = player_left_statistic.rumble_elo
+			elo_pright = player_right_statistic.rumble_elo
 
 		expected_score_pleft = 1 / (1 + 10 ** ((elo_pright - elo_pleft) / 400))
 		expected_score_pright = 1 - expected_score_pleft
@@ -265,9 +272,15 @@ class GameBackend:
 		elo_change = abs(new_elo_pleft - elo_pleft)
 		self.elo_change = round(elo_change)
 
-		await update_user_elo(self.player_left.user, new_elo_pleft)
-		if not self.is_bot_game:
-			await update_user_elo(self.player_right.user, new_elo_pright)
+		match self.game_mode:
+			case "classic":
+				await self.update_user_statistic_classic_elo(self.player_left.user, new_elo_pleft)
+				await self.update_user_statistic_classic_elo(self.player_right.user, new_elo_pright)
+			case "rumble":
+				await self.update_user_statistic_rumble_elo(self.player_left.user, new_elo_pleft)
+				await self.update_user_statistic_rumble_elo(self.player_right.user, new_elo_pright)
+			case _:
+				self.logger.error(f"Invalid game mode: {self.game_mode}")
 
 	async def get_color(self, user):
 		color_map = {
@@ -489,3 +502,15 @@ class GameBackend:
 			await self.channel_layer.group_send(str(self.game_id), state)
 		except Exception as e:
 			self.logger.info(f"Error {e}")
+
+	@database_sync_to_async
+	def update_user_statistic_classic_elo(self, user_statistic, elo):
+		from api.models import UserStatistic
+		user_statistic.classic_elo = elo
+		user_statistic.save()
+
+	@database_sync_to_async
+	def update_user_statistic_rumble_elo(self, user_statistic, elo):
+		from api.models import UserStatistic
+		user_statistic.rumble_elo = elo
+		user_statistic.save()
