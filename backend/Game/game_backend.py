@@ -6,7 +6,7 @@ from .normal_game_logic import ClassicGameInstance, GameBounds
 from .rumble_game_logic import RumbleGameInstance, GameBounds
 from channels.db import database_sync_to_async
 from .bot import Bot
-from api.db_utils import finish_game_history, user_update_game, update_user_elo, add_user_wins, add_user_looses, delete_game_history
+from api.db_utils import finish_game_history, user_update_game, update_user_elo, add_user_wins, add_user_looses, delete_game_history, get_user_preference
 from datetime import datetime
 import redis
 from channels.layers import get_channel_layer
