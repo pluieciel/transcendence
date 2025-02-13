@@ -8,6 +8,7 @@ python manage.py migrate
 
 if [ ! -f "$INIT_FLAG" ]; then
 	python manage.py loaddata db_init
+	rm -rf ./avatars/*
 	touch "$INIT_FLAG"
 fi
 
