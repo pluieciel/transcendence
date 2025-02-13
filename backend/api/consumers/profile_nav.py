@@ -18,6 +18,7 @@ class ProfileNavConsumer(AsyncHttpConsumer):
 				'success': True,
 				'username': user.username,
 				'display_name': user.display_name,
+				'is_42_avatar_used': user.is_42_avatar_used,
 				'avatar_url': get_user_avatar_url(user, self.scope['headers']),
 				'is_admin': user.is_admin,
 			}

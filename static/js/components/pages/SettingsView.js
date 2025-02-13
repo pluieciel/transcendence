@@ -217,8 +217,13 @@ export default class SettingsView {
 				navUsername.innerHTML = data.username;
 				navDisplayName.style.display = data.display_name ? "block" : "none";
 				navDisplayName.innerHTML = data.display_name;
-				const cacheBuster = `?t=${new Date().getTime()}`;
-				navAvatar.setAttribute("src", data.avatar_url + cacheBuster);
+				if (!data.is_42_avatar_used)
+				{
+					const cacheBuster = `?t=${new Date().getTime()}`;
+					navAvatar.setAttribute("src", data.avatar_url + cacheBuster);
+				}
+				else
+					navAvatar.setAttribute("src", data.avatar_url);
 			} else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
 				window.app.logout();
 				window.app.router.navigateTo("/login");

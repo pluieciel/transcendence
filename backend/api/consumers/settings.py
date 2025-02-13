@@ -76,7 +76,7 @@ class SetSettingsConsumer(AsyncHttpConsumer):
 				img_byte_arr = io.BytesIO()
 				image.save(img_byte_arr, format=image.format or 'PNG')
 				img_byte_arr.seek(0)
-				avatar.file = img_byte_arr 
+				avatar.file = img_byte_arr
 				await self.update_avatar(user, avatar)
 				settings_updated = True
 
