@@ -35,7 +35,6 @@ class App {
 			isLoggedIn: sessionStorage.getItem("isLoggedIn") === "true",
 			username: sessionStorage.getItem("username"),
 		};
-		this.avatarCache = {};
 		this.settings = { fetched: false };
 		this.ingame = sessionStorage.getItem("ingame") === "true";
 		window.app = this;
