@@ -204,7 +204,7 @@ class App {
 											<div id="nav-username">${data.username}</div>
 											<div id="nav-display-name" style="display: ${data.display_name ? 'block' : 'none'}">${data.display_name}</div>
 										</div>
-										<img src="${data.avatar_url}" id="nav-avatar" class="avatar">
+										${data.is_42_avatar_used ? `<img src="${data.avatar_url}" id="nav-avatar" class="avatar">` : `<img src="${data.avatar_url}?t=${new Date().getTime()}" id="nav-avatar" class="avatar">`}
 									</div>
 								</li>
 								<li style="display: ${data.is_admin ? 'block' : 'none'}">
