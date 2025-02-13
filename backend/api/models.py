@@ -53,7 +53,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     tourn_win = models.IntegerField(default=0)
     tourn_joined = models.IntegerField(default=0)
     color = models.IntegerField(default=1)
-    quality = models.IntegerField(default=1)
+    quality = models.IntegerField(default=2)
     friends = models.ManyToManyField('self', symmetrical=False, related_name='friend_set', blank=True)
     invites = models.ManyToManyField('self', symmetrical=False, related_name='invite_set', blank=True)
 
