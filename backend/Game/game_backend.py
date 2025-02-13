@@ -269,7 +269,7 @@ class GameBackend:
 		if not self.is_bot_game:
 			await update_user_elo(self.player_right.user, new_elo_pright)
 
-	def get_color(self, user):
+	async def get_color(self, user):
 		color_map = {
 			0: '#447AFF',
 			1: "#00BDD1",
@@ -283,7 +283,8 @@ class GameBackend:
 			9: "#D5DA2B"
 		}
 		try:
-			color = color_map.get(user.color)
+			user_preference = await get_user_preference(user)
+			color = color_map.get(user_preference.color)
 			if (color is None):
 				return "#00BDD1"
 			else:
@@ -297,9 +298,9 @@ class GameBackend:
 		if self.game.scored:
 			if self.game.scorer is not None:
 				if (self.game.scorer == "LEFT"):
-					color = self.get_color(self.player_left.user)
+					color = await self.get_color(self.player_left.user)
 				elif self.game.scorer == "RIGHT":
-					color = self.get_color(self.player_right.user)
+					color = await self.get_color(self.player_right.user)
 				else:
 					self.logger.info(f"color defaulted to grey cause winner is not left or right")
 					color = '#676a6e'
@@ -316,8 +317,8 @@ class GameBackend:
 			})
 			self.game.scored = False
 		if self.game.ended:
-			if (self.game.winner.avatar42):
-				avatar = self.game.winner.avatar42
+			if (self.game.winner.avatar_42):
+				avatar = self.game.winner.avatar_42
 			elif (self.game.winner.avatar):
 				avatar = self.game.winner.avatar.url
 			else:
@@ -338,9 +339,9 @@ class GameBackend:
 		})
 		if self.game.ball.lastHitter is not None:
 			if (self.game.ball.lastHitter == "LEFT"):
-				color = self.get_color(self.player_left.user)
+				color = await self.get_color(self.player_left.user)
 			elif self.game.ball.lastHitter == "RIGHT":
-				color = self.get_color(self.player_right.user)
+				color = await self.get_color(self.player_right.user)
 			else:
 				color = '#676a6e'
 			events.append({"type": "ball_last_hitter", "color": color})
@@ -371,9 +372,9 @@ class GameBackend:
 		if self.game.scored:
 			if self.game.scorer is not None:
 				if (self.game.scorer == "LEFT"):
-					color = self.get_color(self.player_left.user)
+					color = await self.get_color(self.player_left.user)
 				elif self.game.scorer == "RIGHT":
-					color = self.get_color(self.player_right.user)
+					color = await self.get_color(self.player_right.user)
 				else:
 					self.logger.info(f"color defaulted to grey cause winner is not left or right")
 					color = '#676a6e'
@@ -390,8 +391,8 @@ class GameBackend:
 			})
 			self.game.scored = False
 		if self.game.ended:
-			if (self.game.winner.avatar42):
-				avatar = self.game.winner.avatar42
+			if (self.game.winner.avatar_42):
+				avatar = self.game.winner.avatar_42
 			elif (self.game.winner.avatar):
 				avatar = self.game.winner.avatar.url
 			else:
@@ -425,9 +426,9 @@ class GameBackend:
 			self.game.announceEvent = False
 		if self.game.ball.lastHitter is not None:
 			if (self.game.ball.lastHitter == "LEFT"):
-				color = self.get_color(self.player_left.user)
+				color = await self.get_color(self.player_left.user)
 			elif self.game.ball.lastHitter == "RIGHT":
-				color = self.get_color(self.player_right.user)
+				color = await self.get_color(self.player_right.user)
 			else:
 				color = '#676a6e'
 			events.append({"type": "ball_last_hitter", "color": color})

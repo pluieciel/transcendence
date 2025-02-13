@@ -28,8 +28,8 @@ class ProfileConsumer(AsyncHttpConsumer):
 				'wins': user.wins,
 				'looses': user.looses,
 				'winrate': winrate,
-				'tourn_won': user.tourn_win,
-				'tourn_joined': user.tourn_win, #need to fix this
+				'tourn_won': user.tournament_win,
+				'tournament_participated': user.tournament_win, #need to fix this
 				'display_name': user.display_name,
 			}
 			return await self.send_response(200, json.dumps(response_data).encode(),

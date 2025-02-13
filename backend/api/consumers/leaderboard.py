@@ -49,8 +49,8 @@ class getLeaderboard(AsyncHttpConsumer):
 	@database_sync_to_async
 	def getAvatarForUser(self, user):
 		try:
-			if (user.avatar42):
-				return (user.avatar42)
+			if (user.avatar_42):
+				return (user.avatar_42)
 			elif (user.avatar):
 				return (user.avatar.url)
 			else:

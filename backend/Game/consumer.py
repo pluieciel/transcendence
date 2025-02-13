@@ -9,6 +9,7 @@ import json
 import logging
 from urllib.parse import parse_qs
 from api.utils import jwt_to_user
+from api.db_utils import get_user_preference
 from channels.layers import get_channel_layer
 from datetime import datetime
 from time import sleep
@@ -343,7 +344,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 		except Exception as e:
 			self.logger.info(f"Crashed in update {e}")
 
-	def get_color(self, user):
+	async def get_color(self, user):
 		color_map = {
 			0: '#447AFF',
 			1: "#00BDD1",
@@ -357,7 +358,8 @@ class GameConsumer(AsyncWebsocketConsumer):
 			9: "#D5DA2B"
 		}
 		try:
-			color = color_map.get(user.color)
+			user_preference = await get_user_preference(user)
+			color = color_map.get(user_preference.color)
 			if (color is None):
 				return "#00BDD1" #Cyan
 			else:
@@ -367,18 +369,18 @@ class GameConsumer(AsyncWebsocketConsumer):
 			return "#00BDD1" #Cyan
 
 	async def send_initial_game_state(self, instance):
-		if (instance.player_right.user.avatar42 and instance.player_right.user.is_42_avatar_used):
+		if (instance.player_right.user.avatar_42 and instance.player_right.user.is_42_avatar_used):
 			self.logger.info("Avatar 42 found")
-			avatarRight = instance.player_right.user.avatar42
+			avatarRight = instance.player_right.user.avatar_42
 		elif (instance.player_right.user.avatar):
 			avatarRight = instance.player_right.user.avatar.url
 			self.logger.info("Avatar found")
 		else:
 			avatarRight = '/imgs/default_avatar.png'
 
-		if (instance.player_left.user.avatar42 and instance.player_left.user.is_42_avatar_used):
+		if (instance.player_left.user.avatar_42 and instance.player_left.user.is_42_avatar_used):
 			self.logger.info("Avatar 42 found")
-			avatarLeft = instance.player_left.user.avatar42
+			avatarLeft = instance.player_left.user.avatar_42
 		elif (instance.player_left.user.avatar):
 			avatarLeft = instance.player_left.user.avatar.url
 			self.logger.info("Avatar found")
@@ -416,14 +418,14 @@ class GameConsumer(AsyncWebsocketConsumer):
 							"rank": instance.player_left.user.elo,
 							"score": instance.game.player_left.score,
 							"avatar" : avatarLeft,
-							"color": self.get_color(instance.player_left.user)
+							"color": await self.get_color(instance.player_left.user)
 						},
 						"right": {
 							"name": usernameRight,
 							"rank": instance.player_right.user.elo,
 							"score": instance.game.player_right.score,
 							"avatar" : avatarRight,
-							"color" :self.get_color(instance.player_right.user)
+							"color" : await self.get_color(instance.player_right.user)
 						}
 					}
 				}

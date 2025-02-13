@@ -56,9 +56,9 @@
       username: jlefonde
       display_name: Taiyo
       is_admin: true
-      is_oauth_user: true
+      is_42_user: true
       is_42_avatar_used: true
-      avatar42: https://cdn.intra.42.fr/users/aa8d5641c13c2fbf3d51ae1f9a85fdde/jlefonde.jpg
+      avatar_42: https://cdn.intra.42.fr/users/aa8d5641c13c2fbf3d51ae1f9a85fdde/jlefonde.jpg
       created_at: "2025-01-01T00:00:00Z"
 - model: api.customuser
   pk: 10
@@ -66,9 +66,9 @@
       username: valgrant
       display_name: neutrou
       is_admin: true
-      is_oauth_user: true
+      is_42_user: true
       is_42_avatar_used: true
-      avatar42: https://cdn.intra.42.fr/users/6256bf3b76f8634f1e0df573022b0b72/valgrant.JPG
+      avatar_42: https://cdn.intra.42.fr/users/6256bf3b76f8634f1e0df573022b0b72/valgrant.JPG
       created_at: "2025-01-01T00:00:00Z"
 - model: api.customuser
   pk: 11
@@ -76,9 +76,9 @@
       username: jnunes
       display_name: Siul008
       is_admin: true
-      is_oauth_user: true
+      is_42_user: true
       is_42_avatar_used: true
-      avatar42: https://cdn.intra.42.fr/users/67da051bad2511d2fdfa7edafbd2cc10/jnunes.jpg
+      avatar_42: https://cdn.intra.42.fr/users/67da051bad2511d2fdfa7edafbd2cc10/jnunes.jpg
       created_at: "2025-01-01T00:00:00Z"
 - model: api.customuser
   pk: 12
@@ -86,7 +86,7 @@
       username: yuzhao
       display_name: pluieciel
       is_admin: true
-      is_oauth_user: true
+      is_42_user: true
       is_42_avatar_used: true
-      avatar42: https://cdn.intra.42.fr/users/d8221528b165c21340f94f59f223807f/yuzhao.jpg
+      avatar_42: https://cdn.intra.42.fr/users/d8221528b165c21340f94f59f223807f/yuzhao.jpg
       created_at: "2025-01-01T00:00:00Z"

@@ -73,3 +73,8 @@ def delete_game_history(game_id):
 		game.delete()
 	else:
 		logging.getLogger('game').error(f"Game {game_id} not found couldn't delete")
+
+@database_sync_to_async
+def get_user_preference(user):
+	from .models import UserPreference
+	return UserPreference.objects.get(user=user)

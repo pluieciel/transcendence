@@ -166,7 +166,7 @@ export default class ProfileView {
 					ratio.innerHTML = "Go play!";
 				else
 					ratio.innerHTML = "Ratio: " + win + "/" + loose;
-				tourn.innerHTML = "Trophies: " + data["tourn_won"] + "<br>Tournaments played: " + data["tourn_joined"];
+				tourn.innerHTML = "Trophies: " + data["tourn_won"] + "<br>Tournaments played: " + data["tournament_participated"];
 				name.innerHTML = this.username; 
 				if (data['display']) {
 					let toInsert = " [" + data['display'] + "]";
