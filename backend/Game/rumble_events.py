@@ -231,7 +231,7 @@ class NoStoppingEvent(GameEvent):
 class KillerBallEvent(GameEvent):
 	def __init__(self, game: 'RumbleGameInstance'):
 		self.game = game
-		self.icon = "fa-solid fa-skull"
+		self.icon = "fa-solid fa-skull-crossbones"
 		self.action = 'none'
 		self.name = "Killer Ball"
 		self.description = "Do not get hit by the ball !"
@@ -273,6 +273,7 @@ class VisibleTrajectoryEvent(GameEvent):
 		self.icon = "fa-solid fa-arrow-trend-up"
 		self.name = "Visible Trajectory"
 		self.description = "You can now see the ball trajectory, but it goes faster !"
+		self.action = 'none'
 		self.ball_accel_mult = 1.3
 		self.ball_basespeed_mult = 1
 		self.player_speed_mult = 1.3
