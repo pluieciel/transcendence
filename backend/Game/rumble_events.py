@@ -192,6 +192,7 @@ class ShrinkingPaddleEvent(GameEvent):
 		self.icon = "fa-solid fa-arrows-left-right-to-line"
 		self.name = "Shrinking Paddles"
 		self.description = "Each hit will shrink your paddle !"
+		self.action = 'none'
 		self.ball_accel_mult = 0.8
 		self.ball_basespeed_mult = 0.8
 		self.ball_maxspeed_mult = 1
