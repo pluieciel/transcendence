@@ -190,7 +190,8 @@ class GameConsumer(AsyncWebsocketConsumer):
 			if not await self.is_valid_invite(await self.get_user(sender), self.user):
 				self.logger.info(f"Invalid invitation from {sender} to {self.user.username}")
 				return # invalid invitation
-			game_db = await game_manager.create_game_history(user, player_b=await self.get_user(sender), game_category='Invite')
+			mode = 'classic'
+			game_db = await game_manager.create_game_history(user, player_b=await self.get_user(sender), game_category='Invite', game_mode=mode)
 			self.game = GameBackend(game_db.id, 0, game_manager, False, mode) #TODO Ranked mode
 			game_manager.games[game_db.id] = self.game
 			self.game.channel_layer = self.channel_layer
@@ -280,10 +281,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 			await database_sync_to_async(user.refresh_from_db)() # refresh user object
 			self.logger.debug(game_manager.games)
 			self.game = game_manager.get_player_current_game(user)
-			if (self.game):
-				self.logger.info("User found in a game, disconnecting the old session")
-			else:
-				self.game = await game_manager.get_game(user, bot, mode)
+			self.game = await game_manager.get_game(user, bot, mode)
 			self.game.channel_layer = self.channel_layer
 			self.game.assign_player(user, self.channel_name)
 			await user_update_game(self.user, isplaying=True, game_id=self.game.game_id)
@@ -398,7 +396,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 			usernameRight = instance.player_right.user.username
 
 		player_left_statistic = await get_user_statistic(instance.player_left.user)
-		player_right_statistic = await get_user_statistic(instance.player_right.user) if instance.is_ranked else None
+		player_right_statistic = await get_user_statistic(instance.player_right.user) if instance.bot == 0 else None
 
 		if (instance.game_mode == "classic"):
 			player_left_elo = player_left_statistic.classic_elo
