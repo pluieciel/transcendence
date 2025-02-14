@@ -130,9 +130,9 @@
   pk: 1
   fields:
     name: 'Speed Of Light'
-    description: 'Have the ball reach 100 m/s in Rumble'
+    description: 'Have the ball reach 60 m/s in Rumble'
     color_unlocked: 8
-    unlock_value: 1
+    unlock_value: 60
 - model: api.achievement
   pk: 2
   fields:
@@ -601,7 +601,7 @@
     achievement: 1
     date_earned: "2025-01-01T00:00:00Z"
     unlocked: true
-    progression: 100
+    progression: 60
 
 - model: api.userachievement
   pk: 50
@@ -663,7 +663,7 @@
     user: 5
     achievement: 8
     date_earned: "2025-01-01T00:00:00Z"
-    unlocked: true
+    unlocked: false
     progression: 1
 
 - model: api.userachievement
