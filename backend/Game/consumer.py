@@ -13,7 +13,7 @@ from api.db_utils import get_user_preference
 from channels.layers import get_channel_layer
 from datetime import datetime
 from time import sleep
-from api.db_utils import user_update_game, delete_game_history, get_user_statistic
+from api.db_utils import user_update_game, delete_game_history, get_user_statistic, get_user_by_name
 
 class GameManager:
 	def __init__(self):
@@ -149,6 +149,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 		from api.models import is_valid_invite
 		self.is_valid_invite = is_valid_invite
 		self.game = None
+		self.spectator = False
 		self.logger = logging.getLogger('game')
 		self.logger.info(f"Websocket connection made with channel name {self.channel_name}")
 
@@ -158,8 +159,10 @@ class GameConsumer(AsyncWebsocketConsumer):
 		sender = query_params.get("sender", [None])[0]
 		mode = query_params.get("mode", [None])[0]
 		recipient = query_params.get("recipient", [None])[0]
+		watch = query_params.get("watch", [None])[0]
 		#for tournament
 		round = query_params.get("round", [None])[0]
+
 
 		user = await jwt_to_user(self.scope['headers'])
 		self.user = user
@@ -190,7 +193,6 @@ class GameConsumer(AsyncWebsocketConsumer):
 			if not await self.is_valid_invite(await self.get_user(sender), self.user):
 				self.logger.info(f"Invalid invitation from {sender} to {self.user.username}")
 				return # invalid invitation
-			mode = 'classic'
 			game_db = await game_manager.create_game_history(user, player_b=await self.get_user(sender), game_category='Invite', game_mode=mode)
 			self.game = GameBackend(game_db.id, 0, game_manager, False, mode) #TODO Ranked mode
 			game_manager.games[game_db.id] = self.game
@@ -215,6 +217,23 @@ class GameConsumer(AsyncWebsocketConsumer):
 				}
 			)
 			return
+		elif watch:
+			user=await get_user_by_name(watch)
+			game_id = user.current_game_id
+			if (game_id == -1):
+				return
+			self.game = game_manager.games.get(int(game_id))
+			if not self.game:
+				await self.send(text_data=json.dumps({
+					"type": "handle_error",
+					"message": "Game not found."
+				}))
+				return
+			self.logger.info(f"Spectator connected to game {game_id}")
+			self.spectator = True
+			await self.accept()
+			await self.channel_layer.group_add(str(self.game.game_id), self.channel_name)
+			await self.send_initial_game_state(self.game)
 
 		elif recipient: # invitation: WS msg from A, A invite B, recipient is B
 			game_db = await game_manager.get_invite_game(await self.get_user(recipient), user)
@@ -318,6 +337,10 @@ class GameConsumer(AsyncWebsocketConsumer):
 
 
 	async def disconnect(self, close_code):
+		if (self.spectator):
+			self.logger.info(f"Spectator disconnected")
+			await self.channel_layer.group_discard(str(self.game.game_id), self.channel_name)
+			return
 		if (self.game and self.game.game_id):
 			if (self.game.is_full()):
 				await self.channel_layer.group_discard(str(self.game.game_id), self.channel_name)
