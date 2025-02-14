@@ -792,7 +792,7 @@ hr::after {
 
 #profile-card h5 {
 	font-size: 1.1rem;
-	margin-bottom: 1.5rem;
+	margin-bottom: 1rem;
 }
 
 #profile-card ul {
@@ -857,9 +857,46 @@ hr::after {
 }
 
 #profile-card-tournaments {
+	display: flex;
+	flex-direction: column;
 	width: 100%;
 	height: 26%;
 	margin-bottom: 1rem;
+	overflow: hidden;
+}
+
+#profile-card-tournaments-stats {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	flex-grow: 1;
+}
+
+#profile-card-tournaments-stats ul {
+	display: flex;
+	justify-content: space-evenly;
+	align-items: center;
+	width: 100%;
+	margin: 0;
+	padding: 0;
+}
+
+#profile-card-tournaments-stats li {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	text-align: center;
+}
+
+.stat-value {
+	font-weight: bold;
+	margin-bottom: 0.5rem;
+	font-size: 1.2rem;
+}
+
+.stat-label {
+	opacity: 0.5;
+	font-weight: bold;
 }
 
 #profile-card-achievements {
