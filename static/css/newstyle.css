@@ -774,6 +774,105 @@ hr::after {
 }
 
 /* ******************************** */
+/*                Profile           */
+/* ******************************** */
+
+#profile-card {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	justify-content: center;
+	width: 70%;
+	height: 100%;
+}
+
+#profile-card-header {
+	margin-bottom: 1rem;
+}
+
+#profile-card h5 {
+	font-size: 1.1rem;
+	margin-bottom: 1.5rem;
+}
+
+#profile-card ul {
+	display: flex;
+	align-items: center;
+	justify-content: space-evenly;
+	margin: 0;
+	padding: 0;
+}
+
+#profile-card li {
+	display: inline;
+	list-style: none;
+	height: 100%;
+}
+
+#profile-card li:not(:first-child) {
+	margin-left: 1rem;
+}
+
+.stat-value {
+	font-weight: bold;
+	text-align: center;
+}
+
+.stat-label {
+	opacity: 0.5;
+	font-weight: bold;
+}
+
+.profile-card-content {
+	background-color: var(--primary-color);
+	color: var(--secondary-color);
+	border-radius: 0.3rem;
+	padding: 1rem;
+}
+
+#profile-card-header {
+	margin-top: 2.5rem;
+	width: 100%;
+	height: 25%;
+	margin-bottom: 1rem;
+}
+
+#profile-card-body {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: 100%;
+	gap: 1rem;
+}
+
+#profile-card-body-left {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	justify-content: center;
+	width: 100%;
+	height: 100%;
+}
+
+#profile-card-tournaments {
+	width: 100%;
+	height: 26%;
+	margin-bottom: 1rem;
+}
+
+#profile-card-achievements {
+	width: 100%;
+	height: 74%;
+}
+
+#profile-card-game-history {
+	width: 100%;
+	height: 100%;
+}
+
+/* ******************************** */
 /*                Credits           */
 /* ******************************** */
 
