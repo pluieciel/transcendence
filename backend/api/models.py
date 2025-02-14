@@ -9,15 +9,18 @@ from channels.db import database_sync_to_async
 
 class UserManager(BaseUserManager):
     def _create_default_achievements(self, user):
-        achievements = Achievement.objects.all()
-        for achievement in achievements:
-            UserAchievement.objects.create(
-                user=user,
-                achievement=achievement,
-                unlocked=False,
-                progression=0,
-                date_earned="2025-01-01T00:00:00Z"
-            )
+        pass
+    #    achievements = Achievement.objects.all()
+    #    for achievement in achievements:
+    #         UserAchievement.objects.get_or_create(
+    #             user=user,
+    #             achievement=achievement,
+    #             defaults={
+    #                 'unlocked': False,
+    #                 'progression': 0,
+    #                 'date_earned': "2025-01-01T00:00:00Z"
+    #             }
+    #         )
 
     def create_user(self, username, password=None, avatar=None):
         if not username:
@@ -87,11 +90,11 @@ class User(AbstractBaseUser, PermissionsMixin):
         achievement = Achievement.objects.get(name=achievement_name)
         UserAchievement.objects.create(user=self, achievement=achievement)
 
-    def get_unlocked_achievements(self):
-        return self.user_achievements.filter(unlocked=True)
+    def get_achievements(self):
+        return self.user_achievements
 
     def is_color_unlocked(self, color):
-        default_colors = ['#00AD06', '#00BDD1', '#3E27F8', '#6400C4']
+        default_colors = [0]
         if color in default_colors:
             return True
         return self.user_achievements.filter(
@@ -100,7 +103,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         ).exists()
 
     def get_unlocked_colors(self):
-        default_colors = ['#00AD06', '#00BDD1', '#3E27F8', '#6400C4']
+        default_colors = [0]
         user_unlocked_colors = self.user_achievements.filter(
             achievement__color_unlocked__isnull=False,
             unlocked=True
@@ -185,8 +188,8 @@ class Achievement(models.Model):
         return self.name
 
 class UserAchievement(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='achievements')
-    achievement = models.ForeignKey(Achievement, on_delete=models.CASCADE, related_name='achievements')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_achievements')
+    achievement = models.ForeignKey(Achievement, on_delete=models.CASCADE)
     date_earned = models.DateTimeField(auto_now_add=True)
     unlocked = models.BooleanField(default = False)
     progression = models.IntegerField(default = False)

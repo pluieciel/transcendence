@@ -66,3 +66,19 @@ def get_user_preference(user):
 def get_user_statistic(user):
 	from .models import UserStatistic
 	return UserStatistic.objects.get(user=user)
+
+@database_sync_to_async
+def get_achievements(user):
+    achievements = []
+    for user_achievement in user.user_achievements.all():
+        achievements.append({
+            'id': user_achievement.achievement.id,
+            'name': user_achievement.achievement.name,
+            'description': user_achievement.achievement.description,
+            'color_unlocked': user_achievement.achievement.color_unlocked,
+            'unlock_value': user_achievement.achievement.unlock_value,
+            'unlocked': user_achievement.unlocked,
+            'progression': user_achievement.progression,
+            'date_earned': user_achievement.date_earned.isoformat() if user_achievement.unlocked else None
+        })
+    return achievements
