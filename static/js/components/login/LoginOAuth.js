@@ -32,7 +32,7 @@ class LoginOAuth {
         const code = this.getQueryParameter("code");
 
         if (!code) {
-            this.showError("Invalid authentication response.");
+            // TODO: add error message
             return;
         }
 
@@ -50,9 +50,10 @@ class LoginOAuth {
             if (data.success)
 				window.app.login(data);
             else
-                this.showError(data.message);
+                // TODO: add error message
+            ;
         } catch (error) {
-            console.error("An error occurred during authentication: " + error);
+            console.error("An error occurred: " + error);
         }
     }
 

@@ -29,23 +29,6 @@ def update_is_2fa_enabled(user, is_2fa_enabled):
 	user.save()
 
 @database_sync_to_async
-def update_user_elo(user, elo):
-	user.elo = elo
-	user.save()
-
-@database_sync_to_async
-def add_user_wins(user):
-	user.wins += 1
-	logging.getLogger('game').info(f"User {user.username} wins: {user.wins}, loses : {user.looses}")
-	user.save()
-
-@database_sync_to_async
-def add_user_looses(user):
-	user.looses += 1
-	logging.getLogger('game').info(f"User {user.username} wins: {user.wins}, loses : {user.looses}")
-	user.save()
-
-@database_sync_to_async
 def update_recovery_codes_generated(user, recovery_codes_generated):
 	user.recovery_codes_generated = recovery_codes_generated
 	user.save()
@@ -73,3 +56,13 @@ def delete_game_history(game_id):
 		game.delete()
 	else:
 		logging.getLogger('game').error(f"Game {game_id} not found couldn't delete")
+
+@database_sync_to_async
+def get_user_preference(user):
+	from .models import UserPreference
+	return UserPreference.objects.get(user=user)
+
+@database_sync_to_async
+def get_user_statistic(user):
+	from .models import UserStatistic
+	return UserStatistic.objects.get(user=user)

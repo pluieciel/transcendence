@@ -31,7 +31,7 @@ from api.consumers.avatar import AvatarConsumer
 from api.consumers.login import LoginConsumer
 from api.consumers.signup import SignupConsumer
 from api.consumers.recaptcha import RecaptchaConsumer
-from api.consumers.preferences import getPreferences, setPreferences
+from api.consumers.customize import GetCustomizeConsumer, SetCustomizeConsumer
 from api.consumers.delete_user import DeleteUserConsumer
 from api.consumers.admin import AdminConsumer
 from django.contrib import admin
@@ -61,8 +61,8 @@ http_patterns = [
 
     path('api/settings/', GetSettingsConsumer.as_asgi()),
     path('api/settings/update/', SetSettingsConsumer.as_asgi()),
-	path('api/settings/preferences/', getPreferences.as_asgi()),
-	path('api/settings/preferences/update/', setPreferences.as_asgi()),
+	path('api/settings/customize/', GetCustomizeConsumer.as_asgi()),
+	path('api/settings/customize/update/', SetCustomizeConsumer.as_asgi()),
 
     path('api/settings/2fa/qr/generate/', Generate2FAQRConsumer.as_asgi()),
     path('api/settings/2fa/recovery/generate/', Generate2FARecoveryConsumer.as_asgi()),

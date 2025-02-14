@@ -158,7 +158,7 @@ class SetSettingsConsumer(AsyncHttpConsumer):
 	def update_avatar(self, user, avatar):
 		if user.avatar:
 			user.avatar.delete(save=False)
-		if user.is_oauth_user:
+		if user.is_42_user:
 			user.is_42_avatar_used = False
 		user.avatar = avatar
 		user.save()

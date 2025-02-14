@@ -67,7 +67,6 @@ class LoginConsumer(AsyncHttpConsumer):
 				response_data = {
 					'success': True,
 					'message': 'Login successful',
-					'color' : user.color,
 					'username': username,
 				}
 			else:
