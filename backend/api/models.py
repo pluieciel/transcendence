@@ -191,8 +191,11 @@ class UserAchievement(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_achievements')
     achievement = models.ForeignKey(Achievement, on_delete=models.CASCADE)
     date_earned = models.DateTimeField(auto_now_add=True)
-    unlocked = models.BooleanField(default = False)
-    progression = models.IntegerField(default = False)
+    unlocked = models.BooleanField(default=False)
+    progression = models.IntegerField(default=0)
+
+    class Meta:
+        unique_together = ('user', 'achievement')
 
     def __str__(self):
         return f"{self.user.username} - {self.achievement.name}"

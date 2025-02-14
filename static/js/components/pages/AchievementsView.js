@@ -28,11 +28,27 @@ export default class AchievementsView {
 			return [];
 		}
 	}
+
+		
+
 	
 	async render() {
 		await window.app.renderHeader(this.container, "achievements");
 		const achievements = await this.getAchievements(this.username);
-		
+
+		let colorArray = {
+			0: 'Blue',
+			1: 'Cyan',
+			2: 'Green',
+			3: 'Orange',
+			4: 'Pink',
+			5: 'Purple',
+			6: 'Red',
+			7: 'Soft Green',
+			8: 'White',
+			9: 'Yellow',
+		};
+
 		let achievementsHTML = '';
 		achievements.forEach(achievement => {
 			achievementsHTML += `
@@ -43,8 +59,8 @@ export default class AchievementsView {
 						<div class="cheevo-row">
 							<div class="cheevo-body">${achievement.description}</div>
 							${achievement.color_unlocked ? `
-								<div class="cheevo-reward" style="background-color:#${achievement.color_unlocked.toString(16).padStart(6, '0')}">
-									<span class="tooltip">Reward:<br>Color #${achievement.color_unlocked.toString(16).padStart(6, '0')}</span>
+								<div class="cheevo-reward" style="background-color:${window.app.getColor(achievement.color_unlocked)}">
+									<span class="tooltip">Reward:<br> <i class="fa-solid fa-palette"></i> ${colorArray[achievement.color_unlocked]}</span>
 								</div>
 							` : ''}
 						</div>
