@@ -94,7 +94,7 @@ def sha256_hash(data):
 
 def get_user_avatar_url(user, headers):
 	if (user.is_42_avatar_used):
-		return user.avatar42
+		return user.avatar_42
 	host = next(value.decode('utf-8') for key, value in headers if key == b'x-forwarded-host')
 	port = next(value.decode('utf-8') for key, value in headers if key == b'x-forwarded-port')
 	url = f"https://{host}:{port}"

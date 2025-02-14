@@ -18,7 +18,7 @@ class BotUser:
         self.color = color
         self.id = user_id
         self.avatar = BotAvatar("/imgs/bot.png")
-        self.avatar42 = None
+        self.avatar_42 = None
 
 
 class Bot:

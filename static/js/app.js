@@ -76,9 +76,9 @@ class App {
 		}
 	}
 
-	async getPreferences() {
+	async GetCustomizeConsumer() {
 		try {
-			const response = await fetch(`/api/settings/preferences/`);
+			const response = await fetch(`/api/settings/customize/`);
 
 			const data = await response.json();
 			if (data.success)
@@ -87,10 +87,9 @@ class App {
 				this.settings.quality = data['quality'];
 				this.settings.fetched = true;
 				this.setColor(this.settings.color);
-				}
-				else {
-					// TODO: add error msg
-				}
+			} else {
+				// TODO: add error msg
+			}
 		} catch (error) {
 			console.error("An error occurred: " + error);
 		}
@@ -169,32 +168,32 @@ class App {
 						<nav>
 							<ul>
 								<li>
-									<button id="play-button" ${disableBtn === "play" ? 'disabled' : ''}>
+									<button id="play-button" class="nav-button" ${disableBtn === "play" ? 'disabled' : ''}>
 										<i class="fa-solid fa-gamepad fa-xl"></i>Play
 									</button>
 								</li>
 								<li>
-									<button id="tournament-button" ${disableBtn === "tournament" ? 'disabled' : ''}>
+									<button id="tournament-button" class="nav-button" ${disableBtn === "tournament" ? 'disabled' : ''}>
 										<i class="fa-solid fa-crown fa-xl"></i>Tournament
 									</button>
 								</li>
 								<li>
-									<button id="leaderboard-button" ${disableBtn === "leaderboard" ? 'disabled' : ''}>
+									<button id="leaderboard-button" class="nav-button" ${disableBtn === "leaderboard" ? 'disabled' : ''}>
 										<i class="fa-solid fa-medal fa-xl"></i>Leaderboard
 									</button>
 								</li>
 								<li>
-									<button id="achievements-button" ${disableBtn === "achievements" ? 'disabled' : ''}>
+									<button id="achievements-button" class="nav-button" ${disableBtn === "achievements" ? 'disabled' : ''}>
 										<i class="fa-solid fa-trophy fa-xl"></i>Achievements
 									</button>
 								</li>
 								<li>
-									<button id="customize-button" ${disableBtn === "customize" ? 'disabled' : ''}>
+									<button id="customize-button" class="nav-button" ${disableBtn === "customize" ? 'disabled' : ''}>
 										<i class="fa-solid fa-palette fa-xl"></i>Customize
 									</button>
 								</li>
 								<li>
-									<button id="profile-button" ${disableBtn === "profile" ? 'disabled' : ''}>
+									<button id="profile-button" class="nav-button" ${disableBtn === "profile" ? 'disabled' : ''}>
 										<i class="fa-solid fa-user fa-xl"></i>Profile
 									</button>
 								</li>
@@ -208,17 +207,17 @@ class App {
 									</div>
 								</li>
 								<li style="display: ${data.is_admin ? 'block' : 'none'}">
-								<button id="admin-button" ${disableBtn === "admin" ? 'disabled' : ''}>
-								<i class="fa-solid fa-user-tie fa-xl"></i>Admin
-								</button>
+									<button id="admin-button" class="nav-button" ${disableBtn === "admin" ? 'disabled' : ''}>
+										<i class="fa-solid fa-user-tie fa-xl"></i>Admin
+									</button>
 								</li>
 								<li>
-									<button id="settings-button" ${disableBtn === "settings" ? 'disabled' : ''}>
+									<button id="settings-button" class="nav-button" ${disableBtn === "settings" ? 'disabled' : ''}>
 										<i class="fa-solid fa-gear fa-xl"></i>Settings
 									</button>
 								</li>
 								<li>
-									<button id="logout-button">
+									<button id="logout-button" class="nav-button">
 										<i class="fa-solid fa-right-from-bracket fa-xl"></i>Log Out
 									</button>
 								</li>
@@ -302,7 +301,7 @@ class App {
 
 	async getSettings() {
 		if (!window.app.settings["fetched"]) 
-			await window.app.getPreferences();
+			await window.app.GetCustomizeConsumer();
 	}
 
 	login(data) {
@@ -310,7 +309,7 @@ class App {
 		this.state.username = data.username;
 		sessionStorage.setItem("isLoggedIn", "true");
 		sessionStorage.setItem("username", data.username);
-		this.getPreferences();
+		this.GetCustomizeConsumer();
 		this.router.navigateTo("/play");
 	}
 

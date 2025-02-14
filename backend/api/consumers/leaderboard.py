@@ -21,11 +21,12 @@ class getLeaderboard(AsyncHttpConsumer):
 				else:
 					user['winrate'] = 'No games'
 
-			sortedUsers = sorted(users, key=itemgetter('elo'), reverse=True)
+			# TODO: fix sort
+			#sortedUsers = sorted(users, key=itemgetter('elo'), reverse=True)
 
 			response_data = {
 				'success': True,
-				'users': sortedUsers,
+				'users': users,
 			}
 			return await self.send_response(200, json.dumps(response_data).encode(),
 				headers=[(b"Content-Type", b"application/json")])
@@ -49,8 +50,8 @@ class getLeaderboard(AsyncHttpConsumer):
 	@database_sync_to_async
 	def getAvatarForUser(self, user):
 		try:
-			if (user.avatar42):
-				return (user.avatar42)
+			if (user.avatar_42):
+				return (user.avatar_42)
 			elif (user.avatar):
 				return (user.avatar.url)
 			else:

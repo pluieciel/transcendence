@@ -1,9 +1,10 @@
-import {checkAvatarFile} from "../utils/settingsUtils.js"
+import {checkAvatarFile, handleAvatarChange, refreshInputFields} from "../utils/settingsUtils.js"
 
 export default class SettingsView {
 	constructor(container) {
 		this.container = container;
 		this.username = window.app.state.username;
+		this.file = null;
 		this.init();
 	}
 
@@ -123,18 +124,11 @@ export default class SettingsView {
 
 	addSettingsFormEventListeners() {
 		const form = document.getElementById('settings-form');
-		const avatar = document.getElementById('upload-avatar');
 		const avatarInput = document.getElementById('avatar-input');
-		let file = null;
 
-		const handleAvatarChange = (event) => {
-			file = event.target.files[0];
-			if (file) {
-				avatar.textContent = "Avatar selected: " + file.name;
-			}
-		};
-
-		avatarInput.addEventListener('change', handleAvatarChange);
+		avatarInput.addEventListener('change', (e) => {
+			this.file = handleAvatarChange(e, this.file);
+		});
 
 		form.addEventListener('submit', async (e) => {
 			e.preventDefault();
@@ -147,6 +141,10 @@ export default class SettingsView {
 
 			if (password !== confirmPassword) {
 				window.app.showErrorMsg('#input-message', 'Passwords do not match');
+
+				this.refreshInputFields();
+				document.getElementById('password-input').required = false;
+				document.getElementById('confirm-password-input').required = false;
 				return;
 			}
 
@@ -155,8 +153,8 @@ export default class SettingsView {
 			formData.append('password', password);
 			formData.append('confirm_password', confirmPassword);
 
-			if (file) {
-				const modifiedFile = checkAvatarFile(file, this.username);
+			if (this.file) {
+				const modifiedFile = checkAvatarFile(this.file, this.username);
 				if (!modifiedFile)
 					return;
 				formData.append('avatar', modifiedFile);
@@ -177,20 +175,9 @@ export default class SettingsView {
 					{
 						window.app.showSuccessMsg('#input-message', data.message);
 					
-						const passwordInput = document.getElementById('password-input');
-						const confirmPasswordInput = document.getElementById('confirm-password-input');
-						passwordInput.value = '';
-						confirmPasswordInput.value = '';
-						
-						file = null;
-						avatar.innerHTML = `
-							<label for="avatar-input">
-								<i class="fa-solid fa-arrow-up-from-bracket"></i> Upload Avatar
-							</label>
-							<input type="file" id="avatar-input" accept="image/*" hidden>
-						`;
-						const newAvatarInput = document.getElementById('avatar-input');
-						newAvatarInput.addEventListener('change', handleAvatarChange);;
+						this.refreshInputFields();
+						document.getElementById('password-input').required = false;
+						document.getElementById('confirm-password-input').required = false;
 						await this.refreshNavProvile();
 					}
 				} else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
@@ -198,11 +185,22 @@ export default class SettingsView {
 					window.app.router.navigateTo("/login");
 				} else {
 					window.app.showErrorMsg('#input-message', data.message);
+
+					this.refreshInputFields();
+					document.getElementById('password-input').required = false;
+					document.getElementById('confirm-password-input').required = false;
 				}
 			} catch (error) {
 				console.error("An error occurred: " + error);
 			}
 		});
+	}
+
+	refreshInputFields() {
+		refreshInputFields((e) => {
+			this.file = handleAvatarChange(e, this.file);
+		});
+		this.file = null;
 	}
 
 	async refreshNavProvile() {
