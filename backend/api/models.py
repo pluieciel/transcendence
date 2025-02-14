@@ -8,6 +8,17 @@ from channels.db import database_sync_to_async
 ######################## USER ###########################
 
 class UserManager(BaseUserManager):
+    def _create_default_achievements(self, user):
+        achievements = Achievement.objects.all()
+        for achievement in achievements:
+            UserAchievement.objects.create(
+                user=user,
+                achievement=achievement,
+                unlocked=False,
+                progression=0,
+                date_earned="2025-01-01T00:00:00Z"
+            )
+
     def create_user(self, username, password=None, avatar=None):
         if not username:
             raise ValueError('Users must have a username')
@@ -17,6 +28,7 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         UserPreference.objects.create(user=user)
         UserStatistic.objects.create(user=user)
+        self._create_default_achievements(user)
         return user
 
     def	create_user_oauth(self, username, avatarUrl):
@@ -26,6 +38,7 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         UserPreference.objects.create(user=user)
         UserStatistic.objects.create(user=user)
+        self._create_default_achievements(user)
         return user
 
     def create_superuser(self, username, password=None):
@@ -75,17 +88,23 @@ class User(AbstractBaseUser, PermissionsMixin):
         UserAchievement.objects.create(user=self, achievement=achievement)
 
     def get_unlocked_achievements(self):
-        return self.user_achievements.all()
+        return self.user_achievements.filter(unlocked=True)
 
     def is_color_unlocked(self, color):
         default_colors = ['#00AD06', '#00BDD1', '#3E27F8', '#6400C4']
         if color in default_colors:
             return True
-        return self.user_achievements.filter(achievement__color_unlocked=color).exists()
+        return self.user_achievements.filter(
+            achievement__color_unlocked=color,
+            unlocked=True
+        ).exists()
 
     def get_unlocked_colors(self):
         default_colors = ['#00AD06', '#00BDD1', '#3E27F8', '#6400C4']
-        user_unlocked_colors = self.user_achievements.filter(achievement__color_unlocked__isnull=False).values_list('achievement__color_unlocked', flat=True)
+        user_unlocked_colors = self.user_achievements.filter(
+            achievement__color_unlocked__isnull=False,
+            unlocked=True
+        ).values_list('achievement__color_unlocked', flat=True)
         return list(set(default_colors).union(user_unlocked_colors))
 
 class UserPreference(models.Model):
@@ -159,7 +178,8 @@ class RecoveryCode(models.Model):
 class Achievement(models.Model):
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField()
-    color_unlocked = models.CharField(max_length=7, null=True, blank=True)
+    color_unlocked = models.IntegerField(null=True)
+    unlock_value = models.IntegerField(default=1)
 
     def __str__(self):
         return self.name
@@ -168,6 +188,8 @@ class UserAchievement(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='achievements')
     achievement = models.ForeignKey(Achievement, on_delete=models.CASCADE, related_name='achievements')
     date_earned = models.DateTimeField(auto_now_add=True)
+    unlocked = models.BooleanField(default = False)
+    progression = models.IntegerField(default = False)
 
     def __str__(self):
         return f"{self.user.username} - {self.achievement.name}"

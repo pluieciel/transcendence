@@ -102,9 +102,9 @@ class KillerBall(BounceMethods):
 
 	async def BouncePaddle(self, ball, paddle_x, paddle_y):
 		if paddle_x < ball.position.x:
-			await self.game.on_score("LEFT")
-		else:  # Left paddle
 			await self.game.on_score("RIGHT")
+		else:  # Left paddle
+			await self.game.on_score("LEFT")
 
 ################### MOVEMENT METHOD ###################
 
