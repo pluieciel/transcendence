@@ -16,13 +16,71 @@ export default class ProfileView {
 			<main>
 				<div id="profile-card" class="card">
 					<div id="profile-card-header" class="profile-card-content">
-						
+						<div id="profile-card-header-left" class="profile-card-content">
+							<h5 id="card-title"><i class="fa-solid fa-star"></i> Classic</h5>
+							<div class="profile-card-stats">
+								<ul>
+									<li>
+										<div class="stat-value">63</div>
+										<div class="stat-label">Total Games</div>
+									</li>
+									<li>
+										<div class="stat-value">41</div>
+										<div class="stat-label">Win</div>
+									</li>
+									<li>
+										<div class="stat-value">65%</div>
+										<div class="stat-label">Winrate</div>
+									</li>
+									<li>
+										<div class="stat-value">1781</div>
+										<div class="stat-label">Elo</div>
+									</li>
+									<li>
+										<div class="stat-value">#3</div>
+										<div class="stat-label">Rank</div>
+									</li>
+								</ul>
+							</div>
+						</div>
+						<div id="profile-card-header-middle">
+							<img src="/imgs/default_avatar.png" id="profile-card-avatar" class="avatar">
+							<div id="profile-card-username">user1</div>
+							<div id="profile-card-display-name">Joris</div>
+						</div>
+						<div id="profile-card-header-right">
+							<h5 id="card-title"><i class="fa-solid fa-bolt"></i> Rumble</h5>
+							<div class="profile-card-stats">
+								<ul>
+									<li>
+										<div class="stat-value">#3</div>
+										<div class="stat-label">Rank</div>
+									</li>
+									<li>
+										<div class="stat-value">1781</div>
+										<div class="stat-label">Elo</div>
+									</li>
+									<li>
+										<div class="stat-value">65%</div>
+										<div class="stat-label">Winrate</div>
+									</li>
+									<li>
+										<div class="stat-value">41</div>
+										<div class="stat-label">Win</div>
+									</li>
+									<li>
+										<div class="stat-value">63</div>
+										<div class="stat-label">Total Games</div>
+									</li>
+								</ul>
+							</div>
+						</div>
 					</div>
 					<div id="profile-card-body">
 						<div id="profile-card-body-left">
 							<div id="profile-card-tournaments" class="profile-card-content">
 								<h5 id="card-title"><i class="fa-solid fa-crown"></i> Tournaments</h5>
-								<div id="profile-card-tournaments-stats">
+								<div class="profile-card-stats">
 									<ul>
 										<li>
 											<div class="stat-value">11</div>
@@ -42,7 +100,7 @@ export default class ProfileView {
 										</li>
 										<li>
 											<div class="stat-value">1</div>
-											<div class="stat-label">Max streak</div>
+											<div class="stat-label">Max Streak</div>
 										</li>
 									</ul>
 								</div>

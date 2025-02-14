@@ -784,6 +784,7 @@ hr::after {
 	justify-content: center;
 	width: 70%;
 	height: 100%;
+	overflow: hidden;
 }
 
 #profile-card-header {
@@ -791,7 +792,7 @@ hr::after {
 }
 
 #profile-card h5 {
-	font-size: 1.1rem;
+	font-size: 1.2rem;
 	margin-bottom: 1rem;
 }
 
@@ -831,10 +832,58 @@ hr::after {
 }
 
 #profile-card-header {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
 	margin-top: 2.5rem;
 	width: 100%;
 	height: 25%;
 	margin-bottom: 1rem;
+}
+
+#profile-card-header-left, #profile-card-header-middle, #profile-card-header-right {
+	display: flex;
+	flex-direction: column;
+	padding: 0;
+	height: 100%;
+}
+
+#profile-card-header-left, #profile-card-header-right {
+	width: 40%;
+	overflow: hidden;
+}
+
+#profile-card-header-middle {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    width: 20%;
+    padding-bottom: 1rem;
+    margin-top: 2rem;
+}
+
+#profile-card-username, #profile-card-display-name {
+    font-weight: bold;
+}
+
+#profile-card-username {
+    font-size: 1.1rem;
+}
+
+#profile-card-display-name {
+    font-weight: bold;
+    opacity: 0.6;
+}
+
+#profile-card-avatar {
+    width: 9rem;
+    height: 9rem;
+    margin-bottom: 1rem;
+    border: 1px solid var(--user-color);
+    box-shadow: 0 0 12px var(--user-color);
+    margin-top: -10rem;
 }
 
 #profile-card-body {
@@ -865,14 +914,14 @@ hr::after {
 	overflow: hidden;
 }
 
-#profile-card-tournaments-stats {
+.profile-card-stats {
 	display: flex;
 	justify-content: center;
 	align-items: center;
 	flex-grow: 1;
 }
 
-#profile-card-tournaments-stats ul {
+.profile-card-stats ul {
 	display: flex;
 	justify-content: space-evenly;
 	align-items: center;
@@ -881,7 +930,7 @@ hr::after {
 	padding: 0;
 }
 
-#profile-card-tournaments-stats li {
+.profile-card-stats li {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
