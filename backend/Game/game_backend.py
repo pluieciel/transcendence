@@ -148,15 +148,21 @@ class GameBackend:
 
 			if self.game.winner == "LEFT":
 				self.game.winner = self.player_left.user
-				if (self.is_ranked):
+				if (self.is_ranked and self.game_mode == "classic"):
 					await self.update_user_statistic_classic_wins(player_left_statistic)
 					await self.update_user_statistic_classic_losses(player_right_statistic)
+				elif (self.is_ranked and self.game_mode == "rumble"):
+					await self.update_user_statistic_rumble_wins(player_left_statistic)
+					await self.update_user_statistic_rumble_losses(player_right_statistic)
 				self.logger.info("Updated win lose")
 			elif self.game.winner == "RIGHT":
 				self.game.winner = self.player_right.user
-				if (self.is_ranked):
+				if (self.is_ranked and self.game_mode == "classic"):
 					await self.update_user_statistic_classic_wins(player_right_statistic)
 					await self.update_user_statistic_classic_losses(player_left_statistic)
+				elif (self.is_ranked and self.game_mode == "rumble"):
+					await self.update_user_statistic_rumble_wins(player_right_statistic)
+					await self.update_user_statistic_rumble_losses(player_left_statistic)
 				self.logger.info("Updated win lose")
 
 			if (self.bot > 0 ):
