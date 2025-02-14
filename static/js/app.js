@@ -193,11 +193,6 @@ class App {
 									</button>
 								</li>
 								<li>
-									<button id="profile-button" class="nav-button" ${disableBtn === "profile" ? 'disabled' : ''}>
-										<i class="fa-solid fa-user fa-xl"></i>Profile
-									</button>
-								</li>
-								<li>
 									<div id="nav-profile">
 										<div id="nav-user">
 											<div id="nav-username">${data.username}</div>
@@ -245,7 +240,6 @@ class App {
 		const leaderboardButton = document.getElementById("leaderboard-button");
 		const achievementsButton = document.getElementById("achievements-button");
 		const customizeButton = document.getElementById("customize-button");
-		const profileButton = document.getElementById("profile-button");
 		const navProfile = document.getElementById("nav-profile");
 		const adminButton = document.getElementById("admin-button");
 		const settingsButton = document.getElementById("settings-button");
@@ -275,10 +269,6 @@ class App {
 		
 		customizeButton.addEventListener("click", () => {
 			window.app.router.navigateTo("/customize");
-		});
-
-		profileButton.addEventListener("click", () => {
-			window.app.router.navigateTo("/profile");
 		});
 
 		navProfile.addEventListener("click", () => {

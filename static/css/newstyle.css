@@ -836,10 +836,8 @@ hr::after {
 	flex-direction: row;
 	align-items: center;
 	justify-content: space-between;
-	margin-top: 2.5rem;
 	width: 100%;
 	height: 25%;
-	margin-bottom: 1rem;
 }
 
 #profile-card-header-left, #profile-card-header-middle, #profile-card-header-right {
@@ -858,10 +856,10 @@ hr::after {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: center;
     width: 20%;
-    padding-bottom: 1rem;
-    margin-top: 2rem;
+	overflow: hidden;
+	margin-top: 0.5rem;
 }
 
 #profile-card-username, #profile-card-display-name {
@@ -878,12 +876,12 @@ hr::after {
 }
 
 #profile-card-avatar {
-    width: 9rem;
-    height: 9rem;
-    margin-bottom: 1rem;
+    width: 50%;
+    height: auto;
+    aspect-ratio: 1 / 1;
+    margin-bottom: 0.2rem;
     border: 1px solid var(--user-color);
-    box-shadow: 0 0 12px var(--user-color);
-    margin-top: -10rem;
+    box-shadow: 0 0 5px var(--user-color);
 }
 
 #profile-card-body {
@@ -909,7 +907,7 @@ hr::after {
 	display: flex;
 	flex-direction: column;
 	width: 100%;
-	height: 26%;
+	height: 25%;
 	margin-bottom: 1rem;
 	overflow: hidden;
 }
@@ -950,7 +948,7 @@ hr::after {
 
 #profile-card-achievements {
 	width: 100%;
-	height: 74%;
+	height: 75%;
 }
 
 #profile-card-game-history {
