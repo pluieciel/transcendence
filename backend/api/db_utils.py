@@ -66,15 +66,3 @@ def get_user_preference(user):
 def get_user_statistic(user):
 	from .models import UserStatistic
 	return UserStatistic.objects.get(user=user)
-
-@database_sync_to_async
-def add_user_wins(user):
-	user.wins += 1
-	logging.getLogger('game').info(f"User {user.username} wins: {user.wins}, loses : {user.looses}")
-	user.save()
-
-@database_sync_to_async
-def add_user_looses(user):
-	user.looses += 1
-	logging.getLogger('game').info(f"User {user.username} wins: {user.wins}, loses : {user.looses}")
-	user.save()

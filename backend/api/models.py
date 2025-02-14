@@ -51,8 +51,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     recovery_codes_generated = models.BooleanField(default=False)
     is_playing = models.BooleanField(default=False)
     current_game_id = models.IntegerField(default=-1)
-    wins = models.IntegerField(default=0)
-    looses = models.IntegerField(default=0)
     tournament_win = models.IntegerField(default=0)
     tournament_participated = models.IntegerField(default=0)
     friends = models.ManyToManyField('self', symmetrical=False, related_name='friend_set', blank=True)

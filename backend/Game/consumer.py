@@ -399,13 +399,13 @@ class GameConsumer(AsyncWebsocketConsumer):
 
 		player_left_statistic = await get_user_statistic(instance.player_left.user)
 		player_right_statistic = await get_user_statistic(instance.player_right.user) if instance.is_ranked else None
-		# TODO: fix bot elo
+
 		if (instance.game_mode == "classic"):
 			player_left_elo = player_left_statistic.classic_elo
-			player_right_elo = player_right_statistic.classic_elo if player_right_statistic else 1000
+			player_right_elo = player_right_statistic.classic_elo if player_right_statistic else instance.player_right.user.elo
 		elif (instance.game_mode == "rumble"):
 			player_left_elo = player_left_statistic.rumble_elo
-			player_right_elo = player_right_statistic.rumble_elo if player_right_statistic else 1000
+			player_right_elo = player_right_statistic.rumble_elo if player_right_statistic else instance.player_right.user.elo
 
 		init_response = {
 			"type": "init",

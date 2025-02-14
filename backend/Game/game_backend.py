@@ -6,7 +6,7 @@ from .normal_game_logic import ClassicGameInstance, GameBounds
 from .rumble_game_logic import RumbleGameInstance, GameBounds
 from channels.db import database_sync_to_async
 from .bot import Bot
-from api.db_utils import finish_game_history, user_update_game, add_user_wins, add_user_looses, delete_game_history, get_user_preference, get_user_statistic
+from api.db_utils import finish_game_history, user_update_game, delete_game_history, get_user_preference, get_user_statistic
 from datetime import datetime
 import redis
 from channels.layers import get_channel_layer
@@ -31,11 +31,10 @@ class GameBackend:
 		self.elo_change = 0
 
 		self.elo_k_factor = 40
-		self.is_bot_game = bot and bot > 0
 
-		if (self.is_bot_game):
+		if (self.is_ranked is False):
 			self.player_right = Bot(bot, self.game)
-		self.logger.info(f"{self.is_bot_game} and {bot}")
+		self.logger.info(f"{self.is_ranked is False} and {bot}")
 		from Chat.consumer import ChatConsumer
 		self.chat_consumer = ChatConsumer
 	def handle_key_event(self, websocket, key, is_down):
@@ -61,7 +60,7 @@ class GameBackend:
 		if self.is_full() and not self.game.is_running:
 			self.player_left.state = "Playing"
 			self.player_right.state = "Playing"
-			if (self.is_bot_game):
+			if (self.is_ranked is False):
 				self.logger.info("started game with a bot")
 				self.player_right.start_bot()
 			else:
@@ -112,20 +111,20 @@ class GameBackend:
 
 	def set_player_init(self, channel):
 			if (self.player_left.channel == channel):
-				self.logger.info(f"is bot game {self.is_bot_game}")
+				self.logger.info(f"is bot game {self.is_ranked is False}")
 				self.player_left.state = "Ready"
 				self.check_ready_game()
-			elif self.is_bot_game:
+			elif self.is_ranked is False:
 				self.check_ready_game()
 			elif (self.player_right.channel == channel):
-				self.logger.info(f"is bot game {self.is_bot_game}")
+				self.logger.info(f"is bot game {self.is_ranked is False}")
 				self.player_right.state = "Ready"
 				self.check_ready_game()
 			else:
 				self.logger.warning("Received player init but couldnt match channel")
 
 	def check_ready_game(self):
-		if (self.player_left and self.player_left.state == "Ready" and self.is_bot_game or (self.player_right and self.player_right.state == "Ready")):
+		if (self.player_left and self.player_left.state == "Ready" and self.is_ranked is False or (self.player_right and self.player_right.state == "Ready")):
 			self.logger.info("Both player ready, starting")
 			self.start_game()
 		else:
@@ -135,21 +134,27 @@ class GameBackend:
 		try:
 			if (self.is_ranked):
 				await self.update_elo(self.game.winner)
+				player_right_statistic = await get_user_statistic(self.player_right.user)
+
+			player_left_statistic = await get_user_statistic(self.player_left.user)
+
+			self.logger.info(f"player_left_statistic {player_left_statistic.classic_wins}")
+			self.logger.info(f"player_right_statistic {player_right_statistic.classic_wins}")
 
 			if self.game.winner == "LEFT":
 				self.game.winner = self.player_left.user
-				if (self.is_bot_game is False):
-					await add_user_wins(self.player_left.user)
-					await add_user_looses(self.player_right.user)
+				if (self.is_ranked):
+					await self.update_user_statistic_classic_wins(player_left_statistic)
+					await self.update_user_statistic_classic_losses(player_right_statistic)
 				self.logger.info("Updated win lose")
 			elif self.game.winner == "RIGHT":
 				self.game.winner = self.player_right.user
-				if (self.is_bot_game is False):
-					await add_user_wins(self.player_right.user)
-					await add_user_looses(self.player_left.user)
+				if (self.is_ranked):
+					await self.update_user_statistic_classic_wins(player_right_statistic)
+					await self.update_user_statistic_classic_losses(player_left_statistic)
 				self.logger.info("Updated win lose")
 
-			if (self.is_bot_game):
+			if (self.is_ranked is False):
 				await delete_game_history(self.game_id)
 			else:
 				await finish_game_history(self.game_id, self.game.player_left.score, self.game.player_right.score, self.elo_change, self.game.winner)
@@ -164,7 +169,7 @@ class GameBackend:
 				await user_update_game(self.player_left.user, isplaying=False, game_id=-1)
 
 
-			if self.player_right and not self.is_bot_game:
+			if self.player_right and self.is_ranked:
 				self.logger.info(f"Resetting right player: {self.player_right.user.username}")
 				await user_update_game(self.player_left.user, isplaying=False, game_id=-1)
 
@@ -511,3 +516,28 @@ class GameBackend:
 		from api.models import UserStatistic
 		user_statistic.rumble_elo = elo
 		user_statistic.save()
+
+	@database_sync_to_async
+	def update_user_statistic_classic_wins(self, user_statistic):
+		from api.models import UserStatistic
+		user_statistic.classic_wins += 1
+		user_statistic.save()
+
+	@database_sync_to_async
+	def update_user_statistic_rumble_wins(self, user_statistic):
+		from api.models import UserStatistic
+		user_statistic.rumble_wins += 1
+		user_statistic.save()
+
+	@database_sync_to_async
+	def update_user_statistic_classic_losses(self, user_statistic):
+		from api.models import UserStatistic
+		user_statistic.classic_losses += 1
+		user_statistic.save()
+
+	@database_sync_to_async
+	def update_user_statistic_rumble_losses(self, user_statistic):
+		from api.models import UserStatistic
+		user_statistic.rumble_losses += 1
+		user_statistic.save()
+
