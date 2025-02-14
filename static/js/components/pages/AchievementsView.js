@@ -58,9 +58,9 @@ export default class AchievementsView {
 						<div class="cheevo-title">${achievement.name}</div>
 						<div class="cheevo-row">
 							<div class="cheevo-body">${achievement.description}</div>
-							${achievement.color_unlocked ? `
+							${achievement.color_unlocked  != -1? `
 								<div class="cheevo-reward" style="background-color:${window.app.getColor(achievement.color_unlocked)}">
-									<span class="tooltip">Reward:<br> <i class="fa-solid fa-palette"></i> ${colorArray[achievement.color_unlocked]}</span>
+									<span class="tooltip">Reward:<br> <i class="fa-solid fa-palette fa-xl"></i> ${colorArray[achievement.color_unlocked]}</span>
 								</div>
 							` : ''}
 						</div>
