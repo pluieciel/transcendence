@@ -22,7 +22,7 @@ export default class ProfileView {
 								<ul>
 									<li>
 										<div class="stat-value">63</div>
-										<div class="stat-label">Total Games</div>
+										<div class="stat-label">Total Played</div>
 									</li>
 									<li>
 										<div class="stat-value">41</div>
@@ -70,7 +70,7 @@ export default class ProfileView {
 									</li>
 									<li>
 										<div class="stat-value">63</div>
-										<div class="stat-label">Total Games</div>
+										<div class="stat-label">Total Played</div>
 									</li>
 								</ul>
 							</div>
@@ -111,9 +111,11 @@ export default class ProfileView {
 						</div>
 						<div id="profile-card-game-history" class="profile-card-content">
 							<h5 id="card-title"><i class="fa-solid fa-clock-rotate-left"></i> Game History</h5>
-							<div id="profile-card-game-history-content">
-								<div class="profile-card-game-history-item">
-									<i class="fa-solid fa-star"></i>
+							<div id="game-history-content">
+								<div class="game-history-item">
+									<div id="game-history-game-type">
+										<i class="fa-solid fa-star"></i>
+									</div>
 									<div id="player-left-history-name">user1</div>
 									<div id="game-history-middle">
 										<img src="/imgs/default_avatar.png" id="player-left-history-avatar" class="avatar">

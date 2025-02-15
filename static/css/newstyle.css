@@ -958,7 +958,7 @@ hr::after {
 	flex-direction: column;
 }
 
-#profile-card-game-history-content {
+#game-history-content {
     width: 100%;
     height: 100%;
     display: flex;
@@ -968,7 +968,7 @@ hr::after {
     overflow-y: auto;
 }
 
-.profile-card-game-history-item {
+.game-history-item {
 	width: 100%;
 	height: calc((100% - 4rem) / 5);
 	flex-shrink: 0;
@@ -982,7 +982,7 @@ hr::after {
 	padding: 1rem;
 }
 
-.profile-card-game-history-item:not(:last-child) {
+.game-history-item:not(:last-child) {
 	margin-bottom: 1rem;
 }
 
@@ -991,7 +991,14 @@ hr::after {
 	height: 3.2rem;
 	border: 1px solid var(--user-color);
 	box-shadow: 0 0 15px var(--user-color);
-	margin: 0 1rem;
+}
+
+#player-left-history-avatar {
+	margin: 0 1rem 0 0.5rem;
+}
+
+#player-right-history-avatar {
+	margin: 0 0.5rem 0 1rem;
 }
 
 #player-left-history-name, #player-right-history-name {
@@ -999,10 +1006,18 @@ hr::after {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 10ch;
+    max-width: 16ch;
     font-weight: bold;
 	text-align: center;
 	flex-grow: 1;
+}
+
+#game-history-game-type i {
+	margin: 0 0.5rem 0 0 !important;
+}
+
+#game-history-elo-change i {
+	margin: 0 0.2rem 0 0.5rem !important;
 }
 
 #game-history-middle {
@@ -1029,6 +1044,7 @@ hr::after {
 
 #game-history-elo-change {
 	font-weight: bold;
+	flex-shrink: 0;
 }
 
 
