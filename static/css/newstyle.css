@@ -79,7 +79,7 @@ header {
 	left: 0;
 	right: 0;
 	z-index: 100;
-	height: 90px;
+	height: 5.5rem;
 	min-width: 1040px;
 	overflow: hidden;
 }
@@ -100,7 +100,7 @@ header button:hover:not(:disabled) {
 	color: var(--user-color);
 	text-shadow: 0 0 5px var(--user-color);
 	text-align: center;
-	line-height: 90px;
+	line-height: 5.5rem;
 }
 
 #header-title {
@@ -240,7 +240,7 @@ nav i {
 main {
 	width: 100%;
 	height: 100%;
-	margin-top: 90px;
+	margin-top: 5.5rem;
 	display: flex;
 	flex-direction: row;
 	align-items: center;
@@ -954,6 +954,36 @@ hr::after {
 #profile-card-game-history {
 	width: 100%;
 	height: 100%;
+	display: flex;
+	flex-direction: column;
+}
+
+#profile-card-game-history h5 {
+	margin-bottom: 1.5rem;
+}
+
+#profile-card-game-history-content {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-y: auto;
+}
+
+.profile-card-game-history-item {
+	width: 100%;
+	height: 5.5rem;
+	background-color: var(--selector-color);
+	border-radius: 0.3rem;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+}
+
+.profile-card-game-history-item:not(:last-child) {
+	margin-bottom: 1rem;
 }
 
 /* ******************************** */

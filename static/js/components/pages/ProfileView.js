@@ -111,6 +111,23 @@ export default class ProfileView {
 						</div>
 						<div id="profile-card-game-history" class="profile-card-content">
 							<h5 id="card-title"><i class="fa-solid fa-clock-rotate-left"></i> Game History</h5>
+							<div id="profile-card-game-history-content">
+								<div class="profile-card-game-history-item">
+									
+								</div>
+								<div class="profile-card-game-history-item">
+									
+								</div>
+								<div class="profile-card-game-history-item">
+									
+								</div>
+								<div class="profile-card-game-history-item">
+									
+								</div>
+								<div class="profile-card-game-history-item">
+									
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>
