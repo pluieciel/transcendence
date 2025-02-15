@@ -958,10 +958,6 @@ hr::after {
 	flex-direction: column;
 }
 
-#profile-card-game-history h5 {
-	margin-bottom: 1.5rem;
-}
-
 #profile-card-game-history-content {
     width: 100%;
     height: 100%;
@@ -981,12 +977,54 @@ hr::after {
 	display: flex;
 	flex-direction: row;
 	align-items: center;
-	justify-content: center;
+	justify-content: space-between;
+	overflow: hidden;
+	padding: 1rem;
 }
 
 .profile-card-game-history-item:not(:last-child) {
 	margin-bottom: 1rem;
 }
+
+#player-left-history, #player-right-history {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+}
+
+#player-left-history-avatar, #player-right-history-avatar {
+	width: 3.2rem;
+	height: 3.2rem;
+	border: 1px solid var(--user-color);
+	box-shadow: 0 0 15px var(--user-color);
+}
+
+#player-left-history-name {
+	margin-right: 1rem;
+}
+
+#player-right-history-name {
+	margin-left: 1rem;
+}
+
+#player-left-history-name, #player-right-history-name, #game-history-middle, #game-history-elo-change {
+	font-weight: bold;
+}
+
+#game-history-middle {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+}
+
+#game-history-date {
+	opacity: 0.5;
+	margin-top: 0.5rem;
+	font-size: 0.8rem;
+}
+
 
 /* ******************************** */
 /*                Credits           */
