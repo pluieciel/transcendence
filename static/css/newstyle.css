@@ -968,12 +968,14 @@ hr::after {
     display: flex;
     flex-direction: column;
     align-items: center;
+	justify-content: flex-start;
     overflow-y: auto;
 }
 
 .profile-card-game-history-item {
 	width: 100%;
-	height: 5.5rem;
+	height: calc((100% - 4rem) / 5);
+	flex-shrink: 0;
 	background-color: var(--selector-color);
 	border-radius: 0.3rem;
 	display: flex;
