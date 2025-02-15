@@ -986,43 +986,49 @@ hr::after {
 	margin-bottom: 1rem;
 }
 
-#player-left-history, #player-right-history {
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	justify-content: center;
-}
-
 #player-left-history-avatar, #player-right-history-avatar {
 	width: 3.2rem;
 	height: 3.2rem;
 	border: 1px solid var(--user-color);
 	box-shadow: 0 0 15px var(--user-color);
+	margin: 0 1rem;
 }
 
-#player-left-history-name {
-	margin-right: 1rem;
-}
-
-#player-right-history-name {
-	margin-left: 1rem;
-}
-
-#player-left-history-name, #player-right-history-name, #game-history-middle, #game-history-elo-change {
-	font-weight: bold;
+#player-left-history-name, #player-right-history-name {
+	width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 10ch;
+    font-weight: bold;
+	text-align: center;
+	flex-grow: 1;
 }
 
 #game-history-middle {
 	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+	font-weight: bold;
+}
+
+#game-middle-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
 #game-history-date {
 	opacity: 0.5;
 	margin-top: 0.5rem;
 	font-size: 0.8rem;
+}
+
+#game-history-elo-change {
+	font-weight: bold;
 }
 
 

@@ -114,18 +114,16 @@ export default class ProfileView {
 							<div id="profile-card-game-history-content">
 								<div class="profile-card-game-history-item">
 									<i class="fa-solid fa-star"></i>
-									<div id="player-left-history">
-										<div id="player-left-history-name"><i class="fa-solid fa-medal"></i> user1</div>
-										<img src="/imgs/default_avatar.png" id="player-left-history-avatar" class="avatar">
-									</div>
+									<div id="player-left-history-name">user1</div>
 									<div id="game-history-middle">
-										<div id="game-history-score">10 - 5</div>
-										<div id="game-history-date">14/02/2025</div>
-									</div>
-									<div id="player-right-history">
+										<img src="/imgs/default_avatar.png" id="player-left-history-avatar" class="avatar">
+										<div id="game-middle-info">
+											<div id="game-history-score">10 - 5</div>
+											<div id="game-history-date">14/02/2025</div>
+										</div>
 										<img src="/imgs/default_avatar.png" id="player-right-history-avatar" class="avatar">
-										<div id="player-right-history-name">user2</div>
 									</div>
+									<div id="player-right-history-name">user2</div>
 									<div id="game-history-elo-change"><i class="fa-solid fa-plus-minus"></i> 20</div>
 								</div>
 							</div>
