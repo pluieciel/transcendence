@@ -123,6 +123,7 @@ export default class ProfileView {
 											<div id="game-middle-info">
 												<div id="game-history-score">10 - 5</div>
 												<div id="game-history-date">14/02/2025</div>
+												<div id="game-history-time">14:00</div>
 											</div>
 											<img src="/imgs/default_avatar.png" id="player-right-history-avatar" class="avatar">
 										</div>
