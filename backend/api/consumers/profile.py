@@ -34,6 +34,7 @@ class ProfileConsumer(AsyncHttpConsumer):
 			response_data = {
 				'success': True,
 				'username': profile_user.username,
+				'is_42_user': profile_user.is_42_user,
 				'avatar_url': get_user_avatar_url(profile_user, self.scope['headers']),
 				'display_name': profile_user.display_name,
 				'classic': {
