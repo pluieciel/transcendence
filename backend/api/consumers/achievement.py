@@ -3,7 +3,7 @@ from api.utils import jwt_to_user
 from api.db_utils import get_achievements
 import json
 
-class AchievementFetcherConsumer(AsyncHttpConsumer):
+class AchievementConsumer(AsyncHttpConsumer):
 	async def handle(self, body):
 		try:
 			user = await jwt_to_user(self.scope['headers'])

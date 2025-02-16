@@ -30,7 +30,7 @@ from api.consumers.settings import GetSettingsConsumer, SetSettingsConsumer
 from api.consumers.avatar import AvatarConsumer
 from api.consumers.login import LoginConsumer
 from api.consumers.signup import SignupConsumer
-from api.consumers.achievement_fetcher import AchievementFetcherConsumer
+from api.consumers.achievement import AchievementConsumer
 from api.consumers.recaptcha import RecaptchaConsumer
 from api.consumers.customize import GetCustomizeConsumer, SetCustomizeConsumer
 from api.consumers.delete_user import DeleteUserConsumer
@@ -55,11 +55,11 @@ http_patterns = [
     path('api/auth/login/oauth/', LoginOAuthConsumer.as_asgi()),
     path('api/auth/login/oauth/redirect/', OAuthConsumer.as_asgi()),
 
+    path('api/profiles/me/nav/', ProfileNavConsumer.as_asgi()),
     re_path(r'^api/profiles/(?P<username>.*)/avatar/$', AvatarConsumer.as_asgi()),
     re_path(r'^api/profiles/(?P<username>.*)/history/$', getHistory.as_asgi()),
-    re_path(r'^api/profiles/(?P<username>.*)/achievement/$', AchievementFetcherConsumer.as_asgi()),
-    path('api/profiles/me/', ProfileConsumer.as_asgi()),
-    path('api/profiles/me/nav/', ProfileNavConsumer.as_asgi()),
+    re_path(r'^api/profiles/(?P<username>.*)/achievement/$', AchievementConsumer.as_asgi()),
+    re_path(r'^api/profiles/(?P<username>.*)/$', ProfileConsumer.as_asgi()),
 
     path('api/settings/', GetSettingsConsumer.as_asgi()),
     path('api/settings/update/', SetSettingsConsumer.as_asgi()),

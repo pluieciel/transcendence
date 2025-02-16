@@ -8,6 +8,7 @@ export default class ProfileView {
 	async init() {
 		await window.app.getSettings();
 		await this.render();
+		await this.getProfile();
 		this.addEventListeners();
 	}
 
@@ -142,5 +143,25 @@ export default class ProfileView {
 
 	addEventListeners() {
 		window.app.addNavEventListeners();
+	}
+
+	async getProfile() {
+		try {
+			const response = await fetch(`/api/profiles/${this.username}/`);
+	
+			const data = await response.json();
+			if (data.success) {
+				console.log(data);
+			}
+			else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
+				window.app.logout();
+			}
+			else {
+				// TODO: handle error msg
+			}
+		}
+		catch (e) {
+			console.error(e);
+		}
 	}
 }

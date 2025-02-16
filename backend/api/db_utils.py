@@ -82,3 +82,8 @@ def get_achievements(user):
             'date_earned': user_achievement.date_earned.isoformat() if user_achievement.unlocked else None
         })
     return achievements
+
+@database_sync_to_async
+def get_users():
+	User = get_user_model()
+	return list(User.objects.values('username'))

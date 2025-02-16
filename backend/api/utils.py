@@ -100,6 +100,16 @@ def get_user_avatar_url(user, headers):
 	url = f"https://{host}:{port}"
 	return f"{url}{user.avatar.url}" if user.avatar else f"{url}/imgs/default_avatar.png"
 
+def get_winrate(wins, games):
+	if games != 0:
+		return f"{(wins / games) * 100:.2f}%"
+	else:
+		return 'No games'
+
+def sort_leaderboard(leaderboard):
+	return sorted(leaderboard, 
+			key=lambda x: (-x['elo'], x['winrate'] == 'No games', -float(x['winrate'].rstrip('%')) if x['winrate'] != 'No games' else 0, x['username'].lower()))
+
 async def parse_multipart_form_data(body):
 	"""Parse multipart form data and return a dictionary."""
 	#from djangoapi.utils.datastructures import MultiValueDict
