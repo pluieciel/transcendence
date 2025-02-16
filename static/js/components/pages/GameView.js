@@ -104,7 +104,16 @@ export default class GameView {
 		document.querySelector("#winner-name").textContent = `Winner: ${winnerName}`;
 		document.querySelector("#winner-avatar").src = winnerAvatar;
 		document.querySelector("#score-text").textContent = `Final Score: ${scoreLeft} - ${scoreRight}`;
-		document.querySelector("#elo-text").textContent = `ELO Change: ${winnerName == username ? "+" : "-"}${eloChange}`;
+		if (eloChange > 0)
+		{
+			document.querySelector("#elo-text").style.display = 'block';
+			document.querySelector("#elo-text").textContent = `ELO Change: ${winnerName == username ? "+" : "-"}${eloChange}`;
+		}
+		else
+		{
+			document.querySelector("#elo-text").style.display = 'none';
+		}
+
 		const returnButton = document.querySelector("#returnButton");
 		returnButton.style.display = "block";
 		returnButton.onclick = () => {

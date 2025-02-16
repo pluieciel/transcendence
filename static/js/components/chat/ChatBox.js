@@ -579,13 +579,13 @@ export default class ChatBox {
 				const modalBody = document.querySelector("#sendInvitation .modal-body");
 				modalBody.innerHTML = `<p>Invite <strong>${user}</strong> to game, choose game mode:</p>
                 <div class="form-check">
-                    <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1" value="Vanilla" checked>
+                    <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1" value="classic" checked>
                         <label class="form-check-label" for="flexRadioDefault1">
-                            Vanilla
+                            Classic
                         </label>
                 </div>
                 <div class="form-check">
-                    <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2" value="Rumble">
+                    <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2" value="rumble">
                         <label class="form-check-label" for="flexRadioDefault2">
                             Rumble
                         </label>
@@ -618,7 +618,13 @@ export default class ChatBox {
 					this.updateOnlineUsersList();
 				}, 200);
 			} else if (action === "watchgame") {
-				// add watch game
+				window.app.gamews = new WebSocket(`${this.protocol}${this.host}/ws/game/?watch=${user}`);
+				window.app.gamews.onmessage = (event) => {
+					const events = JSON.parse(event.data);
+					if (events.message_type === "init") {
+						this.redirectToGame(events);
+					}
+				};
 			}
 		});
 
@@ -682,8 +688,8 @@ export default class ChatBox {
 				};
 				this.chatSocket.send(JSON.stringify(messageData));
 				// TODO: add start game logic
-				window.app.gamews = new WebSocket(`${this.protocol}${this.host}/ws/game/invite?sender=${user}`);
-				console.log(`${this.protocol}${this.host}/ws/game/invite?sender=${user}`);
+				window.app.gamews = new WebSocket(`${this.protocol}${this.host}/ws/game/invite?sender=${user}&mode=${mode}`);
+				console.log(`${this.protocol}${this.host}/ws/game/invite?sender=${user}&mode=${mode}`);
 				window.app.gamews.onmessage = (event) => {
 					const events = JSON.parse(event.data);
 					if (events.message_type === "init") {

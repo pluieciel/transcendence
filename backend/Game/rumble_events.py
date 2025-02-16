@@ -138,6 +138,7 @@ class RampingBallEvent(GameEvent):
 		self.ball_accel_mult = 2
 		self.player_speed_mult = 1.1
 		self.ball_maxspeed_mult = 15
+		self.ball_basespeed_mult = 0.8
 
 	def apply_specific(self):
 		pass
@@ -277,7 +278,7 @@ class VisibleTrajectoryEvent(GameEvent):
 		self.ball_accel_mult = 1.3
 		self.ball_basespeed_mult = 1
 		self.player_speed_mult = 1.3
-		self.ball_maxspeed_mult = 1
+		self.ball_maxspeed_mult = 15
 
 	def apply_specific(self):
 		pass
