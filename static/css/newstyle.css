@@ -840,6 +840,7 @@ hr::after {
 	justify-content: space-between;
 	width: 100%;
 	height: 25%;
+	padding-top: 0;
 }
 
 #profile-card-header-left, #profile-card-header-middle, #profile-card-header-right {
@@ -852,6 +853,7 @@ hr::after {
 #profile-card-header-left, #profile-card-header-right {
 	width: 40%;
 	overflow: hidden;
+	padding-top: 1rem;
 }
 
 #profile-card-header-middle {
@@ -878,12 +880,11 @@ hr::after {
 }
 
 #profile-card-avatar {
-	width: 50%;
-	height: auto;
-	aspect-ratio: 1 / 1;
+	width: min(50%, 9rem);
+	aspect-ratio: 1;
 	margin-bottom: 0.2rem;
 	border: 1px solid var(--user-color);
-	box-shadow: 0 0 5px var(--user-color);
+	box-shadow: 0 0 15px var(--user-color);
 }
 
 #profile-card-body {
