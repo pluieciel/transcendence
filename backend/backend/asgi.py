@@ -69,7 +69,7 @@ http_patterns = [
     path('api/settings/2fa/enable/', Enable2FAConsumer.as_asgi()),
     path('api/settings/2fa/disable/', Disable2FAConsumer.as_asgi()),
 
-    path('api/leaderboard/', LeaderboardConsumer.as_asgi()),
+    re_path(r'^api/leaderboard/(?P<game_mode>.*)/$', LeaderboardConsumer.as_asgi()),
     path('api/recaptcha/', RecaptchaConsumer.as_asgi()),
     path('api/users/delete/', DeleteUserConsumer.as_asgi()),
 	path('api/admin/', AdminConsumer.as_asgi()),

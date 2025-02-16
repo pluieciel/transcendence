@@ -8,28 +8,28 @@ import json
 class LeaderboardConsumer(AsyncHttpConsumer):
 	async def handle(self, body):
 		try:
+			game_mode = self.scope['url_route']['kwargs']['game_mode']
 			users = await self.get_users()
+
 			for user in users:
 				db_user = await get_user_by_name(user['username'])
 				user_statistic = await get_user_statistic(db_user)
+				
+				avatar_url = get_user_avatar_url(db_user, self.scope['headers'])
+				user['avatar'] = avatar_url
 
-				user['classic_elo'] = user_statistic.classic_elo
-				user['rumble_elo'] = user_statistic.rumble_elo
-				user['classic_games'] = user_statistic.classic_wins + user_statistic.classic_losses
-				user['rumble_games'] = user_statistic.rumble_wins + user_statistic.rumble_losses
-				user['classic_winrate'] = self.get_winrate(user_statistic.classic_wins, user['classic_games'])
-				user['rumble_winrate'] = self.get_winrate(user_statistic.rumble_wins, user['rumble_games'])
-				user['avatar'] = get_user_avatar_url(db_user, self.scope['headers'])
-
-			classic_leaderboard = sorted(users, 
-				key=lambda x: (-x['classic_elo'], x['classic_winrate'] == 'No games', -float(x['classic_winrate'].rstrip('%')) if x['classic_winrate'] != 'No games' else 0, x['username'].lower()))
-			rumble_leaderboard = sorted(users, 
-				key=lambda x: (-x['rumble_elo'], x['rumble_winrate'] == 'No games', -float(x['rumble_winrate'].rstrip('%')) if x['rumble_winrate'] != 'No games' else 0, x['username'].lower()))
+				if (game_mode == "classic"):
+					user['elo'] = user_statistic.classic_elo
+					user['games'] = user_statistic.classic_wins + user_statistic.classic_losses
+					user['winrate'] = self.get_winrate(user_statistic.classic_wins, user['games'])
+				else:
+					user['elo'] = user_statistic.rumble_elo
+					user['games'] = user_statistic.rumble_wins + user_statistic.rumble_losses
+					user['winrate'] = self.get_winrate(user_statistic.rumble_wins, user['games'])
 
 			response_data = {
 				'success': True,
-				'classic_leaderboard': classic_leaderboard,
-				'rumble_leaderboard': rumble_leaderboard,
+				'leaderboard': self.sort_leaderboard(users)  
 			}
 			return await self.send_response(200, json.dumps(response_data).encode(),
 				headers=[(b"Content-Type", b"application/json")])
@@ -52,3 +52,7 @@ class LeaderboardConsumer(AsyncHttpConsumer):
 			return f"{(wins / games) * 100:.2f}%"
 		else:
 			return 'No games'
+	
+	def sort_leaderboard(self, leaderboard):
+		return sorted(leaderboard, 
+				key=lambda x: (-x['elo'], x['winrate'] == 'No games', -float(x['winrate'].rstrip('%')) if x['winrate'] != 'No games' else 0, x['username'].lower()))
