@@ -14,9 +14,20 @@ export default class Router {
     handleRoute() {
         const path = window.location.pathname;
         let route;
+        
+        const profileMatch = path.match(/^\/profiles\/([^/]+)/);
+        if (profileMatch && window.app.getIsLoggedIn()) {
+            route = this.routes.find(r => r.path === '/profiles/:username');
+            if (route) {
+                this.currentComponent = new route.component(document.getElementById('app'), {
+                    username: profileMatch[1]
+                });
+                return;
+            }
+        }
 
         if (window.app.getIsLoggedIn() || path === "/login/oauth" || path === "/signup")
-            route = this.routes.find(r => {return (r.path === path)});
+            route = this.routes.find(r => r.path === path);
         else
             route = this.routes.find(r => r.path === '*');
         

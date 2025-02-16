@@ -636,7 +636,7 @@ hr::after {
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	width: 60%;
+	width: 70%;
 	height: 100%;
 	font-weight: bold;
 }

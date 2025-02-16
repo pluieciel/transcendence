@@ -125,8 +125,11 @@ class UserStatistic(models.Model):
     rumble_elo = models.IntegerField(default=1000)
     rumble_wins = models.IntegerField(default=0)
     rumble_losses = models.IntegerField(default=0)
-    tournament_wins = models.IntegerField(default=0)
-    tournament_participated = models.IntegerField(default=0)
+    tournament_top_1 = models.IntegerField(default=0)
+    tournament_losses = models.IntegerField(default=0)
+    tournament_top_2 = models.IntegerField(default=0)
+    tournament_current_streak = models.IntegerField(default=0)
+    tournament_max_streak = models.IntegerField(default=0)
 
 ######################## GAME INVITE ###########################
 
