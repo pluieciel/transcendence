@@ -23,6 +23,7 @@ class App {
 			{ path: '/customize', component: CustomizeView },
 			{ path: '/credits', component: CreditsView },
 			{ path: '/profile', component: ProfileView },
+			{ path: '/profiles/:username', component: ProfileView },
 			{ path: '/settings', component: SettingsView },
 			{ path: '/achievements', component: AchievementsView},
 			{ path: '/leaderboard', component: LeaderboardView },

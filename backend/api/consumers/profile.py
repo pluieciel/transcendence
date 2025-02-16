@@ -17,6 +17,13 @@ class ProfileConsumer(AsyncHttpConsumer):
 					headers=[(b"Content-Type", b"application/json")])
 
 			profile_user = await get_user_by_name(self.scope['url_route']['kwargs']['username'])
+			if not profile_user:
+				response_data = {
+					'success': False,
+					'message': 'User not found'
+				}
+				return await self.send_response(404, json.dumps(response_data).encode(),
+					headers=[(b"Content-Type", b"application/json")])
 
 			user_statistic = await get_user_statistic(profile_user)
 
@@ -27,7 +34,7 @@ class ProfileConsumer(AsyncHttpConsumer):
 			response_data = {
 				'success': True,
 				'username': profile_user.username,
-				'avatar': get_user_avatar_url(profile_user, self.scope['headers']),
+				'avatar_url': get_user_avatar_url(profile_user, self.scope['headers']),
 				'display_name': profile_user.display_name,
 				'classic': {
 					'total_played': classic_total_played,
@@ -47,7 +54,7 @@ class ProfileConsumer(AsyncHttpConsumer):
 					'total_participated': tournament_total_participated,
 					'top_1': user_statistic.tournament_top_1,
 					'top_2': user_statistic.tournament_top_2,
-					'current_streak': user_statistic.tournament_current_streak,
+					'winrate': "No games", # TODO: get tournament winrate
 					'max_streak': user_statistic.tournament_max_streak,
 				},
 			}

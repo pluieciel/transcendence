@@ -1,18 +1,23 @@
 export default class ProfileView {
-	constructor(container) {
+	constructor(container, params = {}) {
 		this.container = container;
-		this.username = window.app.state.username;
+		if (window.location.pathname === "/profile")
+			this.username = window.app.state.username;
+		else
+			this.username = params.username;
 		this.init();
 	}
 
 	async init() {
 		await window.app.getSettings();
-		await this.render();
-		await this.getProfile();
-		this.addEventListeners();
+		const profile = await this.getProfile();
+		if (profile) {
+			await this.render(profile);
+			this.addEventListeners();
+		}
 	}
 
-	async render() {
+	async render(profile) {
 		await window.app.renderHeader(this.container, "profile");
 		this.container.innerHTML += `
 			<main>
@@ -23,55 +28,55 @@ export default class ProfileView {
 							<div class="profile-card-stats">
 								<ul>
 									<li>
-										<div class="stat-value">63</div>
+										<div class="stat-value">${profile.classic.total_played}</div>
 										<div class="stat-label">Total Played</div>
 									</li>
 									<li>
-										<div class="stat-value">41</div>
+										<div class="stat-value">${profile.classic.wins}</div>
 										<div class="stat-label">Win</div>
 									</li>
 									<li>
-										<div class="stat-value">65%</div>
+										<div class="stat-value">${profile.classic.winrate}</div>
 										<div class="stat-label">Winrate</div>
 									</li>
 									<li>
-										<div class="stat-value">1781</div>
+										<div class="stat-value">${profile.classic.elo}</div>
 										<div class="stat-label">Elo</div>
 									</li>
 									<li>
-										<div class="stat-value">#3</div>
+										<div class="stat-value">#${profile.classic.rank}</div>
 										<div class="stat-label">Rank</div>
 									</li>
 								</ul>
 							</div>
 						</div>
 						<div id="profile-card-header-middle">
-							<img src="/imgs/default_avatar.png" id="profile-card-avatar" class="avatar">
-							<div id="profile-card-username">user1</div>
-							<div id="profile-card-display-name">Joris</div>
+							<img src="${profile.avatar_url}" id="profile-card-avatar" class="avatar">
+							<div id="profile-card-username">${profile.username}</div>
+							<div id="profile-card-display-name" style="display: ${profile.display_name ? 'block' : 'none'}">${profile.display_name || ''}</div>
 						</div>
 						<div id="profile-card-header-right">
 							<h5 id="card-title"><i class="fa-solid fa-bolt"></i> Rumble</h5>
 							<div class="profile-card-stats">
 								<ul>
 									<li>
-										<div class="stat-value">#3</div>
+										<div class="stat-value">#${profile.rumble.rank}</div>
 										<div class="stat-label">Rank</div>
 									</li>
 									<li>
-										<div class="stat-value">1781</div>
+										<div class="stat-value">${profile.rumble.elo}</div>
 										<div class="stat-label">Elo</div>
 									</li>
 									<li>
-										<div class="stat-value">65%</div>
+										<div class="stat-value">${profile.rumble.winrate}</div>
 										<div class="stat-label">Winrate</div>
 									</li>
 									<li>
-										<div class="stat-value">41</div>
+										<div class="stat-value">${profile.rumble.wins}</div>
 										<div class="stat-label">Win</div>
 									</li>
 									<li>
-										<div class="stat-value">63</div>
+										<div class="stat-value">${profile.rumble.total_played}</div>
 										<div class="stat-label">Total Played</div>
 									</li>
 								</ul>
@@ -85,23 +90,23 @@ export default class ProfileView {
 								<div class="profile-card-stats">
 									<ul>
 										<li>
-											<div class="stat-value">11</div>
+											<div class="stat-value">${profile.tournament.total_participated}</div>
 											<div class="stat-label">Total Participated</div>
 										</li>
 										<li>
-											<div class="stat-value">1</div>
+											<div class="stat-value">${profile.tournament.top_1}</div>
 											<div class="stat-label">Top 1</div>
 										</li>
 										<li>
-											<div class="stat-value">2</div>
+											<div class="stat-value">${profile.tournament.top_2}</div>
 											<div class="stat-label">Top 2</div>
 										</li>
 										<li>
-											<div class="stat-value">18%</div>
+											<div class="stat-value">${profile.tournament.winrate}</div>
 											<div class="stat-label">Winrate</div>
 										</li>
 										<li>
-											<div class="stat-value">1</div>
+											<div class="stat-value">${profile.tournament.max_streak}</div>
 											<div class="stat-label">Max Streak</div>
 										</li>
 									</ul>
@@ -151,7 +156,7 @@ export default class ProfileView {
 	
 			const data = await response.json();
 			if (data.success) {
-				console.log(data);
+				return data;
 			}
 			else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
 				window.app.logout();
