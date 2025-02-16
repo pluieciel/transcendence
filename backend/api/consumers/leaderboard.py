@@ -2,31 +2,33 @@ from channels.generic.http import AsyncHttpConsumer
 from django.contrib.auth import get_user_model
 from channels.db import database_sync_to_async
 from operator import itemgetter
-from api.db_utils import get_user_by_name
+from api.utils import get_user_avatar_url
+from api.db_utils import get_user_by_name, get_user_statistic
 import json
 
-class getLeaderboard(AsyncHttpConsumer):
+class LeaderboardConsumer(AsyncHttpConsumer):
 	async def handle(self, body):
 		try:
-
-			users = await self.getAllUsers()
+			users = await self.get_users()
 			for user in users:
-				u = await get_user_by_name(username=user['username'])
-				user['avatar'] = await self.getAvatarForUser(u)
-				user['games'] = user['wins'] + user['looses']
-				user['link'] = "/profile/" + user['username']
-				tot = user['games']
-				if tot != 0:
-					user['winrate'] = f"{(user['wins'] / tot) * 100:.2f}%"
-				else:
-					user['winrate'] = 'No games'
+				db_user = await get_user_by_name(user['username'])
+				user_statistic = await get_user_statistic(db_user)
 
-			# TODO: fix sort
-			#sortedUsers = sorted(users, key=itemgetter('elo'), reverse=True)
+				user['classic_elo'] = user_statistic.classic_elo
+				user['rumble_elo'] = user_statistic.rumble_elo
+				user['classic_games'] = user_statistic.classic_wins + user_statistic.classic_losses
+				user['rumble_games'] = user_statistic.rumble_wins + user_statistic.rumble_losses
+				user['classic_winrate'] = self.get_winrate(user_statistic.classic_wins, user['classic_games'])
+				user['rumble_winrate'] = self.get_winrate(user_statistic.rumble_wins, user['rumble_games'])
+				user['avatar'] = get_user_avatar_url(db_user, self.scope['headers'])
+
+			classic_leaderboard = sorted(users, key=itemgetter('classic_elo', 'classic_winrate', 'username'), reverse=True)
+			rumble_leaderboard = sorted(users, key=itemgetter('rumble_elo', 'rumble_winrate', 'username'), reverse=True)
 
 			response_data = {
 				'success': True,
-				'users': users,
+				'classic_leaderboard': classic_leaderboard,
+				'rumble_leaderboard': rumble_leaderboard,
 			}
 			return await self.send_response(200, json.dumps(response_data).encode(),
 				headers=[(b"Content-Type", b"application/json")])
@@ -40,21 +42,12 @@ class getLeaderboard(AsyncHttpConsumer):
 				headers=[(b"Content-Type", b"application/json")])
 		
 	@database_sync_to_async
-	def getAllUsers(self):
-		try:
-			User = get_user_model()
-			return list(User.objects.values('username', 'elo', 'wins', 'looses'))
-		except Exception as e:
-			return str(e)
-		
-	@database_sync_to_async
-	def getAvatarForUser(self, user):
-		try:
-			if (user.avatar_42):
-				return (user.avatar_42)
-			elif (user.avatar):
-				return (user.avatar.url)
-			else:
-				return ('imgs/default_avatar.png')
-		except Exception as e:
-			return str(e)
+	def get_users(self):
+		User = get_user_model()
+		return list(User.objects.values('username'))
+
+	def get_winrate(self, wins, games):
+		if games != 0:
+			return f"{(wins / games) * 100:.2f}%"
+		else:
+			return 'No games'

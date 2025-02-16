@@ -26,7 +26,8 @@ export default class LeaderboardView {
 							<div class="lb-card-winrate lb-card-att"><i class="fa-solid fa-percent"></i> Winrate</div>
 							<div class="lb-card-games lb-card-att"><i class="fa-solid fa-gamepad"></i> Games</div>
 						</div>
-						<div id="leaderboard-table"></div>
+						<div id="classic-leaderboard-table"></div>
+						<div id="rumble-leaderboard-table"></div>
 					</div>
 				</div>
 			</main>
@@ -39,18 +40,17 @@ export default class LeaderboardView {
 	
 			const data = await response.json();
 	
-			if (data['success']) {
-				console.log(data['users']);
+			if (data.success) {
 				let i = 0;
-				while (i < data.users.length)
-					this.addUserToLB(data.users[i], ++i);
+				while (i < data.classic_leaderboard.length) {
+					this.addUserToLB(data.classic_leaderboard[i], ++i);
+				}	
 			}
 			else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
 				window.app.logout();
-				window.app.router.navigateTo("/login");
 			}
 			else {
-				console.log(data['message']);
+				// TODO: handle error msg
 			}
 		}
 		catch (e) {
@@ -60,17 +60,15 @@ export default class LeaderboardView {
 
 	addUserToLB(data, place) {
 		let		card = "";
-		const	lb = document.getElementById('leaderboard-table');
+		const	lb = document.getElementById('classic-leaderboard-table');
 		
 		card += "<div id=\"lb-card-" + place + "\"class=\"lb-card\">";
 		card += "<div class=\"lb-card-pos lb-card-att\">" + place + "</div>";
 		if (data['avatar'])
 			card += "<div class=\"lb-card-user lb-card-att\"><img class=\"lb-card-avatar avatar\" src=\"" + data['avatar'] + "\"></img> &nbsp;&nbsp;" + data['username'] + "</div>";
-		else
-			card += "<div class=\"lb-card-user lb-card-att\">" + data['username'] + "</div>";
-		card += "<div class=\"lb-card-elo lb-card-att\">" + data['elo'] + "</div>";
-		card += "<div class=\"lb-card-winrate lb-card-att\">" + data['winrate'] + "</div>";
-		card += "<div class=\"lb-card-games lb-card-att\">" + data['games'] + "</div>";
+		card += "<div class=\"lb-card-elo lb-card-att\">" + data['classic_elo'] + "</div>";
+		card += "<div class=\"lb-card-winrate lb-card-att\">" + data['classic_winrate'] + "</div>";
+		card += "<div class=\"lb-card-games lb-card-att\">" + data['classic_games'] + "</div>";
 		card += "</div>";
 
 		lb.insertAdjacentHTML("beforeend", card);

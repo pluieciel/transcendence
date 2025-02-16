@@ -16,7 +16,6 @@ export default class AdminView {
 				this.addEventListeners();
 			} else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
 				window.app.logout();
-				window.app.router.navigateTo("/login");
 			} else if (response.status == 409) {
 				// TODO: show error msg
 			} else {

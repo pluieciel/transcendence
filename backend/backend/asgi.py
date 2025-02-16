@@ -15,7 +15,7 @@ from Chat.routing import websocket_urlpatterns as chat_websocket_patterns
 from Game.routing import websocket_urlpatterns as game_websocket_patterns
 from django.urls import path, re_path
 from api.consumers.history import getHistory
-from api.consumers.leaderboard import getLeaderboard
+from api.consumers.leaderboard import LeaderboardConsumer
 from api.consumers.login_2fa import Login2FAConsumer
 from api.consumers.login_2fa_recovery import Login2FARecoveryConsumer
 from api.consumers.enable_2fa import Enable2FAConsumer
@@ -69,7 +69,7 @@ http_patterns = [
     path('api/settings/2fa/enable/', Enable2FAConsumer.as_asgi()),
     path('api/settings/2fa/disable/', Disable2FAConsumer.as_asgi()),
 
-    path('api/leaderboard/', getLeaderboard.as_asgi()),
+    path('api/leaderboard/', LeaderboardConsumer.as_asgi()),
     path('api/recaptcha/', RecaptchaConsumer.as_asgi()),
     path('api/users/delete/', DeleteUserConsumer.as_asgi()),
 	path('api/admin/', AdminConsumer.as_asgi()),

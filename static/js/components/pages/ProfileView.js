@@ -6,6 +6,7 @@ export default class ProfileView {
 	}
 
 	async init() {
+		await window.app.getSettings();
 		await this.render();
 		this.addEventListeners();
 	}

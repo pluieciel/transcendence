@@ -68,7 +68,7 @@ body {
 	border-bottom-right-radius: 5px;
 }
 
-#leaderboard-table {
+#classic-leaderboard-table {
 	overflow: auto;
 	max-height: 500px !important;
 	margin-left: 15px;

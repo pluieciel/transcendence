@@ -221,7 +221,6 @@ class App {
 					`;
 				} else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
 					window.app.logout();
-					window.app.router.navigateTo("/login");
 				} else {
 					// TODO: add error msg
 				}
