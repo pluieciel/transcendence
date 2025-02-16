@@ -44,7 +44,7 @@ export default class ProfileView {
 										<div class="stat-label">Elo</div>
 									</li>
 									<li>
-										<div class="stat-value">#${profile.classic.rank}</div>
+										<div class="stat-value">${this.getRankField(profile.classic.rank)}</div>
 										<div class="stat-label">Rank</div>
 									</li>
 								</ul>
@@ -60,7 +60,7 @@ export default class ProfileView {
 							<div class="profile-card-stats">
 								<ul>
 									<li>
-										<div class="stat-value">#${profile.rumble.rank}</div>
+										<div class="stat-value">${this.getRankField(profile.rumble.rank)}</div>
 										<div class="stat-label">Rank</div>
 									</li>
 									<li>
@@ -148,6 +148,19 @@ export default class ProfileView {
 
 	addEventListeners() {
 		window.app.addNavEventListeners();
+	}
+
+	getRankField(rank) {
+		switch (rank) {
+			case 1:
+				return `<i class="fa-solid fa-medal" style="color: #FFD700"></i> ` + rank;
+			case 2:
+				return `<i class="fa-solid fa-medal" style="color: #C0C0C0"></i> ` + rank;
+			case 3:
+				return `<i class="fa-solid fa-medal" style="color: #CD7F32"></i> ` + rank;
+			default:
+				return "#" + rank;
+		}
 	}
 
 	async getProfile() {

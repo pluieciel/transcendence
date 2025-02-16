@@ -2,7 +2,7 @@ from django.http import QueryDict
 from django.core.files.base import ContentFile
 from django.contrib.auth import get_user_model
 from channels.db import database_sync_to_async
-from api.db_utils import get_user
+from api.db_utils import get_user, get_user_by_name, get_users, get_user_statistic
 import os
 import jwt
 import re
@@ -99,6 +99,27 @@ def get_user_avatar_url(user, headers):
 	port = next(value.decode('utf-8') for key, value in headers if key == b'x-forwarded-port')
 	url = f"https://{host}:{port}"
 	return f"{url}{user.avatar.url}" if user.avatar else f"{url}/imgs/default_avatar.png"
+
+async def get_users_with_stats(game_mode, headers):
+	users = await get_users()
+
+	for user in users:
+		db_user = await get_user_by_name(user['username'])
+		user_statistic = await get_user_statistic(db_user)
+		
+		avatar_url = get_user_avatar_url(db_user, headers)
+		user['avatar'] = avatar_url
+		user['name'] = db_user.display_name if db_user.display_name is not None else db_user.username
+
+		if (game_mode == "classic"):
+			user['elo'] = user_statistic.classic_elo
+			user['games'] = user_statistic.classic_wins + user_statistic.classic_losses
+			user['winrate'] = get_winrate(user_statistic.classic_wins, user['games'])
+		else:
+			user['elo'] = user_statistic.rumble_elo
+			user['games'] = user_statistic.rumble_wins + user_statistic.rumble_losses
+			user['winrate'] = get_winrate(user_statistic.rumble_wins, user['games'])
+	return users
 
 def get_winrate(wins, games):
 	if games != 0:
