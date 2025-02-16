@@ -1,6 +1,6 @@
 import AdminView from './components/pages/AdminView.js';
 import Router from './router.js';
-import MainView from './components/pages/MainView.js';
+import PlayView from './components/pages/PlayView.js';
 import LoginView from './components/pages/LoginView.js';
 import SignupView from './components/pages/SignupView.js';
 import LoginOAuth from './components/login/LoginOAuth.js';
@@ -19,7 +19,7 @@ class App {
 			{ path: '/', component: LoginView },
 			{ path: '/login', component: LoginView },
 			{ path: '/signup', component: SignupView },
-			{ path: '/play', component: MainView },
+			{ path: '/play', component: PlayView },
 			{ path: '/customize', component: CustomizeView },
 			{ path: '/credits', component: CreditsView },
 			{ path: '/profile', component: ProfileView },
@@ -193,11 +193,6 @@ class App {
 									</button>
 								</li>
 								<li>
-									<button id="profile-button" class="nav-button" ${disableBtn === "profile" ? 'disabled' : ''}>
-										<i class="fa-solid fa-user fa-xl"></i>Profile
-									</button>
-								</li>
-								<li>
 									<div id="nav-profile">
 										<div id="nav-user">
 											<div id="nav-username">${data.username}</div>
@@ -226,7 +221,6 @@ class App {
 					`;
 				} else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
 					window.app.logout();
-					window.app.router.navigateTo("/login");
 				} else {
 					// TODO: add error msg
 				}
@@ -245,7 +239,6 @@ class App {
 		const leaderboardButton = document.getElementById("leaderboard-button");
 		const achievementsButton = document.getElementById("achievements-button");
 		const customizeButton = document.getElementById("customize-button");
-		const profileButton = document.getElementById("profile-button");
 		const navProfile = document.getElementById("nav-profile");
 		const adminButton = document.getElementById("admin-button");
 		const settingsButton = document.getElementById("settings-button");
@@ -275,10 +268,6 @@ class App {
 		
 		customizeButton.addEventListener("click", () => {
 			window.app.router.navigateTo("/customize");
-		});
-
-		profileButton.addEventListener("click", () => {
-			window.app.router.navigateTo("/profile");
 		});
 
 		navProfile.addEventListener("click", () => {

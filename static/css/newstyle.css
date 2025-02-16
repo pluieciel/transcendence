@@ -79,7 +79,7 @@ header {
 	left: 0;
 	right: 0;
 	z-index: 100;
-	height: 90px;
+	height: 5.5rem;
 	min-width: 1040px;
 	overflow: hidden;
 }
@@ -100,7 +100,7 @@ header button:hover:not(:disabled) {
 	color: var(--user-color);
 	text-shadow: 0 0 5px var(--user-color);
 	text-align: center;
-	line-height: 90px;
+	line-height: 5.5rem;
 }
 
 #header-title {
@@ -240,7 +240,7 @@ nav i {
 main {
 	width: 100%;
 	height: 100%;
-	margin-top: 90px;
+	margin-top: 5.5rem;
 	display: flex;
 	flex-direction: row;
 	align-items: center;
@@ -308,24 +308,24 @@ form button:hover:not(:disabled) {
 
 .input-container {
 	width: 100%;
-    position: relative;
-    display: inline-block;
+	position: relative;
+	display: inline-block;
 }
 
 .input-container i {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-100%);
-    pointer-events: none;
-    color: var(--secondary-color);
+	position: absolute;
+	top: 50%;
+	transform: translateY(-100%);
+	pointer-events: none;
+	color: var(--secondary-color);
 	opacity: 0.5;
 }
 
 .input-container input {
-    padding-left: 2.65rem;
+	padding-left: 2.65rem;
 	padding-right: 2.65rem;
-    width: 100%;
-    box-sizing: border-box;
+	width: 100%;
+	box-sizing: border-box;
 }
 
 .input-icon {
@@ -497,71 +497,71 @@ hr::after {
 #game-mode, #game-type
 {
 	margin-bottom: 1rem;
-    position: relative;
-    width: 100%;
+	position: relative;
+	width: 100%;
 	height: 3rem;
 }
 
 .knobs, .layer
 {
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
+	position: absolute;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
 }
 
 .checkbox-button
 {
-    position: relative;
-    width: 100%;
+	position: relative;
+	width: 100%;
 	height: 3rem;
 }
 
 .checkbox
 {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    padding: 0;
-    margin: 0;
-    opacity: 0;
-    cursor: pointer;
-    z-index: 3;
+	position: relative;
+	width: 100%;
+	height: 100%;
+	padding: 0;
+	margin: 0;
+	opacity: 0;
+	cursor: pointer;
+	z-index: 3;
 }
 
 .knobs
 {
-    z-index: 2;
+	z-index: 2;
 }
 
 .layer
 {
-    width: 100%;
+	width: 100%;
 	border-radius: 0.3rem;
-    background-color: var(--primary-color);
-    transition: 0.3s ease all;
-    z-index: 1;
+	background-color: var(--primary-color);
+	transition: 0.3s ease all;
+	z-index: 1;
 }
 
 .checkbox-button .knobs:before, .checkbox-button .knobs:after, .checkbox-button .knobs span
 {
-    position: absolute;
-    width: 50%;
-    height: 3rem;
-    font-weight: bold;
-    text-align: center;
-    line-height: 1;
-    padding: 1rem 0;
-    border-radius: 0.3rem;
-    transition: 0.3s ease all;
+	position: absolute;
+	width: 50%;
+	height: 3rem;
+	font-weight: bold;
+	text-align: center;
+	line-height: 1;
+	padding: 1rem 0;
+	border-radius: 0.3rem;
+	transition: 0.3s ease all;
 }
 
 .checkbox-button .knobs:before
 {
-    content: '';
-    left: 0;
-    background-color: var(--selector-color);
+	content: '';
+	left: 0;
+	background-color: var(--selector-color);
 }
 
 #game-mode-rumble, #game-type-ranked {
@@ -570,33 +570,34 @@ hr::after {
 }
 
 .checkbox-button .checkbox:checked + .knobs #game-mode-rumble, .checkbox-button .checkbox:checked + .knobs #game-type-ranked {
-    color: var(--secondary-color);
+	color: var(--secondary-color);
 }
 
 .checkbox-button .checkbox:checked + .knobs #game-mode-classic, .checkbox-button .checkbox:checked + .knobs #game-type-ai {
-    color: var(--checkbox-unchecked-color);
+	color: var(--checkbox-unchecked-color);
 }
 
 .checkbox-button .checkbox:checked + .knobs:before
 {
 	left: 50%;
-    background-color: var(--selector-color);
+	background-color: var(--selector-color);
 }
 
 #chat-icon {
 	color: var(--secondary-color);
 }
 
+#main-view {
+	justify-content: space-between;
+}
+
 #how-to-play-card {
-	position: absolute;
+	align-self: flex-start;
 	text-align: center;
-	top: 8.5rem;
-	right: 2.5rem;
 	width: 30rem;
 }
 
-#play-card {
-	margin: auto;
+#play-card, #left-filler {
 	width: 30rem;
 }
 
@@ -610,7 +611,6 @@ hr::after {
 
 #preview-card {
 	height: 100%;
-	flex-grow: 1;
 	display: flex;
 	justify-content: center;
 	align-items: center;
@@ -646,7 +646,7 @@ hr::after {
 	height: 100%;
 }
 
-#leaderboard-table {
+#classic-leaderboard-table {
 	width: 100%;
 	height: 100%;
 	overflow-y: auto;
@@ -657,8 +657,8 @@ hr::after {
 	display: flex;
 	justify-content: center;
 	flex-direction: row;
-	margin-bottom: 1rem;
 	width: 100%;
+	border-bottom: 1px solid var(--selector-color);
 }
 
 .lb-card-header div {
@@ -666,11 +666,11 @@ hr::after {
 }
 
 .lb-card-header div:first-child {
-    border-top-left-radius: 0.3rem;
+	border-top-left-radius: 0.3rem;
 }
 
 .lb-card-header div:last-child {
-    border-top-right-radius: 0.3rem;
+	border-top-right-radius: 0.3rem;
 }
 
 .lb-card {
@@ -718,22 +718,22 @@ hr::after {
 }
 
 #lb-card-1 .lb-card-pos:before {
-    content: '\f5a2';
-    color: #FFD700;
+	content: '\f5a2';
+	color: #FFD700;
 	font-family: "Font Awesome 5 Free";
 	margin-right: 0.5rem;
 }
 
 #lb-card-2 .lb-card-pos:before {
-    content: '\f5a2';
-    color: #C0C0C0;
+	content: '\f5a2';
+	color: #C0C0C0;
 	font-family: "Font Awesome 5 Free";
 	margin-right: 0.5rem;
 }
 
 #lb-card-3 .lb-card-pos:before {
-    content: '\f5a2';
-    color: #CD7F32;
+	content: '\f5a2';
+	color: #CD7F32;
 	font-family: "Font Awesome 5 Free";
 	margin-right: 0.5rem;
 }
@@ -771,6 +771,289 @@ hr::after {
 	border: 1px solid var(--input-error-text-color);
 	box-shadow: 0 0 15px var(--input-error-text-color);
 	transition: all 0.3s ease;
+}
+
+/* ******************************** */
+/*                Profile           */
+/* ******************************** */
+
+#profile-card {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	justify-content: flex-start;
+	width: 70%;
+	height: 100%;
+	overflow: hidden;
+	position: relative;
+}
+
+#profile-card-header {
+	margin-bottom: 1rem;
+}
+
+#profile-card h5 {
+	font-size: 1.2rem;
+	margin-bottom: 1rem;
+}
+
+#profile-card ul {
+	display: flex;
+	align-items: center;
+	justify-content: space-evenly;
+	margin: 0;
+	padding: 0;
+}
+
+#profile-card li {
+	display: inline;
+	list-style: none;
+	height: 100%;
+}
+
+#profile-card li:not(:first-child) {
+	margin-left: 1rem;
+}
+
+.stat-value {
+	font-weight: bold;
+	text-align: center;
+}
+
+.stat-label {
+	opacity: 0.5;
+	font-weight: bold;
+}
+
+.profile-card-content {
+	background-color: var(--primary-color);
+	color: var(--secondary-color);
+	border-radius: 0.3rem;
+	padding: 1rem;
+}
+
+#profile-card-header {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+	width: 100%;
+	height: 25%;
+	padding-top: 0;
+}
+
+#profile-card-header-left, #profile-card-header-middle, #profile-card-header-right {
+	display: flex;
+	flex-direction: column;
+	padding: 0;
+	height: 100%;
+}
+
+#profile-card-header-left, #profile-card-header-right {
+	width: 40%;
+	overflow: hidden;
+	padding-top: 1rem;
+}
+
+#profile-card-header-middle {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	width: 20%;
+	overflow: hidden;
+	margin-top: 0.5rem;
+}
+
+#profile-card-username, #profile-card-display-name {
+	font-weight: bold;
+}
+
+#profile-card-username {
+	font-size: 1.1rem;
+}
+
+#profile-card-display-name {
+	font-weight: bold;
+	opacity: 0.6;
+}
+
+#profile-card-avatar {
+	width: min(50%, 9rem);
+	aspect-ratio: 1;
+	margin-bottom: 0.2rem;
+	border: 1px solid var(--user-color);
+	box-shadow: 0 0 15px var(--user-color);
+}
+
+#profile-card-body {
+	display: flex;
+	flex-direction: row;
+	align-items: flex-start;
+	justify-content: center;
+	width: 100%;
+	height: calc(75% - 1rem);
+	gap: 1rem;
+	overflow: hidden;
+}
+
+#profile-card-body-left {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	justify-content: flex-start;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+}
+
+#profile-card-tournaments {
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	height: 25%;
+	margin-bottom: 1rem;
+	overflow: hidden;
+}
+
+.profile-card-stats {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	flex-grow: 1;
+}
+
+.profile-card-stats ul {
+	display: flex;
+	justify-content: space-evenly;
+	align-items: center;
+	width: 100%;
+	margin: 0;
+	padding: 0;
+}
+
+.profile-card-stats li {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	text-align: center;
+}
+
+.stat-value {
+	font-weight: bold;
+	margin-bottom: 0.5rem;
+	font-size: 1.2rem;
+}
+
+.stat-label {
+	opacity: 0.5;
+	font-weight: bold;
+}
+
+#profile-card-achievements {
+	width: 100%;
+	height: 75%;
+}
+
+#profile-card-game-history {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+}
+
+#game-history-content {
+	width: 100%;
+	height: 100%;
+	position: relative;
+}
+
+#game-history-item-container {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	overflow-y: auto;
+}
+
+.game-history-item {
+	width: 100%;
+	height: 5.5rem;
+	background-color: var(--selector-color);
+	border-radius: 0.3rem;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.game-history-item:not(:last-child) {
+	margin-bottom: 1rem;
+}
+
+#player-left-history-avatar, #player-right-history-avatar {
+	width: 3.2rem;
+	height: 3.2rem;
+	border: 1px solid var(--user-color);
+	box-shadow: 0 0 15px var(--user-color);
+}
+
+#player-left-history-avatar {
+	margin: 0 1rem 0 0.5rem;
+}
+
+#player-right-history-avatar {
+	margin: 0 0.5rem 0 1rem;
+}
+
+#player-left-history-name, #player-right-history-name {
+	width: 100%;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	max-width: 16ch;
+	font-weight: bold;
+	text-align: center;
+	flex-grow: 1;
+}
+
+#game-history-game-type i {
+	margin: 0 0.5rem 0 1rem !important;
+}
+
+#game-history-elo-change i {
+	margin: 0 0.2rem 0 0.5rem !important;
+}
+
+#game-history-middle {
+	height: 100%;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	font-weight: bold;
+}
+
+#game-middle-info {
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: space-around;
+}
+
+#game-history-date, #game-history-time {
+	opacity: 0.5;
+	font-size: 0.75rem;
+	text-align: center;
+}
+
+#game-history-elo-change {
+	font-weight: bold;
+	flex-shrink: 0;
+	margin-right: 1rem;
 }
 
 /* ******************************** */
@@ -823,9 +1106,9 @@ hr::after {
 
 .service-logo {
 	width: 2rem;
-    height: 2rem;
-    position: relative;
-    top: -0.2rem;
+	height: 2rem;
+	position: relative;
+	top: -0.2rem;
 }
 
 .service-button {
