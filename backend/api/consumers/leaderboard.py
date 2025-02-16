@@ -1,7 +1,6 @@
 from channels.generic.http import AsyncHttpConsumer
 from django.contrib.auth import get_user_model
 from channels.db import database_sync_to_async
-from operator import itemgetter
 from api.utils import get_user_avatar_url
 from api.db_utils import get_user_by_name, get_user_statistic
 import json
@@ -22,8 +21,10 @@ class LeaderboardConsumer(AsyncHttpConsumer):
 				user['rumble_winrate'] = self.get_winrate(user_statistic.rumble_wins, user['rumble_games'])
 				user['avatar'] = get_user_avatar_url(db_user, self.scope['headers'])
 
-			classic_leaderboard = sorted(users, key=itemgetter('classic_elo', 'classic_winrate', 'username'), reverse=True)
-			rumble_leaderboard = sorted(users, key=itemgetter('rumble_elo', 'rumble_winrate', 'username'), reverse=True)
+			classic_leaderboard = sorted(users, 
+				key=lambda x: (-x['classic_elo'], x['classic_winrate'] == 'No games', -float(x['classic_winrate'].rstrip('%')) if x['classic_winrate'] != 'No games' else 0, x['username'].lower()))
+			rumble_leaderboard = sorted(users, 
+				key=lambda x: (-x['rumble_elo'], x['rumble_winrate'] == 'No games', -float(x['rumble_winrate'].rstrip('%')) if x['rumble_winrate'] != 'No games' else 0, x['username'].lower()))
 
 			response_data = {
 				'success': True,
