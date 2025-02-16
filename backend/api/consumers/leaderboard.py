@@ -1,7 +1,7 @@
 from channels.generic.http import AsyncHttpConsumer
 from django.contrib.auth import get_user_model
 from channels.db import database_sync_to_async
-from api.utils import get_user_avatar_url
+from api.utils import jwt_to_user, get_user_avatar_url
 from api.db_utils import get_user_by_name, get_user_statistic
 import json
 
@@ -27,6 +27,7 @@ class LeaderboardConsumer(AsyncHttpConsumer):
 				
 				avatar_url = get_user_avatar_url(db_user, self.scope['headers'])
 				user['avatar'] = avatar_url
+				user['name'] = db_user.display_name if db_user.display_name is not None else db_user.username
 
 				if (game_mode == "classic"):
 					user['elo'] = user_statistic.classic_elo

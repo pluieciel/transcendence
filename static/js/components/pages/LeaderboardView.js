@@ -68,7 +68,7 @@ export default class LeaderboardView {
 				leaderboardTable.innerHTML = "";
 				let i = 0;
 				while (i < data.leaderboard.length) {
-					this.addUserToLB(data.leaderboard[i], ++i, gameMode);
+					this.addUserToLB(data.leaderboard[i], ++i);
 				}	
 			}
 			else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
@@ -83,13 +83,13 @@ export default class LeaderboardView {
 		}
 	}
 
-	addUserToLB(user, rank, game_mode) {
+	addUserToLB(user, rank) {
 		let		row = "";
 		const	lb = document.getElementById("leaderboard-table");
 		
-		row += "<div id=\"" + game_mode + "-lb-card-" + rank + "\"class=\"lb-card\">";
+		row += "<div id=\"lb-card-" + rank + "\"class=\"lb-card\">";
 		row += "<div class=\"lb-card-pos lb-card-att\">" + rank + "</div>";
-		row += "<div class=\"lb-card-user lb-card-att\"><img class=\"lb-card-avatar avatar\" src=\"" + user.avatar + "\"></img> &nbsp;&nbsp;" + user.username + "</div>";
+		row += "<div class=\"lb-card-user lb-card-att\"><img class=\"lb-card-avatar avatar\" src=\"" + user.avatar + "\"></img> &nbsp;&nbsp;" + user.name + "</div>";
 		row += "<div class=\"lb-card-elo lb-card-att\">" + user.elo + "</div>";
 		row += "<div class=\"lb-card-winrate lb-card-att\">" + user.winrate + "</div>";
 		row += "<div class=\"lb-card-games lb-card-att\">" + user.games + "</div>";
