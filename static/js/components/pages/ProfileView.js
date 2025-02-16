@@ -52,7 +52,7 @@ export default class ProfileView {
 						</div>
 						<div id="profile-card-header-middle">
 							<img src="${profile.avatar_url}" id="profile-card-avatar" class="avatar">
-							<div id="profile-card-username">${profile.username}</div>
+							<div id="profile-card-username">${profile.username}${profile.is_42_user ? "&nbsp;<img src=\"/imgs/42_logo.png\" id=\"oauth-logo\"></img>" : ""}</div>
 							<div id="profile-card-display-name" style="display: ${profile.display_name ? 'block' : 'none'}">${profile.display_name || ''}</div>
 						</div>
 						<div id="profile-card-header-right">

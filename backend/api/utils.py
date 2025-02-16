@@ -108,6 +108,7 @@ async def get_users_with_stats(game_mode, headers):
 		user_statistic = await get_user_statistic(db_user)
 		
 		avatar_url = get_user_avatar_url(db_user, headers)
+		user['is_42_user'] = db_user.is_42_user
 		user['avatar'] = avatar_url
 		user['name'] = db_user.display_name if db_user.display_name is not None else db_user.username
 

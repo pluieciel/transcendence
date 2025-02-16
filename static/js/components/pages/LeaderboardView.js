@@ -89,7 +89,10 @@ export default class LeaderboardView {
 		
 		row += "<div id=\"lb-card-" + rank + "\"class=\"lb-card\">";
 		row += "<div class=\"lb-card-pos lb-card-att\">" + rank + "</div>";
-		row += "<div class=\"lb-card-user lb-card-att\"><img class=\"lb-card-avatar avatar\" src=\"" + user.avatar + "\"></img> &nbsp;&nbsp;" + user.name + "</div>";
+		row += "<div class=\"lb-card-user lb-card-att\"><img class=\"lb-card-avatar avatar\" src=\"" + user.avatar + "\"></img> &nbsp;&nbsp;" + user.name;
+		if (user.is_42_user)
+			row += "&nbsp;<img src=\"/imgs/42_logo.png\" id=\"oauth-logo\"></img>"
+		row += "</div>"
 		row += "<div class=\"lb-card-elo lb-card-att\">" + user.elo + "</div>";
 		row += "<div class=\"lb-card-winrate lb-card-att\">" + user.winrate + "</div>";
 		row += "<div class=\"lb-card-games lb-card-att\">" + user.games + "</div>";
