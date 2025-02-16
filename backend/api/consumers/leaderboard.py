@@ -8,6 +8,16 @@ import json
 class LeaderboardConsumer(AsyncHttpConsumer):
 	async def handle(self, body):
 		try:
+			user = await jwt_to_user(self.scope['headers'])
+			if not user:
+				response_data = {
+					'success': False,
+					'is_jwt_valid': False,
+					'message': 'Invalid JWT'
+				}
+				return await self.send_response(401, json.dumps(response_data).encode(),
+					headers=[(b"Content-Type", b"application/json")])
+
 			game_mode = self.scope['url_route']['kwargs']['game_mode']
 			users = await self.get_users()
 

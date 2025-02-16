@@ -657,7 +657,6 @@ hr::after {
 	display: flex;
 	justify-content: center;
 	flex-direction: row;
-	margin-bottom: 1rem;
 	width: 100%;
 }
 
