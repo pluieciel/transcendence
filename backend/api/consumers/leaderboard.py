@@ -1,8 +1,7 @@
 from channels.generic.http import AsyncHttpConsumer
 from django.contrib.auth import get_user_model
 from channels.db import database_sync_to_async
-from api.utils import jwt_to_user, get_user_avatar_url, get_winrate, sort_leaderboard
-from api.db_utils import get_user_by_name, get_user_statistic, get_users
+from api.utils import jwt_to_user, get_user_avatar_url, get_users_with_stats, sort_leaderboard
 import json
 
 class LeaderboardConsumer(AsyncHttpConsumer):
@@ -19,24 +18,7 @@ class LeaderboardConsumer(AsyncHttpConsumer):
 					headers=[(b"Content-Type", b"application/json")])
 
 			game_mode = self.scope['url_route']['kwargs']['game_mode']
-			users = await get_users()
-
-			for user in users:
-				db_user = await get_user_by_name(user['username'])
-				user_statistic = await get_user_statistic(db_user)
-				
-				avatar_url = get_user_avatar_url(db_user, self.scope['headers'])
-				user['avatar'] = avatar_url
-				user['name'] = db_user.display_name if db_user.display_name is not None else db_user.username
-
-				if (game_mode == "classic"):
-					user['elo'] = user_statistic.classic_elo
-					user['games'] = user_statistic.classic_wins + user_statistic.classic_losses
-					user['winrate'] = get_winrate(user_statistic.classic_wins, user['games'])
-				else:
-					user['elo'] = user_statistic.rumble_elo
-					user['games'] = user_statistic.rumble_wins + user_statistic.rumble_losses
-					user['winrate'] = get_winrate(user_statistic.rumble_wins, user['games'])
+			users = await get_users_with_stats(game_mode, self.scope['headers'])
 
 			response_data = {
 				'success': True,

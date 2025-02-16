@@ -1,5 +1,5 @@
 from channels.generic.http import AsyncHttpConsumer
-from api.utils import jwt_to_user, get_user_avatar_url, get_winrate, sort_leaderboard
+from api.utils import jwt_to_user, get_user_avatar_url, get_users_with_stats, get_winrate, sort_leaderboard
 from api.db_utils import get_user_by_name, get_user_statistic
 import json
 
@@ -41,14 +41,14 @@ class ProfileConsumer(AsyncHttpConsumer):
 					'wins': user_statistic.classic_wins,
 					'winrate': get_winrate(user_statistic.classic_wins, classic_total_played),
 					'elo': user_statistic.classic_elo,
-					'rank': "1", # TODO: get classic rank
+					'rank': await self.get_user_rank(profile_user, "classic"),
 				},
 				'rumble': {
 					'total_played': rumble_total_played,
 					'wins': user_statistic.rumble_wins,
 					'winrate': get_winrate(user_statistic.rumble_wins, rumble_total_played),
 					'elo': user_statistic.rumble_elo,
-					'rank': "1", # TODO: get rumbler rank
+					'rank': await self.get_user_rank(profile_user, "rumble"),
 				},
 				'tournament': {
 					'total_participated': tournament_total_participated,
@@ -68,3 +68,12 @@ class ProfileConsumer(AsyncHttpConsumer):
 			}
 			return await self.send_response(500, json.dumps(response_data).encode(),
 				headers=[(b"Content-Type", b"application/json")])
+
+	async def get_user_rank(self, user, game_mode):
+		users = await get_users_with_stats(game_mode, self.scope['headers'])
+		sorted_users = sort_leaderboard(users)
+		for i, u in enumerate(sorted_users):
+			if u['username'] == user.username:
+				return i + 1
+		return None
+
