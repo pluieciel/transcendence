@@ -1,6 +1,6 @@
 import AdminView from './components/pages/AdminView.js';
 import Router from './router.js';
-import MainView from './components/pages/MainView.js';
+import PlayView from './components/pages/PlayView.js';
 import LoginView from './components/pages/LoginView.js';
 import SignupView from './components/pages/SignupView.js';
 import LoginOAuth from './components/login/LoginOAuth.js';
@@ -19,7 +19,7 @@ class App {
 			{ path: '/', component: LoginView },
 			{ path: '/login', component: LoginView },
 			{ path: '/signup', component: SignupView },
-			{ path: '/play', component: MainView },
+			{ path: '/play', component: PlayView },
 			{ path: '/customize', component: CustomizeView },
 			{ path: '/credits', component: CreditsView },
 			{ path: '/profile', component: ProfileView },

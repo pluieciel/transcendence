@@ -587,16 +587,17 @@ hr::after {
 	color: var(--secondary-color);
 }
 
+#main-view {
+	justify-content: space-between;
+}
+
 #how-to-play-card {
-	position: absolute;
+	align-self: flex-start;
 	text-align: center;
-	top: 8.5rem;
-	right: 2.5rem;
 	width: 30rem;
 }
 
-#play-card {
-	margin: auto;
+#play-card, #left-filler {
 	width: 30rem;
 }
 
@@ -658,6 +659,7 @@ hr::after {
 	justify-content: center;
 	flex-direction: row;
 	width: 100%;
+	border-bottom: 1px solid var(--selector-color);
 }
 
 .lb-card-header div {
