@@ -56,7 +56,7 @@ class SetSettingsConsumer(AsyncHttpConsumer):
 
 			if display_name != user.display_name:
 				if display_name == "":
-					pass
+					display_name = None
 				elif not (self.is_valid_display_name(display_name)):
 					response_data = {
 						'success': False,
