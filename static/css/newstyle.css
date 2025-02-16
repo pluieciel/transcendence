@@ -1040,17 +1040,13 @@ hr::after {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
+	justify-content: space-around;
 }
 
 #game-history-date, #game-history-time {
 	opacity: 0.5;
 	font-size: 0.75rem;
 	text-align: center;
-}
-
-#game-history-score {
-	margin-top: 1.5rem;
-	font-weight: bold;
 }
 
 #game-history-elo-change {
