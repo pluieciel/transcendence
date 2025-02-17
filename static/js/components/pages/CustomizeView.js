@@ -9,6 +9,8 @@ export default class CustomizeView {
 		this.container = container;
 		this.username = window.app.state.username;
 		this.previewGame = null;
+		this.saveButton = null;
+		this.unlockedColors = new Set();
 		this.init();
 	}
 
@@ -23,8 +25,43 @@ export default class CustomizeView {
 		};
 		await addUserData(this.settings);
 		const canvas = document.getElementById("preview");
+		this.saveButton = document.querySelector('#save-button');
 		this.previewGame = new PreviewGame(canvas);
 		await this.previewGame.initialize();
+		await this.getColors(this.username)
+		document.querySelector('#input-message').innerHTML = 'locked'
+	}
+
+	setSaveButtonActive(active)
+	{
+		if (active)
+		{
+			this.saveButton.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save';
+			this.saveButton.disabled = '';
+		}
+		else
+		{
+			this.saveButton.innerHTML = '<i class="fa-solid fa-lock"></i> Locked';
+			this.saveButton.disabled = true;
+		}
+	}
+
+	async getColors(username) {
+		try {
+			const response = await fetch(`/api/profiles/${username}/colors/`);
+			const data = await response.json();
+			if (data.success) {
+				this.unlockedColors = new Set(data.colors);
+				this.setSaveButtonActive(this.unlockedColors.has(this.settings.color))
+				return data.colors;
+			} else {
+				console.error("Failed to fetch colors:", data.message);
+				return [];
+			}
+		} catch (error) {
+			console.error("An error occurred: " + error);
+			return [];
+		}
 	}
 
 	async refresh_settings() {
@@ -74,6 +111,9 @@ export default class CustomizeView {
 			addUserData(this.settings);
 			this.previewGame.updateColor(this.settings.color);
 			this.settings.isSaved = false;
+
+			console.log(this.unlockedColors.has(7));
+			this.setSaveButtonActive(this.unlockedColors.has(this.settings.color));
 		});
 
 		rightColor.addEventListener("click", () => {
@@ -82,6 +122,7 @@ export default class CustomizeView {
 			addUserData(this.settings);
 			this.previewGame.updateColor(this.settings.color);
 			this.settings.isSaved = false;
+			this.setSaveButtonActive(this.unlockedColors.has(this.settings.color));
 		});
 
 		leftQuality.addEventListener("click", () => {

@@ -207,6 +207,8 @@ class ShrinkingPaddleEvent(GameEvent):
 		self.action = 'reset'
 		self.game.player_left.paddle_height = self.paddle_height
 		self.game.player_right.paddle_height = self.paddle_height
+		self.game.player_left.currentShrinkPaddle = 0
+		self.game.player_right.currentShrinkPaddle = 0
 
 class NoStoppingEvent(GameEvent):
 	def __init__(self, game: 'RumbleGameInstance'):
@@ -239,13 +241,19 @@ class KillerBallEvent(GameEvent):
 		self.ball_accel_mult = 1.1
 		self.ball_basespeed_mult = 0.9
 		self.player_speed_mult = 1.1
-		self.ball_maxspeed_mult = 1.2
+		self.ball_maxspeed_mult = 6
+		self.killer_ball_start_time = None
 
 	def apply_specific(self):
 		self.game.ball.bounce_methods = KillerBall(self.game)
+		self.killer_ball_start_time = time.time() + 5
 
 	def revert_specific(self):
+		survived_time = time.time() - self.killer_ball_start_time
+		if (survived_time > self.game.highestKillerSurvive):
+			self.game.highestKillerSurvive = survived_time
 		self.game.ball.bounce_methods = NormalBounce()
+		self.killer_ball_start_time = None
 
 
 class IcyPaddlesEvent(GameEvent):
