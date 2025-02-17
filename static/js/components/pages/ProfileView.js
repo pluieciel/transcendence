@@ -11,6 +11,7 @@ export default class ProfileView {
 	async init() {
 		await window.app.getSettings();
 		const profile = await this.getProfile();
+		await this.getGameHistory();
 		if (profile) {
 			await this.render(profile);
 			this.addEventListeners();
@@ -168,6 +169,27 @@ export default class ProfileView {
 			const response = await fetch(`/api/profiles/${this.username}/`);
 	
 			const data = await response.json();
+			if (data.success) {
+				return data;
+			}
+			else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
+				window.app.logout();
+			}
+			else {
+				// TODO: handle error msg
+			}
+		}
+		catch (e) {
+			console.error(e);
+		}
+	}
+
+	async getGameHistory() {
+		try {
+			const response = await fetch(`/api/profiles/${this.username}/history/`);
+	
+			const data = await response.json();
+			console.log(data);
 			if (data.success) {
 				return data;
 			}

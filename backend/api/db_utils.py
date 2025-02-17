@@ -34,6 +34,16 @@ def update_recovery_codes_generated(user, recovery_codes_generated):
 	user.save()
 
 @database_sync_to_async
+def update_game_history_player_b(game_id, player_b):
+	from .models import GameHistory
+	game = GameHistory.objects.get(id=game_id)
+	if (game):
+		game.player_b = player_b
+		game.save()
+	else:
+		logging.getLogger('game').error(f"Game {game_id} not found")
+
+@database_sync_to_async
 def finish_game_history(game_id, score_a, score_b, elo_change, winner):
 	from .models import GameHistory
 	game = GameHistory.objects.get(id=game_id)

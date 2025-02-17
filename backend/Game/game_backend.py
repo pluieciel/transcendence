@@ -6,7 +6,7 @@ from .normal_game_logic import ClassicGameInstance, GameBounds
 from .rumble_game_logic import RumbleGameInstance, GameBounds
 from channels.db import database_sync_to_async
 from .bot import Bot
-from api.db_utils import finish_game_history, user_update_game, delete_game_history, get_user_preference, get_user_statistic
+from api.db_utils import update_game_history_player_b, finish_game_history, user_update_game, delete_game_history, get_user_preference, get_user_statistic
 from datetime import datetime
 import redis
 from channels.layers import get_channel_layer
@@ -33,7 +33,7 @@ class GameBackend:
 
 		self.elo_k_factor = 40
 
-		if (bot > 1):
+		if (bot > 0):
 			self.player_right = Bot(bot, self.game)
 		self.logger.info(f"{self.is_ranked is False} and {bot}")
 		from Chat.consumer import ChatConsumer
@@ -57,7 +57,7 @@ class GameBackend:
 	def is_full(self):
 		return (self.player_left is not None and self.player_right is not None)
 
-	def start_game(self):
+	async def start_game(self):
 		if self.is_full() and not self.game.is_running:
 			self.player_left.state = "Playing"
 			self.player_right.state = "Playing"
@@ -65,6 +65,7 @@ class GameBackend:
 				self.logger.info("started game with a bot")
 				self.player_right.start_bot()
 			else:
+				await update_game_history_player_b(self.game_id, self.player_right.user)
 				self.logger.info("started game with a player")
 			self.game.start()
 		else:
@@ -110,30 +111,30 @@ class GameBackend:
 		else:
 			raise Exception("Error : assign player when two player were in a game")
 
-	def set_player_init(self, channel):
+	async def set_player_init(self, channel):
 			self.logger.info('init called')
 			if (self.player_left.channel == channel):
 				self.logger.info('inisaddsat calasddasled')
 				self.logger.info(f"is bot game {self.bot > 0}")
 				self.player_left.state = "Ready"
-				self.check_ready_game()
+				await self.check_ready_game()
 			elif self.bot > 0:
 				self.logger.info('inisadasdsadasdsat called')
-				self.check_ready_game()
+				await self.check_ready_game()
 			elif (self.player_right.channel == channel):
 				self.logger.info('inisaddsat calasdasled')
 				self.logger.info(f"is bot game {self.bot > 0}")
 				self.player_right.state = "Ready"
-				self.check_ready_game()
+				await self.check_ready_game()
 			else:
 				self.logger.info('inisaddsat called')
 				self.logger.warning("Received player init but couldnt match channel")
 
-	def check_ready_game(self):
+	async def check_ready_game(self):
 		self.logger.info('check called')
 		if (self.player_left and self.player_left.state == "Ready" and (self.bot > 0 or (self.player_right and self.player_right.state == "Ready"))):
 			self.logger.info("Both player ready, starting")
-			self.start_game()
+			await self.start_game()
 		else:
 			self.logger.info("Not starting, both player not ready yet")
 
@@ -179,17 +180,16 @@ class GameBackend:
 				self.logger.info(f"Resetting left player: {self.player_left.user.username}")
 				await user_update_game(self.player_left.user, isplaying=False, game_id=-1)
 
-
 			if self.player_right and self.bot == 0:
 				self.logger.info(f"Resetting right player: {self.player_right.user.username}")
-				await user_update_game(self.player_left.user, isplaying=False, game_id=-1)
+				await user_update_game(self.player_right.user, isplaying=False, game_id=-1)
 
 			self.manager.remove_game(self.game_id)
 			game_history_db = await self.manager.get_game_by_id(self.game_id)
 			await self.manager.set_game_state(game_history_db, 'finished', self.game.player_left.score, self.game.player_right.score)
 
 			#next round for tournament
-			if game_history_db.game_category == "Tournament1":
+			if game_history_db.game_type == "Tournament1":
 				next_game_place = game_history_db.tournament_round2_place
 				self.chat_consumer.tournament_info["round1"][f"game{next_game_place}"]["winner"] = self.game.winner.username
 				next_game_id = game_history_db.tournament_round2_game_id
@@ -220,7 +220,7 @@ class GameBackend:
 							"time": datetime.now().strftime("%H:%M:%S")
 						}
 					)
-			elif game_history_db.game_category == "Tournament2":
+			elif game_history_db.game_type == "Tournament2":
 				self.chat_consumer.tournament_info["round2"]["game1"]["winner"] = self.game.winner.username
 
 				redis_client = redis.Redis(host='redis', port=6379, db=0)
