@@ -34,7 +34,7 @@ export default class ProfileView {
 									</li>
 									<li>
 										<div class="stat-value">${profile.classic.wins}</div>
-										<div class="stat-label">Win</div>
+										<div class="stat-label">Wins</div>
 									</li>
 									<li>
 										<div class="stat-value">${profile.classic.winrate}</div>
@@ -74,7 +74,7 @@ export default class ProfileView {
 									</li>
 									<li>
 										<div class="stat-value">${profile.rumble.wins}</div>
-										<div class="stat-label">Win</div>
+										<div class="stat-label">Wins</div>
 									</li>
 									<li>
 										<div class="stat-value">${profile.rumble.total_played}</div>
@@ -197,16 +197,24 @@ export default class ProfileView {
 				<div id="game-history-game-type">
 					${gameHistory['game_mode'] == "classic" ? '<i class="fa-solid fa-star"></i>' : '<i class="fa-solid fa-bolt"></i>'}
 				</div>
-				<div id="player-left-history-name">${gameHistory['player_left']['is_winner'] ? '<i class="fa-solid fa-medal"></i>' : ''} ${gameHistory['player_left']['name']}</div>
+				<div id="player-left-history-name">${gameHistory['player_left']['name']}</div>
 				<div id="game-history-middle">
-					<img src="${gameHistory['player_left']['avatar_url']}" id="player-left-history-avatar" class="avatar">
+					<div id="player-left-history-avatar">
+						<img src="${gameHistory['player_left']['avatar_url']}" id="player-left-avatar" class="avatar">
+						<div class="player-winner">${gameHistory['player_left']['is_winner'] ? 'WINNER' : ''}</div>
+						<div class="player-loser">${gameHistory['player_left']['is_winner'] ? '' : 'LOSER'}</div>
+					</div>
 					<div id="game-middle-info">
 						<div id="game-history-score">${gameHistory['score_left']} - ${gameHistory['score_right']}</div>
 						<div id="game-history-time">${gameHistory['time_since_game']}</div>
 					</div>
-					<img src="${gameHistory['player_right']['avatar_url']}" id="player-right-history-avatar" class="avatar">
+					<div id="player-right-history-avatar">
+						<img src="${gameHistory['player_right']['avatar_url']}" id="player-right-avatar" class="avatar">
+						<div class="player-winner">${gameHistory['player_right']['is_winner'] ? 'WINNER' : ''}</div>
+						<div class="player-loser">${gameHistory['player_right']['is_winner'] ? '' : 'LOSER'}</div>
+					</div>
 				</div>
-				<div id="player-right-history-name">${gameHistory['player_right']['name']} ${gameHistory['player_right']['is_winner'] ? '<i class="fa-solid fa-medal"></i>' : ''}</div>
+				<div id="player-right-history-name">${gameHistory['player_right']['name']}</div>
 				<div id="game-history-elo-change"><i class="fa-solid fa-plus-minus"></i> ${gameHistory['elo_change']}</div>
 			</div>`
 		itemContainer.insertAdjacentHTML("beforeend", item);

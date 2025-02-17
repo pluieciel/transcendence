@@ -41,8 +41,10 @@ class GameHistoryConsumer(AsyncHttpConsumer):
 				player_right =  await self.get_player_right(game_history)
 				winner = await self.get_winner(game_history)
 				time_since_game = timesince(game_history.updated_at, timezone.now())
-				if not "," in time_since_game:
+				if "," in time_since_game:
 					time_since_game = time_since_game.split(",")[0]
+				if "hours" in time_since_game or "hour" in time_since_game:
+					time_since_game = time_since_game.split()[0] + " " + time_since_game.split()[1]
 				time_since_game = time_since_game.strip() + " ago"
 
 				response_data[f"game_history_{index}"] = {

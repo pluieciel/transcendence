@@ -993,10 +993,10 @@ hr::after {
 }
 
 #player-left-history-avatar, #player-right-history-avatar {
-	width: 3.2rem;
-	height: 3.2rem;
-	border: 1px solid var(--user-color);
-	box-shadow: 0 0 15px var(--user-color);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
 }
 
 #player-left-history-avatar {
@@ -1005,6 +1005,26 @@ hr::after {
 
 #player-right-history-avatar {
 	margin: 0 0.5rem 0 1rem;
+}
+
+.player-winner {
+	font-size: 0.75rem;
+	text-align: center;
+	color: var(--user-color);
+	text-shadow: 0 0 5px var(--user-color);
+}
+
+.player-loser {
+	opacity: 0.5;
+	font-size: 0.75rem;
+	text-align: center;
+}
+
+#player-left-avatar, #player-right-avatar {
+	width: 3.2rem;
+	height: 3.2rem;
+	border: 1px solid var(--user-color);
+	box-shadow: 0 0 15px var(--user-color);
 }
 
 #player-left-history-name, #player-right-history-name {
