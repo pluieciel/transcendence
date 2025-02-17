@@ -879,7 +879,7 @@ hr::after {
 }
 
 #profile-card-avatar {
-	width: min(50%, 9rem);
+	width: min(50%, 6rem);
 	aspect-ratio: 1;
 	margin-bottom: 0.2rem;
 	border: 1px solid var(--user-color);
@@ -1041,7 +1041,7 @@ hr::after {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	justify-content: space-around;
+	justify-content: center;
 }
 
 #game-history-date, #game-history-time {

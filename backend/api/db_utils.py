@@ -34,17 +34,27 @@ def update_recovery_codes_generated(user, recovery_codes_generated):
 	user.save()
 
 @database_sync_to_async
-def finish_game_history(game_id, score_a, score_b, elo_change, winner):
+def update_game_history_player_right(game_id, player_right):
 	from .models import GameHistory
 	game = GameHistory.objects.get(id=game_id)
 	if (game):
-		game.score_a = score_a
-		game.score_b = score_b
+		game.player_right = player_right
+		game.save()
+	else:
+		logging.getLogger('game').error(f"Game {game_id} not found")
+
+@database_sync_to_async
+def finish_game_history(game_id, score_left, score_right, elo_change, winner):
+	from .models import GameHistory
+	game = GameHistory.objects.get(id=game_id)
+	if (game):
+		game.score_left = score_left
+		game.score_right = score_right
 		game.status = "finished"
 		game.elo_change = elo_change
 		game.winner = winner
 		game.save()
-		logging.getLogger('game').info(f"Game {game_id} finished with score {score_a} - {score_b} and elo change {elo_change} for player A : {game.player_a} and player B : {game.player_b} state is now {game.status} for the mode {game.game_mode} the winner is {game.winner}")
+		logging.getLogger('game').info(f"Game {game_id} finished with score {score_left} - {score_right} and elo change {elo_change} for player A : {game.player_left} and player B : {game.player_right} state is now {game.status} for the mode {game.game_mode} the winner is {game.winner}")
 	else:
 		logging.getLogger('game').error(f"Game {game_id} not found")
 

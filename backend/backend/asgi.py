@@ -14,7 +14,6 @@ from channels.auth import AuthMiddlewareStack
 from Chat.routing import websocket_urlpatterns as chat_websocket_patterns
 from Game.routing import websocket_urlpatterns as game_websocket_patterns
 from django.urls import path, re_path
-from api.consumers.history import getHistory
 from api.consumers.leaderboard import LeaderboardConsumer
 from api.consumers.login_2fa import Login2FAConsumer
 from api.consumers.login_2fa_recovery import Login2FARecoveryConsumer
@@ -24,6 +23,7 @@ from api.consumers.generate_2fa_qr import Generate2FAQRConsumer
 from api.consumers.generate_2fa_recovery import Generate2FARecoveryConsumer
 from api.consumers.oauth import OAuthConsumer
 from api.consumers.login_oauth import LoginOAuthConsumer
+from api.consumers.game_history import GameHistoryConsumer
 from api.consumers.profile import ProfileConsumer
 from api.consumers.profile_nav import ProfileNavConsumer
 from api.consumers.settings import GetSettingsConsumer, SetSettingsConsumer
@@ -57,7 +57,7 @@ http_patterns = [
 
     path('api/profiles/me/nav/', ProfileNavConsumer.as_asgi()),
     re_path(r'^api/profiles/(?P<username>.*)/avatar/$', AvatarConsumer.as_asgi()),
-    re_path(r'^api/profiles/(?P<username>.*)/history/$', getHistory.as_asgi()),
+    re_path(r'^api/profiles/(?P<username>.*)/history/$', GameHistoryConsumer.as_asgi()),
     re_path(r'^api/profiles/(?P<username>.*)/achievement/$', AchievementConsumer.as_asgi()),
     re_path(r'^api/profiles/(?P<username>.*)/$', ProfileConsumer.as_asgi()),
 
