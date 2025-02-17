@@ -1031,7 +1031,7 @@ hr::after {
 	text-align: center;
 }
 
-#player-left-avatar, #player-right-avatar {
+.player-avatar {
 	width: 3.2rem;
 	height: 3.2rem;
 	border: 1px solid var(--user-color);
@@ -1047,6 +1047,20 @@ hr::after {
 	font-weight: bold;
 	text-align: center;
 	flex-grow: 1;
+}
+
+#player-left-history-avatar button, #player-right-history-avatar button, 
+#player-left-history-name button, #player-right-history-name button {
+	border: none;
+	background-color: transparent;
+	color: var(--secondary-color);
+	font-weight: bold;
+	width: 100%;
+}
+
+#player-left-history-avatar button:hover, #player-right-history-avatar button:hover, 
+#player-left-history-name button:hover, #player-right-history-name button:hover {
+	opacity: 0.5;
 }
 
 #game-history-game-type i {

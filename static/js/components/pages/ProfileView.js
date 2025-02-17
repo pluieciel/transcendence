@@ -223,33 +223,65 @@ export default class ProfileView {
 		}
 	}
 
+	getHistoryAvatar(player) {
+		let history_avatar = `<img src="${player['avatar_url']}" class="avatar player-avatar">`
+		if (player['is_winner'])
+			history_avatar += `<div class="player-winner">WINNER</div>`
+		else
+			history_avatar += `<div class="player-loser">LOSER</div>`
+		return history_avatar;
+	}
+
 	addGameHistoryToGameHistories(gameHistory) {
 		const itemContainer = document.getElementById('game-history-item-container');
+		const leftProfileButtonId = `game-history-${gameHistory['id']}-left-name`;
+		const rightProfileButtonId = `game-history-${gameHistory['id']}-right-name`;
+		const leftAvatarButtonId = `game-history-${gameHistory['id']}-left-avatar`;
+		const rightAvatarButtonId = `game-history-${gameHistory['id']}-right-avatar`;
+		
 		const item = `
 			<div class="game-history-item">
 				<div id="game-history-game-type">
 					${gameHistory['game_mode'] == "classic" ? '<i class="fa-solid fa-star"></i>' : '<i class="fa-solid fa-bolt"></i>'}
 				</div>
-				<div id="player-left-history-name">${gameHistory['player_left']['name']}</div>
+				<div id="player-left-history-name">
+					${gameHistory['player_left']['is_opponent'] ? 
+						`<button id="${leftProfileButtonId}" data-redirect-to="${gameHistory['player_left']['username']}">${gameHistory['player_left']['name']}</button>` :
+						gameHistory['player_left']['name']}
+				</div>
 				<div id="game-history-middle">
 					<div id="player-left-history-avatar">
-						<img src="${gameHistory['player_left']['avatar_url']}" id="player-left-avatar" class="avatar">
-						<div class="player-winner">${gameHistory['player_left']['is_winner'] ? 'WINNER' : ''}</div>
-						<div class="player-loser">${gameHistory['player_left']['is_winner'] ? '' : 'LOSER'}</div>
+						${gameHistory['player_left']['is_opponent'] ? 
+							`<button id="${leftAvatarButtonId}" data-redirect-to="${gameHistory['player_left']['username']}">${this.getHistoryAvatar(gameHistory['player_left'])}</button>` :
+							this.getHistoryAvatar(gameHistory['player_left'])}
 					</div>
 					<div id="game-middle-info">
 						<div id="game-history-score">${gameHistory['score_left']} - ${gameHistory['score_right']}</div>
 						<div id="game-history-time">${gameHistory['time_since_game']}</div>
 					</div>
 					<div id="player-right-history-avatar">
-						<img src="${gameHistory['player_right']['avatar_url']}" id="player-right-avatar" class="avatar">
-						<div class="player-winner">${gameHistory['player_right']['is_winner'] ? 'WINNER' : ''}</div>
-						<div class="player-loser">${gameHistory['player_right']['is_winner'] ? '' : 'LOSER'}</div>
+						${gameHistory['player_right']['is_opponent'] ? 
+							`<button id="${rightAvatarButtonId}" data-redirect-to="${gameHistory['player_right']['username']}">${this.getHistoryAvatar(gameHistory['player_right'])}</button>` :
+							this.getHistoryAvatar(gameHistory['player_right'])}
 					</div>
 				</div>
-				<div id="player-right-history-name">${gameHistory['player_right']['name']}</div>
+				<div id="player-right-history-name">
+					${gameHistory['player_right']['is_opponent'] ? 
+						`<button id="${rightProfileButtonId}" data-redirect-to="${gameHistory['player_right']['username']}">${gameHistory['player_right']['name']}</button>` :
+						gameHistory['player_right']['name']}
+				</div>
 				<div id="game-history-elo-change"><i class="fa-solid fa-plus-minus"></i> ${gameHistory['elo_change']}</div>
-			</div>`
+			</div>`;
 		itemContainer.insertAdjacentHTML("beforeend", item);
+
+		[leftProfileButtonId, rightProfileButtonId, leftAvatarButtonId, rightAvatarButtonId].forEach(btnId => {
+			const button = document.getElementById(btnId);
+			if (button) {
+				button.addEventListener('click', (e) => {
+					const username = e.currentTarget.dataset.redirectTo;
+					window.app.router.navigateTo(`/profiles/${username}`);
+				});
+			}
+		});
 	}
 }

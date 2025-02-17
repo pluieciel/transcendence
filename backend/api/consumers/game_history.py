@@ -48,6 +48,7 @@ class GameHistoryConsumer(AsyncHttpConsumer):
 				time_since_game = time_since_game.strip() + " ago"
 
 				response_data[f"game_history_{index}"] = {
+					'id': game_history.id,
 					'game_type': game_history.game_type,
 					'game_mode': game_history.game_mode,
 					'score_left': game_history.score_left,
@@ -55,14 +56,18 @@ class GameHistoryConsumer(AsyncHttpConsumer):
 					'elo_change': game_history.elo_change,
 					'time_since_game': time_since_game,
 					'player_left': {
+						'username': player_left.username,
 						'name': player_left.display_name if player_left.display_name is not None else player_left.username,
 						'avatar_url': get_user_avatar_url(player_left, self.scope['headers']),
 						'is_winner': player_left.id == winner.id,
+						'is_opponent': player_left.username != self.scope['url_route']['kwargs']['username'],
 					},
 					'player_right': {
+						'username': player_right.username,
 						'name': player_right.display_name if player_right.display_name is not None else player_right.username,
 						'avatar_url': get_user_avatar_url(player_right, self.scope['headers']),
 						'is_winner': player_right.id == winner.id,
+						'is_opponent': player_right.username != self.scope['url_route']['kwargs']['username'],
 					},
 				}
 			return await self.send_response(200, json.dumps(response_data).encode(),
