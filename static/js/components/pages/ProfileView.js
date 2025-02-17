@@ -13,6 +13,7 @@ export default class ProfileView {
 		const profile = await this.getProfile();
 		if (profile) {
 			await this.render(profile);
+			await this.getGameHistory();
 			this.addEventListeners();
 		}
 	}
@@ -119,25 +120,7 @@ export default class ProfileView {
 						<div id="profile-card-game-history" class="profile-card-content">
 							<h5 id="card-title"><i class="fa-solid fa-clock-rotate-left"></i> Game History</h5>
 							<div id="game-history-content">
-								<div id="game-history-item-container">
-									<div class="game-history-item">
-											<div id="game-history-game-type">
-												<i class="fa-solid fa-star"></i>
-										</div>
-										<div id="player-left-history-name">user1</div>
-										<div id="game-history-middle">
-											<img src="/imgs/default_avatar.png" id="player-left-history-avatar" class="avatar">
-											<div id="game-middle-info">
-												<div id="game-history-date">14/02/2025</div>
-												<div id="game-history-score">10 - 5</div>
-												<div id="game-history-time">14:00</div>
-											</div>
-											<img src="/imgs/default_avatar.png" id="player-right-history-avatar" class="avatar">
-										</div>
-										<div id="player-right-history-name">user2</div>
-										<div id="game-history-elo-change"><i class="fa-solid fa-plus-minus"></i> 20</div>
-									</div>
-								</div>
+								<div id="game-history-item-container"></div>
 							</div>
 						</div>
 					</div>
@@ -181,5 +164,51 @@ export default class ProfileView {
 		catch (e) {
 			console.error(e);
 		}
+	}
+
+	async getGameHistory() {
+		try {
+			const response = await fetch(`/api/profiles/${this.username}/history/`);
+	
+			const data = await response.json();
+			console.log(data);
+			if (data.success) {
+				Object.keys(data).forEach(key => {
+					if (key.startsWith('game_history_'))
+						this.addGameHistoryToGameHistories(data[key]);
+				});
+			}
+			else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
+				window.app.logout();
+			}
+			else {
+				// TODO: handle error msg
+			}
+		}
+		catch (e) {
+			console.error(e);
+		}
+	}
+
+	addGameHistoryToGameHistories(gameHistory) {
+		const itemContainer = document.getElementById('game-history-item-container');
+		const item = `
+			<div class="game-history-item">
+				<div id="game-history-game-type">
+					${gameHistory['game_mode'] == "classic" ? '<i class="fa-solid fa-star"></i>' : '<i class="fa-solid fa-bolt"></i>'}
+				</div>
+				<div id="player-left-history-name">${gameHistory['player_left']['is_winner'] ? '<i class="fa-solid fa-medal"></i>' : ''} ${gameHistory['player_left']['name']}</div>
+				<div id="game-history-middle">
+					<img src="${gameHistory['player_left']['avatar_url']}" id="player-left-history-avatar" class="avatar">
+					<div id="game-middle-info">
+						<div id="game-history-score">${gameHistory['score_left']} - ${gameHistory['score_right']}</div>
+						<div id="game-history-time">${gameHistory['time_since_game']}</div>
+					</div>
+					<img src="${gameHistory['player_right']['avatar_url']}" id="player-right-history-avatar" class="avatar">
+				</div>
+				<div id="player-right-history-name">${gameHistory['player_right']['name']} ${gameHistory['player_right']['is_winner'] ? '<i class="fa-solid fa-medal"></i>' : ''}</div>
+				<div id="game-history-elo-change"><i class="fa-solid fa-plus-minus"></i> ${gameHistory['elo_change']}</div>
+			</div>`
+		itemContainer.insertAdjacentHTML("beforeend", item);
 	}
 }
