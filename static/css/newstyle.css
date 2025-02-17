@@ -1196,9 +1196,11 @@ hr::after {
 }
 
 .my-modal {
+	background-color: #0e0e0e;
+	color: var(--secondary-color);	
 	margin-top: 5.5rem;
-	background-color: var(--accent-color);
-	color: var(--secondary-color);
+	border-radius: 0.3rem;
+	padding: 2rem;
 }
 
 .my-modal #modal-title {

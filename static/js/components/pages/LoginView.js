@@ -35,7 +35,7 @@ export default class LoginView {
 					</form>
 				</div>
 				<div class="my-modal-background">
-					<div id="specific-modal" class="card my-modal">
+					<div id="specific-modal" class="my-modal">
 						<div id="modal-header">
 							<h5 id="modal-title"><i class="fa-solid fa-key"></i>&nbsp; Two Factor Authentication</h5>
 							<i class="fa-solid fa-xmark fa-xl"></i>
