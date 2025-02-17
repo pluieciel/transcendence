@@ -164,11 +164,11 @@ class GameHistory(models.Model):
     game_mode = models.CharField(max_length=32, default='classic')
     game_type = models.CharField(max_length=32) # Quick Match, Invite, Tournament1/2?
     game_state = models.CharField(max_length=32, default='waiting') # waiting, playing, finished
-    score_a = models.IntegerField(default=0)
-    score_b = models.IntegerField(default=0)
     elo_change = models.IntegerField(default=0)
-    player_a = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='player_a')
-    player_b = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='player_b')
+    score_left = models.IntegerField(default=0)
+    score_right = models.IntegerField(default=0)
+    player_left = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='player_left')
+    player_right = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='player_right')
     winner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='winner')
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)

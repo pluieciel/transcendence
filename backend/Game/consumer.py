@@ -91,22 +91,22 @@ class GameManager:
 		return self.game_history.objects.filter(game_state='waiting', game_mode=game_mode)
 
 	@database_sync_to_async
-	def get_invite_game(self, player_a, player_b, game_type='Invite'):
-		game = self.game_history.objects.filter(player_a=player_a, player_b=player_b, game_state='waiting', game_type=game_type)
+	def get_invite_game(self, player_left, player_right, game_type='Invite'):
+		game = self.game_history.objects.filter(player_left=player_left, player_right=player_right, game_state='waiting', game_type=game_type)
 		if not game.exists():
 			self.logger.info("Waiting for the game to be created")
 			sleep(0.5)
-			game = self.game_history.objects.filter(player_a=player_a, player_b=player_b, game_state='waiting', game_type=game_type)
+			game = self.game_history.objects.filter(player_left=player_left, player_right=player_right, game_state='waiting', game_type=game_type)
 		return game.first()
 
 	@database_sync_to_async
 	def get_tournament_game(self, p1, p2, game_type='Tournament1'):
-		game = self.game_history.objects.filter(player_a=p1, player_b=p2, game_state='waiting', game_type=game_type)
+		game = self.game_history.objects.filter(player_left=p1, player_right=p2, game_state='waiting', game_type=game_type)
 		return game.first()
 
 	@database_sync_to_async
-	def create_game_history(self, player_a, player_b=None, game_type='ranked', game_mode='classic', game_state='waiting', tournament_count=0, tournament_round2_game_id=-1, tournament_round2_place=-1):
-		return self.game_history.objects.create(player_a=player_a, player_b=player_b, game_type=game_type, game_mode=game_mode, game_state=game_state, tournament_count=tournament_count, tournament_round2_game_id=tournament_round2_game_id, tournament_round2_place=tournament_round2_place)
+	def create_game_history(self, player_left, player_right=None, game_type='ranked', game_mode='classic', game_state='waiting', tournament_count=0, tournament_round2_game_id=-1, tournament_round2_place=-1):
+		return self.game_history.objects.create(player_left=player_left, player_right=player_right, game_type=game_type, game_mode=game_mode, game_state=game_state, tournament_count=tournament_count, tournament_round2_game_id=tournament_round2_game_id, tournament_round2_place=tournament_round2_place)
 
 	@database_sync_to_async
 	def save_game_history(self, game_history):
@@ -121,14 +121,14 @@ class GameManager:
 		return games.first()
 
 	@database_sync_to_async
-	def set_game_state(self, game, game_state, score_a = 0, score_b = 0, player_a = None, player_b = None):
-		game.score_a = score_a
-		game.score_b = score_b
+	def set_game_state(self, game, game_state, score_left = 0, score_right = 0, player_left = None, player_right = None):
+		game.score_left = score_left
+		game.score_right = score_right
 		game.game_state = game_state
-		if player_a:
-			game.player_a = player_a
-		if player_b:
-			game.player_b = player_b
+		if player_left:
+			game.player_left = player_left
+		if player_right:
+			game.player_right = player_right
 		game.save()
 
 	@database_sync_to_async
@@ -193,7 +193,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 			if not await self.is_valid_invite(await self.get_user(sender), self.user):
 				self.logger.info(f"Invalid invitation from {sender} to {self.user.username}")
 				return # invalid invitation
-			game_db = await game_manager.create_game_history(user, player_b=await self.get_user(sender), game_type='Invite', game_mode=mode)
+			game_db = await game_manager.create_game_history(user, player_right=await self.get_user(sender), game_type='Invite', game_mode=mode)
 			self.game = GameBackend(game_db.id, 0, game_manager, False, mode) #TODO Ranked mode
 			game_manager.games[game_db.id] = self.game
 			self.game.channel_layer = self.channel_layer

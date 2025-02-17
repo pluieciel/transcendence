@@ -6,7 +6,7 @@ from .normal_game_logic import ClassicGameInstance, GameBounds
 from .rumble_game_logic import RumbleGameInstance, GameBounds
 from channels.db import database_sync_to_async
 from .bot import Bot
-from api.db_utils import update_game_history_player_b, finish_game_history, user_update_game, delete_game_history, get_user_preference, get_user_statistic
+from api.db_utils import update_game_history_player_right, finish_game_history, user_update_game, delete_game_history, get_user_preference, get_user_statistic
 from datetime import datetime
 import redis
 from channels.layers import get_channel_layer
@@ -65,7 +65,7 @@ class GameBackend:
 				self.logger.info("started game with a bot")
 				self.player_right.start_bot()
 			else:
-				await update_game_history_player_b(self.game_id, self.player_right.user)
+				await update_game_history_player_right(self.game_id, self.player_right.user)
 				self.logger.info("started game with a player")
 			self.game.start()
 		else:
@@ -195,10 +195,10 @@ class GameBackend:
 				next_game_id = game_history_db.tournament_round2_game_id
 				new_game_history_db = await self.manager.get_game_by_id(next_game_id)
 				if next_game_place == 1:
-					await self.manager.set_game_state(new_game_history_db, 'waiting', player_a=self.game.winner)
+					await self.manager.set_game_state(new_game_history_db, 'waiting', player_left=self.game.winner)
 					self.chat_consumer.tournament_info["round2"]["game1"]["p1"] = self.game.winner.username
 				else:
-					await self.manager.set_game_state(new_game_history_db, 'waiting', player_b=self.game.winner)
+					await self.manager.set_game_state(new_game_history_db, 'waiting', player_right=self.game.winner)
 					self.chat_consumer.tournament_info["round2"]["game1"]["p2"] = self.game.winner.username
 
 				if self.chat_consumer.tournament_info["round2"]["game1"].get("p1", None) and self.chat_consumer.tournament_info["round2"]["game1"].get("p2", None):
