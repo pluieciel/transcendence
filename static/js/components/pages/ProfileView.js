@@ -10,15 +10,13 @@ export default class ProfileView {
 
 	async init() {
 		await window.app.getSettings();
-		const profile = await this.getProfile();
-		if (profile) {
-			await this.render(profile);
-			await this.getGameHistory();
-			this.addEventListeners();
-		}
+		await this.render();
+		await this.setProfile();
+		await this.setGameHistory();
+		this.addEventListeners();
 	}
 
-	async render(profile) {
+	async render() {
 		await window.app.renderHeader(this.container, "profile");
 		this.container.innerHTML += `
 			<main>
@@ -29,55 +27,53 @@ export default class ProfileView {
 							<div class="profile-card-stats">
 								<ul>
 									<li>
-										<div class="stat-value">${profile.classic.total_played}</div>
+										<div id="classic-total-played" class="stat-value"></div>
 										<div class="stat-label">Total Played</div>
 									</li>
 									<li>
-										<div class="stat-value">${profile.classic.wins}</div>
+										<div id="classic-wins" class="stat-value"></div>
 										<div class="stat-label">Wins</div>
 									</li>
 									<li>
-										<div class="stat-value">${profile.classic.winrate}</div>
+										<div id="classic-winrate" class="stat-value"></div>
 										<div class="stat-label">Winrate</div>
 									</li>
 									<li>
-										<div class="stat-value">${profile.classic.elo}</div>
+										<div id="classic-elo" class="stat-value"></div>
 										<div class="stat-label">Elo</div>
 									</li>
 									<li>
-										<div class="stat-value">${this.getRankField(profile.classic.rank)}</div>
+										<div id="classic-rank" class="stat-value"></div>
 										<div class="stat-label">Rank</div>
 									</li>
 								</ul>
 							</div>
 						</div>
 						<div id="profile-card-header-middle">
-							<img src="${profile.avatar_url}" id="profile-card-avatar" class="avatar">
-							<div id="profile-card-username">${profile.username}${profile.is_42_user ? "&nbsp;<img src=\"/imgs/42_logo.png\" id=\"oauth-logo\"></img>" : ""}</div>
-							<div id="profile-card-display-name" style="display: ${profile.display_name ? 'block' : 'none'}">${profile.display_name || ''}</div>
+
 						</div>
 						<div id="profile-card-header-right">
 							<h5 id="card-title"><i class="fa-solid fa-bolt"></i> Rumble</h5>
 							<div class="profile-card-stats">
 								<ul>
 									<li>
-										<div class="stat-value">${this.getRankField(profile.rumble.rank)}</div>
+										<div id="rumble-rank" class="stat-value"></div>
 										<div class="stat-label">Rank</div>
 									</li>
 									<li>
-										<div class="stat-value">${profile.rumble.elo}</div>
+										<div id="rumble-elo" class="stat-value"></div>
 										<div class="stat-label">Elo</div>
 									</li>
 									<li>
-										<div class="stat-value">${profile.rumble.winrate}</div>
+										<div id="rumble-winrate" class="stat-value"></div>
 										<div class="stat-label">Winrate</div>
 									</li>
 									<li>
-										<div class="stat-value">${profile.rumble.wins}</div>
+										<div id="rumble-wins" class="stat-value"></div>
 										<div class="stat-label">Wins</div>
 									</li>
 									<li>
-										<div class="stat-value">${profile.rumble.total_played}</div>
+										<div id="rumble-total-played" class="stat-value"></div>
 										<div class="stat-label">Total Played</div>
 									</li>
 								</ul>
@@ -91,23 +87,23 @@ export default class ProfileView {
 								<div class="profile-card-stats">
 									<ul>
 										<li>
-											<div class="stat-value">${profile.tournament.total_participated}</div>
+											<div id="tournament-total-participated" class="stat-value"></div>
 											<div class="stat-label">Total Participated</div>
 										</li>
 										<li>
-											<div class="stat-value">${profile.tournament.top_1}</div>
+											<div id="tournament-top-1" class="stat-value"></div>
 											<div class="stat-label">Top 1</div>
 										</li>
 										<li>
-											<div class="stat-value">${profile.tournament.top_2}</div>
+											<div id="tournament-top-2" class="stat-value"></div>
 											<div class="stat-label">Top 2</div>
 										</li>
 										<li>
-											<div class="stat-value">${profile.tournament.winrate}</div>
+											<div id="tournament-winrate" class="stat-value"></div>
 											<div class="stat-label">Winrate</div>
 										</li>
 										<li>
-											<div class="stat-value">${profile.tournament.max_streak}</div>
+											<div id="tournament-max-streak" class="stat-value"></div>
 											<div class="stat-label">Max Streak</div>
 										</li>
 									</ul>
@@ -146,13 +142,51 @@ export default class ProfileView {
 		}
 	}
 
-	async getProfile() {
+	async setProfile() {
 		try {
 			const response = await fetch(`/api/profiles/${this.username}/`);
 	
 			const data = await response.json();
 			if (data.success) {
-				return data;
+				const profileCardHeaderMiddle = document.getElementById('profile-card-header-middle');
+				const classicTotalPlayed = document.getElementById('classic-total-played');
+				const classicWins = document.getElementById('classic-wins');
+				const classicWinrate = document.getElementById('classic-winrate');
+				const classicElo = document.getElementById('classic-elo');
+				const classicRank = document.getElementById('classic-rank');
+				const rumbleTotalPlayed = document.getElementById('rumble-total-played');
+				const rumbleWins = document.getElementById('rumble-wins');
+				const rumbleWinrate = document.getElementById('rumble-winrate');
+				const rumbleElo = document.getElementById('rumble-elo');
+				const rumbleRank = document.getElementById('rumble-rank');
+				const tournamentTotalParticipated = document.getElementById('tournament-total-participated');
+				const tournamentTop1 = document.getElementById('tournament-top-1');
+				const tournamentTop2 = document.getElementById('tournament-top-2');
+				const tournamentWinrate = document.getElementById('tournament-winrate');
+				const tournamentMaxStreak = document.getElementById('tournament-max-streak');
+
+				let middleInfo = `
+					<img src="${data.avatar_url}" id="profile-card-avatar" class="avatar">
+					<div id="profile-card-username">${data.username}${data.is_42_user ? "&nbsp;<img src=\"/imgs/42_logo.png\" id=\"oauth-logo\"></img>" : ""}</div>`
+				if (data.display_name)
+					middleInfo += `<div id="profile-card-display-name">${data.display_name}</div>`
+				profileCardHeaderMiddle.insertAdjacentHTML('beforeend', middleInfo);
+
+				classicTotalPlayed.innerHTML = data.classic.total_played;
+				classicWins.innerHTML = data.classic.wins;
+				classicWinrate.innerHTML = data.classic.winrate;
+				classicElo.innerHTML = data.classic.elo;
+				classicRank.innerHTML = this.getRankField(data.classic.rank);
+				rumbleTotalPlayed.innerHTML = data.rumble.total_played;
+				rumbleWins.innerHTML = data.rumble.wins;
+				rumbleWinrate.innerHTML = data.rumble.winrate;
+				rumbleElo.innerHTML = data.rumble.elo;
+				rumbleRank.innerHTML = this.getRankField(data.rumble.rank);
+				tournamentTotalParticipated.innerHTML = data.tournament.total_participated;
+				tournamentTop1.innerHTML = data.tournament.top_1;
+				tournamentTop2.innerHTML = data.tournament.top_2;
+				tournamentWinrate.innerHTML = data.tournament.winrate;
+				tournamentMaxStreak.innerHTML = data.tournament.max_streak;
 			}
 			else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
 				window.app.logout();
@@ -166,7 +200,7 @@ export default class ProfileView {
 		}
 	}
 
-	async getGameHistory() {
+	async setGameHistory() {
 		try {
 			const response = await fetch(`/api/profiles/${this.username}/history/`);
 	
