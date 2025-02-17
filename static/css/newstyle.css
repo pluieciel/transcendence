@@ -717,6 +717,17 @@ hr::after {
 	width: 15%;
 }
 
+.lb-card-user button {
+	border: none;
+	background-color: transparent;
+	color: var(--secondary-color);
+	font-weight: bold;
+}
+
+.lb-card-user button:hover {
+	opacity: 0.5;
+}
+
 #lb-card-1 .lb-card-pos:before {
 	content: '\f5a2';
 	color: #FFD700;
