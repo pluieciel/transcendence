@@ -205,7 +205,6 @@ export default class ProfileView {
 			const response = await fetch(`/api/profiles/${this.username}/history/`);
 	
 			const data = await response.json();
-			console.log(data);
 			if (data.success) {
 				Object.keys(data).forEach(key => {
 					if (key.startsWith('game_history_'))
