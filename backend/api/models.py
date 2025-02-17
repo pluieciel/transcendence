@@ -9,18 +9,17 @@ from channels.db import database_sync_to_async
 
 class UserManager(BaseUserManager):
     def _create_default_achievements(self, user):
-        pass
-    #    achievements = Achievement.objects.all()
-    #    for achievement in achievements:
-    #         UserAchievement.objects.get_or_create(
-    #             user=user,
-    #             achievement=achievement,
-    #             defaults={
-    #                 'unlocked': False,
-    #                 'progression': 0,
-    #                 'date_earned': "2025-01-01T00:00:00Z"
-    #             }
-    #         )
+        achievements = Achievement.objects.all()
+        for achievement in achievements:
+             UserAchievement.objects.get_or_create(
+                 user=user,
+                 achievement=achievement,
+                 defaults={
+                     'unlocked': False,
+                     'progression': 0,
+                     'date_earned': "2025-01-01T00:00:00Z"
+                 }
+             )
 
     def create_user(self, username, password=None, avatar=None):
         if not username:
