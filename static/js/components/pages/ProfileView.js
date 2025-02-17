@@ -27,23 +27,23 @@ export default class ProfileView {
 							<div class="profile-card-stats">
 								<ul>
 									<li>
-										<div id="classic-total-played" class="stat-value"></div>
+										<div id="classic-total-played" class="stat-value"><i class="fa-solid fa-circle-notch fa-spin"></i></div>
 										<div class="stat-label">Total Played</div>
 									</li>
 									<li>
-										<div id="classic-wins" class="stat-value"></div>
+										<div id="classic-wins" class="stat-value"><i class="fa-solid fa-circle-notch fa-spin"></i></div>
 										<div class="stat-label">Wins</div>
 									</li>
 									<li>
-										<div id="classic-winrate" class="stat-value"></div>
+										<div id="classic-winrate" class="stat-value"><i class="fa-solid fa-circle-notch fa-spin"></i></div>
 										<div class="stat-label">Winrate</div>
 									</li>
 									<li>
-										<div id="classic-elo" class="stat-value"></div>
+										<div id="classic-elo" class="stat-value"><i class="fa-solid fa-circle-notch fa-spin"></i></div>
 										<div class="stat-label">Elo</div>
 									</li>
 									<li>
-										<div id="classic-rank" class="stat-value"></div>
+										<div id="classic-rank" class="stat-value"><i class="fa-solid fa-circle-notch fa-spin"></i></div>
 										<div class="stat-label">Rank</div>
 									</li>
 								</ul>
@@ -57,23 +57,23 @@ export default class ProfileView {
 							<div class="profile-card-stats">
 								<ul>
 									<li>
-										<div id="rumble-rank" class="stat-value"></div>
+										<div id="rumble-rank" class="stat-value"><i class="fa-solid fa-circle-notch fa-spin"></i></div>
 										<div class="stat-label">Rank</div>
 									</li>
 									<li>
-										<div id="rumble-elo" class="stat-value"></div>
+										<div id="rumble-elo" class="stat-value"><i class="fa-solid fa-circle-notch fa-spin"></i></div>
 										<div class="stat-label">Elo</div>
 									</li>
 									<li>
-										<div id="rumble-winrate" class="stat-value"></div>
+										<div id="rumble-winrate" class="stat-value"><i class="fa-solid fa-circle-notch fa-spin"></i></div>
 										<div class="stat-label">Winrate</div>
 									</li>
 									<li>
-										<div id="rumble-wins" class="stat-value"></div>
+										<div id="rumble-wins" class="stat-value"><i class="fa-solid fa-circle-notch fa-spin"></i></div>
 										<div class="stat-label">Wins</div>
 									</li>
 									<li>
-										<div id="rumble-total-played" class="stat-value"></div>
+										<div id="rumble-total-played" class="stat-value"><i class="fa-solid fa-circle-notch fa-spin"></i></div>
 										<div class="stat-label">Total Played</div>
 									</li>
 								</ul>
@@ -87,23 +87,23 @@ export default class ProfileView {
 								<div class="profile-card-stats">
 									<ul>
 										<li>
-											<div id="tournament-total-participated" class="stat-value"></div>
+											<div id="tournament-total-participated" class="stat-value"><i class="fa-solid fa-circle-notch fa-spin"></i></div>
 											<div class="stat-label">Total Participated</div>
 										</li>
 										<li>
-											<div id="tournament-top-1" class="stat-value"></div>
+											<div id="tournament-top-1" class="stat-value"><i class="fa-solid fa-circle-notch fa-spin"></i></div>
 											<div class="stat-label">Top 1</div>
 										</li>
 										<li>
-											<div id="tournament-top-2" class="stat-value"></div>
+											<div id="tournament-top-2" class="stat-value"><i class="fa-solid fa-circle-notch fa-spin"></i></div>
 											<div class="stat-label">Top 2</div>
 										</li>
 										<li>
-											<div id="tournament-winrate" class="stat-value"></div>
+											<div id="tournament-winrate" class="stat-value"><i class="fa-solid fa-circle-notch fa-spin"></i></div>
 											<div class="stat-label">Winrate</div>
 										</li>
 										<li>
-											<div id="tournament-max-streak" class="stat-value"></div>
+											<div id="tournament-max-streak" class="stat-value"><i class="fa-solid fa-circle-notch fa-spin"></i></div>
 											<div class="stat-label">Max Streak</div>
 										</li>
 									</ul>
