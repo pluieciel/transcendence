@@ -27,6 +27,7 @@ from api.consumers.login_oauth import LoginOAuthConsumer
 from api.consumers.profile import ProfileConsumer
 from api.consumers.profile_nav import ProfileNavConsumer
 from api.consumers.settings import GetSettingsConsumer, SetSettingsConsumer
+from api.consumers.colors import ColorsConsumer
 from api.consumers.avatar import AvatarConsumer
 from api.consumers.login import LoginConsumer
 from api.consumers.signup import SignupConsumer
@@ -59,6 +60,7 @@ http_patterns = [
     re_path(r'^api/profiles/(?P<username>.*)/avatar/$', AvatarConsumer.as_asgi()),
     re_path(r'^api/profiles/(?P<username>.*)/history/$', getHistory.as_asgi()),
     re_path(r'^api/profiles/(?P<username>.*)/achievement/$', AchievementConsumer.as_asgi()),
+    re_path(r'^api/profiles/(?P<username>.*)/colors/$', ColorsConsumer.as_asgi()), #TODO
     re_path(r'^api/profiles/(?P<username>.*)/$', ProfileConsumer.as_asgi()),
 
     path('api/settings/', GetSettingsConsumer.as_asgi()),

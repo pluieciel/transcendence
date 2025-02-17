@@ -93,22 +93,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     def get_achievements(self):
         return self.user_achievements
 
-    def is_color_unlocked(self, color):
-        default_colors = [0]
-        if color in default_colors:
-            return True
-        return self.user_achievements.filter(
-            achievement__color_unlocked=color,
-            unlocked=True
-        ).exists()
-
-    def get_unlocked_colors(self):
-        default_colors = [0]
-        user_unlocked_colors = self.user_achievements.filter(
-            achievement__color_unlocked__isnull=False,
-            unlocked=True
-        ).values_list('achievement__color_unlocked', flat=True)
-        return list(set(default_colors).union(user_unlocked_colors))
 
 class UserPreference(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='preference')
@@ -186,6 +170,7 @@ class Achievement(models.Model):
     description = models.TextField()
     color_unlocked = models.IntegerField(null=True)
     unlock_value = models.IntegerField(default=1)
+    category = models.CharField(default='classic')
 
     def __str__(self):
         return self.name

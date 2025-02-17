@@ -1,8 +1,9 @@
 from channels.generic.http import AsyncHttpConsumer
 from channels.db import database_sync_to_async
 from api.utils import jwt_to_user
-from api.db_utils import get_user_preference
+from api.db_utils import get_user_preference, is_color_unlocked
 import json
+import logging
 
 class GetCustomizeConsumer(AsyncHttpConsumer):
 	async def handle(self, body):
@@ -50,7 +51,14 @@ class SetCustomizeConsumer(AsyncHttpConsumer):
 			data = json.loads(body.decode())
 			color = data.get('color')
 			quality = data.get('quality')
-
+			if (await is_color_unlocked(user, color) == False):
+				response_data = {
+					'success': False,
+					'message': 'Color is not unlocked'
+				}
+				return await self.send_response(403, json.dumps(response_data).encode(),
+					headers=[(b"Content-Type", b"application/json")])
+			
 			user_preference = await get_user_preference(user)
 
 			if user_preference.color == color and user_preference.quality == quality:
