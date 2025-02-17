@@ -34,6 +34,14 @@ export default class LoginView {
 						<div id="signup-link">Don't have an account? <button type="button" id="signup-button"> Sign Up</button></div>
 					</form>
 				</div>
+				<div class="my-modal-background">
+					<div id="specific-modal" class="card my-modal">
+						<div id="modal-header">
+							<h5 id="modal-title"><i class="fa-solid fa-key"></i>&nbsp; Two Factor Authentication</h5>
+							<i class="fa-solid fa-xmark fa-xl"></i>
+						</div>
+					</div>
+				</div>
 			</main>
 			<div class="modal fade" id="totpModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
 				<div class="modal-dialog">

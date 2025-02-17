@@ -1182,33 +1182,41 @@ hr::after {
 /*                Modal             */
 /* ******************************** */
 
-.modal-content {
-	border: 1px solid var(--user-color);
-	border-radius: 5px;
-	box-shadow: 0 0 15px var(--user-color);
+.my-modal-background {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	z-index: 200;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background-color: rgba(17, 17, 17, 0.85);
+}
+
+.my-modal {
+	margin-top: 5.5rem;
+	background-color: var(--accent-color);
 	color: var(--secondary-color);
-	background-color: var(--primary-color);
 }
 
-.modal-header {
-	border-bottom-color: var(--accent-color);
+.my-modal #modal-title {
+	font-weight: bold;
 }
 
-.modal-footer {
-	border-top-color: var(--accent-color);
-}
-
-#modalDialog {
-	text-shadow: none;
-}
-
-#modalFooter {
+#modal-header {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
 	justify-content: space-between;
 }
 
-#modalHeader {
-	font-size: 2rem;
-	font-weight: bold;
-	align-items: center;
-	text-shadow: none;
+#modal-header i:hover {
+	cursor: pointer;
+}
+
+#specific-modal {
+	width: 30rem;
+	height: 25rem;
 }
