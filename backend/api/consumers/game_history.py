@@ -1,13 +1,12 @@
 from channels.generic.http import AsyncHttpConsumer
 from channels.db import database_sync_to_async
+from django.contrib.auth import get_user_model
 from django.db.models import Q
 from django.utils import timezone
 from django.utils.timesince import timesince
 from api.utils import jwt_to_user, get_user_avatar_url
 from api.db_utils import get_user, get_user_by_name
 import json
-import traceback
-from django.contrib.auth import get_user_model
 
 class GameHistoryConsumer(AsyncHttpConsumer):
 	async def handle(self, body):
@@ -48,6 +47,7 @@ class GameHistoryConsumer(AsyncHttpConsumer):
 
 				response_data[f"game_history_{index}"] = {
 					'game_type': game_history.game_type,
+					'game_mode': game_history.game_mode,
 					'score_left': game_history.score_left,
 					'score_right': game_history.score_right,
 					'elo_change': game_history.elo_change,
@@ -69,7 +69,6 @@ class GameHistoryConsumer(AsyncHttpConsumer):
 		except Exception as e:
 			response_data = {
 				'success': False,
-				'traceback': traceback.format_exc(),
 				'message': str(e)
 			}
 			return await self.send_response(500, json.dumps(response_data).encode(),
