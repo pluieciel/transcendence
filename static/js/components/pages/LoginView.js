@@ -36,6 +36,7 @@ export default class LoginView {
 						</div>
 						<div class="my-modal-content">
 							<form id="totp-form">
+								<p class="modal-info">Please enter your 2FA code from your authenticator app</p>
 								<div class="input-container">
 									<i id="totp-input-icon" class="fa-solid fa-key input-icon"></i>
 									<input type="text" id="totp-input" placeholder="Code" maxlength="6" required>
@@ -66,6 +67,7 @@ export default class LoginView {
 		const totpMethodButton = document.getElementById('totp-method-button');
 		totpMethodButton.addEventListener('click', (e) => {
 			const isChecked = e.currentTarget.dataset.checked === 'true';
+			const modalInfo = this.container.querySelector('.modal-info');
 			const totpInput = this.container.querySelector('#totp-input');
 			const totpInputIcon = document.getElementById('totp-input-icon');
 			totpInput.value = "";
@@ -75,12 +77,14 @@ export default class LoginView {
 				totpInput.placeholder = 'Recovery Code';
 				totpInputIcon.classList.remove('fa-key');
 				totpInputIcon.classList.add('fa-clipboard-list');
+				modalInfo.textContent = 'Please enter your recovery code';
 			}
 			else {
 				totpInput.maxLength = 6;
 				totpInput.placeholder = 'Code';
 				totpInputIcon.classList.add('fa-key');
 				totpInputIcon.classList.remove('fa-clipboard-list');
+				modalInfo.textContent = 'Please enter your 2FA code from your authenticator app';
 			}
 
 			e.currentTarget.dataset.checked = !isChecked;

@@ -56,6 +56,7 @@ export default class SettingsView {
 						</div>
 						<div class="my-modal-content">
 							<form id="totp-form">
+								<p class="modal-info">Scan this QR code with your authenticator app, then enter the 2FA code below</p>
 								<div id="qr-code"></div>
 								<div class="input-container">
 									<i id="totp-input-icon" class="fa-solid fa-key input-icon"></i>
@@ -74,6 +75,7 @@ export default class SettingsView {
 							<i class="modal-quit fa-solid fa-xmark fa-xl"></i>
 						</div>
 						<div class="my-modal-content">
+							<p class="modal-info">Save these recovery codes securely - you'll need them if you lose access to your authenticator</p>
 							<ul id="recovery-codes"></ul>
 						</div>
 					</div>
@@ -343,8 +345,11 @@ export default class SettingsView {
 					toggle2FAButton.setAttribute("data-is-2fa-enabled", "true");
 					await this.getSettings();
 					
+					const totpInput = document.getElementById('totp-input');
 					const totpModal = document.getElementById('totp-modal');
+					totpInput.value = '';
 					totpModal.parentElement.style.display = 'none';
+
 					const response = await fetch('/api/settings/2fa/recovery/generate/');
 
 					const data = await response.json();

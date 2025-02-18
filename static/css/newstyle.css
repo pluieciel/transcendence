@@ -495,6 +495,56 @@ form button:hover:not(:disabled) {
 	align-self: flex-start;
 }
 
+#totp-modal {
+	width: 30rem;
+}
+
+#totp-method-button {
+	margin-bottom: 1rem;
+	color: var(--secondary-color);
+	background-color: var(--primary-color);
+	border: 1px solid var(--primary-color);
+	border-radius: 0.3rem;
+	padding: 0.4rem;
+	font-weight: bold;
+	height: 3rem;
+	width: 100%;
+}
+
+#totp-method-button:hover {
+	border: 1px solid var(--user-color);
+	box-shadow: 0 0 15px var(--user-color);
+	transition: all 0.3s ease;
+}
+
+#totp-form button {
+	background-color: var(--primary-color);
+	border: 1px solid var(--primary-color);
+}
+
+#totp-form button:hover, #totp-method-button:hover {
+	border: 1px solid var(--user-color);
+}
+
+#totp-form-divider {
+	width: 100%;
+	border: none;
+	border-top: 1px solid var(--hover-color);
+	overflow: visible;
+	text-align: center;
+	height: 1rem;
+	opacity: 0.5;
+}
+
+#totp-form-divider::after {
+	content: "or";
+	background-color: #080808;
+	color: var(--hover-color);
+	padding: 0 4px;
+	position: relative;
+	top: -0.9rem;
+}
+
 /* ******************************** */
 /*                Play              */
 /* ******************************** */
@@ -785,6 +835,31 @@ form button:hover:not(:disabled) {
 
 #toggle-2fa-button {
 	margin-top: 2rem;
+}
+
+#recovery-modal {
+	width: 30rem;
+}
+
+#recovery-codes {
+	text-align: center;
+	width: 100%;
+	border: 1px solid var(--accent-color);
+	border-radius: 0.3rem;
+	list-style-type: none;
+	padding: 1rem;
+}
+
+#qr-code {
+	text-align: center;
+	width: 100%;
+	border: 1px solid var(--accent-color);
+	border-radius: 0.3rem;
+	margin-bottom: 1rem;
+}
+
+#qr-code svg path {
+	fill: var(--secondary-color);
 }
 
 #delete-account-button {
@@ -1216,10 +1291,7 @@ form button:hover:not(:disabled) {
 	margin-top: 5.5rem;
 	border-radius: 0.3rem;
 	padding: 1rem;
-}
-
-#totp-modal {
-	width: 30rem;
+	font-weight: bold;
 }
 
 .modal-header {
@@ -1228,7 +1300,6 @@ form button:hover:not(:disabled) {
 	align-items: center;
 	justify-content: space-between;
 	margin-bottom: 1rem;
-	font-weight: bold;
 }
 
 .modal-header i:hover {
@@ -1253,52 +1324,8 @@ form button:hover:not(:disabled) {
 	border: 1px solid var(--user-color);
 }
 
-#totp-method-button {
-	margin-bottom: 1rem;
-	color: var(--secondary-color);
-	background-color: var(--primary-color);
-	border: 1px solid var(--primary-color);
-	border-radius: 0.3rem;
-	padding: 0.4rem;
-	font-weight: bold;
-	height: 3rem;
-	width: 100%;
-}
-
-#totp-method-button:hover {
-	border: 1px solid var(--user-color);
-	box-shadow: 0 0 15px var(--user-color);
-	transition: all 0.3s ease;
-}
-
-#totp-form button {
-	background-color: var(--primary-color);
-	border: 1px solid var(--primary-color);
-}
-
-#totp-form button:hover, #totp-method-button:hover {
-	border: 1px solid var(--user-color);
-}
-
-#totp-form-divider {
-	width: 100%;
-	border: none;
-	border-top: 1px solid var(--hover-color);
-	overflow: visible;
-	text-align: center;
-	height: 1rem;
+.modal-info {
+	font-size: 0.9rem;
 	opacity: 0.5;
-}
-
-#totp-form-divider::after {
-	content: "or";
-	background-color: #080808;
-	color: var(--hover-color);
-	padding: 0 4px;
-	position: relative;
-	top: -0.9rem;
-}
-
-#qr-code svg path {
-	fill: var(--secondary-color);
+	font-weight: normal;
 }
