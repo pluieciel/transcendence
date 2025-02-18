@@ -39,7 +39,7 @@ export default class LoginView {
 								<p class="modal-info">Please enter your 2FA code from your authenticator app</p>
 								<div class="input-container">
 									<i id="totp-input-icon" class="fa-solid fa-key input-icon"></i>
-									<input type="text" id="totp-input" placeholder="Code" maxlength="6" required>
+									<input type="text" id="totp-input" placeholder="2FA Code" maxlength="6" required>
 								</div>
 								<div id="totp-message" class="input-message"></div>
 								<button id="totp-button" type="submit"><i class="fa-solid fa-check"></i> Verify</button>
@@ -81,7 +81,7 @@ export default class LoginView {
 			}
 			else {
 				totpInput.maxLength = 6;
-				totpInput.placeholder = 'Code';
+				totpInput.placeholder = '2FA Code';
 				totpInputIcon.classList.add('fa-key');
 				totpInputIcon.classList.remove('fa-clipboard-list');
 				modalInfo.textContent = 'Please enter your 2FA code from your authenticator app';

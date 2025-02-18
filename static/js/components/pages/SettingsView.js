@@ -60,7 +60,7 @@ export default class SettingsView {
 								<div id="qr-code"></div>
 								<div class="input-container">
 									<i id="totp-input-icon" class="fa-solid fa-key input-icon"></i>
-									<input type="text" id="totp-input" placeholder="Code" maxlength="6" required>
+									<input type="text" id="totp-input" placeholder="2FA Code" maxlength="6" required>
 								</div>
 								<div id="totp-message" class="input-message"></div>
 								<button id="totp-button" type="submit"><i class="fa-solid fa-check"></i> Verify</button>
@@ -75,7 +75,7 @@ export default class SettingsView {
 							<i class="modal-quit fa-solid fa-xmark fa-xl"></i>
 						</div>
 						<div class="my-modal-content">
-							<p class="modal-info">Save these recovery codes securely - you'll need them if you lose access to your authenticator</p>
+							<p class="modal-info">Save these recovery codes securely - you'll need them if you lose access to your authenticator app</p>
 							<ul id="recovery-codes"></ul>
 						</div>
 					</div>

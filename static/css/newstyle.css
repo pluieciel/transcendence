@@ -848,6 +848,7 @@ form button:hover:not(:disabled) {
 	border-radius: 0.3rem;
 	list-style-type: none;
 	padding: 1rem;
+	font-weight: bold;
 }
 
 #qr-code {
@@ -1291,7 +1292,6 @@ form button:hover:not(:disabled) {
 	margin-top: 5.5rem;
 	border-radius: 0.3rem;
 	padding: 1rem;
-	font-weight: bold;
 }
 
 .modal-header {
@@ -1304,6 +1304,10 @@ form button:hover:not(:disabled) {
 
 .modal-header i:hover {
 	cursor: pointer;
+}
+
+.modal-title {
+	font-weight: bold;
 }
 
 .my-modal-content {
