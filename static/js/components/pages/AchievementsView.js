@@ -49,11 +49,12 @@ export default class AchievementsView {
 			9: 'Yellow',
 		};
 
+		achievements.sort((a, b) => a.order - b.order);
 		let achievementsHTML = '';
 		achievements.forEach(achievement => {
 			achievementsHTML += `
 				<div class="cheevo ${achievement.unlocked ? 'success' : ''}">
-					<div class="cheevo-icon"><i class="fa-solid fa-trophy fa-xl"></i></div>
+					<div class="cheevo-icon"><i class="${achievement.icon}"></i></div>
 					<div class="cheevo-container">
 						<div class="cheevo-title">${achievement.name}</div>
 						<div class="cheevo-row">

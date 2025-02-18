@@ -133,6 +133,9 @@
     description: 'Have the ball reach 60 m/s in Rumble'
     color_unlocked: 8
     unlock_value: 60
+    category: 'rumble'
+    icon: 'fa-solid fa-gauge-high fa-xl'
+    order: 11
 - model: api.achievement
   pk: 2
   fields:
@@ -140,6 +143,9 @@
     description: 'Survive 42 seconds in killer ball in Rumble'
     color_unlocked: 6
     unlock_value: 42
+    category: 'rumble'
+    icon: 'fa-solid fa-heart-pulse fa-xl'
+    order: 12
 - model: api.achievement
   pk: 3
   fields:
@@ -147,13 +153,19 @@
     description: 'Reach the lowest paddle size in Shrinking Paddles'
     color_unlocked: -1
     unlock_value: 8
+    category: 'rumble'
+    icon: 'fa-solid fa-arrows-left-right-to-line fa-xl'
+    order: 10
 - model: api.achievement
   pk: 4
   fields:
     name: 'Rumbler'
     description: 'Win a game of rumble'
-    color_unlocked: -1
+    color_unlocked: 3
     unlock_value: 1
+    category: 'rumble'
+    icon: 'fa-solid fa-bolt fa-xl'
+    order: 9
 - model: api.achievement
   pk: 5
   fields:
@@ -161,6 +173,9 @@
     description: 'Have five friends'
     color_unlocked: 4
     unlock_value: 5
+    category: 'classic'
+    icon: 'fa-solid fa-heart fa-xl'
+    order: 1
 - model: api.achievement
   pk: 6
   fields:
@@ -168,6 +183,9 @@
     description: 'Win without losing a round'
     color_unlocked: -1
     unlock_value: 1
+    category: 'clasic'
+    icon: 'fa-solid fa-robot fa-xl'
+    order: 7
 - model: api.achievement
   pk: 7
   fields:
@@ -175,6 +193,9 @@
     description: 'Win a game where you were 6 points behind'
     color_unlocked: -1
     unlock_value: 1
+    category: 'classic'
+    icon: 'fa-regular fa-gem fa-xl'
+    order: 5
 - model: api.achievement
   pk: 8
   fields:
@@ -182,6 +203,9 @@
     description: 'Win a game where you were 9 points behind'
     color_unlocked: 7
     unlock_value: 1
+    category: 'classic'
+    icon: 'fa-solid fa-gem fa-xl'
+    order: 6
 - model: api.achievement
   pk: 9
   fields:
@@ -189,20 +213,29 @@
     description: 'Win a tournament'
     color_unlocked: 9
     unlock_value: 1
+    category: 'classic'
+    icon : 'fa-solid fa-crown fa-xl'
+    order: 4
 - model: api.achievement
   pk: 10
   fields:
-    name: 'Purist'
+    name: 'Vanilla'
     description: 'Win a classic game'
-    color_unlocked: -1
+    color_unlocked: 0
     unlock_value: 1
+    category: 'classic'
+    icon: 'fa-solid fa-star fa-xl'
+    order: 2
 - model: api.achievement
   pk: 11
   fields:
     name: 'Challenger'
-    description: 'Win 10 games game'
+    description: 'Win 10 games'
     color_unlocked: -1
     unlock_value: 10
+    category: 'classic'
+    icon: 'fa-solid fa-medal fa-xl'
+    order: 3
 - model: api.achievement
   pk: 12
   fields:
@@ -210,6 +243,9 @@
     description: '?????'
     color_unlocked: 5
     unlock_value: 1
+    category: 'classic'
+    icon: 'fa-solid fa-egg fa-xl'
+    order: 8
 - model: api.userachievement
   pk: 1
   fields:
@@ -240,7 +276,7 @@
     user: 1
     achievement: 4
     date_earned : "2025-01-01T00:00:00Z"
-    unlocked: false
+    unlocked: true
     progression: 0
 - model: api.userachievement
   pk: 5
@@ -248,7 +284,7 @@
     user: 1
     achievement: 5
     date_earned : "2025-01-01T00:00:00Z"
-    unlocked: false
+    unlocked: true
     progression: 0
 - model: api.userachievement
   pk: 6
@@ -256,7 +292,7 @@
     user: 1
     achievement: 6
     date_earned : "2025-01-01T00:00:00Z"
-    unlocked: false
+    unlocked: true
     progression: 0
 - model: api.userachievement
   pk: 7
@@ -264,7 +300,7 @@
     user: 1
     achievement: 7
     date_earned : "2025-01-01T00:00:00Z"
-    unlocked: false
+    unlocked: true
     progression: 0
 - model: api.userachievement
   pk: 8
@@ -272,7 +308,7 @@
     user: 1
     achievement: 8
     date_earned : "2025-01-01T00:00:00Z"
-    unlocked: false
+    unlocked: true
     progression: 0
 - model: api.userachievement
   pk: 9
@@ -280,7 +316,7 @@
     user: 1
     achievement: 9
     date_earned : "2025-01-01T00:00:00Z"
-    unlocked: false
+    unlocked: true
     progression: 0
 - model: api.userachievement
   pk: 10
@@ -288,7 +324,7 @@
     user: 1
     achievement: 10
     date_earned : "2025-01-01T00:00:00Z"
-    unlocked: false
+    unlocked: true
     progression: 0
 - model: api.userachievement
   pk: 11

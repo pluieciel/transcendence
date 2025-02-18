@@ -48,24 +48,47 @@ export class TextManager {
 		});
 	}
 
+	checkTextWidth(testText) {
+        const testGeometry = new TextGeometry(testText, {
+            font: this.font,
+            size: 2,
+            height: 0.2,
+            curveSegments: 12,
+            bevelEnabled: false,
+        });
+        testGeometry.computeBoundingBox();
+        return testGeometry.boundingBox.max.x - testGeometry.boundingBox.min.x;
+    }
+
 	createText(text, position, color = 0x00ffff, scale = 1) {
-		const geometry = new TextGeometry(text, {
+		const maxWidth = 11;
+		let displayText = text;
+		
+		if (this.checkTextWidth(text) * scale > maxWidth) {
+			let truncated = text;
+			while (truncated.length > 3 && this.checkTextWidth(truncated + "...") * scale > maxWidth) {
+				truncated = truncated.slice(0, -1);
+			}
+			displayText = truncated + "...";
+		}
+	
+		const geometry = new TextGeometry(displayText, {
 			font: this.font,
 			size: 2,
 			height: 0.2,
 			curveSegments: 12,
 			bevelEnabled: false,
 		});
-
+	
 		geometry.computeBoundingBox();
 		geometry.translate(-geometry.boundingBox.max.x / 2, 0, 0);
-
+	
 		const material = new THREE.MeshStandardMaterial({
 			color: color,
 			metalness: 0,
 			roughness: 1,
 		});
-
+	
 		const mesh = new THREE.Mesh(geometry, material);
 		mesh.position.copy(position);
 		mesh.scale.set(scale, scale, scale);

@@ -12,7 +12,7 @@ class Ball:
 		self.baseSpeed = DEFAULT_BALL_BASE_SPEED
 		self.speed = self.baseSpeed
 		self.maxSpeedMult = 0.8
-		self.reaction_time = 0.2
+		self.reaction_time = 0.1
 		self.maxSpeed = self.calculate_max_safe_speed(self.maxSpeedMult)
 		self.radius = 0.5
 		self.bounds = GameBounds()
@@ -132,7 +132,7 @@ class GameBounds:
 		self.right = Vector2D(20.42, -3.70+10.5, -15)
 
 class ClassicGameInstance:
-	def __init__(self, broadcast_fun, game_end_fun):
+	def __init__(self, broadcast_fun, game_end_fun, achievement_checker_fun):
 		self.bounds = GameBounds()
 		self.player_left = Player(Vector2D(self.bounds.left.x + 2, -3+10.5, -15), 0,{"ArrowUp": False, "ArrowDown": False}, self.bounds)
 		self.player_right = Player(Vector2D(self.bounds.right.x - 2, -3+10.5, -15), 0,{"ArrowUp": False, "ArrowDown": False}, self.bounds)
@@ -151,6 +151,7 @@ class ClassicGameInstance:
 		self.broadcast_function = broadcast_fun
 		self.game_end_fun = game_end_fun
 		self.logger = logging.getLogger('game')
+		self.achievement_checker_fun = achievement_checker_fun
 
 	async def check_collisions(self):
 		ball = self.ball
@@ -211,6 +212,7 @@ class ClassicGameInstance:
 		self.ball.visible = False
 		self.ball.is_moving = False
 		self.ball.countdown = 2
+		await self.achievement_checker_fun()
 		self.scored = True
 
 		if (self.check_winner(winner)):
@@ -244,6 +246,7 @@ class ClassicGameInstance:
 		self.stop()
 		self.winner = winner
 		self.ended = True
+		await self.achievement_checker_fun()
 		await self.game_end_fun()
 
 	def start(self):

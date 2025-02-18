@@ -27,11 +27,13 @@ from api.consumers.game_history import GameHistoryConsumer
 from api.consumers.profile import ProfileConsumer
 from api.consumers.profile_nav import ProfileNavConsumer
 from api.consumers.settings import GetSettingsConsumer, SetSettingsConsumer
+from api.consumers.colors import ColorsConsumer
 from api.consumers.avatar import AvatarConsumer
 from api.consumers.login import LoginConsumer
 from api.consumers.signup import SignupConsumer
 from api.consumers.achievement import AchievementConsumer
 from api.consumers.recaptcha import RecaptchaConsumer
+from api.consumers.easter_egg import EasterEggConsumer
 from api.consumers.customize import GetCustomizeConsumer, SetCustomizeConsumer
 from api.consumers.delete_user import DeleteUserConsumer
 from api.consumers.admin import AdminConsumer
@@ -59,6 +61,7 @@ http_patterns = [
     re_path(r'^api/profiles/(?P<username>.*)/avatar/$', AvatarConsumer.as_asgi()),
     re_path(r'^api/profiles/(?P<username>.*)/history/$', GameHistoryConsumer.as_asgi()),
     re_path(r'^api/profiles/(?P<username>.*)/achievement/$', AchievementConsumer.as_asgi()),
+    re_path(r'^api/profiles/(?P<username>.*)/colors/$', ColorsConsumer.as_asgi()), #TODO
     re_path(r'^api/profiles/(?P<username>.*)/$', ProfileConsumer.as_asgi()),
 
     path('api/settings/', GetSettingsConsumer.as_asgi()),
@@ -75,6 +78,7 @@ http_patterns = [
     path('api/recaptcha/', RecaptchaConsumer.as_asgi()),
     path('api/users/delete/', DeleteUserConsumer.as_asgi()),
 	path('api/admin/', AdminConsumer.as_asgi()),
+	path('api/credits/', EasterEggConsumer.as_asgi()),
     path('admin/', get_asgi_application()),
 ]
 

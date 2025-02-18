@@ -52,12 +52,12 @@ class App {
 			case 1: return "#00BDD1";
 			case 2: return "#00AD06";
 			case 3: return "#E67E00";
-			case 4: return "#E6008F"; //Pink
-			case 5: return "#6400C4"; //Purple
-			case 6: return "#E71200"; // Red
-			case 7: return "#0EC384"; //Soft green
-			case 8: return "#E6E3E1"; //White
-			case 9: return "#D5DA2B"; //Yellow
+			case 4: return "#E6008F"; //Pink A
+			case 5: return "#6400C4"; //Purple A
+			case 6: return "#E71200"; // Red A
+			case 7: return "#0EC384"; //Soft green A
+			case 8: return "#E6E3E1"; //White A
+			case 9: return "#D5DA2B"; //Yellow A
 			default: return "#00BDD1";
 		}
 	}

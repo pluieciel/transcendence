@@ -53,6 +53,9 @@ class Migration(migrations.Migration):
                 ('description', models.TextField()),
                 ('color_unlocked', models.IntegerField(null=True)),
                 ('unlock_value', models.IntegerField(default=1)),
+                ('category', models.CharField(default='classic')),
+                ('icon', models.CharField(max_length=64)),
+                ('order', models.IntegerField(unique=True)),
             ],
         ),
         migrations.CreateModel(
