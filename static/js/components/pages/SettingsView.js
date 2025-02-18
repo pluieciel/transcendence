@@ -80,6 +80,25 @@ export default class SettingsView {
 						</div>
 					</div>
 				</div>
+				<div class="my-modal-background">
+					<div id="delete-modal" class="my-modal">
+						<div class="modal-header">
+							<h5 class="modal-title"><i class="fa-solid fa-trash-can"></i>&nbsp; Delete Account</h5>
+							<i class="modal-quit fa-solid fa-xmark fa-xl"></i>
+						</div>
+						<div class="my-modal-content">
+							<p class="modal-info"><strong>WARNING:</strong> Your account will be permanently deleted and all data will be lost - this action cannot be undone</p>
+							<form id="delete-form">
+								<div class="input-container">
+									<i class="fa-solid fa-triangle-exclamation input-icon"></i>
+									<input type="text" id="confirm-delete-account-input" placeholder="Type 'Delete' to confirm" maxlength="32" required>
+								</div>
+								<div id="delete-message" class="input-message"></div>
+								<button id="confirm-delete-account-button" type="submit"><i class="fa-solid fa-check"></i> Confirm</button>
+							</form>
+						</div>
+					</div>
+				</div>
 			</main>
 		`;
 	}
@@ -89,6 +108,7 @@ export default class SettingsView {
 		window.app.addModalQuitButtonEventListener();
 		this.addPasswordToggleEventListeners();
 		this.addDeleteAccountButtonEventListeners();
+		this.addConfirmDeleteAccountButtonEventListeners()
 		this.addToggle2FAButtonEventListeners();
 		this.add2FAEventListeners();
 		this.addSettingsFormEventListeners();
@@ -298,14 +318,18 @@ export default class SettingsView {
 		});
 	}
 
-	addDeleteAccountButtonEventListeners() {
-		const deleteAccountButton = document.getElementById("delete-account-button");
+	addConfirmDeleteAccountButtonEventListeners() {
+		const deleteForm = document.getElementById("delete-form");
+		const confirmDeleteAccountInput = document.getElementById("confirm-delete-account-input");
 
-		deleteAccountButton.addEventListener("click", async () => {
+		deleteForm.addEventListener("submit", async (e) => {
+			e.preventDefault();
 			try {
 				const response = await fetch("/api/users/delete/", {
 					method: "POST",
-					body: JSON.stringify({ username: this.username }),
+					body: JSON.stringify({
+						confirm: confirmDeleteAccountInput.value,
+					})
 				});
 
 				const data = await response.json();
@@ -314,11 +338,20 @@ export default class SettingsView {
 				} else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
 					window.app.logout();
 				} else {
-					// TODO: Show error message
+					window.app.showErrorMsg('#delete-message', data.message);
 				}
 			} catch (error) {
 				console.error("An error occurred: " + error);
 			}
+		});
+	}
+
+	addDeleteAccountButtonEventListeners() {
+		const deleteAccountButton = document.getElementById("delete-account-button");
+
+		deleteAccountButton.addEventListener("click", () => {
+			const deleteModal = document.getElementById('delete-modal');
+			deleteModal.parentElement.style.display = 'flex';
 		});
 	}
 

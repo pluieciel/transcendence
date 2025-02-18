@@ -923,7 +923,7 @@ form button:hover:not(:disabled) {
 	margin-top: 2rem;
 }
 
-#recovery-modal {
+#recovery-modal, #delete-modal {
 	width: 30rem;
 }
 
@@ -947,6 +947,24 @@ form button:hover:not(:disabled) {
 
 #qr-code svg path {
 	fill: var(--secondary-color);
+}
+
+#confirm-delete-account-button {
+	margin-bottom: 1rem;
+	color: var(--input-error-text-color);
+	background-color: var(--input-error-color);
+	border: 1px solid var(-input-error-border-color);
+	border-radius: 0.3rem;
+	padding: 0.4rem;
+	font-weight: bold;
+	height: 3rem;
+	width: 100%;
+}
+
+#confirm-delete-account-button:hover {
+	border: 1px solid var(--input-error-text-color);
+	box-shadow: 0 0 15px var(--input-error-text-color);
+	transition: all 0.3s ease;
 }
 
 #delete-account-button {
