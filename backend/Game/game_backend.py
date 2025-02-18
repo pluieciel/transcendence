@@ -28,13 +28,20 @@ class GameBackend:
 		self.channel_layer = None
 		self.manager = manager
 		self.bot = bot
+		self.bot_game = bot > 0
 		self.player_left = None
 		self.player_right = None
 		self.elo_change = 0
 		self.remontada = None
 		self.bigRemontada = None
-
 		self.elo_k_factor = 40
+
+		if (self.bot_game):
+			self.logger.info(f'Creating a game with a bot, difficulty : {bot}')
+		else:
+			self.logger.info("Creating a game without bot")
+
+			
 
 		if (bot > 0):
 			self.player_right = Bot(bot, self.game)
@@ -547,7 +554,7 @@ class GameBackend:
 		elif self.game.ended and self.remontada:
 			if (self.game.winner == 'LEFT' and self.remontada == self.player_left.user):
 				await unlock_achievement(self.remontada, "Clutch")
-			elif (self.game.winner == 'RIGHT' and self.remontada == self.player_right.user):
+			elif (self.game.winner == 'RIGHT' and self.remontada == self.player_right.user and not self.bot_game):
 				await unlock_achievement(self.remontada, "Clutch")
 	
 	async def check_big_remontada(self):
@@ -561,19 +568,20 @@ class GameBackend:
 		elif self.game.ended and self.bigRemontada:
 			if (self.game.winner == 'LEFT' and self.bigRemontada == self.player_left.user):
 				await unlock_achievement(self.bigRemontada, "God's Clutch")
-			elif (self.game.winner == 'RIGHT' and self.bigRemontada == self.player_right.user):
+			elif (self.game.winner == 'RIGHT' and self.bigRemontada == self.player_right.user and not self.bot_game):
 				await unlock_achievement(self.bigRemontada, "God's Clutch")
 
 	async def check_flawless_victory(self):
 		if (self.game.ended):
 			if (self.game.winner == 'LEFT' and self.game.player_left.score == 10 and self.game.player_right.score == 0):
 				await unlock_achievement(self.player_left.user, "Flawless")
-			elif (self.game.winner == 'RIGHT' and self.game.player_right.score == 10 and self.game.player_left.score == 0):
+			elif (self.game.winner == 'RIGHT' and self.game.player_right.score == 10 and self.game.player_left.score == 0 and not self.bot_game):
 				await unlock_achievement(self.player_right.user, "Flawless")
 	
 	async def check_speed_of_light(self):
 		if (self.game.ended and self.game.ball.highestSpeed < 60 and math.floor(self.game.ball.highestSpeed) > 0):
-			await update_achievement_progression(self.player_right.user, 'Speed Of Light', math.floor(self.game.ball.highestSpeed))
+			if not self.bot_game:
+				await update_achievement_progression(self.player_right.user, 'Speed Of Light', math.floor(self.game.ball.highestSpeed))
 			await update_achievement_progression(self.player_left.user, 'Speed Of Light', math.floor(self.game.ball.highestSpeed))
 		elif (self.game.ended and self.game.ball.highestSpeed >= 60):
 			await unlock_achievement(self.player_right.user, "Speed Of Light")
@@ -581,18 +589,20 @@ class GameBackend:
 	
 	async def check_killer_survivor(self):
 		if (self.game.ended and self.game.highestKillerSurvive < 42 and math.floor(self.game.highestKillerSurvive)> 0):
-			await update_achievement_progression(self.player_right.user, 'Survivor', math.floor(self.game.highestKillerSurvive))
+			if not self.bot_game:
+				await update_achievement_progression(self.player_right.user, 'Survivor', math.floor(self.game.highestKillerSurvive))
 			await update_achievement_progression(self.player_left.user, 'Survivor', math.floor(self.game.highestKillerSurvive))
 		elif (self.game.ended and self.game.highestKillerSurvive >= 42):
-			await unlock_achievement(self.player_right.user, "Survivor")
-			await unlock_achievement(self.player_right.user, "Survivor")
+			await unlock_achievement(self.player_left.user, "Survivor")
+			if not self.bot_game:
+				await unlock_achievement(self.player_right.user, "Survivor")
 
 	async def check_shrinking_paddle(self):
-		if (self.game.ended and self.game.player_right.highestShrinkPaddle < 8 and self.game.player_right.highestShrinkPaddle > 0):
+		if (self.game.ended and not self.bot_game and self.game.player_right.highestShrinkPaddle < 8 and self.game.player_right.highestShrinkPaddle > 0):
 			await update_achievement_progression(self.player_right.user, 'Honey, I Shrunk the Paddles', self.game.player_right.highestShrinkPaddle)
 		if (self.game.ended and self.game.player_left.highestShrinkPaddle < 8 and self.game.player_left.highestShrinkPaddle > 0):
 			await update_achievement_progression(self.player_left.user, 'Honey, I Shrunk the Paddles', self.game.player_left.highestShrinkPaddle)
-		if (self.game.ended and self.game.player_right.highestShrinkPaddle >= 8):
+		if (self.game.ended and not self.bot_game and self.game.player_right.highestShrinkPaddle >= 8):
 			await unlock_achievement(self.player_right.user, 'Honey, I Shrunk the Paddles')
 		if (self.game.ended and self.game.player_left.highestShrinkPaddle >= 8):
 			await unlock_achievement(self.player_left.user, 'Honey, I Shrunk the Paddles')
@@ -600,7 +610,7 @@ class GameBackend:
 	async def check_rumble_win(self):
 		if (self.game.ended and self.game.winner =='LEFT'):
 			await unlock_achievement(self.player_left.user, 'Rumbler')
-		elif (self.game.ended and self.game.winner == 'RIGHT'):
+		elif (self.game.ended and not self.bot_game and self.game.winner == 'RIGHT'):
 			await unlock_achievement(self.player_right.user, 'Rumbler')
 		else:
 			self.logger.info("Rubmble game not won by anyone or not ended")
@@ -608,7 +618,7 @@ class GameBackend:
 	async def check_classic_win(self):
 		if (self.game.ended and self.game.winner =='LEFT'):
 			await unlock_achievement(self.player_left.user, 'Vanilla')
-		elif (self.game.ended and self.game.winner == 'RIGHT'):
+		elif (self.game.ended and not self.bot_game and self.game.winner == 'RIGHT'):
 			await unlock_achievement(self.player_right.user, 'Vanilla')
 	
 	async def check_wins(self):
@@ -618,7 +628,7 @@ class GameBackend:
 				await update_achievement_progression(self.player_left.user, 'Challenger', user_stat.classic_wins + user_stat.rumble_wins + 1)
 			else:
 				await unlock_achievement(self.player_right.user, 'Challenger')
-		elif (self.game.ended and self.game.winner =='RIGHT'):
+		elif (self.game.ended and not self.bot_game and self.game.winner =='RIGHT'):
 			user_stat = await get_user_statistic(self.player_right .user)
 			if (user_stat.classic_wins + user_stat.rumble_wins + 1 < 10):
 				await update_achievement_progression(self.player_right.user, 'Challenger', user_stat.classic_wins + user_stat.rumble_wins + 1)

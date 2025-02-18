@@ -420,14 +420,12 @@ export class SceneManager {
 								case "PaddleLights":
 									obj.material.color.set(color);
 									obj.material.emissive.set(color);
-									console.log(color);
 									obj.material.emissiveIntensity = 2;
 									break;
 								case "BallColor":
 									this.ballMat = obj.material;
 									obj.material.color.set(color);
 									obj.material.emissive.set(color);
-									console.log(color);
 									obj.material.emissiveIntensity = 2;
 							}
 						}

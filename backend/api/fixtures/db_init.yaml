@@ -134,6 +134,8 @@
     color_unlocked: 8
     unlock_value: 60
     category: 'rumble'
+    icon: 'fa-solid fa-gauge-high fa-xl'
+    order: 11
 - model: api.achievement
   pk: 2
   fields:
@@ -142,6 +144,8 @@
     color_unlocked: 6
     unlock_value: 42
     category: 'rumble'
+    icon: 'fa-solid fa-heart-pulse fa-xl'
+    order: 12
 - model: api.achievement
   pk: 3
   fields:
@@ -150,6 +154,8 @@
     color_unlocked: -1
     unlock_value: 8
     category: 'rumble'
+    icon: 'fa-solid fa-arrows-left-right-to-line fa-xl'
+    order: 10
 - model: api.achievement
   pk: 4
   fields:
@@ -158,6 +164,8 @@
     color_unlocked: 3
     unlock_value: 1
     category: 'rumble'
+    icon: 'fa-solid fa-bolt fa-xl'
+    order: 9
 - model: api.achievement
   pk: 5
   fields:
@@ -166,6 +174,8 @@
     color_unlocked: 4
     unlock_value: 5
     category: 'classic'
+    icon: 'fa-solid fa-heart fa-xl'
+    order: 1
 - model: api.achievement
   pk: 6
   fields:
@@ -174,6 +184,8 @@
     color_unlocked: -1
     unlock_value: 1
     category: 'clasic'
+    icon: 'fa-solid fa-robot fa-xl'
+    order: 7
 - model: api.achievement
   pk: 7
   fields:
@@ -182,6 +194,8 @@
     color_unlocked: -1
     unlock_value: 1
     category: 'classic'
+    icon: 'fa-regular fa-gem fa-xl'
+    order: 5
 - model: api.achievement
   pk: 8
   fields:
@@ -190,6 +204,8 @@
     color_unlocked: 7
     unlock_value: 1
     category: 'classic'
+    icon: 'fa-solid fa-gem fa-xl'
+    order: 6
 - model: api.achievement
   pk: 9
   fields:
@@ -198,6 +214,8 @@
     color_unlocked: 9
     unlock_value: 1
     category: 'classic'
+    icon : 'fa-solid fa-crown fa-xl'
+    order: 4
 - model: api.achievement
   pk: 10
   fields:
@@ -206,6 +224,8 @@
     color_unlocked: 0
     unlock_value: 1
     category: 'classic'
+    icon: 'fa-solid fa-star fa-xl'
+    order: 2
 - model: api.achievement
   pk: 11
   fields:
@@ -214,6 +234,8 @@
     color_unlocked: -1
     unlock_value: 10
     category: 'classic'
+    icon: 'fa-solid fa-medal fa-xl'
+    order: 3
 - model: api.achievement
   pk: 12
   fields:
@@ -222,6 +244,8 @@
     color_unlocked: 5
     unlock_value: 1
     category: 'classic'
+    icon: 'fa-solid fa-egg fa-xl'
+    order: 8
 - model: api.userachievement
   pk: 1
   fields:

@@ -12,7 +12,7 @@ class Ball:
 		self.baseSpeed = DEFAULT_BALL_BASE_SPEED
 		self.speed = self.baseSpeed
 		self.maxSpeedMult = 0.8
-		self.reaction_time = 0.2
+		self.reaction_time = 0.1
 		self.maxSpeed = self.calculate_max_safe_speed(self.maxSpeedMult)
 		self.radius = 0.5
 		self.bounds = GameBounds()

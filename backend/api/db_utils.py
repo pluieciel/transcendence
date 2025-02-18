@@ -88,8 +88,11 @@ def get_achievements(user):
 			'description': user_achievement.achievement.description,
 			'color_unlocked': user_achievement.achievement.color_unlocked,
 			'unlock_value': user_achievement.achievement.unlock_value,
+			'category' : user_achievement.achievement.category,
 			'unlocked': user_achievement.unlocked,
+			'icon' : user_achievement.achievement.icon,
 			'progression': user_achievement.progression,
+			'order': user_achievement.achievement.order,
 			'date_earned': user_achievement.date_earned.isoformat() if user_achievement.unlocked else None
 		})
 	return achievements
@@ -138,6 +141,7 @@ def unlock_achievement(user, name):
 		user_achievement.date_earned = timezone.now()
 		user_achievement.save()
 		logging.getLogger('game').info(f"Achievement {name} unlocked for user {user.username}")
+	return True
 
 @database_sync_to_async
 def update_achievement_progression(user, name, progression):

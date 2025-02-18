@@ -25,11 +25,11 @@ class Bot:
 	def __init__(self, difficulty, game):
 		match difficulty:
 			case 1:
-				self.user = BotUser(f'AI (Easy)', 1000, 1, -1)
+				self.user = BotUser(f'AI (Easy)', 800, 1, -1)
 			case 2:
-				self.user = BotUser(f'AI (Medium)', 1000, 1, -1)
-			case 3:
-				self.user = BotUser(f'AI (Hard)', 1000, 1, -1)
+				self.user = BotUser(f'AI (Medium)', 1200, 1, -1)
+			case 5:
+				self.user = BotUser(f'AI (Hard)', 1800, 1, -1)
 		self.channel = None
 		self.state = "Ready"
 		self.game = game

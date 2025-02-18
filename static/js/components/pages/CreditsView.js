@@ -6,9 +6,27 @@ export default class CreditsView {
 	}
 
 	async init() {
+
 		await window.app.getSettings();
 		await this.render();
 		window.app.addNavEventListeners();
+		await this.unlockEasterEgg();
+	}
+
+	async unlockEasterEgg() {
+		try {
+			const response = await fetch(`/api/credits/`);
+			const data = await response.json();
+			if (data.success) {
+				return;
+			} else {
+				console.error("Failed to unlock easter egg:", data.message);
+				return [];
+			}
+		} catch (error) {
+			console.error("An error occurred: " + error);
+			return [];
+		}
 	}
 
 	async render() {

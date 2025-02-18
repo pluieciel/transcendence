@@ -145,10 +145,11 @@ export default class PlayView {
 
 		const difficulties = ["Easy", "Medium", "Hard"];
 		const difficultyIcons = ["fa-smile", "fa-meh", "fa-frown"];
+		const difficultyValues = [1, 2, 5];
 		let currentDifficulty = 0;
 
 		difficultySpan.innerHTML = `<i class="fa-solid ${difficultyIcons[currentDifficulty]}"></i> ${difficulties[currentDifficulty]}`;
-		window.app.settings["bot-difficulty"] = currentDifficulty + 1;
+		window.app.settings["bot-difficulty"] = difficultyValues[currentDifficulty];
 		leftDifficulty.disabled = true;
 
 		leftDifficulty.addEventListener("click", () => {
@@ -158,7 +159,7 @@ export default class PlayView {
 				if (currentDifficulty == 0)
 					leftDifficulty.disabled = true;
 				difficultySpan.innerHTML = `<i class="fa-solid ${difficultyIcons[currentDifficulty]}"></i> ${difficulties[currentDifficulty]}`;
-				window.app.settings["bot-difficulty"] = currentDifficulty + 1;
+				window.app.settings["bot-difficulty"] = difficultyValues[currentDifficulty];
 			}
 		});
 
@@ -169,7 +170,7 @@ export default class PlayView {
 				if (currentDifficulty == difficulties.length - 1)
 					rightDifficulty.disabled = true;
 				difficultySpan.innerHTML = `<i class="fa-solid ${difficultyIcons[currentDifficulty]}"></i> ${difficulties[currentDifficulty]}`;
-				window.app.settings["bot-difficulty"] = currentDifficulty + 1;
+				window.app.settings["bot-difficulty"] = difficultyValues[currentDifficulty];
 			}
 		});
 	}

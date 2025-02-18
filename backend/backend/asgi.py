@@ -33,6 +33,7 @@ from api.consumers.login import LoginConsumer
 from api.consumers.signup import SignupConsumer
 from api.consumers.achievement import AchievementConsumer
 from api.consumers.recaptcha import RecaptchaConsumer
+from api.consumers.easter_egg import EasterEggConsumer
 from api.consumers.customize import GetCustomizeConsumer, SetCustomizeConsumer
 from api.consumers.delete_user import DeleteUserConsumer
 from api.consumers.admin import AdminConsumer
@@ -77,6 +78,7 @@ http_patterns = [
     path('api/recaptcha/', RecaptchaConsumer.as_asgi()),
     path('api/users/delete/', DeleteUserConsumer.as_asgi()),
 	path('api/admin/', AdminConsumer.as_asgi()),
+	path('api/credits/', EasterEggConsumer.as_asgi()),
     path('admin/', get_asgi_application()),
 ]
 
