@@ -2,13 +2,7 @@ export default class LoginView {
 	constructor(container) {
 		this.container = container;
 		this.render();
-		this.addOAuthEventListeners();
-		this.add2FAEventListeners();
-		this.add2FARecoveryCodeBtnEventListeners();
-		this.add2FATOTPBtnEventListeners();
-		this.addLoginEventListeners();
-		this.addSignupBtnEventListeners();
-		this.addPasswordToggleEventListeners();
+		this.addEventListeners();
 	}
 
 	render() {
@@ -27,76 +21,87 @@ export default class LoginView {
 							<input type="password" id="password-input" placeholder="Password" maxlength="32" required>
 							<i class="fa-solid fa-eye" id="password-toggle"></i>
 						</div>
-						<div id="input-message"><i class="fa-solid fa-xmark"></i></div>
+						<div id="input-message"></div>
 						<button id="login-button" type="submit"><i class="fa-solid fa-right-to-bracket"></i> Log In</button>
-						<hr />
+						<hr id="login-form-divider" />
 						<button id="login42-button" type="button"><img src="imgs/42_logo.png" id="oauth-logo"> Login In with 42</button>
 						<div id="signup-link">Don't have an account? <button type="button" id="signup-button"> Sign Up</button></div>
 					</form>
 				</div>
-			</main>
-			<div class="modal fade" id="totpModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-				<div class="modal-dialog">
-					<div class="modal-content">
+				<div class="my-modal-background">
+					<div id="totp-modal" class="my-modal">
 						<div class="modal-header">
-							<h1 class="modal-title fs-5" id="staticBackdropLabel">Two-Factor Authentication</h1>
-							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+							<h5 class="modal-title"><i class="fa-solid fa-lock"></i>&nbsp; Two Factor Authentication</h5>
+							<i class="modal-quit fa-solid fa-xmark fa-xl"></i>
 						</div>
-						<form id="totpForm">
-							<div class="modal-body">
-								<div class="mb-3">
-									<input id="totpInput" class="form-control" maxlength="6" required placeholder="Enter 2FA code">
-									<input id="recoveryCodeInput" class="form-control" maxlength="16" disabled required style="display: none;" placeholder="Enter recovery code">
+						<div class="my-modal-content">
+							<form id="totp-form">
+								<div class="input-container">
+									<i id="totp-input-icon" class="fa-solid fa-key input-icon"></i>
+									<input type="text" id="totp-input" placeholder="Code" maxlength="6" required>
 								</div>
-								<div id="totpError" class="alert alert-danger d-none"></div>
-								<button type="button" class="btn btn-primary" id="recoveryCodeBtn">Use recovery code</button>
-								<button type="button" class="btn btn-primary" id="totpBtn" style="display: none;">Use 2FA</button>
-							</div>
-							<div class="modal-footer">
-								<button type="submit" class="btn btn-primary" id="totpSubmit">Submit</button>
-							</div>
-						</form>
+								<div id="input-message"></div>
+								<button id="totp-button" type="submit"><i class="fa-solid fa-unlock"></i> Verify</button>
+								<hr id="totp-form-divider"/>
+							</form>
+							<button id="totp-method-button" type="click" data-checked="true"><i class="fa-solid fa-clipboard-list"></i> Use recovery code</button>
+						</div>
 					</div>
 				</div>
-			</div>
+			</main>
 		`;
 	}
 
-	add2FARecoveryCodeBtnEventListeners() {
-		const recoveryCodeBtn = this.container.querySelector('#recoveryCodeBtn');
-		recoveryCodeBtn.addEventListener('click', () => {
-			const totpBtn = this.container.querySelector('#totpBtn');
-			const totpInput = this.container.querySelector('#totpInput');
-			const recoveryCodeInput = this.container.querySelector('#recoveryCodeInput');
+	addEventListeners() {
+		this.addOAuthEventListeners();
+		this.add2FAEventListeners();
+		this.addLoginEventListeners();
+		this.addSignupBtnEventListeners();
+		this.addPasswordToggleEventListeners();
+		this.addModalQuitButtonEventListener();
+		this.add2FAMethodEventListeners();
+	}
 
-			totpBtn.style.display = "block";
+	addModalQuitButtonEventListener() {
+		const modalQuits = document.querySelectorAll('.modal-quit');
 
-			totpInput.value = "";
-			totpInput.style.display = "none";
-			totpInput.disabled = true;
-
-			recoveryCodeInput.style.display = "block";
-			recoveryCodeInput.disabled = false;
-			recoveryCodeBtn.style.display = "none";
+		modalQuits.forEach(modalQuit => {
+			modalQuit.addEventListener('click', () => {
+				const modalBackgrounds = document.querySelectorAll('.my-modal-background');
+				
+				modalBackgrounds.forEach(modalBackground => {
+					modalBackground.style.display = 'none';
+				});
+			});
 		});
 	}
 
-	add2FATOTPBtnEventListeners() {
-		const totpBtn = this.container.querySelector('#totpBtn');
-		totpBtn.addEventListener('click', () => {
-			const recoveryCodeBtn = this.container.querySelector('#recoveryCodeBtn');
-			const recoveryCodeInput = this.container.querySelector('#recoveryCodeInput');
-			const totpInput = this.container.querySelector('#totpInput');
-			
-			recoveryCodeBtn.style.display = "block";
+	add2FAMethodEventListeners() {
+		const totpMethodButton = document.getElementById('totp-method-button');
+		totpMethodButton.addEventListener('click', (e) => {
+			const isChecked = e.currentTarget.dataset.checked === 'true';
+			const totpInput = this.container.querySelector('#totp-input');
+			const totpInputIcon = document.getElementById('totp-input-icon');
+			totpInput.value = "";
 
-			recoveryCodeInput.value = "";
-			recoveryCodeInput.style.display = "none";
-			recoveryCodeInput.disabled = true;
+			if (isChecked) {
+				totpInput.maxlength = 16;
+				totpInput.placeholder = 'Recovery Code';
+				totpInputIcon.classList.remove('fa-key');
+				totpInputIcon.classList.add('fa-clipboard-list');
+			}
+			else {
+				totpInput.maxlength = 6;
+				totpInput.placeholder = 'Code';
+				totpInputIcon.classList.add('fa-key');
+				totpInputIcon.classList.remove('fa-clipboard-list');
+			}
 
-			totpInput.style.display = "block";
-			totpInput.disabled = false;
-			totpBtn.style.display = "none";
+			e.currentTarget.dataset.checked = !isChecked;
+
+			totpMethodButton.innerHTML = !isChecked ? 
+				`<i class="fa-solid fa-clipboard-list"></i> Use recovery code` : 
+				`<i class="fa-solid fa-key"></i> Use 2FA code`;
 		});
 	}
 
@@ -127,12 +132,12 @@ export default class LoginView {
 	}
 
 	add2FAEventListeners() {
-		const submit = this.container.querySelector('#totpForm');
+		const submit = this.container.querySelector('#totp-form');
 
 		submit.addEventListener('submit', async (e) => {
 			e.preventDefault();
-			const totp = this.container.querySelector('#totpInput').value;
-			const recovery_code = this.container.querySelector('#recoveryCodeInput').value;
+			const totp = this.container.querySelector('#totp-input').value;
+			const recovery_code = this.container.querySelector('#recovery-input').value;
 			try {
 				const username = this.container.querySelector('#username-input').value;
 				let response = null;
@@ -161,9 +166,6 @@ export default class LoginView {
 				}
 				const data = await response.json();
 				if (data.success) {
-					const modal = bootstrap.Modal.getInstance(this.container.querySelector('#totpModal'));
-					if (modal)
-						modal.hide();
 					window.app.login(data);
 				} else
 					window.app.showErrorMsg('#totpError', data.message);
@@ -194,8 +196,10 @@ export default class LoginView {
 				const data = await response.json();
 				
 				if (data.success) {
-					if (data.is_2fa_enabled)
-						new bootstrap.Modal(this.container.querySelector('#totpModal')).show();
+					if (data.is_2fa_enabled) {
+						const totpModal = document.getElementById('totp-modal');
+						totpModal.parentElement.style.display = 'flex';
+					}
 					else
 						window.app.login(data);
 				} else

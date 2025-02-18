@@ -84,20 +84,26 @@ export default class LeaderboardView {
 	}
 
 	addUserToLB(user, rank) {
-		let		row = "";
-		const	lb = document.getElementById("leaderboard-table");
-		
-		row += "<div id=\"lb-card-" + rank + "\"class=\"lb-card\">";
-		row += "<div class=\"lb-card-pos lb-card-att\">" + rank + "</div>";
-		row += "<div class=\"lb-card-user lb-card-att\"><img class=\"lb-card-avatar avatar\" src=\"" + user.avatar + "\"></img> &nbsp;&nbsp;" + user.name;
-		if (user.is_42_user)
-			row += "&nbsp;<img src=\"/imgs/42_logo.png\" id=\"oauth-logo\"></img>"
-		row += "</div>"
-		row += "<div class=\"lb-card-elo lb-card-att\">" + user.elo + "</div>";
-		row += "<div class=\"lb-card-winrate lb-card-att\">" + user.winrate + "</div>";
-		row += "<div class=\"lb-card-games lb-card-att\">" + user.games + "</div>";
-		row += "</div>";
-
+		const lb = document.getElementById("leaderboard-table");
+		const name = user.display_name == null ? user.username : user.display_name;
+		let profileButtonId = `lb-card-redirect-profile-${rank}`;
+		const row = `
+			<div id="lb-card-${rank}" class="lb-card">
+			<div class="lb-card-pos lb-card-att">${rank}</div>
+			<div class="lb-card-user lb-card-att">
+				<button id="${profileButtonId}">
+					<img class="lb-card-avatar avatar" src="${user.avatar}"></img> &nbsp;&nbsp; ${name}
+					${user.is_42_user ? "&nbsp;<img src=\"/imgs/42_logo.png\" id=\"oauth-logo\"></img>" : ""}
+				</button>
+			</div>
+			<div class="lb-card-elo lb-card-att">${user.elo}</div>
+			<div class="lb-card-winrate lb-card-att">${user.winrate}</div>
+			<div class="lb-card-games lb-card-att">${user.games}</div>
+			</div>`
 		lb.insertAdjacentHTML("beforeend", row);
+		const profileButton = document.getElementById(profileButtonId);
+		profileButton.addEventListener('click', () => {
+			window.app.router.navigateTo(`/profiles/${user.username}`);
+		});
 	}
 }

@@ -102,7 +102,7 @@ class App {
 			clearTimeout(errorDiv.timeoutId);
 		}
 		
-		errorDiv.innerHTML = `<i class="fa-solid fa-xmark"></i> ${msg}`;
+		errorDiv.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> ${msg}`;
 		errorDiv.style.backgroundColor = 'var(--input-error-color)';
 		errorDiv.style.border = `1px solid var(--input-error-border-color)`;
 		errorDiv.style.color = 'var(--input-error-text-color)';
