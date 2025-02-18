@@ -14,11 +14,14 @@ export default class GameComponent {
 			<div class="my-modal-background">
 				<div id="search-game-modal" class="my-modal">
 					<div class="modal-header">
-						<h5 class="modal-title"><i class="fa-solid fa-magnifying-glass"></i>&nbsp; Matchmaking</h5>
+						<h5 class="modal-title"><i class="fa-solid fa-magnifying-glass"></i>&nbsp; Searching for a game...</h5>
 						<i class="cancel-search-game modal-quit fa-solid fa-xmark fa-xl"></i>
 					</div>
 					<div class="my-modal-content">
-						<div id="game-search-message">Searching for a game...</div>
+						<div id="game-search-info">
+							<div id="game-search-mode"></div>
+							<div id="game-search-type"><i class="fa-solid fa-ranking-star"></i>&nbsp; Ranked</div>
+						</div>
 						<div id="game-search-loading">
 							<i id="paddle-left" class="fa-solid fa-minus fa-5x"></i>
 							<i id="ball-spinner" class="fa-solid fa-circle-notch fa-2x"></i>
@@ -40,13 +43,17 @@ export default class GameComponent {
 		
 		playButton.addEventListener("click", () => {
 			const searchGameModal = document.getElementById('search-game-modal');
+			const gameSearchMode = document.getElementById('game-search-mode');
+			const gameSearchType = document.getElementById('game-search-type');
 			searchGameModal.parentElement.style.display = 'flex';
 
 			window.app.settings["game-mode"] = gameModeCheckbox.checked ? "rumble" : "classic";
 			window.app.settings["game-type"] = gameTypeCheckbox.checked ? "ranked" : "ai";
 
+			gameSearchMode.innerHTML = window.app.settings["game-mode"] === "classic" ? `<i class="fa-solid fa-star"></i>&nbsp; Classic` : `<i class="fa-solid fa-bolt"></i>&nbsp; Rumble`;
+			gameSearchType.innerHTML = window.app.settings["game-type"] === "ai" ? `<i class="fa-solid fa-robot"></i>&nbsp; AI` : `<i class="fa-solid fa-ranking-star"></i>&nbsp; Ranked`;
+
 			if (window.app.settings["game-type"] === "ai") {
-				console.log(parseInt(window.app.settings["bot-difficulty"]));
 				this.playBot(parseInt(window.app.settings["bot-difficulty"]));
 			}
 			else if (window.app.settings["game-type"] === "ranked")
