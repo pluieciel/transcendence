@@ -21,7 +21,7 @@ export default class LoginView {
 							<input type="password" id="password-input" placeholder="Password" maxlength="32" required>
 							<i class="fa-solid fa-eye" id="password-toggle"></i>
 						</div>
-						<div id="input-message"></div>
+						<div id="input-message" class="input-message"></div>
 						<button id="login-button" type="submit"><i class="fa-solid fa-right-to-bracket"></i> Log In</button>
 						<hr id="login-form-divider" />
 						<button id="login42-button" type="button"><img src="imgs/42_logo.png" id="oauth-logo"> Login In with 42</button>
@@ -40,7 +40,7 @@ export default class LoginView {
 									<i id="totp-input-icon" class="fa-solid fa-key input-icon"></i>
 									<input type="text" id="totp-input" placeholder="Code" maxlength="6" required>
 								</div>
-								<div id="input-message"></div>
+								<div id="totp-message" class="input-message"></div>
 								<button id="totp-button" type="submit"><i class="fa-solid fa-unlock"></i> Verify</button>
 								<hr id="totp-form-divider"/>
 							</form>
@@ -136,12 +136,14 @@ export default class LoginView {
 
 		submit.addEventListener('submit', async (e) => {
 			e.preventDefault();
-			const totp = this.container.querySelector('#totp-input').value;
-			const recovery_code = this.container.querySelector('#recovery-input').value;
+			const input = this.container.querySelector('#totp-input').value;
 			try {
 				const username = this.container.querySelector('#username-input').value;
+				const totpMethodButton = document.getElementById('totp-method-button');
+
 				let response = null;
-				if (recovery_code) {
+				const is_recovery_code = totpMethodButton.getAttribute('checked') === 'true';
+				if (is_recovery_code) {
 					response = await fetch('/api/auth/login/2fa/recovery/', {
 						method: 'POST',
 						headers: {
@@ -149,7 +151,7 @@ export default class LoginView {
 						},
 						body: JSON.stringify({
 							username: username,
-							recovery_code: recovery_code,
+							recovery_code: input,
 						})
 					});
 				} else {
@@ -160,7 +162,7 @@ export default class LoginView {
 						},
 						body: JSON.stringify({
 							username: username,
-							totp: totp,
+							totp: input,
 						})
 					});
 				}
@@ -168,7 +170,7 @@ export default class LoginView {
 				if (data.success) {
 					window.app.login(data);
 				} else
-					window.app.showErrorMsg('#totpError', data.message);
+					window.app.showErrorMsg('#totp-message', data.message);
 			} catch (error) {
 				console.error("An error occurred: " + error);
 			}

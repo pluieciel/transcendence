@@ -57,7 +57,7 @@ body {
 	flex-wrap: wrap;
 }
 
-main i:not(#chat-icon, #input-message i) {
+main i:not(#chat-icon, .input-message i) {
 	margin-right: 0.2rem;
 }
 
@@ -214,7 +214,7 @@ nav i {
 	display: block;
 }
 
-#input-message {
+.input-message {
 	width: 100%;
 	min-height: 3rem;
 	border-radius: 0.3rem;
@@ -223,7 +223,7 @@ nav i {
 	display: none;
 }
 
-#input-message i {
+.input-message i {
 	padding: 0 0.5rem;
 }
 

@@ -42,7 +42,7 @@ export default class SettingsView {
 							</label>
 							<input type="file" id="avatar-input" accept="image/*" hidden>
 						</span>
-						<div id="input-message"></div>
+						<div id="input-message" class="input-message"></div>
 						<button id="save-button" type="submit"><i class="fa-solid fa-floppy-disk"></i> Save</button>
 					</form>
 					<button id="toggle-2fa-button" type="button"></button>
