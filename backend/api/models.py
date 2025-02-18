@@ -102,14 +102,14 @@ class UserPreference(models.Model):
 
 class UserStatistic(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='statistic')
+    classic_total_played = models.IntegerField(default=0)
     classic_elo = models.IntegerField(default=1000)
     classic_wins = models.IntegerField(default=0)
-    classic_losses = models.IntegerField(default=0)
+    rumble_total_played = models.IntegerField(default=0)
     rumble_elo = models.IntegerField(default=1000)
     rumble_wins = models.IntegerField(default=0)
-    rumble_losses = models.IntegerField(default=0)
+    tournament_total_participated = models.IntegerField(default=0)
     tournament_top_1 = models.IntegerField(default=0)
-    tournament_losses = models.IntegerField(default=0)
     tournament_top_2 = models.IntegerField(default=0)
     tournament_current_streak = models.IntegerField(default=0)
     tournament_max_streak = models.IntegerField(default=0)

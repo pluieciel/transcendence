@@ -161,20 +161,21 @@ class GameBackend:
 				self.game.winner = self.player_left.user
 				if (self.is_ranked and self.game_mode == "classic"):
 					await self.update_user_statistic_classic_wins(player_left_statistic)
-					await self.update_user_statistic_classic_losses(player_right_statistic)
 				elif (self.is_ranked and self.game_mode == "rumble"):
 					await self.update_user_statistic_rumble_wins(player_left_statistic)
-					await self.update_user_statistic_rumble_losses(player_right_statistic)
-				self.logger.info("Updated win lose")
 			elif self.game.winner == "RIGHT":
 				self.game.winner = self.player_right.user
 				if (self.is_ranked and self.game_mode == "classic"):
 					await self.update_user_statistic_classic_wins(player_right_statistic)
-					await self.update_user_statistic_classic_losses(player_left_statistic)
 				elif (self.is_ranked and self.game_mode == "rumble"):
 					await self.update_user_statistic_rumble_wins(player_right_statistic)
-					await self.update_user_statistic_rumble_losses(player_left_statistic)
-				self.logger.info("Updated win lose")
+
+			if (self.is_ranked and self.game_mode == "classic"):
+				await self.update_user_statistic_classic_total_played(player_left_statistic)
+				await self.update_user_statistic_classic_total_played(player_right_statistic)
+			elif (self.is_ranked and self.game_mode == "rumble"):
+				await self.update_user_statistic_rumble_total_played(player_left_statistic)
+				await self.update_user_statistic_rumble_total_played(player_right_statistic)
 
 			if (self.bot > 0 ):
 				await delete_game_history(self.game_id)
@@ -661,13 +662,13 @@ class GameBackend:
 		user_statistic.save()
 
 	@database_sync_to_async
-	def update_user_statistic_classic_losses(self, user_statistic):
+	def update_user_statistic_classic_total_played(self, user_statistic):
 		from api.models import UserStatistic
-		user_statistic.classic_losses += 1
+		user_statistic.classic_total_played += 1
 		user_statistic.save()
 
 	@database_sync_to_async
-	def update_user_statistic_rumble_losses(self, user_statistic):
+	def update_user_statistic_rumble_total_played(self, user_statistic):
 		from api.models import UserStatistic
-		user_statistic.rumble_losses += 1
+		user_statistic.rumble_total_played += 1
 		user_statistic.save()

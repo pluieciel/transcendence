@@ -39,7 +39,7 @@ export default class SignupView {
 							<input type="file" id="avatar-input" accept="image/*" hidden>
 						</span>
 						<div id="recaptcha"></div>
-						<div id="input-message"><i class="fa-solid fa-xmark"></i></div>
+						<div id="input-message"></div>
 						<button id="signup-button" type="submit"><i class="fa-solid fa-user-plus"></i> Sign Up</button>
 						<div id="login-link">Already have an account? <button type="button" id="login-button"> Log In</button></div>
 					</form>

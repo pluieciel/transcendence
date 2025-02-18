@@ -27,10 +27,6 @@ class ProfileConsumer(AsyncHttpConsumer):
 
 			user_statistic = await get_user_statistic(profile_user)
 
-			classic_total_played = user_statistic.classic_wins + user_statistic.classic_losses
-			rumble_total_played = user_statistic.rumble_wins + user_statistic.rumble_losses
-			tournament_total_participated = user_statistic.tournament_top_1 + user_statistic.tournament_losses
-
 			response_data = {
 				'success': True,
 				'username': profile_user.username,
@@ -38,24 +34,24 @@ class ProfileConsumer(AsyncHttpConsumer):
 				'avatar_url': get_user_avatar_url(profile_user, self.scope['headers']),
 				'display_name': profile_user.display_name,
 				'classic': {
-					'total_played': classic_total_played,
+					'total_played': user_statistic.classic_total_played,
 					'wins': user_statistic.classic_wins,
-					'winrate': get_winrate(user_statistic.classic_wins, classic_total_played),
+					'winrate': get_winrate(user_statistic.classic_wins, user_statistic.classic_total_played),
 					'elo': user_statistic.classic_elo,
 					'rank': await self.get_user_rank(profile_user, "classic"),
 				},
 				'rumble': {
-					'total_played': rumble_total_played,
+					'total_played': user_statistic.rumble_total_played,
 					'wins': user_statistic.rumble_wins,
-					'winrate': get_winrate(user_statistic.rumble_wins, rumble_total_played),
+					'winrate': get_winrate(user_statistic.rumble_wins, user_statistic.rumble_total_played),
 					'elo': user_statistic.rumble_elo,
 					'rank': await self.get_user_rank(profile_user, "rumble"),
 				},
 				'tournament': {
-					'total_participated': tournament_total_participated,
+					'total_participated': user_statistic.tournament_total_participated,
 					'top_1': user_statistic.tournament_top_1,
 					'top_2': user_statistic.tournament_top_2,
-					'winrate': "No games", # TODO: get tournament winrate
+					'winrate': get_winrate(user_statistic.rumble_wins, user_statistic.tournament_total_participated),
 					'max_streak': user_statistic.tournament_max_streak,
 				},
 			}
