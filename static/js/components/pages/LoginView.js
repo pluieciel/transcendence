@@ -85,13 +85,13 @@ export default class LoginView {
 			totpInput.value = "";
 
 			if (isChecked) {
-				totpInput.maxlength = 16;
+				totpInput.maxLength = 16;
 				totpInput.placeholder = 'Recovery Code';
 				totpInputIcon.classList.remove('fa-key');
 				totpInputIcon.classList.add('fa-clipboard-list');
 			}
 			else {
-				totpInput.maxlength = 6;
+				totpInput.maxLength = 6;
 				totpInput.placeholder = 'Code';
 				totpInputIcon.classList.add('fa-key');
 				totpInputIcon.classList.remove('fa-clipboard-list');
@@ -142,7 +142,7 @@ export default class LoginView {
 				const totpMethodButton = document.getElementById('totp-method-button');
 
 				let response = null;
-				const is_recovery_code = totpMethodButton.getAttribute('checked') === 'true';
+				const is_recovery_code = totpMethodButton.dataset.checked === 'false';
 				if (is_recovery_code) {
 					response = await fetch('/api/auth/login/2fa/recovery/', {
 						method: 'POST',
