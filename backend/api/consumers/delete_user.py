@@ -18,6 +18,17 @@ class DeleteUserConsumer(AsyncHttpConsumer):
 				return await self.send_response(401, json.dumps(response_data).encode(),
 					headers=[(b"Content-Type", b"application/json")])
 
+			data = json.loads(body.decode())
+			confirm_message = data.get('confirm')
+
+			if (confirm_message != "Delete"):
+				response_data = {
+					'success': False,
+					'message': "Invalid confirmation message"
+				}
+				return await self.send_response(400, json.dumps(response_data).encode(),
+					headers=[(b"Content-Type", b"application/json")])
+
 			if await self.delete_user(user.id):
 				response_data = {
 					'success': True,

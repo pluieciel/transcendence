@@ -21,7 +21,7 @@ export default class LoginView {
 							<input type="password" id="password-input" placeholder="Password" maxlength="32" required>
 							<i class="fa-solid fa-eye" id="password-toggle"></i>
 						</div>
-						<div id="input-message"></div>
+						<div id="input-message" class="input-message"></div>
 						<button id="login-button" type="submit"><i class="fa-solid fa-right-to-bracket"></i> Log In</button>
 						<hr id="login-form-divider" />
 						<button id="login42-button" type="button"><img src="imgs/42_logo.png" id="oauth-logo"> Login In with 42</button>
@@ -31,17 +31,18 @@ export default class LoginView {
 				<div class="my-modal-background">
 					<div id="totp-modal" class="my-modal">
 						<div class="modal-header">
-							<h5 class="modal-title"><i class="fa-solid fa-lock"></i>&nbsp; Two Factor Authentication</h5>
+							<h5 class="modal-title"><i class="fa-solid fa-user-shield"></i>&nbsp; Two Factor Authentication</h5>
 							<i class="modal-quit fa-solid fa-xmark fa-xl"></i>
 						</div>
 						<div class="my-modal-content">
 							<form id="totp-form">
+								<p class="modal-info">Please enter your 2FA code from your authenticator app</p>
 								<div class="input-container">
 									<i id="totp-input-icon" class="fa-solid fa-key input-icon"></i>
-									<input type="text" id="totp-input" placeholder="Code" maxlength="6" required>
+									<input type="text" id="totp-input" placeholder="2FA Code" maxlength="6" required>
 								</div>
-								<div id="input-message"></div>
-								<button id="totp-button" type="submit"><i class="fa-solid fa-unlock"></i> Verify</button>
+								<div id="totp-message" class="input-message"></div>
+								<button id="totp-button" type="submit"><i class="fa-solid fa-check"></i> Verify</button>
 								<hr id="totp-form-divider"/>
 							</form>
 							<button id="totp-method-button" type="click" data-checked="true"><i class="fa-solid fa-clipboard-list"></i> Use recovery code</button>
@@ -53,48 +54,37 @@ export default class LoginView {
 	}
 
 	addEventListeners() {
+		window.app.addModalQuitButtonEventListener();
 		this.addOAuthEventListeners();
 		this.add2FAEventListeners();
 		this.addLoginEventListeners();
 		this.addSignupBtnEventListeners();
 		this.addPasswordToggleEventListeners();
-		this.addModalQuitButtonEventListener();
 		this.add2FAMethodEventListeners();
-	}
-
-	addModalQuitButtonEventListener() {
-		const modalQuits = document.querySelectorAll('.modal-quit');
-
-		modalQuits.forEach(modalQuit => {
-			modalQuit.addEventListener('click', () => {
-				const modalBackgrounds = document.querySelectorAll('.my-modal-background');
-				
-				modalBackgrounds.forEach(modalBackground => {
-					modalBackground.style.display = 'none';
-				});
-			});
-		});
 	}
 
 	add2FAMethodEventListeners() {
 		const totpMethodButton = document.getElementById('totp-method-button');
 		totpMethodButton.addEventListener('click', (e) => {
 			const isChecked = e.currentTarget.dataset.checked === 'true';
+			const modalInfo = this.container.querySelector('.modal-info');
 			const totpInput = this.container.querySelector('#totp-input');
 			const totpInputIcon = document.getElementById('totp-input-icon');
 			totpInput.value = "";
 
 			if (isChecked) {
-				totpInput.maxlength = 16;
+				totpInput.maxLength = 16;
 				totpInput.placeholder = 'Recovery Code';
 				totpInputIcon.classList.remove('fa-key');
 				totpInputIcon.classList.add('fa-clipboard-list');
+				modalInfo.textContent = 'Please enter your recovery code';
 			}
 			else {
-				totpInput.maxlength = 6;
-				totpInput.placeholder = 'Code';
+				totpInput.maxLength = 6;
+				totpInput.placeholder = '2FA Code';
 				totpInputIcon.classList.add('fa-key');
 				totpInputIcon.classList.remove('fa-clipboard-list');
+				modalInfo.textContent = 'Please enter your 2FA code from your authenticator app';
 			}
 
 			e.currentTarget.dataset.checked = !isChecked;
@@ -136,12 +126,14 @@ export default class LoginView {
 
 		submit.addEventListener('submit', async (e) => {
 			e.preventDefault();
-			const totp = this.container.querySelector('#totp-input').value;
-			const recovery_code = this.container.querySelector('#recovery-input').value;
+			const input = this.container.querySelector('#totp-input').value;
 			try {
 				const username = this.container.querySelector('#username-input').value;
+				const totpMethodButton = document.getElementById('totp-method-button');
+
 				let response = null;
-				if (recovery_code) {
+				const is_recovery_code = totpMethodButton.dataset.checked === 'false';
+				if (is_recovery_code) {
 					response = await fetch('/api/auth/login/2fa/recovery/', {
 						method: 'POST',
 						headers: {
@@ -149,7 +141,7 @@ export default class LoginView {
 						},
 						body: JSON.stringify({
 							username: username,
-							recovery_code: recovery_code,
+							recovery_code: input,
 						})
 					});
 				} else {
@@ -160,7 +152,7 @@ export default class LoginView {
 						},
 						body: JSON.stringify({
 							username: username,
-							totp: totp,
+							totp: input,
 						})
 					});
 				}
@@ -168,7 +160,7 @@ export default class LoginView {
 				if (data.success) {
 					window.app.login(data);
 				} else
-					window.app.showErrorMsg('#totpError', data.message);
+					window.app.showErrorMsg('#totp-message', data.message);
 			} catch (error) {
 				console.error("An error occurred: " + error);
 			}

@@ -54,7 +54,7 @@ class SetSettingsConsumer(AsyncHttpConsumer):
 			avatar = data.get('avatar')
 			settings_updated = False
 
-			if display_name != user.display_name:
+			if display_name != user.display_name and not (display_name == "" and user.display_name is None):
 				if display_name == "":
 					display_name = None
 				elif not (self.is_valid_display_name(display_name)):

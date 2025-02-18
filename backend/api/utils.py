@@ -72,6 +72,8 @@ def generate_totp(secret, offset):
 	return bin_code % 1000000
 
 def verify_totp(totp_secret, totp_input):
+	if not totp_input.isnumeric() or len(totp_input) != 6:
+		return False
 	for offset in [-2, -1, 0, 1]:
 		totp = generate_totp(totp_secret, offset)
 		if totp == int(totp_input):
