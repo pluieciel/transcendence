@@ -11,25 +11,37 @@ export default class GameComponent {
 
 	render() {
 		this.container.innerHTML = `
-			<!-- Quick Match Timer container -->
-			<div class="modal fade" id="matchSearch" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-				<div class="modal-dialog modal-dialog-centered">
-					<div class="modal-content modal-content-game d-flex flex-column align-items-center justify-content-center text-center">
-						<h5 class="modal-title w-70 mt-3 mb-3" id="staticBackdropLabel">Searching for a game</h5>
-						<h2 id="timer">0s</h2> <!-- Timer below the header -->
-						<button type="button" class="btn btn-secondary m-3" id="gameSearchCancel" data-bs-dismiss="modal">Cancel</button>
+			<div class="my-modal-background">
+				<div id="search-game-modal" class="my-modal">
+					<div class="modal-header">
+						<h5 class="modal-title"><i class="fa-solid fa-magnifying-glass"></i>&nbsp; Matchmaking</h5>
+						<i class="cancel-search-game modal-quit fa-solid fa-xmark fa-xl"></i>
+					</div>
+					<div class="my-modal-content">
+						<div id="game-search-message">Searching for a game...</div>
+						<div id="game-search-loading">
+							<i id="paddle-left" class="fa-solid fa-minus fa-5x"></i>
+							<i id="ball-spinner" class="fa-solid fa-circle-notch fa-2x"></i>
+							<i id="paddle-right" class="fa-solid fa-minus fa-rotate-90 fa-5x"></i>
+						</div>
+						<div id="game-search-timer">0s</div>
+						<button id="cancel-search-button" class="cancel-search-game" type="click"><i class="fa-solid fa-ban"></i>&nbsp; Cancel</button>
 					</div>
 				</div>
 			</div>
 		`;
 	}
 
-	addPlayButtonEventListeners() {
+	addPlayButtonEventListeners() {		
 		const playButton = document.getElementById("start-button");
 		const gameModeCheckbox = document.getElementById("game-mode-checkbox");
 		const gameTypeCheckbox = document.getElementById("game-type-checkbox");
-
+		
+		
 		playButton.addEventListener("click", () => {
+			const searchGameModal = document.getElementById('search-game-modal');
+			searchGameModal.parentElement.style.display = 'flex';
+
 			window.app.settings["game-mode"] = gameModeCheckbox.checked ? "rumble" : "classic";
 			window.app.settings["game-type"] = gameTypeCheckbox.checked ? "ranked" : "ai";
 
@@ -42,22 +54,23 @@ export default class GameComponent {
 		});
 	}
 
-	addCancelGameSearchEventListener() {
-		const cancelGameSearch = document.getElementById("gameSearchCancel");
+	addCancelSearchGameEventListener() {
+		const cancelSearchGameButtons = document.querySelectorAll('.cancel-search-game');
 
-		if (cancelGameSearch) {
-			cancelGameSearch.addEventListener("click", () => {
+		cancelSearchGameButtons.forEach((cancelSearchGame) => {
+			cancelSearchGame.addEventListener("click", () => {
 				if (window.app.gamews) {
 					window.app.gamews.close();
 				}
 				this.stopTimerAndDismissModal();
 			});
-		}
+		});
 	}
 
 	addEventListeners() {
+		window.app.addModalQuitButtonEventListener();
 		this.addPlayButtonEventListeners();
-		this.addCancelGameSearchEventListener();
+		this.addCancelSearchGameEventListener();
 	}
 
 	searchGame() {
@@ -120,7 +133,7 @@ export default class GameComponent {
 
 	startSearchGameTimer() {
 		this.countdownTime = 0;
-		this.timerElement = document.getElementById("timer");
+		this.timerElement = document.getElementById("game-search-timer");
 		if (this.timerElement) {
 			this.timerElement.innerText = "0s";
 		}
@@ -137,10 +150,7 @@ export default class GameComponent {
 		if (this.timerElement) {
 			this.timerElement.innerText = "0s";
 		}
-		const matchSearchModal = bootstrap.Modal.getInstance(document.getElementById("matchSearch"));
-		if (matchSearchModal) {
-			matchSearchModal.hide();
-			await new Promise((resolve) => setTimeout(resolve, 300)); // Wait for the modal to fully close
-		}
+		const searchGameModal = document.getElementById('search-game-modal');
+		searchGameModal.parentElement.style.display = 'none';
 	}
 }

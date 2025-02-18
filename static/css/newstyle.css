@@ -652,8 +652,88 @@ form button:hover:not(:disabled) {
 	width: 30rem;
 }
 
-#play-card, #left-filler {
+#play-card, #left-filler, #search-game-modal {
 	width: 30rem;
+}
+
+#search-game-modal {
+	font-weight: bold;
+}
+
+#game-search-loading {
+	width: 100%;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+}
+
+#game-search-loading #ball-spinner {
+	animation: ball-moving 2s infinite linear;
+}
+
+#game-search-loading #paddle-left {
+	animation: paddle-left-moving 2s infinite linear;
+}
+
+#game-search-loading #paddle-right {
+	animation: paddle-right-moving 2s infinite linear;
+}
+  
+@keyframes ball-moving {
+	0%   {transform: translateX(0) rotate(0deg);}
+	25%  {transform: translateX(-500%) rotate(90deg);}
+	50%  {transform: translateX(0) rotate(180deg);}
+	75%  {transform: translateX(500%) rotate(270deg);}
+	100% {transform: translateX(0) rotate(360deg);}
+}
+
+@keyframes paddle-left-moving {
+	0%   {transform: translateY(0) rotate(90deg);}
+	15%  {transform: translateY(-20%) rotate(90deg);}
+	35%  {transform: translateY(-40%) rotate(90deg);}
+	50%  {transform: translateY(0) rotate(90deg);}
+	65%  {transform: translateY(30%) rotate(90deg);}
+	85%  {transform: translateY(15%) rotate(90deg);}
+	100% {transform: translateY(0) rotate(90deg);}
+}
+
+@keyframes paddle-right-moving {
+	0%   {transform: translateY(0) rotate(90deg);}
+	20%  {transform: translateY(35%) rotate(90deg);}
+	40%  {transform: translateY(20%) rotate(90deg);}
+	50%  {transform: translateY(0) rotate(90deg);}
+	70%  {transform: translateY(-25%) rotate(90deg);}
+	85%  {transform: translateY(-10%) rotate(90deg);}
+	100% {transform: translateY(0) rotate(90deg);}
+}
+
+#game-search-timer {
+	margin: 1rem 0;
+	font-size: 2rem;
+}
+
+#game-search-message {
+	font-size: 1.2rem;
+	margin-bottom: 1rem;
+}
+
+#cancel-search-button {
+	margin-bottom: 1rem;
+	color: var(--secondary-color);
+	background-color: var(--primary-color);
+	border: 1px solid var(--primary-color);
+	border-radius: 0.3rem;
+	padding: 0.4rem;
+	height: 3rem;
+	font-weight: bold;
+	width: 100%;
+}
+
+#cancel-search-button:hover {
+	border: 1px solid var(--user-color);
+	box-shadow: 0 0 15px var(--user-color);
+	transition: all 0.3s ease;
 }
 
 /* ******************************** */
@@ -1332,4 +1412,14 @@ form button:hover:not(:disabled) {
 	font-size: 0.9rem;
 	opacity: 0.5;
 	font-weight: normal;
+}
+
+.paddle {
+  animation: paddle-move 2s infinite;
+}
+
+@keyframes paddle-move {
+  0% { transform: translateY(-100px); }
+  50% { transform: translateY(100px); }
+  100% { transform: translateY(-100px); }
 }
