@@ -59,7 +59,6 @@ export default class LoginView {
 		this.addLoginEventListeners();
 		this.addSignupBtnEventListeners();
 		this.addPasswordToggleEventListeners();
-		this.addModalQuitButtonEventListener();
 		this.add2FAMethodEventListeners();
 	}
 

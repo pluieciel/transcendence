@@ -33,7 +33,7 @@ class Enable2FAConsumer(AsyncHttpConsumer):
 			if not is_totp_valid:
 				response_data = {
 					'success': False,
-					'message': 'Invalid totp code'
+					'message': 'Invalid 2FA code'
 				}
 				return await self.send_response(401, json.dumps(response_data).encode(),
 					headers=[(b"Content-Type", b"application/json")])
