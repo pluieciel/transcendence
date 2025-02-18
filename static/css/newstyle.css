@@ -288,6 +288,10 @@ input:focus {
 	transition: all 0.3s ease;
 }
 
+form {
+	width: 100%;
+}
+
 form button {
 	margin-bottom: 1rem;
 	color: var(--secondary-color);
@@ -298,6 +302,7 @@ form button {
 	transition: all 0.3s ease;
 	font-weight: bold;
 	height: 3rem;
+	width: 100%;
 }
 
 form button:hover:not(:disabled) {
@@ -420,6 +425,7 @@ form button:hover:not(:disabled) {
 }
 
 #signup-link button, #login-link button {
+	width: auto;
 	background-color: transparent;
 	border: none;
 	color: var(--secondary-color);
@@ -439,7 +445,7 @@ form button:hover:not(:disabled) {
 	height: 1.5rem;
 }
 
-hr {
+#login-form-divider {
 	width: 100%;
 	border: none;
 	border-top: 1px solid var(--secondary-color);
@@ -449,7 +455,7 @@ hr {
 	opacity: 0.5;
 }
 
-hr::after {
+#login-form-divider::after {
 	content: "or";
 	background-color: var(--accent-color);
 	padding: 0 4px;
@@ -1189,36 +1195,79 @@ hr::after {
 	width: 100vw;
 	height: 100vh;
 	z-index: 200;
-	display: flex;
+	display: none;
 	align-items: center;
 	justify-content: center;
 	background-color: rgba(17, 17, 17, 0.85);
 }
 
 .my-modal {
-	background-color: #0e0e0e;
+	background-color: #080808;
 	color: var(--secondary-color);	
 	margin-top: 5.5rem;
 	border-radius: 0.3rem;
-	padding: 2rem;
+	padding: 1rem;
 }
 
-.my-modal #modal-title {
-	font-weight: bold;
+#totp-modal {
+	width: 30rem;
 }
 
-#modal-header {
+.modal-header {
 	display: flex;
 	flex-direction: row;
 	align-items: center;
 	justify-content: space-between;
+	margin-bottom: 1rem;
+	font-weight: bold;
 }
 
-#modal-header i:hover {
+.modal-header i:hover {
 	cursor: pointer;
 }
 
-#specific-modal {
-	width: 30rem;
-	height: 25rem;
+.my-modal-content {
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 0.5rem;
+}
+
+.my-modal-content input {
+	background-color: var(--accent-color);
+	border: 1px solid var(--accent-color);
+}
+
+.my-modal-content input:focus {
+	border: 1px solid var(--user-color);
+}
+
+#totp-form button {
+	background-color: var(--primary-color);
+	border: 1px solid var(--primary-color);
+}
+
+#totp-form button:hover {
+	border: 1px solid var(--user-color);
+}
+
+#totp-form-divider {
+	width: 100%;
+	border: none;
+	border-top: 1px solid var(--hover-color);
+	overflow: visible;
+	text-align: center;
+	height: 1rem;
+	opacity: 0.5;
+}
+
+#totp-form-divider::after {
+	content: "or";
+	background-color: #080808;
+	color: var(--hover-color);
+	padding: 0 4px;
+	position: relative;
+	top: -0.9rem;
 }

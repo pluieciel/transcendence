@@ -261,7 +261,7 @@ export default class SettingsView {
 			const data = await response.json();
 			if (data.success) {
 				const toggle2FAButton = document.getElementById("toggle-2fa-button");
-				toggle2FAButton.innerHTML = '<i class="fa-solid fa-key"></i> Enable 2FA';
+				toggle2FAButton.innerHTML = '<i class="fa-solid fa-lock"></i> Enable 2FA';
 				toggle2FAButton.setAttribute("data-is-2fa-enabled", "false");
 			} else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
 				window.app.logout();
@@ -396,8 +396,7 @@ export default class SettingsView {
 				const toggle2FAButton = document.getElementById("toggle-2fa-button");
 
 				displayNameInput.value = data.display_name;
-				toggle2FAButton.innerHTML = '<i class="fa-solid fa-key"></i> ';
-				toggle2FAButton.innerHTML += data.is_2fa_enabled ? "Disable 2FA" : "Enable 2FA";
+				toggle2FAButton.innerHTML = data.is_2fa_enabled ? `<i class="fa-solid fa-unlock"></i> Disable 2FA` : `<i class="fa-solid fa-lock"></i> Enable 2FA`;
 				toggle2FAButton.setAttribute("data-is-2fa-enabled", data.is_2fa_enabled);
 			} else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
 				window.app.logout();
