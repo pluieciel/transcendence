@@ -299,7 +299,6 @@ form button {
 	border: 1px solid var(--primary-color);
 	border-radius: 0.3rem;
 	padding: 0.4rem;
-	transition: all 0.3s ease;
 	font-weight: bold;
 	height: 3rem;
 	width: 100%;
@@ -1244,12 +1243,30 @@ form button:hover:not(:disabled) {
 	border: 1px solid var(--user-color);
 }
 
+#totp-method-button {
+	margin-bottom: 1rem;
+	color: var(--secondary-color);
+	background-color: var(--primary-color);
+	border: 1px solid var(--primary-color);
+	border-radius: 0.3rem;
+	padding: 0.4rem;
+	font-weight: bold;
+	height: 3rem;
+	width: 100%;
+}
+
+#totp-method-button:hover {
+	border: 1px solid var(--user-color);
+	box-shadow: 0 0 15px var(--user-color);
+	transition: all 0.3s ease;
+}
+
 #totp-form button {
 	background-color: var(--primary-color);
 	border: 1px solid var(--primary-color);
 }
 
-#totp-form button:hover {
+#totp-form button:hover, #totp-method-button:hover {
 	border: 1px solid var(--user-color);
 }
 

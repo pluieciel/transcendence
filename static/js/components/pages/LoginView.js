@@ -37,14 +37,14 @@ export default class LoginView {
 						<div class="my-modal-content">
 							<form id="totp-form">
 								<div class="input-container">
-									<i class="fa-solid fa-key input-icon"></i>
+									<i id="totp-input-icon" class="fa-solid fa-key input-icon"></i>
 									<input type="text" id="totp-input" placeholder="Code" maxlength="6" required>
 								</div>
 								<div id="input-message"></div>
 								<button id="totp-button" type="submit"><i class="fa-solid fa-unlock"></i> Verify</button>
 								<hr id="totp-form-divider"/>
-								<button id="totp-method-button" type="submit"><i class="fa-solid fa-clipboard-list"></i> Use recovery code</button>
 							</form>
+							<button id="totp-method-button" type="click" data-checked="true"><i class="fa-solid fa-clipboard-list"></i> Use recovery code</button>
 						</div>
 					</div>
 				</div>
@@ -54,10 +54,12 @@ export default class LoginView {
 
 	addEventListeners() {
 		this.addOAuthEventListeners();
+		this.add2FAEventListeners();
 		this.addLoginEventListeners();
 		this.addSignupBtnEventListeners();
 		this.addPasswordToggleEventListeners();
 		this.addModalQuitButtonEventListener();
+		this.add2FAMethodEventListeners();
 	}
 
 	addModalQuitButtonEventListener() {
@@ -74,22 +76,32 @@ export default class LoginView {
 		});
 	}
 
-	add2FATOTPBtnEventListeners() {
-		const totpBtn = this.container.querySelector('#totpBtn');
-		totpBtn.addEventListener('click', () => {
-			const recoveryCodeBtn = this.container.querySelector('#recoveryCodeBtn');
-			const recoveryCodeInput = this.container.querySelector('#recoveryCodeInput');
-			const totpInput = this.container.querySelector('#totpInput');
-			
-			recoveryCodeBtn.style.display = "block";
+	add2FAMethodEventListeners() {
+		const totpMethodButton = document.getElementById('totp-method-button');
+		totpMethodButton.addEventListener('click', (e) => {
+			const isChecked = e.currentTarget.dataset.checked === 'true';
+			const totpInput = this.container.querySelector('#totp-input');
+			const totpInputIcon = document.getElementById('totp-input-icon');
+			totpInput.value = "";
 
-			recoveryCodeInput.value = "";
-			recoveryCodeInput.style.display = "none";
-			recoveryCodeInput.disabled = true;
+			if (isChecked) {
+				totpInput.maxlength = 16;
+				totpInput.placeholder = 'Recovery Code';
+				totpInputIcon.classList.remove('fa-key');
+				totpInputIcon.classList.add('fa-clipboard-list');
+			}
+			else {
+				totpInput.maxlength = 6;
+				totpInput.placeholder = 'Code';
+				totpInputIcon.classList.add('fa-key');
+				totpInputIcon.classList.remove('fa-clipboard-list');
+			}
 
-			totpInput.style.display = "block";
-			totpInput.disabled = false;
-			totpBtn.style.display = "none";
+			e.currentTarget.dataset.checked = !isChecked;
+
+			totpMethodButton.innerHTML = !isChecked ? 
+				`<i class="fa-solid fa-clipboard-list"></i> Use recovery code` : 
+				`<i class="fa-solid fa-key"></i> Use 2FA code`;
 		});
 	}
 
@@ -120,12 +132,12 @@ export default class LoginView {
 	}
 
 	add2FAEventListeners() {
-		const submit = this.container.querySelector('#totpForm');
+		const submit = this.container.querySelector('#totp-form');
 
 		submit.addEventListener('submit', async (e) => {
 			e.preventDefault();
-			const totp = this.container.querySelector('#totpInput').value;
-			const recovery_code = this.container.querySelector('#recoveryCodeInput').value;
+			const totp = this.container.querySelector('#totp-input').value;
+			const recovery_code = this.container.querySelector('#recovery-input').value;
 			try {
 				const username = this.container.querySelector('#username-input').value;
 				let response = null;
@@ -154,9 +166,6 @@ export default class LoginView {
 				}
 				const data = await response.json();
 				if (data.success) {
-					const modal = bootstrap.Modal.getInstance(this.container.querySelector('#totpModal'));
-					if (modal)
-						modal.hide();
 					window.app.login(data);
 				} else
 					window.app.showErrorMsg('#totpError', data.message);
