@@ -119,7 +119,7 @@ class App {
 			clearTimeout(successDiv.timeoutId);
 		}
 
-		successDiv.innerHTML = `<i class="fa-solid fa-check"></i> ${msg}`;
+		successDiv.innerHTML = `<i class="fa-solid fa-circle-check"></i> ${msg}`;
 		successDiv.style.backgroundColor = 'var(--input-success-color)';
 		successDiv.style.border = `1px solid var(--input-success-border-color)`;
 		successDiv.style.color = 'var(--input-success-text-color)';
@@ -286,6 +286,20 @@ class App {
 		logoutButton.addEventListener("click", () => {
 			//window.app.chatBox.disconnect();
 			window.app.logout();
+		});
+	}
+
+	addModalQuitButtonEventListener() {
+		const modalQuits = document.querySelectorAll('.modal-quit');
+
+		modalQuits.forEach(modalQuit => {
+			modalQuit.addEventListener('click', () => {
+				const modalBackgrounds = document.querySelectorAll('.my-modal-background');
+				
+				modalBackgrounds.forEach(modalBackground => {
+					modalBackground.style.display = 'none';
+				});
+			});
 		});
 	}
 

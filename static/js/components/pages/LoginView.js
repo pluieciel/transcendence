@@ -31,7 +31,7 @@ export default class LoginView {
 				<div class="my-modal-background">
 					<div id="totp-modal" class="my-modal">
 						<div class="modal-header">
-							<h5 class="modal-title"><i class="fa-solid fa-lock"></i>&nbsp; Two Factor Authentication</h5>
+							<h5 class="modal-title"><i class="fa-solid fa-user-shield"></i>&nbsp; Two Factor Authentication</h5>
 							<i class="modal-quit fa-solid fa-xmark fa-xl"></i>
 						</div>
 						<div class="my-modal-content">
@@ -41,7 +41,7 @@ export default class LoginView {
 									<input type="text" id="totp-input" placeholder="Code" maxlength="6" required>
 								</div>
 								<div id="totp-message" class="input-message"></div>
-								<button id="totp-button" type="submit"><i class="fa-solid fa-unlock"></i> Verify</button>
+								<button id="totp-button" type="submit"><i class="fa-solid fa-check"></i> Verify</button>
 								<hr id="totp-form-divider"/>
 							</form>
 							<button id="totp-method-button" type="click" data-checked="true"><i class="fa-solid fa-clipboard-list"></i> Use recovery code</button>
@@ -53,6 +53,7 @@ export default class LoginView {
 	}
 
 	addEventListeners() {
+		window.app.addModalQuitButtonEventListener();
 		this.addOAuthEventListeners();
 		this.add2FAEventListeners();
 		this.addLoginEventListeners();
@@ -60,20 +61,6 @@ export default class LoginView {
 		this.addPasswordToggleEventListeners();
 		this.addModalQuitButtonEventListener();
 		this.add2FAMethodEventListeners();
-	}
-
-	addModalQuitButtonEventListener() {
-		const modalQuits = document.querySelectorAll('.modal-quit');
-
-		modalQuits.forEach(modalQuit => {
-			modalQuit.addEventListener('click', () => {
-				const modalBackgrounds = document.querySelectorAll('.my-modal-background');
-				
-				modalBackgrounds.forEach(modalBackground => {
-					modalBackground.style.display = 'none';
-				});
-			});
-		});
 	}
 
 	add2FAMethodEventListeners() {

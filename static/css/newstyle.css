@@ -1298,3 +1298,7 @@ form button:hover:not(:disabled) {
 	position: relative;
 	top: -0.9rem;
 }
+
+#qr-code svg path {
+	fill: var(--secondary-color);
+}

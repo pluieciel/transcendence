@@ -48,53 +48,43 @@ export default class SettingsView {
 					<button id="toggle-2fa-button" type="button"></button>
 					<button id="delete-account-button" type="submit"><i class="fa-solid fa-trash-can"></i> Delete Account</button>
 				</div>
+				<div class="my-modal-background">
+					<div id="totp-modal" class="my-modal">
+						<div class="modal-header">
+							<h5 class="modal-title"><i class="fa-solid fa-user-shield"></i>&nbsp; Two Factor Authentication</h5>
+							<i class="modal-quit fa-solid fa-xmark fa-xl"></i>
+						</div>
+						<div class="my-modal-content">
+							<form id="totp-form">
+								<div id="qr-code"></div>
+								<div class="input-container">
+									<i id="totp-input-icon" class="fa-solid fa-key input-icon"></i>
+									<input type="text" id="totp-input" placeholder="Code" maxlength="6" required>
+								</div>
+								<div id="totp-message" class="input-message"></div>
+								<button id="totp-button" type="submit"><i class="fa-solid fa-check"></i> Verify</button>
+							</form>
+						</div>
+					</div>
+				</div>
+				<div class="my-modal-background">
+					<div id="recovery-modal" class="my-modal">
+						<div class="modal-header">
+							<h5 class="modal-title"><i class="fa-solid fa-clipboard-list"></i>&nbsp; Recovery Codes</h5>
+							<i class="modal-quit fa-solid fa-xmark fa-xl"></i>
+						</div>
+						<div class="my-modal-content">
+							<ul id="recovery-codes"></ul>
+						</div>
+					</div>
+				</div>
 			</main>
-			<div class="modal fade" id="totpModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-				<div class="modal-dialog">
-					<div class="modal-content">
-						<div class="modal-header">
-							<h1 class="modal-title fs-5" id="staticBackdropLabel">Two-Factor Authentication</h1>
-							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-						</div>
-						<form id="totpForm">
-							<div class="modal-body">
-								<div class="mb-3">
-									<div id="qrCode"></div>
-									<div id="qrCodeError" class="alert alert-danger d-none"></div>
-								</div>
-								<div class="mb-3">
-									<input id="totpInput" class="form-control" maxlength="6" placeholder="Enter 2FA code" required>
-								</div>
-								<div id="totpError" class="alert alert-danger d-none"></div>
-							</div>
-							<div class="modal-footer">
-								<button type="submit" class="btn btn-primary" id="totpSubmit">Submit</button>
-							</div>
-						</form>
-					</div>
-				</div>
-			</div>
-			<div class="modal fade" id="recoveryModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-				<div class="modal-dialog">
-					<div class="modal-content">
-						<div class="modal-header">
-							<h1 class="modal-title fs-5" id="staticBackdropLabel">Recovery codes</h1>
-							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-						</div>
-						<form id="recoveryForm">
-							<div class="modal-body">
-								<ul id="recoveryCodes">
-								</ul>
-							</div>
-						</form>
-					</div>
-				</div>
-			</div>
 		`;
 	}
 
 	addEventListeners() {
 		window.app.addNavEventListeners();
+		window.app.addModalQuitButtonEventListener();
 		this.addPasswordToggleEventListeners();
 		this.addDeleteAccountButtonEventListeners();
 		this.addToggle2FAButtonEventListeners();
@@ -261,7 +251,7 @@ export default class SettingsView {
 			const data = await response.json();
 			if (data.success) {
 				const toggle2FAButton = document.getElementById("toggle-2fa-button");
-				toggle2FAButton.innerHTML = '<i class="fa-solid fa-lock"></i> Enable 2FA';
+				toggle2FAButton.innerHTML = '<i class="fa-solid fa-shield-halved"></i> Enable 2FA';
 				toggle2FAButton.setAttribute("data-is-2fa-enabled", "false");
 			} else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
 				window.app.logout();
@@ -282,8 +272,9 @@ export default class SettingsView {
 			const data = await response.json();
 
 			if (data.success) {
-				new bootstrap.Modal(this.container.querySelector('#totpModal')).show();
-				const qrCode = this.container.querySelector('#qrCode');
+				const totpModal = document.getElementById('totp-modal');
+				totpModal.parentElement.style.display = 'flex';
+				const qrCode = document.getElementById('qr-code');
 				qrCode.innerHTML = data.qr_code;
 			} else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
 				window.app.logout();
@@ -330,12 +321,11 @@ export default class SettingsView {
 	}
 
 	add2FAEventListeners() {
-		const submit = this.container.querySelector('#totpForm');
-		const errorDiv = this.container.querySelector('#totpError');
+		const submit = this.container.querySelector('#totp-form');
 
 		submit.addEventListener('submit', async (e) => {
 			e.preventDefault();
-			const totp = this.container.querySelector('#totpInput').value;
+			const totp = this.container.querySelector('#totp-input').value;
 			try {
 				const response = await fetch('/api/settings/2fa/enable/', {
 					method: 'POST',
@@ -352,31 +342,30 @@ export default class SettingsView {
 					toggle2FAButton.innerHTML = '<i class="fa-solid fa-key"></i> Disable 2FA';
 					toggle2FAButton.setAttribute("data-is-2fa-enabled", "true");
 					await this.getSettings();
-					const modal = bootstrap.Modal.getInstance(this.container.querySelector('#totpModal'));
-					if (modal)
-					{
-						modal.hide();
-						const response = await fetch('/api/settings/2fa/recovery/generate/');
+					
+					const totpModal = document.getElementById('totp-modal');
+					totpModal.parentElement.style.display = 'none';
+					const response = await fetch('/api/settings/2fa/recovery/generate/');
 
-						const data = await response.json();
+					const data = await response.json();
 
-						const recoveryCodes = this.container.querySelector('#recoveryCodes');
-						recoveryCodes.innerHTML = '';
-						recoveryCodes.append(Object.assign(document.createElement('li'), {textContent: data.recovery_code_1}));
-						recoveryCodes.append(Object.assign(document.createElement('li'), {textContent: data.recovery_code_2}));
-						recoveryCodes.append(Object.assign(document.createElement('li'), {textContent: data.recovery_code_3}));
-						recoveryCodes.append(Object.assign(document.createElement('li'), {textContent: data.recovery_code_4}));
-						recoveryCodes.append(Object.assign(document.createElement('li'), {textContent: data.recovery_code_5}));
-						recoveryCodes.append(Object.assign(document.createElement('li'), {textContent: data.recovery_code_6}));
+					const recoveryCodes = document.getElementById('recovery-codes');
+					recoveryCodes.innerHTML = '';
+					recoveryCodes.append(Object.assign(document.createElement('li'), {textContent: data.recovery_code_1}));
+					recoveryCodes.append(Object.assign(document.createElement('li'), {textContent: data.recovery_code_2}));
+					recoveryCodes.append(Object.assign(document.createElement('li'), {textContent: data.recovery_code_3}));
+					recoveryCodes.append(Object.assign(document.createElement('li'), {textContent: data.recovery_code_4}));
+					recoveryCodes.append(Object.assign(document.createElement('li'), {textContent: data.recovery_code_5}));
+					recoveryCodes.append(Object.assign(document.createElement('li'), {textContent: data.recovery_code_6}));
 
-						new bootstrap.Modal(this.container.querySelector('#recoveryModal')).show();
-					}
+					const recoveryModal = document.getElementById('recovery-modal');
+					recoveryModal.parentElement.style.display = 'flex';
 				} else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
 					window.app.logout();
 				} else if (response.status == 409) {
 					// TODO: show error msg
 				} else {
-					// TODO: Show error message
+					window.app.showErrorMsg('#totp-message', data.message);
 				}
 			} catch (error) {
 				console.error("An error occurred: " + error);
@@ -396,7 +385,7 @@ export default class SettingsView {
 				const toggle2FAButton = document.getElementById("toggle-2fa-button");
 
 				displayNameInput.value = data.display_name;
-				toggle2FAButton.innerHTML = data.is_2fa_enabled ? `<i class="fa-solid fa-unlock"></i> Disable 2FA` : `<i class="fa-solid fa-lock"></i> Enable 2FA`;
+				toggle2FAButton.innerHTML = data.is_2fa_enabled ? `<i class="fa-solid fa-unlock"></i> Disable 2FA` : `<i class="fa-solid fa-shield-halved"></i> Enable 2FA`;
 				toggle2FAButton.setAttribute("data-is-2fa-enabled", data.is_2fa_enabled);
 			} else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
 				window.app.logout();
