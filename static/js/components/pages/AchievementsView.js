@@ -56,19 +56,21 @@ export default class AchievementsView {
 				<div class="cheevo ${achievement.unlocked ? 'success' : ''}">
 					<div class="cheevo-icon"><i class="${achievement.icon}"></i></div>
 					<div class="cheevo-container">
-						<div class="cheevo-title">${achievement.name}</div>
-						<div class="cheevo-row">
+						<div class="cheevo-left">
+							<div class="cheevo-title">${achievement.name}</div>
 							<div class="cheevo-body">${achievement.description}</div>
+							<div class="progress-bar">
+								<div class="progress-bar-percentage" style="width: ${(achievement.progression / achievement.unlock_value * 100)}%">
+									<span>${achievement.progression}/${achievement.unlock_value}</span>
+								</div>
+							</div>
+						</div>
+						<div class="cheevo-right">
 							${achievement.color_unlocked  != -1? `
 								<div class="cheevo-reward" style="background-color:${window.app.getColor(achievement.color_unlocked)}">
 									<span class="tooltip">Reward:<br> <i class="fa-solid fa-palette fa-xl"></i> ${colorArray[achievement.color_unlocked]}</span>
 								</div>
-							` : ''}
-						</div>
-						<div class="progress-bar">
-							<div class="progress-bar-percentage" style="width: ${(achievement.progression / achievement.unlock_value * 100)}%">
-								<span>${achievement.progression}/${achievement.unlock_value}</span>
-							</div>
+							` : ' '}
 						</div>
 					</div>
 				</div>
@@ -78,7 +80,7 @@ export default class AchievementsView {
 		this.container.innerHTML += `
 			<main>
 				<div id="achievements-card" class="card">
-					<h2 id="card-title">ACHIEVEMENTS</h2>
+					<h2 id="card-title"><i class="fa-solid fa-trophy"></i> ACHIEVEMENTS</h2>
 					<div id="achievements-content">
 						${achievementsHTML}
 					</div>

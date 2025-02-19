@@ -1396,6 +1396,8 @@ form button:hover:not(:disabled) {
 	margin-top: 5.5rem;
 	border-radius: 0.3rem;
 	padding: 1rem;
+	border: 1px solid var(--user-color);
+	box-shadow: 0 0 15px var(--user-color);
 }
 
 .modal-header {

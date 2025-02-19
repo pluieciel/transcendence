@@ -154,7 +154,7 @@
     color_unlocked: -1
     unlock_value: 8
     category: 'rumble'
-    icon: 'fa-solid fa-arrows-left-right-to-line fa-xl'
+    icon: 'fa-solid fa-microscope fa-xl'
     order: 10
 - model: api.achievement
   pk: 4
