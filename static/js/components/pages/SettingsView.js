@@ -423,8 +423,12 @@ export default class SettingsView {
 				const toggle2FAButton = document.getElementById("toggle-2fa-button");
 
 				displayNameInput.value = data.display_name;
-				toggle2FAButton.innerHTML = data.is_2fa_enabled ? `<i class="fa-solid fa-shield"></i> Disable 2FA` : `<i class="fa-solid fa-shield-halved"></i> Enable 2FA`;
-				toggle2FAButton.setAttribute("data-is-2fa-enabled", data.is_2fa_enabled);
+				if (data.is_42_user)
+					toggle2FAButton.style.display = 'none';
+				else {
+					toggle2FAButton.innerHTML = data.is_2fa_enabled ? `<i class="fa-solid fa-shield"></i> Disable 2FA` : `<i class="fa-solid fa-shield-halved"></i> Enable 2FA`;
+					toggle2FAButton.setAttribute("data-is-2fa-enabled", data.is_2fa_enabled);
+				}
 			} else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
 				window.app.logout();
 			} else {

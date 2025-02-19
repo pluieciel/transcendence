@@ -22,10 +22,9 @@ class App {
 			{ path: '/play', component: PlayView },
 			{ path: '/customize', component: CustomizeView },
 			{ path: '/credits', component: CreditsView },
-			{ path: '/profile', component: ProfileView },
 			{ path: '/profiles/:username', component: ProfileView },
 			{ path: '/settings', component: SettingsView },
-			{ path: '/achievements', component: AchievementsView},
+			{ path: '/achievements/:username', component: AchievementsView},
 			{ path: '/leaderboard', component: LeaderboardView },
 			{ path: '/admin', component: AdminView },
 			{ path: '/login/oauth', component: LoginOAuth },
@@ -147,7 +146,7 @@ class App {
 		}, timeout);
 	}
 
-	async renderHeader(container, disableBtn = null, withNav = true, creditsDisabled = false, inLogin = false) {
+	async renderHeader(container, disableBtn = null, withNav = true, creditsDisabled = false, inLogin = false, username = null) {
 		let header = `
 			<header>
 				<h1 id="header-title">P
@@ -184,7 +183,7 @@ class App {
 									</button>
 								</li>
 								<li>
-									<button id="achievements-button" class="nav-button" ${disableBtn === "achievements" ? 'disabled' : ''}>
+									<button id="achievements-button" class="nav-button" ${disableBtn === "achievements" && (username && this.state.username == username) ? 'disabled' : ''}>
 										<i class="fa-solid fa-trophy fa-xl"></i>Achievements
 									</button>
 								</li>
@@ -264,7 +263,7 @@ class App {
 		});
 		
 		achievementsButton.addEventListener("click", () => {
-			window.app.router.navigateTo("/achievements");
+			window.app.router.navigateTo(`/achievements/${this.state.username}`);
 		});
 		
 		customizeButton.addEventListener("click", () => {
@@ -272,7 +271,7 @@ class App {
 		});
 
 		navProfile.addEventListener("click", () => {
-			window.app.router.navigateTo("/profile");
+			window.app.router.navigateTo(`/profiles/${this.state.username}`);
 		});
 
 		adminButton.addEventListener("click", () => {
