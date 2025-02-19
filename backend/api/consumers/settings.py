@@ -22,6 +22,7 @@ class GetSettingsConsumer(AsyncHttpConsumer):
 			response_data = {
 				'success': True,
 				'display_name': user.display_name,
+				'is_42_user': user.is_42_user,
 				'is_2fa_enabled': user.is_2fa_enabled,
 			}
 			return await self.send_response(200, json.dumps(response_data).encode(),
@@ -54,7 +55,7 @@ class SetSettingsConsumer(AsyncHttpConsumer):
 			avatar = data.get('avatar')
 			settings_updated = False
 
-			if display_name != user.display_name:
+			if display_name != user.display_name and not (display_name == "" and user.display_name is None):
 				if display_name == "":
 					display_name = None
 				elif not (self.is_valid_display_name(display_name)):

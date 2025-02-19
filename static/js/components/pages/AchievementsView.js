@@ -1,7 +1,7 @@
 export default class AchievementsView {
-	constructor(container) {
+	constructor(container, params = {}) {
 		this.container = container;
-		this.username = window.app.state.username;
+		this.username = params.username;
 		this.init();
 	}
 
@@ -13,10 +13,8 @@ export default class AchievementsView {
 
 	async getAchievements(username) {
 		try {
-			const response = await fetch(`/api/profiles/${username}/achievement/`);
-			console.log(response);
+			const response = await fetch(`/api/profiles/${username}/achievements/`);
 			const data = await response.json();
-			console.log(data);
 			if (data.success)
 				return data.achievements;
 			else {
@@ -29,11 +27,8 @@ export default class AchievementsView {
 		}
 	}
 
-		
-
-	
 	async render() {
-		await window.app.renderHeader(this.container, "achievements");
+		await window.app.renderHeader(this.container, "achievements", true, false, false, this.username);
 		const achievements = await this.getAchievements(this.username);
 
 		let colorArray = {
@@ -56,19 +51,21 @@ export default class AchievementsView {
 				<div class="cheevo ${achievement.unlocked ? 'success' : ''}">
 					<div class="cheevo-icon"><i class="${achievement.icon}"></i></div>
 					<div class="cheevo-container">
-						<div class="cheevo-title">${achievement.name}</div>
-						<div class="cheevo-row">
+						<div class="cheevo-left">
+							<div class="cheevo-title">${achievement.name}</div>
 							<div class="cheevo-body">${achievement.description}</div>
+							<div class="progress-bar">
+								<div class="progress-bar-percentage" style="width: ${(achievement.progression / achievement.unlock_value * 100)}%">
+									<span>${achievement.progression}/${achievement.unlock_value}</span>
+								</div>
+							</div>
+						</div>
+						<div class="cheevo-right">
 							${achievement.color_unlocked  != -1? `
 								<div class="cheevo-reward" style="background-color:${window.app.getColor(achievement.color_unlocked)}">
 									<span class="tooltip">Reward:<br> <i class="fa-solid fa-palette fa-xl"></i> ${colorArray[achievement.color_unlocked]}</span>
 								</div>
-							` : ''}
-						</div>
-						<div class="progress-bar">
-							<div class="progress-bar-percentage" style="width: ${(achievement.progression / achievement.unlock_value * 100)}%">
-								<span>${achievement.progression}/${achievement.unlock_value}</span>
-							</div>
+							` : ' '}
 						</div>
 					</div>
 				</div>
@@ -78,7 +75,7 @@ export default class AchievementsView {
 		this.container.innerHTML += `
 			<main>
 				<div id="achievements-card" class="card">
-					<h2 id="card-title">ACHIEVEMENTS</h2>
+					<h2 id="card-title"><i class="fa-solid fa-trophy"></i>${window.app.state.username != this.username ? '&nbsp;' + this.username.toUpperCase() + (this.username.endsWith('s') ? '\'' : '\'S'): ''} ACHIEVEMENTS</h2>
 					<div id="achievements-content">
 						${achievementsHTML}
 					</div>

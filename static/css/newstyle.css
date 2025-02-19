@@ -21,6 +21,7 @@
 	--input-warning-text-color: #b37737;
 	--checkbox-unchecked-color: #4e4e4e;
 	--selector-color: #1e1e1e;
+	--cheevos-success-color: #ffbb00;
 }
 
 ::-webkit-scrollbar {
@@ -57,7 +58,7 @@ body {
 	flex-wrap: wrap;
 }
 
-main i:not(#chat-icon, #input-message i) {
+main i:not(#chat-icon, .input-message i) {
 	margin-right: 0.2rem;
 }
 
@@ -214,7 +215,7 @@ nav i {
 	display: block;
 }
 
-#input-message {
+.input-message {
 	width: 100%;
 	min-height: 3rem;
 	border-radius: 0.3rem;
@@ -223,7 +224,7 @@ nav i {
 	display: none;
 }
 
-#input-message i {
+.input-message i {
 	padding: 0 0.5rem;
 }
 
@@ -398,6 +399,10 @@ form button:hover:not(:disabled) {
 	height: 3rem;
 }
 
+#save-button {
+	margin-bottom: 2rem;
+}
+
 #start-button:hover, #save-button:hover, #toggle-2fa-button:hover {
 	border: 1px solid var(--user-color);
 	box-shadow: 0 0 15px var(--user-color);
@@ -493,6 +498,56 @@ form button:hover:not(:disabled) {
 	margin-bottom: 1rem;
 	display: none;
 	align-self: flex-start;
+}
+
+#totp-modal {
+	width: 30rem;
+}
+
+#totp-method-button {
+	margin-bottom: 1rem;
+	color: var(--secondary-color);
+	background-color: var(--primary-color);
+	border: 1px solid var(--primary-color);
+	border-radius: 0.3rem;
+	padding: 0.4rem;
+	font-weight: bold;
+	height: 3rem;
+	width: 100%;
+}
+
+#totp-method-button:hover {
+	border: 1px solid var(--user-color);
+	box-shadow: 0 0 15px var(--user-color);
+	transition: all 0.3s ease;
+}
+
+#totp-form button {
+	background-color: var(--primary-color);
+	border: 1px solid var(--primary-color);
+}
+
+#totp-form button:hover, #totp-method-button:hover {
+	border: 1px solid var(--user-color);
+}
+
+#totp-form-divider {
+	width: 100%;
+	border: none;
+	border-top: 1px solid var(--hover-color);
+	overflow: visible;
+	text-align: center;
+	height: 1rem;
+	opacity: 0.5;
+}
+
+#totp-form-divider::after {
+	content: "or";
+	background-color: #080808;
+	color: var(--hover-color);
+	padding: 0 4px;
+	position: relative;
+	top: -0.9rem;
 }
 
 /* ******************************** */
@@ -602,8 +657,94 @@ form button:hover:not(:disabled) {
 	width: 30rem;
 }
 
-#play-card, #left-filler {
+#play-card, #left-filler, #search-game-modal {
 	width: 30rem;
+}
+
+#search-game-modal {
+	font-weight: bold;
+}
+
+#game-search-loading {
+	width: 100%;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+}
+
+#game-search-loading #ball-spinner {
+	animation: ball-moving 2s infinite linear;
+}
+
+#game-search-loading #paddle-left {
+	animation: paddle-left-moving 2s infinite linear;
+}
+
+#game-search-loading #paddle-right {
+	animation: paddle-right-moving 2s infinite linear;
+}
+  
+@keyframes ball-moving {
+	0%   {transform: translateX(0) rotate(0deg);}
+	25%  {transform: translateX(-500%) rotate(90deg);}
+	50%  {transform: translateX(0) rotate(180deg);}
+	75%  {transform: translateX(500%) rotate(270deg);}
+	100% {transform: translateX(0) rotate(360deg);}
+}
+
+@keyframes paddle-left-moving {
+	0%   {transform: translateY(0) rotate(90deg);}
+	15%  {transform: translateY(-20%) rotate(90deg);}
+	35%  {transform: translateY(-40%) rotate(90deg);}
+	50%  {transform: translateY(0) rotate(90deg);}
+	65%  {transform: translateY(30%) rotate(90deg);}
+	85%  {transform: translateY(15%) rotate(90deg);}
+	100% {transform: translateY(0) rotate(90deg);}
+}
+
+@keyframes paddle-right-moving {
+	0%   {transform: translateY(0) rotate(90deg);}
+	20%  {transform: translateY(35%) rotate(90deg);}
+	40%  {transform: translateY(20%) rotate(90deg);}
+	50%  {transform: translateY(0) rotate(90deg);}
+	70%  {transform: translateY(-25%) rotate(90deg);}
+	85%  {transform: translateY(-10%) rotate(90deg);}
+	100% {transform: translateY(0) rotate(90deg);}
+}
+
+#game-search-timer {
+	margin: 1rem 0;
+	font-size: 2rem;
+}
+
+#game-search-info {
+	width: 100%;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-around;
+	margin-bottom: 1rem;
+	font-weight: bold;
+	font-size: 1.1rem;
+}
+
+#cancel-search-button {
+	margin-bottom: 1rem;
+	color: var(--secondary-color);
+	background-color: var(--primary-color);
+	border: 1px solid var(--primary-color);
+	border-radius: 0.3rem;
+	padding: 0.4rem;
+	height: 3rem;
+	font-weight: bold;
+	width: 100%;
+}
+
+#cancel-search-button:hover {
+	border: 1px solid var(--user-color);
+	box-shadow: 0 0 15px var(--user-color);
+	transition: all 0.3s ease;
 }
 
 /* ******************************** */
@@ -765,6 +906,169 @@ form button:hover:not(:disabled) {
 }
 
 /* ******************************** */
+/*            Achievements          */
+/* ******************************** */
+
+#achievements-card {
+	width: 70%;
+	height: 100%;
+}
+
+#achievements-content {
+	display: flex;
+    align-content: center;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+    flex-direction: row;
+	gap: 20px;
+}
+
+.cheevo {
+	height: 5.5rem;
+	min-width: 45%;
+	display: flex;
+	border-radius: 6rem;
+	align-items: center;
+	background-color: var(--selector-color);
+	border: 2px solid var(--header-disabled-color);
+}
+
+.cheevo-container {
+	width: 100%;
+	height: 100%;
+	display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+	padding: 0.5rem;
+	gap: 0.5rem;
+}
+
+.cheevo-icon {
+	border-radius: 50%;
+	background-color: var(--primary-color);
+	border: 2px solid var(--header-disabled-color);
+	border-left: none;
+	text-align: center;
+	min-width: 5.5rem;
+	min-height: 5.5rem;
+	display: flex;
+	justify-content: center;
+    align-items: center;
+	font-size: 2rem;
+	color: var(--hover-color);
+}
+
+.cheevo-left {
+	height: 100%;
+}
+
+.cheevo-right {
+	margin-right: 0.5rem;
+}
+
+.cheevo-title {
+	font-weight: bold;
+}
+
+.cheevo-body {
+	font-size: 0.8rem;
+}
+
+.cheevo-row {
+	width: 100%;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+}
+
+.progress-bar {
+	width: 15rem;
+	height: 1.4rem;
+	background: var(--hover-color);
+	position: relative;
+	border-radius: 1.4rem;
+	border: 2px solid var(--hover-color);
+	margin-top: 0.3rem;
+}
+
+.progress-bar-percentage {
+	background-color: var(--primary-color);
+	color: #FFF;
+	text-align: center;
+	height: 100%;
+}
+
+.progress-bar-percentage span {
+	display: inline-block;
+	position: absolute;
+	width: 15rem;
+	left: 0;
+	bottom: -0.2rem;
+	font-weight: 600;
+}
+
+.cheevo-unlock-txt {
+	font-size: 0.8rem;
+	display: flex;
+	position: relative;
+    justify-content: center;
+    align-items: center;
+	left: 0.2rem;
+	bottom: 0.05rem;
+}
+
+.all-rounded {
+	border-radius: 5px;
+}
+
+.cheevo-reward {
+	background-color: var(--secondary-color);
+	border: 3px solid var(--primary-color);
+	border-radius: 50%;
+	height: 2rem;
+	width: 2rem;
+}
+
+.cheevo.success .cheevo-icon {
+	color: var(--cheevos-success-color);
+	border-color: var(--cheevos-success-color);
+}
+
+.cheevo.success  {
+	border-color: var(--cheevos-success-color);
+	box-shadow: 0 0 5px var(--cheevos-success-color);
+}
+
+.cheevo.success .progress-bar-percentage span {
+	color: var(--secondary-color);
+}
+
+.tooltip {
+	position: relative;
+    opacity: 0;
+    width: 120px;
+    background-color: var(--hover-color);
+    color: var(--secondary-color);
+    text-align: center;
+    padding: 5px 0;
+    border-radius: 6px;
+    z-index: 1;
+    transition: opacity 0.6s;
+	margin-top: -50px;
+	margin-left: -50px;
+}
+
+.cheevo-reward:hover .tooltip {
+    opacity: 1;
+}
+
+.cheevo-icon i {
+	margin-right: 0 !important;
+}
+
+/* ******************************** */
 /*                Settings          */
 /* ******************************** */
 
@@ -783,8 +1087,48 @@ form button:hover:not(:disabled) {
 	width: 100%;
 }
 
-#toggle-2fa-button {
-	margin-top: 2rem;
+#recovery-modal, #delete-modal {
+	width: 30rem;
+}
+
+#recovery-codes {
+	text-align: center;
+	width: 100%;
+	border: 1px solid var(--accent-color);
+	border-radius: 0.3rem;
+	list-style-type: none;
+	padding: 1rem;
+	font-weight: bold;
+}
+
+#qr-code {
+	text-align: center;
+	width: 100%;
+	border: 1px solid var(--accent-color);
+	border-radius: 0.3rem;
+	margin-bottom: 1rem;
+}
+
+#qr-code svg path {
+	fill: var(--secondary-color);
+}
+
+#confirm-delete-account-button {
+	margin-bottom: 1rem;
+	color: var(--input-error-text-color);
+	background-color: var(--input-error-color);
+	border: 1px solid var(-input-error-border-color);
+	border-radius: 0.3rem;
+	padding: 0.4rem;
+	font-weight: bold;
+	height: 3rem;
+	width: 100%;
+}
+
+#confirm-delete-account-button:hover {
+	border: 1px solid var(--input-error-text-color);
+	box-shadow: 0 0 15px var(--input-error-text-color);
+	transition: all 0.3s ease;
 }
 
 #delete-account-button {
@@ -979,6 +1323,30 @@ form button:hover:not(:disabled) {
 #profile-card-achievements {
 	width: 100%;
 	height: 75%;
+}
+
+#profile-achievements-content {
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: flex-end;
+}
+
+#achievements-stats {
+	display: flex;
+	justify-content: center;
+	align-items: flex-end;
+}
+
+#achievements-header {
+	width: 100%;
+	display: flex;
+}
+
+#profile-to-achievements:hover {
+	cursor: pointer;
+	opacity: 0.5;
 }
 
 #profile-card-game-history {
@@ -1216,10 +1584,8 @@ form button:hover:not(:disabled) {
 	margin-top: 5.5rem;
 	border-radius: 0.3rem;
 	padding: 1rem;
-}
-
-#totp-modal {
-	width: 30rem;
+	border: 1px solid var(--user-color);
+	box-shadow: 0 0 15px var(--user-color);
 }
 
 .modal-header {
@@ -1228,11 +1594,14 @@ form button:hover:not(:disabled) {
 	align-items: center;
 	justify-content: space-between;
 	margin-bottom: 1rem;
-	font-weight: bold;
 }
 
 .modal-header i:hover {
 	cursor: pointer;
+}
+
+.modal-title {
+	font-weight: bold;
 }
 
 .my-modal-content {
@@ -1253,48 +1622,18 @@ form button:hover:not(:disabled) {
 	border: 1px solid var(--user-color);
 }
 
-#totp-method-button {
-	margin-bottom: 1rem;
-	color: var(--secondary-color);
-	background-color: var(--primary-color);
-	border: 1px solid var(--primary-color);
-	border-radius: 0.3rem;
-	padding: 0.4rem;
-	font-weight: bold;
-	height: 3rem;
-	width: 100%;
-}
-
-#totp-method-button:hover {
-	border: 1px solid var(--user-color);
-	box-shadow: 0 0 15px var(--user-color);
-	transition: all 0.3s ease;
-}
-
-#totp-form button {
-	background-color: var(--primary-color);
-	border: 1px solid var(--primary-color);
-}
-
-#totp-form button:hover, #totp-method-button:hover {
-	border: 1px solid var(--user-color);
-}
-
-#totp-form-divider {
-	width: 100%;
-	border: none;
-	border-top: 1px solid var(--hover-color);
-	overflow: visible;
-	text-align: center;
-	height: 1rem;
+.modal-info {
+	font-size: 0.9rem;
 	opacity: 0.5;
+	font-weight: normal;
 }
 
-#totp-form-divider::after {
-	content: "or";
-	background-color: #080808;
-	color: var(--hover-color);
-	padding: 0 4px;
-	position: relative;
-	top: -0.9rem;
+.paddle {
+  animation: paddle-move 2s infinite;
+}
+
+@keyframes paddle-move {
+  0% { transform: translateY(-100px); }
+  50% { transform: translateY(100px); }
+  100% { transform: translateY(-100px); }
 }

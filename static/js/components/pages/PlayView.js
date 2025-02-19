@@ -56,7 +56,7 @@ export default class PlayView {
 						</div>
 						<button id="selector-right-arrow"><i class="fa-solid fa-arrow-right fa-lg"></i></button>
 					</div>
-					<button type="submit" id="start-button" data-bs-toggle="modal" data-bs-target="#matchSearch"><i class="fa-solid fa-gamepad"></i> Play</button>
+					<button type="submit" id="start-button"><i class="fa-solid fa-gamepad"></i> Play</button>
 				</div>
 				<div id="how-to-play-card" class="card">
 					<h2 id="card-title"><i class="fa-regular fa-circle-question"></i> HOW TO PLAY</h2>

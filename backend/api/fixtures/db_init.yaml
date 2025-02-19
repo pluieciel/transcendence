@@ -20,7 +20,7 @@
   pk: 4
   fields:
       username: user4
-      password: pbkdf2_sha256$600000$TiuwgO3cz8gUQ6ZvNXMmeW$V772Lv03EOa+4pqsnzWxjAeT0tKda7Doy1OF6F24j7I=
+      password: pbkdf2_sha256$600000$anoz2ImzZApp8TTDKN0Qee$0l6fCE+Zdp7JTga58XkuPsr+q9Wr3XTf7YQ349T1d0w=
       created_at: "2025-01-01T00:00:00Z"
 - model: api.user
   pk: 5
@@ -154,7 +154,7 @@
     color_unlocked: -1
     unlock_value: 8
     category: 'rumble'
-    icon: 'fa-solid fa-arrows-left-right-to-line fa-xl'
+    icon: 'fa-solid fa-microscope fa-xl'
     order: 10
 - model: api.achievement
   pk: 4

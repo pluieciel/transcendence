@@ -88,7 +88,7 @@ export default class CustomizeView {
 						</div>
 						<button id="selector-right-arrow"><i class="fa-solid fa-arrow-right fa-lg"></i></button>
 					</div>
-					<div id="input-message"></div>
+					<div id="input-message" class="input-message"></div>
 					<button id="save-button" type="submit"><i class="fa-solid fa-floppy-disk"></i> Save</button>
 				</div>
 				<div id="preview-card" class="card">
