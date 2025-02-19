@@ -916,11 +916,11 @@ form button:hover:not(:disabled) {
 
 #cheevos-content {
 	display: flex;
-    align-content: center;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: flex-start;
-    flex-direction: row;
+	align-content: center;
+	flex-wrap: wrap;
+	justify-content: center;
+	align-items: flex-start;
+	flex-direction: row;
 	gap: 20px;
 }
 
@@ -944,9 +944,9 @@ form button:hover:not(:disabled) {
 	width: 100%;
 	height: 100%;
 	display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
 	padding: 0.5rem;
 	gap: 0.5rem;
 }
@@ -961,7 +961,7 @@ form button:hover:not(:disabled) {
 	min-height: 5.5rem;
 	display: flex;
 	justify-content: center;
-    align-items: center;
+	align-items: center;
 	font-size: 2rem;
 	color: var(--hover-color);
 }
@@ -1019,8 +1019,8 @@ form button:hover:not(:disabled) {
 	font-size: 0.8rem;
 	display: flex;
 	position: relative;
-    justify-content: center;
-    align-items: center;
+	justify-content: center;
+	align-items: center;
 	left: 0.2rem;
 	bottom: 0.05rem;
 }
@@ -1053,21 +1053,21 @@ form button:hover:not(:disabled) {
 
 .tooltip {
 	position: relative;
-    opacity: 0;
-    width: 120px;
-    background-color: var(--hover-color);
-    color: var(--secondary-color);
-    text-align: center;
-    padding: 5px 0;
-    border-radius: 6px;
-    z-index: 1;
-    transition: opacity 0.6s;
+	opacity: 0;
+	width: 120px;
+	background-color: var(--hover-color);
+	color: var(--secondary-color);
+	text-align: center;
+	padding: 5px 0;
+	border-radius: 6px;
+	z-index: 1;
+	transition: opacity 0.6s;
 	margin-top: -50px;
 	margin-left: -50px;
 }
 
 .cheevo-reward:hover .tooltip {
-    opacity: 1;
+	opacity: 1;
 }
 
 .cheevo-icon i {
@@ -1341,26 +1341,26 @@ form button:hover:not(:disabled) {
 }
 
 #achievements-content {
-    width: 100%;
-    height: 100%;
-    position: relative;
+	width: 100%;
+	height: 100%;
+	position: relative;
 }
 
 #achievements-item-container {
-    display: flex;
-    flex-direction: row;
-    align-items: flex-start;
-    justify-content: flex-start;
+	display: flex;
+	flex-direction: row;
+	align-items: flex-start;
+	justify-content: flex-start;
+	align-content: flex-start;
 	flex-wrap: wrap;
-    row-gap: 3rem;
+	row-gap: 3rem;
 	column-gap: 1.415rem;
-	overflow-y: auto;
-    padding: 1rem 0.5rem 1rem 1rem;
+	padding: 1rem 0.5rem 1rem 1rem;
 }
 
 .achievement-item {
-    width: 5.5rem;
-    height: 5.5rem;
+	width: 5.5rem;
+	height: 5.5rem;
 }
 
 #achievements-stats {
@@ -1384,7 +1384,7 @@ form button:hover:not(:disabled) {
 	min-height: 5.5rem;
 	display: flex;
 	justify-content: center;
-    align-items: center;
+	align-items: center;
 	font-size: 2rem;
 	color: var(--cheevos-success-color);
 	box-shadow: 0 0 15px var(--cheevos-success-color);
