@@ -255,6 +255,14 @@ export default class ProfileView {
 		return history_avatar;
 	}
 
+	getEloChangeIcon(gameHistory) {
+		if ((gameHistory['player_left']['is_winner'] && gameHistory['player_left']['username'] === this.username) || 
+			(gameHistory['player_right']['is_winner'] && gameHistory['player_right']['username'] === this.username))
+			return `<i class="fa-solid fa-plus"></i>`
+		else
+			return `<i class="fa-solid fa-minus"></i>`
+	}
+
 	addGameHistoryToGameHistories(gameHistory) {
 		const itemContainer = document.getElementById('game-history-item-container');
 		const leftProfileButtonId = `game-history-${gameHistory['id']}-left-name`;
@@ -293,7 +301,7 @@ export default class ProfileView {
 						`<button id="${rightProfileButtonId}" data-redirect-to="${gameHistory['player_right']['username']}">${gameHistory['player_right']['name']}</button>` :
 						gameHistory['player_right']['name']}
 				</div>
-				<div id="game-history-elo-change"><i class="fa-solid fa-plus-minus"></i> ${gameHistory['elo_change']}</div>
+				<div id="game-history-elo-change">${this.getEloChangeIcon(gameHistory)}${gameHistory['elo_change']}</div>
 			</div>`;
 		itemContainer.insertAdjacentHTML("beforeend", item);
 
