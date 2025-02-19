@@ -17,6 +17,14 @@ class Enable2FAConsumer(AsyncHttpConsumer):
 				return await self.send_response(401, json.dumps(response_data).encode(),
 					headers=[(b"Content-Type", b"application/json")])
 
+			if user.is_42_user:
+				response_data = {
+					'success': False,
+					'message': '2FA is not available for oauth'
+				}
+				return await self.send_response(403, json.dumps(response_data).encode(),
+					headers=[(b"Content-Type", b"application/json")])
+
 			if user.is_2fa_enabled:
 				response_data = {
 					'success': False,

@@ -399,6 +399,10 @@ form button:hover:not(:disabled) {
 	height: 3rem;
 }
 
+#save-button {
+	margin-bottom: 2rem;
+}
+
 #start-button:hover, #save-button:hover, #toggle-2fa-button:hover {
 	border: 1px solid var(--user-color);
 	box-shadow: 0 0 15px var(--user-color);
@@ -1081,10 +1085,6 @@ form button:hover:not(:disabled) {
 
 #settings-card button {
 	width: 100%;
-}
-
-#toggle-2fa-button {
-	margin-top: 2rem;
 }
 
 #recovery-modal, #delete-modal {

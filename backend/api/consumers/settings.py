@@ -22,6 +22,7 @@ class GetSettingsConsumer(AsyncHttpConsumer):
 			response_data = {
 				'success': True,
 				'display_name': user.display_name,
+				'is_42_user': user.is_42_user,
 				'is_2fa_enabled': user.is_2fa_enabled,
 			}
 			return await self.send_response(200, json.dumps(response_data).encode(),
