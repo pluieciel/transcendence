@@ -146,7 +146,7 @@ class App {
 		}, timeout);
 	}
 
-	async renderHeader(container, disableBtn = null, withNav = true, creditsDisabled = false, inLogin = false) {
+	async renderHeader(container, disableBtn = null, withNav = true, creditsDisabled = false, inLogin = false, username = null) {
 		let header = `
 			<header>
 				<h1 id="header-title">P
@@ -183,7 +183,7 @@ class App {
 									</button>
 								</li>
 								<li>
-									<button id="achievements-button" class="nav-button" ${disableBtn === "achievements" ? 'disabled' : ''}>
+									<button id="achievements-button" class="nav-button" ${disableBtn === "achievements" && (username && this.state.username == username) ? 'disabled' : ''}>
 										<i class="fa-solid fa-trophy fa-xl"></i>Achievements
 									</button>
 								</li>
