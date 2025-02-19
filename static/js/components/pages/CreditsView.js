@@ -19,6 +19,8 @@ export default class CreditsView {
 			const data = await response.json();
 			if (data.success) {
 				return;
+			} else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
+				window.app.logout();
 			} else {
 				console.error("Failed to unlock easter egg:", data.message);
 				return [];

@@ -66,9 +66,11 @@ class App {
 			const response = await fetch(`/api/profiles/${username}/avatar/`);
 
 			const data = await response.json();
-			if (data.success)
+			if (data.success) {
 				return data.avatar_url;
-			else {
+			} else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
+				window.app.logout();
+			} else {
 				console.error(data.message);
 			}
 		} catch (error) {
@@ -87,6 +89,8 @@ class App {
 				this.settings.quality = data['quality'];
 				this.settings.fetched = true;
 				this.setColor(this.settings.color);
+			} else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
+				window.app.logout();
 			} else {
 				console.error(data.message);
 			}

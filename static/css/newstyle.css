@@ -924,6 +924,12 @@ form button:hover:not(:disabled) {
 	gap: 20px;
 }
 
+#achievements-info {
+	text-align: center;
+	margin-bottom: 1rem;
+	opacity: 0.5;
+}
+
 .cheevo {
 	height: 5.5rem;
 	min-width: 45%;

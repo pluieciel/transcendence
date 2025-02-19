@@ -15,9 +15,11 @@ export default class AchievementsView {
 		try {
 			const response = await fetch(`/api/achievements/${username}/`);
 			const data = await response.json();
-			if (data.success)
+			if (data.success) {
 				return data.achievements;
-			else {
+			} else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
+				window.app.logout();
+			} else {
 				console.error("Failed to fetch achievements:", data.message);
 				return [];
 			}
@@ -76,6 +78,10 @@ export default class AchievementsView {
 			<main>
 				<div id="achievements-card" class="card">
 					<h2 id="card-title"><i class="fa-solid fa-trophy"></i>${window.app.state.username != this.username ? '&nbsp;' + this.username.toUpperCase() + (this.username.endsWith('s') ? '\'' : '\'S'): ''} ACHIEVEMENTS</h2>
+					${window.app.state.username === this.username ? `
+						<div id="achievements-info">
+							<i class="fa-solid fa-circle-info"></i> Play ranked games to progress and earn special color rewards - available in Customize section
+						</div>`: ''}
 					<div id="achievements-content">
 						${achievementsHTML}
 					</div>
