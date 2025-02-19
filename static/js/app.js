@@ -22,10 +22,8 @@ class App {
 			{ path: '/play', component: PlayView },
 			{ path: '/customize', component: CustomizeView },
 			{ path: '/credits', component: CreditsView },
-			{ path: '/profile', component: ProfileView },
 			{ path: '/profiles/:username', component: ProfileView },
 			{ path: '/settings', component: SettingsView },
-			{ path: '/achievements', component: AchievementsView},
 			{ path: '/achievements/:username', component: AchievementsView},
 			{ path: '/leaderboard', component: LeaderboardView },
 			{ path: '/admin', component: AdminView },
@@ -265,7 +263,7 @@ class App {
 		});
 		
 		achievementsButton.addEventListener("click", () => {
-			window.app.router.navigateTo("/achievements");
+			window.app.router.navigateTo(`/achievements/${this.state.username}`);
 		});
 		
 		customizeButton.addEventListener("click", () => {
@@ -273,7 +271,7 @@ class App {
 		});
 
 		navProfile.addEventListener("click", () => {
-			window.app.router.navigateTo("/profile");
+			window.app.router.navigateTo(`/profiles/${this.state.username}`);
 		});
 
 		adminButton.addEventListener("click", () => {

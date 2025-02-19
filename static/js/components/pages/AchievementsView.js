@@ -1,10 +1,7 @@
 export default class AchievementsView {
 	constructor(container, params = {}) {
 		this.container = container;
-		if (window.location.pathname === "/achievements")
-			this.username = window.app.state.username;
-		else
-			this.username = params.username;
+		this.username = params.username;
 		this.init();
 	}
 
