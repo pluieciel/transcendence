@@ -1,7 +1,10 @@
 export default class AchievementsView {
-	constructor(container) {
+	constructor(container, params = {}) {
 		this.container = container;
-		this.username = window.app.state.username;
+		if (window.location.pathname === "/achievements")
+			this.username = window.app.state.username;
+		else
+			this.username = params.username;
 		this.init();
 	}
 
@@ -13,10 +16,8 @@ export default class AchievementsView {
 
 	async getAchievements(username) {
 		try {
-			const response = await fetch(`/api/profiles/${username}/achievement/`);
-			console.log(response);
+			const response = await fetch(`/api/profiles/${username}/achievements/`);
 			const data = await response.json();
-			console.log(data);
 			if (data.success)
 				return data.achievements;
 			else {
@@ -29,9 +30,6 @@ export default class AchievementsView {
 		}
 	}
 
-		
-
-	
 	async render() {
 		await window.app.renderHeader(this.container, "achievements");
 		const achievements = await this.getAchievements(this.username);

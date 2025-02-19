@@ -26,6 +26,7 @@ class App {
 			{ path: '/profiles/:username', component: ProfileView },
 			{ path: '/settings', component: SettingsView },
 			{ path: '/achievements', component: AchievementsView},
+			{ path: '/achievements/:username', component: AchievementsView},
 			{ path: '/leaderboard', component: LeaderboardView },
 			{ path: '/admin', component: AdminView },
 			{ path: '/login/oauth', component: LoginOAuth },

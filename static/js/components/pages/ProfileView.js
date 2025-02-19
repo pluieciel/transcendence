@@ -110,7 +110,10 @@ export default class ProfileView {
 								</div>
 							</div>
 							<div id="profile-card-achievements" class="profile-card-content">
-								<h5 id="card-title"><i class="fa-solid fa-trophy"></i> Achievements</h5>
+								<div id="achievements-header">
+									<h5 id="card-title"><i class="fa-solid fa-trophy"></i> Achievements</h5>
+									<i id="profile-to-achievements" class="fa-solid fa-arrow-up-right-from-square"></i>
+								</div>
 							</div>
 						</div>
 						<div id="profile-card-game-history" class="profile-card-content">
@@ -127,6 +130,15 @@ export default class ProfileView {
 
 	addEventListeners() {
 		window.app.addNavEventListeners();
+		this.addRedirectToAchievementsListener();
+	}
+
+	addRedirectToAchievementsListener() {
+		const redirectToAchievements = document.getElementById('profile-to-achievements');
+
+		redirectToAchievements.addEventListener('click', () => {
+			window.app.router.navigateTo(`/achievements/${this.username}`);
+		});
 	}
 
 	getRankField(rank) {

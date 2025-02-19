@@ -26,6 +26,17 @@ export default class Router {
             }
         }
 
+        const achievementsMatch = path.match(/^\/achievements\/([^/]+)/);
+        if (achievementsMatch && window.app.getIsLoggedIn()) {
+            route = this.routes.find(r => r.path === '/achievements/:username');
+            if (route) {
+                this.currentComponent = new route.component(document.getElementById('app'), {
+                    username: achievementsMatch[1]
+                });
+                return;
+            }
+        }
+
         if (window.app.getIsLoggedIn() || path === "/login/oauth" || path === "/signup")
             route = this.routes.find(r => r.path === path);
         else

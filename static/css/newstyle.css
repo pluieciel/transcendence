@@ -1325,6 +1325,16 @@ form button:hover:not(:disabled) {
 	height: 75%;
 }
 
+#achievements-header {
+	width: 100%;
+	display: flex;
+}
+
+#profile-to-achievements:hover {
+	cursor: pointer;
+	opacity: 0.5;
+}
+
 #profile-card-game-history {
 	width: 100%;
 	height: 100%;
