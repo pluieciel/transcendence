@@ -112,6 +112,26 @@ export default class ProfileView {
 									<i id="profile-to-achievements" class="fa-solid fa-arrow-up-right-from-square"></i>
 								</div>
 								<div id="profile-achievements-content">
+									<div id="achievements-content">
+										<div id="achievements-item-container">
+											<div class="achievement-item">
+												<div class="achievement-icon"><i class="fa-solid fa-star fa-xl"></i></div>	
+												<div class="achievement-title">Classic</div>
+											</div>
+											<div class="achievement-item">
+												<div class="achievement-icon"><i class="fa-solid fa-star fa-xl"></i></div>	
+												<div class="achievement-title">Classic</div>
+											</div>
+											<div class="achievement-item">
+												<div class="achievement-icon"><i class="fa-solid fa-star fa-xl"></i></div>	
+												<div class="achievement-title">Classic</div>
+											</div>
+											<div class="achievement-item">
+												<div class="achievement-icon"><i class="fa-solid fa-star fa-xl"></i></div>	
+												<div class="achievement-title">Classic</div>
+											</div>
+										</div>
+									</div>
 									<div id="achievements-stats" class="profile-card-stats">
 										<ul>
 											<li>

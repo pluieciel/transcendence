@@ -82,7 +82,7 @@ export default class AchievementsView {
 						<div id="achievements-info">
 							<i class="fa-solid fa-circle-info"></i> Play ranked games to progress and earn special color rewards - available in Customize section
 						</div>`: ''}
-					<div id="achievements-content">
+					<div id="cheevos-content">
 						${achievementsHTML}
 					</div>
 				</div>
