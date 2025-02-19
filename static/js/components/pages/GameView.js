@@ -96,7 +96,7 @@ export default class GameView {
 		}, 3000 + 1000); // 2 seconds + duration of the fade-in transition
 	}
 
-	onGameEnd(winnerName, winnerAvatar, scoreLeft, scoreRight, eloChange) {
+	onGameEnd(winnerName, winnerUser, winnerAvatar, scoreLeft, scoreRight, eloChange) {
 		console.log("game end called");
 		const overlay = document.querySelector("#overlay");
 		let username = sessionStorage.getItem("username");
@@ -107,7 +107,7 @@ export default class GameView {
 		if (eloChange > 0)
 		{
 			document.querySelector("#elo-text").style.display = 'block';
-			document.querySelector("#elo-text").textContent = `ELO Change: ${winnerName == username ? "+" : "-"}${eloChange}`;
+			document.querySelector("#elo-text").textContent = `ELO Change: ${winnerUser == username ? "+" : "-"}${eloChange}`;
 		}
 		else
 		{

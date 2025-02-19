@@ -12,6 +12,7 @@ import redis
 import math
 from channels.layers import get_channel_layer
 from copy import deepcopy
+
 class User:
 	def __init__(self, user, channel, state):
 		self.user = user
@@ -443,6 +444,7 @@ class GameBackend:
 			events.append({
 				"type": "game_end",
 				"winnerName": username,
+				"winnerUser" : self.game.winner.username,
 				"winnerAvatar": avatar,
 				"scoreLeft": self.game.player_left.score,
 				"scoreRight": self.game.player_right.score,
