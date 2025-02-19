@@ -69,7 +69,7 @@ class App {
 			if (data.success)
 				return data.avatar_url;
 			else {
-				// TODO: add error msg
+				console.error(data.message);
 			}
 		} catch (error) {
 			console.error("An error occurred: " + error);
@@ -88,7 +88,7 @@ class App {
 				this.settings.fetched = true;
 				this.setColor(this.settings.color);
 			} else {
-				// TODO: add error msg
+				console.error(data.message);
 			}
 		} catch (error) {
 			console.error("An error occurred: " + error);
@@ -222,7 +222,7 @@ class App {
 				} else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
 					window.app.logout();
 				} else {
-					// TODO: add error msg
+					console.error(data.message);
 				}
 			} catch (error) {
 				console.error("An error occurred: " + error);

@@ -60,9 +60,10 @@ http_patterns = [
     path('api/profiles/me/nav/', ProfileNavConsumer.as_asgi()),
     re_path(r'^api/profiles/(?P<username>.*)/avatar/$', AvatarConsumer.as_asgi()),
     re_path(r'^api/profiles/(?P<username>.*)/history/$', GameHistoryConsumer.as_asgi()),
-    re_path(r'^api/profiles/(?P<username>.*)/achievements/$', AchievementConsumer.as_asgi()),
-    re_path(r'^api/profiles/(?P<username>.*)/colors/$', ColorsConsumer.as_asgi()), #TODO
+    re_path(r'^api/profiles/(?P<username>.*)/colors/$', ColorsConsumer.as_asgi()),
     re_path(r'^api/profiles/(?P<username>.*)/$', ProfileConsumer.as_asgi()),
+    
+    re_path(r'^api/achievements/(?P<username>.*)/$', AchievementConsumer.as_asgi()),
 
     path('api/settings/', GetSettingsConsumer.as_asgi()),
     path('api/settings/update/', SetSettingsConsumer.as_asgi()),

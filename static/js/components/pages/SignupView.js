@@ -69,7 +69,7 @@ export default class SignupView {
 				recaptcha.style.display = 'block';
 			}
 			else {
-				// TODO: add error message
+				console.error(data.message);
 			}
 		} catch (error) {
 			console.error("An error occurred: " + error);

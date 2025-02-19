@@ -215,7 +215,7 @@ export default class ProfileView {
 				window.app.logout();
 			}
 			else {
-				// TODO: handle error msg
+				console.error(data.message);
 			}
 		}
 		catch (e) {
@@ -238,7 +238,7 @@ export default class ProfileView {
 				window.app.logout();
 			}
 			else {
-				// TODO: handle error msg
+				console.error(data.message);
 			}
 		}
 		catch (e) {

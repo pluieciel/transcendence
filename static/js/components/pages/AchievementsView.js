@@ -13,7 +13,7 @@ export default class AchievementsView {
 
 	async getAchievements(username) {
 		try {
-			const response = await fetch(`/api/profiles/${username}/achievements/`);
+			const response = await fetch(`/api/achievements/${username}/`);
 			const data = await response.json();
 			if (data.success)
 				return data.achievements;

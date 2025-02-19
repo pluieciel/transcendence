@@ -236,7 +236,7 @@ export default class SettingsView {
 			} else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
 				window.app.logout();
 			} else {
-				// TODO: add error msg
+				console.error(data.message);
 			}
 		} catch (error) {
 			console.error("An error occurred: " + error);
@@ -277,10 +277,8 @@ export default class SettingsView {
 				toggle2FAButton.setAttribute("data-is-2fa-enabled", "false");
 			} else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
 				window.app.logout();
-			} else if (response.status == 409) {
-				// TODO: show error msg
 			} else {
-				// TODO: show error msg
+				console.error(data.message);
 			}
 		} catch (error) {
 			console.error("An error occurred: " + error);
@@ -300,10 +298,8 @@ export default class SettingsView {
 				qrCode.innerHTML = data.qr_code;
 			} else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
 				window.app.logout();
-			} else if (response.status == 409) {
-				// TODO: show error msg
 			} else {
-				// TODO: show error msg
+				console.error(data.message);
 			}
 		} catch (error) {
 			console.error("An error occurred: " + error);
@@ -401,7 +397,7 @@ export default class SettingsView {
 				} else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
 					window.app.logout();
 				} else if (response.status == 409) {
-					// TODO: show error msg
+					console.error(data.message);
 				} else {
 					window.app.showErrorMsg('#totp-message', data.message);
 				}
@@ -432,7 +428,7 @@ export default class SettingsView {
 			} else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
 				window.app.logout();
 			} else {
-				// TODO: Show error message
+				console.error(data.message);
 			}
 		} catch (error) {
 			console.error("An error occurred: " + error);
