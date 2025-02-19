@@ -293,11 +293,20 @@ class GameBackend:
 			self.logger.error("update elo but winner is neither left or right")
 			return 0
 
-		new_elo_pleft = elo_pleft + self.elo_k_factor * (actual_score_pleft - expected_score_pleft)
-		new_elo_pright = elo_pright + self.elo_k_factor * (actual_score_pright - expected_score_pright)
+		new_elo_pleft = math.ceil(elo_pleft + self.elo_k_factor * (actual_score_pleft - expected_score_pleft))
+		new_elo_pright = math.ceil(elo_pright + self.elo_k_factor * (actual_score_pright - expected_score_pright))
 
-		elo_change = abs(new_elo_pleft - elo_pleft)
-		self.elo_change = round(elo_change)
+		left_change = abs(new_elo_pleft - elo_pleft)
+		right_change = abs(new_elo_pright - elo_pright)
+
+		self.elo_change = math.ceil((left_change + right_change) / 2)
+
+		if (winner == "LEFT"):
+			new_elo_pleft = elo_pleft + self.elo_change
+			new_elo_pright = elo_pright - self.elo_change
+		else:
+			new_elo_pleft = elo_pleft - self.elo_change
+			new_elo_pright = elo_pright + self.elo_change
 
 		if (self.game_mode == "classic"):
 			await self.update_user_statistic_classic_elo(player_left_statistic, new_elo_pleft)

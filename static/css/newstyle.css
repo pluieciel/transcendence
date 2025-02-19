@@ -1325,6 +1325,20 @@ form button:hover:not(:disabled) {
 	height: 75%;
 }
 
+#profile-achievements-content {
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: flex-end;
+}
+
+#achievements-stats {
+	display: flex;
+	justify-content: center;
+	align-items: flex-end;
+}
+
 #achievements-header {
 	width: 100%;
 	display: flex;
