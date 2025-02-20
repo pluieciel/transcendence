@@ -81,7 +81,7 @@ def get_user_statistic(user):
 @database_sync_to_async
 def get_achievements(user):
 	achievements = []
-	for user_achievement in user.user_achievements.all():
+	for user_achievement in user.user_achievements.all().order_by('achievement__order'):
 		achievements.append({
 			'id': user_achievement.achievement.id,
 			'name': user_achievement.achievement.name,
@@ -94,6 +94,26 @@ def get_achievements(user):
 			'progression': user_achievement.progression,
 			'order': user_achievement.achievement.order,
 			'date_earned': user_achievement.date_earned.isoformat() if user_achievement.unlocked else None
+		})
+	return achievements
+
+@database_sync_to_async
+def get_achievements_stats(user):
+	total_achievements = len(user.user_achievements.all())
+	total_achievements_unlocked = len(user.user_achievements.filter(unlocked=True))
+
+	return {
+		"total_earned": str(total_achievements_unlocked) + "/" + str(total_achievements),
+		"completion": f'{round((total_achievements_unlocked / total_achievements) * 100)}%',
+	}
+
+@database_sync_to_async
+def get_profile_achievements(user):
+	achievements = []
+	for user_achievement in user.user_achievements.filter(unlocked=True).order_by('date_earned'):
+		achievements.append({
+			'name': user_achievement.achievement.name,
+			'icon' : user_achievement.achievement.icon,
 		})
 	return achievements
 

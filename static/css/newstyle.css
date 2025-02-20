@@ -1350,7 +1350,7 @@ form button:hover:not(:disabled) {
 	display: flex;
 	flex-direction: row;
 	align-items: flex-start;
-	justify-content: flex-start;
+	justify-content: space-between;
 	align-content: flex-start;
 	flex-wrap: wrap;
 	row-gap: 3rem;
@@ -1364,8 +1364,9 @@ form button:hover:not(:disabled) {
 }
 
 #achievements-stats {
+	width: 100%;
 	display: flex;
-	justify-content: center;
+	justify-content: space-evenly;
 	align-items: flex-end;
 	margin-top: 1rem;
 }
@@ -1392,6 +1393,7 @@ form button:hover:not(:disabled) {
 
 .achievement-title {
 	font-weight: bold;
+	font-size: 0.9rem;
 	text-align: center;
 	margin-top: 0.5rem;
 	color: var(--secondary-color);

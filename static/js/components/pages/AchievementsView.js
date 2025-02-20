@@ -46,7 +46,6 @@ export default class AchievementsView {
 			9: 'Yellow',
 		};
 
-		achievements.sort((a, b) => a.order - b.order);
 		let achievementsHTML = '';
 		achievements.forEach(achievement => {
 			achievementsHTML += `

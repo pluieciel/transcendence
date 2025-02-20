@@ -10,6 +10,7 @@ export default class ProfileView {
 		await this.render();
 		await this.setProfile();
 		await this.setGameHistory();
+		await this.setAchievements();
 		this.addEventListeners();
 	}
 
@@ -46,9 +47,7 @@ export default class ProfileView {
 								</ul>
 							</div>
 						</div>
-						<div id="profile-card-header-middle">
-
-						</div>
+						<div id="profile-card-header-middle"></div>
 						<div id="profile-card-header-right">
 							<h5 id="card-title"><i class="fa-solid fa-bolt"></i> Rumble</h5>
 							<div class="profile-card-stats">
@@ -113,33 +112,16 @@ export default class ProfileView {
 								</div>
 								<div id="profile-achievements-content">
 									<div id="achievements-content">
-										<div id="achievements-item-container">
-											<div class="achievement-item">
-												<div class="achievement-icon"><i class="fa-solid fa-star fa-xl"></i></div>	
-												<div class="achievement-title">Classic</div>
-											</div>
-											<div class="achievement-item">
-												<div class="achievement-icon"><i class="fa-solid fa-star fa-xl"></i></div>	
-												<div class="achievement-title">Classic</div>
-											</div>
-											<div class="achievement-item">
-												<div class="achievement-icon"><i class="fa-solid fa-star fa-xl"></i></div>	
-												<div class="achievement-title">Classic</div>
-											</div>
-											<div class="achievement-item">
-												<div class="achievement-icon"><i class="fa-solid fa-star fa-xl"></i></div>	
-												<div class="achievement-title">Classic</div>
-											</div>
-										</div>
+										<div id="achievements-item-container"></div>
 									</div>
 									<div id="achievements-stats" class="profile-card-stats">
 										<ul>
 											<li>
-												<div id="achievements-total-earned" class="stat-value">3/11</div>
+												<div id="achievements-total-earned" class="stat-value"><i class="fa-solid fa-circle-notch fa-spin"></i></div>
 												<div class="stat-label">Total Earned</div>
 											</li>
 											<li>
-												<div id="achievements-completion" class="stat-value">27%</div>
+												<div id="achievements-completion" class="stat-value"><i class="fa-solid fa-circle-notch fa-spin"></i></div>
 												<div class="stat-label">Completion</div>
 											</li>
 										</ul>
@@ -264,6 +246,44 @@ export default class ProfileView {
 		catch (e) {
 			console.error(e);
 		}
+	}
+
+	async setAchievements() {
+		try {
+			const response = await fetch(`/api/profiles/${this.username}/achievements/`);
+	
+			const data = await response.json();
+			if (data.success) {
+				const totalEarned = document.getElementById('achievements-total-earned');
+				const completion = document.getElementById('achievements-completion');
+
+				totalEarned.innerHTML = data.total_earned
+				completion.innerHTML = data.completion
+
+				data.achievements.forEach(achievement => this.addAchievementToAchievements(achievement));
+			}
+			else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
+				window.app.logout();
+			}
+			else {
+				console.error(data.message);
+			}
+		}
+		catch (e) {
+			console.error(e);
+		}
+	}
+
+	addAchievementToAchievements(achievement) {
+		const itemContainer = document.getElementById('achievements-item-container');
+		
+		const item = `
+			<div class="achievement-item">
+				<div class="achievement-icon"><i class="${achievement.icon}"></i></div>	
+				<div class="achievement-title">${achievement.name}</div>
+			</div>`
+
+		itemContainer.insertAdjacentHTML("beforeend", item);
 	}
 
 	getHistoryAvatar(player) {
