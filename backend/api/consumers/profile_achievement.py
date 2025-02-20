@@ -28,7 +28,7 @@ class ProfileAchievementConsumer(AsyncHttpConsumer):
 			response_data = {
 				'success': True,
 				'achievements': await get_profile_achievements(profile_user),
-				**(await get_achievements_stats(profile_user))
+				**(await get_achievements_stats(profile_user)),
 			}
 			return await self.send_response(200, json.dumps(response_data).encode(),
 				headers=[(b"Content-Type", b"application/json")])

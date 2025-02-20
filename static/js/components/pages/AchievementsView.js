@@ -16,7 +16,7 @@ export default class AchievementsView {
 			const response = await fetch(`/api/achievements/${username}/`);
 			const data = await response.json();
 			if (data.success) {
-				return data.achievements;
+				return data;
 			} else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
 				window.app.logout();
 			} else {
@@ -31,7 +31,10 @@ export default class AchievementsView {
 
 	async render() {
 		await window.app.renderHeader(this.container, "achievements", true, false, false, this.username);
-		const achievements = await this.getAchievements(this.username);
+		const data = await this.getAchievements(this.username);
+
+		if (!data)
+			return;
 
 		let colorArray = {
 			0: 'Blue',
@@ -47,7 +50,7 @@ export default class AchievementsView {
 		};
 
 		let achievementsHTML = '';
-		achievements.forEach(achievement => {
+		data.achievements.forEach(achievement => {
 			achievementsHTML += `
 				<div class="cheevo ${achievement.unlocked ? 'success' : ''}">
 					<div class="cheevo-icon"><i class="${achievement.icon}"></i></div>
@@ -82,6 +85,11 @@ export default class AchievementsView {
 							<i class="fa-solid fa-circle-info"></i> Play ranked games to progress and earn special color rewards - available in Customize section
 						</div>`: ''}
 					<div id="cheevos-content">
+						<div id="achievements-total-progress-bar" class="progress-bar">
+							<div class="progress-bar-percentage" style="width: ${data.completion}">
+								<span>${data.total_earned}</span>
+							</div>
+						</div>
 						${achievementsHTML}
 					</div>
 				</div>

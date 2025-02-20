@@ -990,6 +990,10 @@ form button:hover:not(:disabled) {
 	justify-content: space-between;
 }
 
+#achievements-total-progress-bar {
+	width: 90%;
+}
+
 .progress-bar {
 	width: 50%;
 	height: 1.4rem;
@@ -1011,7 +1015,7 @@ form button:hover:not(:disabled) {
 	position: absolute;
 	width: 50%;
 	left: 25%;
-	font-weight: 600;
+	font-weight: bold;
 }
 
 .cheevo-unlock-txt {
@@ -1387,7 +1391,7 @@ form button:hover:not(:disabled) {
 	align-items: center;
 	font-size: 2rem;
 	color: var(--cheevos-success-color);
-	box-shadow: 0 0 15px var(--cheevos-success-color);
+	box-shadow: 0 0 10px var(--cheevos-success-color);
 }
 
 .achievement-title {

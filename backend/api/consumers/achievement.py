@@ -1,6 +1,6 @@
 from channels.generic.http import AsyncHttpConsumer
 from api.utils import jwt_to_user
-from api.db_utils import get_user_by_name, get_achievements
+from api.db_utils import get_user_by_name, get_achievements, get_achievements_stats
 import json
 
 class AchievementConsumer(AsyncHttpConsumer):
@@ -27,7 +27,8 @@ class AchievementConsumer(AsyncHttpConsumer):
 
 			response_data = {
 				'success': True,
-				'achievements': await get_achievements(profile_user)
+				'achievements': await get_achievements(profile_user),
+				**(await get_achievements_stats(profile_user)),
 			}
 			return await self.send_response(200, json.dumps(response_data).encode(),
 				headers=[(b"Content-Type", b"application/json")])
