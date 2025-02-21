@@ -1612,6 +1612,7 @@ form button:hover:not(:disabled) {
 }
 
 #waiting-room {
+	flex-grow: 1;
 	margin-bottom: 1rem;
 }
 
