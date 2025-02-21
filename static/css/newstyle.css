@@ -386,7 +386,7 @@ form button:hover:not(:disabled) {
 	align-self: flex-end;
 }
 
-#start-button, #save-button, #toggle-2fa-button, #delete-account-button {
+#start-button, #save-button, #toggle-2fa-button, #delete-account-button, #create-button {
 	width: 100%;
 	margin-bottom: 1rem;
 	color: var(--secondary-color);
@@ -399,7 +399,7 @@ form button:hover:not(:disabled) {
 	height: 3rem;
 }
 
-#start-button:hover, #save-button:hover, #toggle-2fa-button:hover {
+#start-button:hover, #save-button:hover, #toggle-2fa-button:hover, #create-button:hover {
 	border: 1px solid var(--user-color);
 	box-shadow: 0 0 15px var(--user-color);
 	transition: all 0.3s ease;
@@ -1582,6 +1582,49 @@ form button:hover:not(:disabled) {
 	width: 100%;
 	height: 100%;
 	border-radius: 0.3rem;
+}
+
+/* ******************************** */
+/*             Tournament           */
+/* ******************************** */
+
+#tournament-card {
+	width: 30rem;
+	display: flex;
+	flex-direction: column;
+	align-self: flex-start;
+	justify-content: center;
+}
+
+#game-size
+{
+	margin-bottom: 1rem;
+	position: relative;
+	width: 100%;
+	height: 3rem;
+}
+
+#game-size-8 {
+	left: 50%;
+	color: var(--checkbox-unchecked-color);
+}
+
+.checkbox-button .checkbox:checked + .knobs #game-size-8 {
+	color: var(--secondary-color);
+}
+
+.checkbox-button .checkbox:checked + .knobs #game-size-4 {
+	color: var(--checkbox-unchecked-color);
+}
+
+#tournament-tree {
+	height: 100%;
+	flex-grow: 1;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	overflow: hidden;
+	padding: 2rem;
 }
 
 /* ******************************** */
