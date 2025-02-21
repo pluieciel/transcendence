@@ -11,8 +11,10 @@ from api.db_utils import finish_game_history, user_update_game, delete_game_hist
 from datetime import datetime
 import redis
 import math
+from urllib.parse import parse_qs
 from channels.layers import get_channel_layer
 from copy import deepcopy
+from api.utils import jwt_to_user
 
 class TournamentConsumer(AsyncWebsocketConsumer):
 	def __init__(self):
@@ -23,23 +25,58 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 		self.mode = 'classic'
 		self.logger = logging.getLogger('game')
 		self.round = 1
+		self.user = None
 
 	async def connect(self):
-		pass
-	async def receive(self):
-		pass
+		user = await jwt_to_user(self.scope['headers'])
+		self.user = user
+		if not self.user:
+			await self.send(text_data=json.dumps({
+				"type": "handle_error",
+				"message": "Invalid JWT"
+			}))
+			return
+		await self.channel_layer.group_add("updates", self.channel_name)
+		#Recognize if the user is a player
+	async def receive(self, text_data):
+		try:
+			data = json.loads(text_data)
+			if data["action"] == 'create':
+				self.logger.info(f"Size {data['size']},  {type(data['size'])} Mode {data['mode']}, {type(data['mode'])}")
+				self.createTournament(data['size'], data['mode'], self.user)
+			elif data["action"] == 'join':
+				self.logger.info("Joining tournament")
+				self.addPlayer(self.user)
+			elif data["action"] == 'leave':
+				self.logger.info("Leaving tournament")
+				self.removePlayer(self.user)
+			elif data["action"] == 'spectate':
+				pass
+			elif data["action"] == 'ready':
+				pass
+			await self.sendUpdates()
+
+
+		except json.JSONDecodeError:
+			print("Error decoding JSON message")
+		except Exception as e:
+			print(f"Error handling message: {e}")
+
 	async def disconnect(self):
 		pass
 
 	#Send visual updates
 	#Receive players joining tournament
 	#Receive player leaving tournament
+	#Receive tournamnent creation
+
+
 	#Send start game to players
 	#Receive ready state for tournament
 	#Receive spectate game
-	#Receive tournamnent creation
 
-	def createTournament(self, size, mode, user):
+
+	async def createTournament(self, size, mode, user):
 		if (size not in [4,8]):
 			self.logger.warn(f"Choosen size is not valid {size}")
 			return False
@@ -51,26 +88,24 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 			return False
 		self.mode = mode
 		self.size = size
-		self.round = 1
 		self.state = "waiting"
 		self.addPlayer(user)
 
-	def addPlayer(self, user):
+	async def addPlayer(self, user):
 		if (self.state != 'waiting'):
 			self.logger.warn(f"Tournament is not ready to be joined : {self.state}")
 			return False
 		self.players.append(user)
-		#Connect to websocket
-		if (self.players.count == self.size * 2):
+		if (self.players.count == self.size):
 			self.startTournament()
+		await self.channel_layer.group_add("players", self.channel_name)
 	
-	def removePlayer(self, user):
+	async def removePlayer(self, user):
 		if (user in self.players):
 			self.players.remove(user)
 			if (self.players.count == 0):
-				#Disconnect from websocket 
-				#Discard the tournament
-				pass
+				self.state = 'finished'
+		#If is a player, forfeit it
 	
 	def startTournament():
 		#Reset games
@@ -79,8 +114,30 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 	def createGames():
 		pass
 
-	async def sendUpdates():
-		pass
+	async def sendUpdates(self):
+		tournament_state = {
+			"type": "tournament_update",
+			"state": self.state,
+			"size": self.size,
+			"mode": self.mode,
+			"round": self.round,
+			"players": [
+				{
+					"username": player.username
+				} for player in self.players
+			]
+		}
+		
+		await self.channel_layer.group_send(
+			"updates",
+			{
+				"type": "send_tournament_update",
+				"message": tournament_state
+			}
+		)
+
+	async def send_tournament_update(self, event):
+		await self.send(text_data=json.dumps(event["message"]))
 
 
 
