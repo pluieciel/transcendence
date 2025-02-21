@@ -181,6 +181,7 @@ export default class TournamentView {
 								<div id="waiting-room-total-players"></div>
 								<div id="waiting-room-tournament-game-mode"><i class="fa-solid fa-bolt"></i>&nbsp; Rumble</div>
 							</div>
+							<div id="tournament-state"><i class="fa-solid fa-hourglass-half fa-spin"></i>&nbsp; Waiting for players...</div>
 							<div id="waiting-room-content">
 								<ul id="waiting-room-container"></ul>
 							</div>
