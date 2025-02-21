@@ -11,25 +11,26 @@ class BotAvatar:
 
 
 class BotUser:
-    def __init__(self, username, elo, color, user_id):
-        self.username = username
-        self.display_name = username
-        self.elo = elo
-        self.color = color
-        self.id = user_id
-        self.avatar = BotAvatar("/imgs/bot.png")
-        self.avatar_42 = None
-
+	def __init__(self, difficulty, elo, color, user_id):
+		# self.username = username
+		self.username = "AI (" + difficulty.capitalize() + ")"
+		self.display_name = self.username
+		self.elo = elo
+		self.color = color
+		self.id = user_id
+		# self.avatar = BotAvatar(avatarUrl)
+		self.avatar = BotAvatar("/imgs/bot-" + difficulty + ".jpg")
+		self.avatar_42 = None
 
 class Bot:
 	def __init__(self, difficulty, game):
 		match difficulty:
 			case 1:
-				self.user = BotUser(f'AI (Easy)', 800, 1, -1)
+				self.user = BotUser("easy", 800, 1, -1)
 			case 2:
-				self.user = BotUser(f'AI (Medium)', 1200, 1, -1)
+				self.user = BotUser("medium", 1200, 1, -1)
 			case 5:
-				self.user = BotUser(f'AI (Hard)', 1800, 1, -1)
+				self.user = BotUser("hard", 1800, 1, -1)
 		self.channel = None
 		self.state = "Ready"
 		self.game = game
