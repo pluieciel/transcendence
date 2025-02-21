@@ -14,7 +14,6 @@ export default class GameView {
 		this.handlePopState = this.handlePopState.bind(this);
 		window.addEventListener("popstate", this.handlePopState);
 		this.checkForBackdrop();
-		// document.getElementById("overlay").style["display"] = "flex"
 	}
 
 	checkForBackdrop() {
