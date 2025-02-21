@@ -127,10 +127,7 @@ export default class TournamentView {
 					<div id="tournament-room-content">
 					 	<div id="waiting-room">
 							<ul id="waiting-room-container">
-								<li>
-									<img src="/imgs/default_avatar.png" class="avatar tournament-player-avatar">
-									<div class="tournament-waiting-player-name">user1</div>
-								</li>
+
 							</ul>
 						</div>
 						<button type="submit" id="join-button"><i class="fa-solid fa-user-plus"></i> Join</button>
@@ -190,5 +187,23 @@ export default class TournamentView {
 			leaveButton.style.display = 'none';
 			joinButton.style.display = 'block';
 		});
+	}
+
+	addUserToWaitingRoom(user) {
+		const waitingRoom = document.getElementById('waiting-room-container');
+
+		const row =  `
+			<li>
+				<img src="/imgs/default_avatar.png" class="avatar tournament-player-avatar">
+				<div class="tournament-waiting-player-name">user1</div>
+			</li>`;
+
+		// row =  `
+		// 	<li>
+		// 		<img src="${user['avatar_url']}" class="avatar tournament-player-avatar">
+		// 		<div class="tournament-waiting-player-name">${user['name']}</div>
+		// 	</li>`;
+
+		waitingRoom.insertAdjacentHTML('beforeend', row);
 	}
 }
