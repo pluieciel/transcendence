@@ -20,7 +20,7 @@ class User:
 		self.state = state
 
 class GameBackend:
-	def __init__(self, room_id, bot, manager, ranked, mode):
+	def __init__(self, room_id, bot, manager, ranked, mode, tournament):
 		self.logger = logging.getLogger('game')
 		self.game_id = room_id
 		self.game_mode = mode
@@ -36,6 +36,7 @@ class GameBackend:
 		self.remontada = None
 		self.bigRemontada = None
 		self.elo_k_factor = 40
+		self.tournament = tournament
 
 		if (self.bot_game):
 			self.logger.info(f'Creating a game with a bot, difficulty : {bot}')
@@ -196,6 +197,10 @@ class GameBackend:
 				self.logger.info(f"Resetting right player: {self.player_right.user.username}")
 				await user_update_game(self.player_right.user, isplaying=False, game_id=-1)
 
+			if self.tournament:
+				from .tournament import Tournament
+				tournament = Tournament.get_instance()
+				await tournament.gameEnded(self.game_id, self.game.player_left.score, self.game.player_right.score, self.game.winner.username)
 			self.manager.remove_game(self.game_id)
 			game_history_db = await self.manager.get_game_by_id(self.game_id)
 			await self.manager.set_game_state(game_history_db, 'finished', self.game.player_left.score, self.game.player_right.score)

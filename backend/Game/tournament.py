@@ -48,6 +48,9 @@ class Tournament:
 			self.player_left = player_left
 			self.player_right = player_right
 			self.state = 'waiting'
+			self.score_left = 0	
+			self.score_right = 0
+			self.winner = None
 
 	async def createTournament(self, size, mode, user, channel_name):
 		self.logger.info("Enter create tournament")
@@ -82,7 +85,7 @@ class Tournament:
 			return False
 		self.logger.info("Appending an user to players")
 		self.players.append(self.Player(user, channel_name))
-		if (len(self.players) == 2):
+		if (len(self.players) == self.size):
 			await self.startTournament()
 		self.logger.info("Player added")
 		return True
@@ -105,18 +108,17 @@ class Tournament:
 		self.logger.info("Tournament started")
 
 	async def createGames(self):
-		self.logger.info("Geting history model")
 		self.game_history = self.get_game_history_model()
-		self.logger.info("Creating game history")
 		game_id = (await self.create_game_history(player_left=self.players[0].user, player_right=self.players[1].user, game_mode=self.mode, game_type='tournament')).id
-		self.logger.info(f"Game history created with id {game_id}")
-		self.logger.info("Creating game backend")
-		game_manager.games[game_id] = GameBackend(game_id, 0, game_manager, False, self.mode)
-		self.logger.info("Creating tournament game")
+		game_manager.games[game_id] = GameBackend(game_id, 0, game_manager, False, self.mode, True)
 		tournamentGame = self.TournamentGame(game_id, self.players[0], self.players[1])
-		self.logger.info("appending tournament game")
 		self.games.append(tournamentGame)
-		self.logger.info(f"Game {game_id} created between {self.players[0].user.username} and {self.players[1].user.username}")
+
+		game_id = (await self.create_game_history(player_left=self.players[2].user, player_right=self.players[3].user, game_mode=self.mode, game_type='tournament')).id
+		game_manager.games[game_id] = GameBackend(game_id, 0, game_manager, False, self.mode, True)
+		tournamentGame = self.TournamentGame(game_id, self.players[2], self.players[3])
+		self.games.append(tournamentGame)
+		self.logger.info(f"Game {game_id} created between {self.players[2].user.username} and {self.players[3].user.username}")
 	
 	@database_sync_to_async
 	def create_game_history(self, player_left, player_right=None, game_type='ranked', game_mode='classic', game_state='waiting', tournament_count=0, tournament_round2_game_id=-1, tournament_round2_place=-1):
@@ -134,6 +136,18 @@ class Tournament:
 		except Exception as e:
 			self.logger.error(f"Error in create_game_history: {e}")
 			raise
+	
+	async def gameEnded(self, game_id, scoreLeft, scoreRight, winner):
+		self.logger.info(f"Game {game_id} ended")
+		for game in self.games:
+			if game.game_id == game_id:
+				self.logger.info(f"Game {game_id} found")
+				game.state = 'finished'
+				game.score_left = scoreLeft
+				game.score_right = scoreRight
+				game.winner = winner
+				self.logger.info(f"Game {game_id} ended with {game.score_left} - {game.score_right}")
+				
 	
 	async def setReady(self, user):
 		self.logger.info("Received ready")
