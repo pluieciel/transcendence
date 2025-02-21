@@ -45,6 +45,12 @@ class GameConsumer(AsyncWebsocketConsumer):
 				"message": "Invalid JWT"
 			}))
 			return
+		if self.user.is_playing:
+			await self.send(text_data=json.dumps({
+				"type": "handle_error",
+				"message": "User is already playing"
+			}))
+			return
 		game_manager._get_game_history_model()
 
 		if sender: # invitation: WS msg from B, A invite B, sender is A
