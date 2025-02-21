@@ -31,6 +31,12 @@ export default class TournamentView {
 				this.updatePlayersList(events.players);
 				console.log("Entered tournament update");
 
+				const waitingRoomTotalPlayers = document.getElementById("waiting-room-total-players");
+				waitingRoomTotalPlayers.innerHTML = `<i class="fa-solid fa-user"></i>&nbsp; ${events.players.length}/${events.size}`
+
+				const waitingRoomTournamentGameMode = document.getElementById("waiting-room-tournament-game-mode");
+				waitingRoomTournamentGameMode.innerHTML = events.mode === "classic" ? `<i class="fa-solid fa-star"></i>&nbsp; Classic` : `<i class="fa-solid fa-bolt"></i>&nbsp; Rumble`;
+
 				const createCardTournament = document.getElementById("tournament-create-card");
 				const roomCardTournament = document.getElementById("tournament-room-card");
 				events.state === 'finished'? createCardTournament.style.display = 'flex' : createCardTournament.style.display = 'none';
@@ -126,8 +132,8 @@ export default class TournamentView {
 					<div id="tournament-room-content">
 					 	<div id="waiting-room">
 							<div id="waiting-room-info">
-								<div id="waiting-room-total-players"><i class="fa-solid fa-user"></i>&nbsp; 1/4</div>
-								<div id="waiting-room-tournament-mode"><i class="fa-solid fa-bolt"></i>&nbsp; Rumble</div>
+								<div id="waiting-room-total-players"></div>
+								<div id="waiting-room-tournament-game-mode"><i class="fa-solid fa-bolt"></i>&nbsp; Rumble</div>
 							</div>
 							<div id="waiting-room-content">
 								<ul id="waiting-room-container"></ul>
