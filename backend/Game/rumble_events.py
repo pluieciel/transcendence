@@ -335,7 +335,7 @@ class SupersonicBallEvent(GameEvent):
 class InfiniteSpeedEvent(GameEvent):
 	def __init__(self, game: 'RumbleGameInstance'):
 		self.game = game
-		self.icon = "fa-solid fa-stopwatch"
+		self.icon = "fa-solid fa-infinity"
 		self.name = "Infinite Speed"
 		self.description = "The ball can accelerate beyond the max speed"
 		self.action = 'none'
