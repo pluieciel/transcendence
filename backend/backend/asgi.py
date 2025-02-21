@@ -13,6 +13,7 @@ from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack
 from Chat.routing import websocket_urlpatterns as chat_websocket_patterns
 from Game.routing import websocket_urlpatterns as game_websocket_patterns
+from Game.routing import websocket_urlpatternsTournament as tournament_websocket_patterns
 from django.urls import path, re_path
 from api.consumers.leaderboard import LeaderboardConsumer
 from api.consumers.login_2fa import Login2FAConsumer
@@ -48,6 +49,7 @@ websocket_patterns = [
     path('ws/chat/', URLRouter(chat_websocket_patterns)),
     path('ws/game/', URLRouter(game_websocket_patterns)),
     path('ws/game/invite', URLRouter(game_websocket_patterns)),
+    path('ws/tournament/', URLRouter(tournament_websocket_patterns)),
 ]
 
 http_patterns = [
