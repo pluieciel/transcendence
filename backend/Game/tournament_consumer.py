@@ -22,10 +22,10 @@ tournament = Tournament.get_instance()
 
 class TournamentConsumer(AsyncWebsocketConsumer):
 	def __init__(self):
-		super().__init__()
-		self.groups = ["updates"]
+		super().__init__
 		self.logger = logging.getLogger('game')
 		self.user = None
+		self.groups = ['updates', 'players']
 
 	async def connect(self):
 		self.logger.info("connected to ws")
@@ -40,7 +40,7 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 		await self.accept()
 		await self.channel_layer.group_add("updates", self.channel_name)
 		await self.sendUpdates()
-		#Recognize if the user is a player
+
 	async def receive(self, text_data):
 		try:
 			data = json.loads(text_data)
@@ -52,10 +52,12 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 				await tournament.createTournament(size, mode, self.user)
 			elif data["action"] == 'join':
 				self.logger.info("Joining tournament")
-				await tournament.addPlayer(self.user)
+				if (await tournament.addPlayer(self.user)):
+					await self.channel_layer.group_add("players", self.channel_name)	
 			elif data["action"] == 'leave':
 				self.logger.info("Leaving tournament")
-				await tournament.removePlayer(self.user)
+				if (await tournament.removePlayer(self.user)):
+					await self.channel_layer.group_discard("players", self.channel_name)
 			elif data["action"] == 'spectate':
 				pass
 			elif data["action"] == 'ready':
@@ -81,9 +83,6 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 	#Receive ready state for tournament
 	#Receive spectate game
 
-
-
-
 	async def sendUpdates(self):
 		tournament_state = {
 			"type": "tournament_update",
@@ -93,7 +92,13 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 			"round": tournament.round,
 			"players": [
 				{
-					"username": player.username
+                "username": player.username,
+                "display": player.display_name,
+                "avatar": (
+                    player.avatar_42 if player.avatar_42 else
+                    player.avatar.url if player.avatar else
+                    '/imgs/default_avatar.png'
+                )
 				} for player in tournament.players
 			]
 		}

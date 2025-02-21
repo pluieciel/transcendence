@@ -19,7 +19,6 @@ class Tournament:
 			raise Exception("This class is a singleton!")
 		else:
 			Tournament._instance = self
-			self.groups = ["updates"]
 			self.size = 0;
 			self.players = []
 			self.games = []
@@ -27,7 +26,6 @@ class Tournament:
 			self.mode = 'classic'
 			self.logger = logging.getLogger('game')
 			self.round = 1
-
 
 	async def createTournament(self, size, mode, user):
 		self.logger.info("Enter create tournament")
@@ -55,13 +53,16 @@ class Tournament:
 		if (len(self.players) == self.size):
 			self.startTournament()
 		self.logger.info("Player added")
-		#await self.channel_layer.group_add("players", self.channel_name)
+		return True
 	
 	async def removePlayer(self, user):
 		if (user in self.players):
 			self.players.remove(user)
 			if (len(self.players) == 0):
 				self.state = 'finished'
+			return True
+		return False
+		
 		#If is a player, forfeit it
 	
 	def startTournament(self):

@@ -51,7 +51,7 @@ export default class TournamentView {
 		const joinButton = document.getElementById("join-button");
 		const leaveButton = document.getElementById("leave-button");
 		for (let player of players) {
-			this.addUserToWaitingRoom(player.username);
+			this.addUserToWaitingRoom(player.username, player.display, player.avatar);
 			if (player.username === window.app.state.username) {
 				found = true;
 			}
@@ -181,13 +181,13 @@ export default class TournamentView {
 		});
 	}
 
-	addUserToWaitingRoom(user) {
+	addUserToWaitingRoom(username, display_name, avatar) {
 		const waitingRoom = document.getElementById('waiting-room-container');
-
+		console.log(display_name);
 		const row =  `
 			<li>
-				<img src="/imgs/default_avatar.png" class="avatar tournament-player-avatar">
-				<div class="tournament-waiting-player-name">${user}</div>
+				<img src="${avatar}" class="avatar tournament-player-avatar">
+				<div class="tournament-waiting-player-name">${display_name ? display_name : username}</div>
 			</li>`;
 
 		// row =  `
