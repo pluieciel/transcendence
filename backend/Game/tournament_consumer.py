@@ -49,10 +49,10 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 				mode = data['mode']
 				self.logger.info(self.user)
 				self.logger.info(f"Size {size}, Mode {mode}")
-				await tournament.createTournament(size, mode, self.user)
+				await tournament.createTournament(size, mode, self.user, self.channel_name)
 			elif data["action"] == 'join':
 				self.logger.info("Joining tournament")
-				if (await tournament.addPlayer(self.user)):
+				if (await tournament.addPlayer(self.user, self.channel_name)):
 					await self.channel_layer.group_add("players", self.channel_name)	
 			elif data["action"] == 'leave':
 				self.logger.info("Leaving tournament")
@@ -61,7 +61,7 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 			elif data["action"] == 'spectate':
 				pass
 			elif data["action"] == 'ready':
-				pass
+				await tournament.setReady(self.user)
 			await self.sendUpdates()
 
 
@@ -92,11 +92,11 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 			"round": tournament.round,
 			"players": [
 				{
-                "username": player.username,
-                "display": player.display_name,
+                "username": player.user.username,
+                "display": player.user.display_name,
                 "avatar": (
-                    player.avatar_42 if player.avatar_42 else
-                    player.avatar.url if player.avatar else
+                    player.user.avatar_42 if player.user.avatar_42 else
+                    player.user.avatar.url if player.user.avatar else
                     '/imgs/default_avatar.png'
                 )
 				} for player in tournament.players
@@ -114,7 +114,11 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 	async def send_tournament_update(self, event):
 		await self.send(text_data=json.dumps(event["message"]))
 
+	async def start_game(self, event):
+		await self.send(text_data=json.dumps({
+			"type": "start_game"
+		}))
 
 
 
-	
+

@@ -42,12 +42,58 @@ export default class TournamentView {
 				events.state === 'finished'? createCardTournament.style.display = 'flex' : createCardTournament.style.display = 'none';
 				events.state !== 'finished'? roomCardTournament.style.display = 'flex' : roomCardTournament.style.display = 'none';
 			}
+			else if (events.type === "start_game") {
+				const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+				const host = window.location.host;
+				const wsGameUrl = `${protocol}//${host}/ws/game/`;
+				this.initializeGameWebSocket(wsGameUrl);
+			}
 		};
 
 		window.app.tournamentws.onerror = (error) => {
 			console.error("WebSocket error:", error);
 			alert("Connection error! Please try again.");
 		};
+	}
+
+	initializeGameWebSocket(wsUrl) {
+		if (window.app.gamews) {
+			window.app.gamews.close();
+		}
+
+		window.app.gamews = new WebSocket(wsUrl);
+
+		window.app.gamews.onmessage = (event) => {
+			const events = JSON.parse(event.data);
+			if (events.message_type === "init") {
+				this.redirectToGame(events);
+			}
+		};
+
+		window.app.gamews.onopen = () => {
+			console.log("Connected to server");
+			window.app.ingame = true;
+			sessionStorage.setItem("ingame", "true");
+		};
+
+		window.app.gamews.onclose = () => {
+			console.log("Disconnected from server");
+			window.app.ingame = false;
+			sessionStorage.setItem("ingame", "false");
+		};
+
+		window.app.gamews.onerror = (error) => {
+			console.error("WebSocket error:", error);
+			alert("Connection error! Please try again.");
+		};
+	}
+
+	async redirectToGame(events) {
+		window.app.router.navigateTo("/game");
+		const gameView = window.app.router.currentComponent;
+		if (gameView && gameView.initializeGame) {
+			gameView.initializeGame(events);
+		}
 	}
 
 	updatePlayersList(players)
@@ -144,7 +190,9 @@ export default class TournamentView {
 						<button type="submit" id="leave-button"><i class="fa-solid fa-user-minus"></i> Leave</button>
 					</div>
 				</div>
-				<div id="tournament-tree" class="card"></div>
+				<div id="tournament-tree" class="card">
+					<button type="submit" id="ready-button"><i class="fa-solid fa-user-plus"></i> Ready</button>
+				</div>
 			</main>
 		`;
 	}
@@ -156,6 +204,7 @@ export default class TournamentView {
 		this.addCreateTournamentEventListeners();
 		this.addJoinTournamentEventListeners();
 		this.addLeaveTournamentEventListeners();
+		this.addReadyButtonEventListeners();
 	}
 
 	addGameSizeCheckboxEventListeners() {
@@ -190,6 +239,14 @@ export default class TournamentView {
 		const leaveButton = document.getElementById("leave-button");
 		leaveButton.addEventListener("click", () => {
 			this.sendAction('leave');
+		});
+	}
+
+	addReadyButtonEventListeners() {
+		const leaveButton = document.getElementById("ready-button");
+		leaveButton.addEventListener("click", () => {
+			console.log("Ready button clicked");
+			this.sendAction('ready');
 		});
 	}
 
