@@ -79,7 +79,7 @@ export default class AchievementsView {
 		this.container.innerHTML += `
 			<main>
 				<div id="achievements-card" class="card">
-					<h2 id="card-title"><i class="fa-solid fa-trophy"></i>${window.app.state.username != this.username ? '&nbsp;' + this.username.toUpperCase() + (this.username.endsWith('s') ? '\'' : '\'S'): ''} ACHIEVEMENTS</h2>
+					<h2 id="card-title" class="achievements-card-title"><i class="fa-solid fa-trophy"></i>${window.app.state.username != this.username ? '&nbsp;' + this.username.toUpperCase() + (this.username.endsWith('s') ? '\'' : '\'S'): ''} ACHIEVEMENTS</h2>
 					${window.app.state.username === this.username ? `
 						<div id="achievements-info">
 							<i class="fa-solid fa-circle-info"></i> Play ranked games to progress and earn special color rewards - available in Customize section

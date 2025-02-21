@@ -43,7 +43,7 @@ export default class SettingsView {
 							<input type="file" id="avatar-input" accept="image/*" hidden>
 						</span>
 						<div id="input-message" class="input-message"></div>
-						<button id="save-button" type="submit"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+						<button id="save-settings-button" type="submit"><i class="fa-solid fa-floppy-disk"></i> Save</button>
 					</form>
 					<button id="toggle-2fa-button" type="button"></button>
 					<button id="delete-account-button" type="submit"><i class="fa-solid fa-trash-can"></i> Delete Account</button>
