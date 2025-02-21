@@ -559,10 +559,10 @@ class GameBackend:
 	
 	async def check_remontada(self):
 		if (self.remontada is None):
-			if (self.game.ended is False and self.game.player_left.score + 5 < self.game.player_right.score):
+			if (self.game.ended is False and self.game.player_left.score + 3 < self.game.player_right.score):
 				self.remontada = self.player_left.user
 				self.logger.info("Player left elligible for Clutch")
-			elif (self.game.ended is False and self.game.player_right.score + 5 < self.game.player_left.score):
+			elif (self.game.ended is False and self.game.player_right.score + 3 < self.game.player_left.score):
 				self.remontada = self.player_right.user
 				self.logger.info("Player right elligible for Clutch")
 		elif self.game.ended and self.remontada:
@@ -573,10 +573,10 @@ class GameBackend:
 	
 	async def check_big_remontada(self):
 		if (self.bigRemontada is None):
-			if (self.game.ended is False and self.game.player_left.score == 0 and self.game.player_right.score == 9):
+			if (self.game.ended is False and self.game.player_left.score + 6 < self.game.player_right.score):
 				self.bigRemontada = self.player_left.user
 				self.logger.info("Player left elligible for God's Clutch")
-			elif (self.game.ended is False and self.game.player_right.score == 0 and self.game.player_left.score == 9):
+			elif (self.game.ended is False and self.game.player_right.score + 6 < self.game.player_left.score):
 				self.bigRemontada = self.player_right.user
 				self.logger.info("Player left elligible for God's Clutch")
 		elif self.game.ended and self.bigRemontada:

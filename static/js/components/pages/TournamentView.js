@@ -24,43 +24,17 @@ export default class TournamentView {
 
 		window.app.tournamentws = new WebSocket(wsUrl);
 
-		window.app.tournamentws.onmessage = (event) => {
-			const events = JSON.parse(event.data);
+		window.app.tournamentws.onmessage = (bla) => {
+			const events = JSON.parse(bla.data);
+			console.log(events);
 			if (events.type === "tournament_update") {
-				if (event.state == 'waiting')
-				{
-					const createCardTournament = document.getElementById("tournament-create-card");
-					const roomCardTournament = document.getElementById("tournament-room-card");
-					createCardTournament.style.display = 'none';
-					roomCardTournament.style.display = 'flex';
+				this.updatePlayersList(events.players);
+				console.log("Entered tournament update");
 
-					let players = event.players;
-					let found = false;
-					for (player in players)
-					{
-						if (player.username == window.app.state.username)
-						{
-							found = true;
-						}
-					}
-					if (found)
-					{
-						joinButton.style.display = 'none';
-						leaveButton.style.display = 'block';
-					}
-					else
-					{
-						joinButton.style.display = 'block';
-						leaveButton.style.display = 'none';
-					}
-				}
-				else if (event.state == 'finished')
-				{
-					const createCardTournament = document.getElementById("tournament-create-card");
-					const roomCardTournament = document.getElementById("tournament-room-card");
-					createCardTournament.style.display = 'flex';
-					roomCardTournament.style.display = 'none';
-				}
+				const createCardTournament = document.getElementById("tournament-create-card");
+				const roomCardTournament = document.getElementById("tournament-room-card");
+				events.state === 'finished'? createCardTournament.style.display = 'flex' : createCardTournament.style.display = 'none';
+				events.state !== 'finished'? roomCardTournament.style.display = 'flex' : roomCardTournament.style.display = 'none';
 			}
 		};
 
@@ -68,6 +42,30 @@ export default class TournamentView {
 			console.error("WebSocket error:", error);
 			alert("Connection error! Please try again.");
 		};
+	}
+
+	updatePlayersList(players)
+	{
+		document.getElementById("waiting-room-container").innerHTML = '';
+		let found = false;
+		const joinButton = document.getElementById("join-button");
+		const leaveButton = document.getElementById("leave-button");
+		for (let player of players) {
+			this.addUserToWaitingRoom(player.username);
+			if (player.username === window.app.state.username) {
+				found = true;
+			}
+		}
+		if (found)
+		{
+			joinButton.style.display = 'none';
+			leaveButton.style.display = 'block';
+		}
+		else
+		{
+			joinButton.style.display = 'block';
+			leaveButton.style.display = 'none';
+		}
 	}
 
 	sendAction(action) {
@@ -173,9 +171,6 @@ export default class TournamentView {
 		const joinButton = document.getElementById("join-button");
 		joinButton.addEventListener("click", () => {
 			this.sendAction('join');
-			const leaveButton = document.getElementById("leave-button");
-			joinButton.style.display = 'none';
-			leaveButton.style.display = 'block';
 		});
 	}
 
@@ -183,9 +178,6 @@ export default class TournamentView {
 		const leaveButton = document.getElementById("leave-button");
 		leaveButton.addEventListener("click", () => {
 			this.sendAction('leave');
-			const joinButton = document.getElementById("join-button");
-			leaveButton.style.display = 'none';
-			joinButton.style.display = 'block';
 		});
 	}
 
@@ -195,7 +187,7 @@ export default class TournamentView {
 		const row =  `
 			<li>
 				<img src="/imgs/default_avatar.png" class="avatar tournament-player-avatar">
-				<div class="tournament-waiting-player-name">user1</div>
+				<div class="tournament-waiting-player-name">${user}</div>
 			</li>`;
 
 		// row =  `

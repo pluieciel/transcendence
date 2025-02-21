@@ -184,13 +184,13 @@
     color_unlocked: -1
     unlock_value: 1
     category: 'clasic'
-    icon: 'fa-solid fa-robot fa-xl'
+    icon: 'fa-solid fa-shield-halved fa-xl'
     order: 7
 - model: api.achievement
   pk: 7
   fields:
     name: 'Clutch'
-    description: 'Win a game where you were 6 points behind'
+    description: 'Win a game where you were 4 points behind'
     color_unlocked: -1
     unlock_value: 1
     category: 'classic'
@@ -200,7 +200,7 @@
   pk: 8
   fields:
     name: "God's Clutch"
-    description: 'Win a game where you were 9 points behind'
+    description: 'Win a game where you were 7 points behind'
     color_unlocked: 7
     unlock_value: 1
     category: 'classic'
