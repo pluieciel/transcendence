@@ -54,6 +54,8 @@ export default class CustomizeView {
 				this.unlockedColors = new Set(data.colors);
 				this.setSaveButtonActive(this.unlockedColors.has(this.settings.color))
 				return data.colors;
+			} else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
+				window.app.logout();
 			} else {
 				console.error("Failed to fetch colors:", data.message);
 				return [];

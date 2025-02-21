@@ -75,7 +75,7 @@ export default class LeaderboardView {
 				window.app.logout();
 			}
 			else {
-				// TODO: handle error msg
+				console.error(data.message);
 			}
 		}
 		catch (e) {

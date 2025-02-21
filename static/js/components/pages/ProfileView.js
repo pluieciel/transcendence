@@ -10,6 +10,7 @@ export default class ProfileView {
 		await this.render();
 		await this.setProfile();
 		await this.setGameHistory();
+		await this.setAchievements();
 		this.addEventListeners();
 	}
 
@@ -46,9 +47,7 @@ export default class ProfileView {
 								</ul>
 							</div>
 						</div>
-						<div id="profile-card-header-middle">
-
-						</div>
+						<div id="profile-card-header-middle"></div>
 						<div id="profile-card-header-right">
 							<h5 id="card-title"><i class="fa-solid fa-bolt"></i> Rumble</h5>
 							<div class="profile-card-stats">
@@ -112,14 +111,17 @@ export default class ProfileView {
 									<i id="profile-to-achievements" class="fa-solid fa-arrow-up-right-from-square"></i>
 								</div>
 								<div id="profile-achievements-content">
+									<div id="achievements-content">
+										<div id="achievements-item-container"></div>
+									</div>
 									<div id="achievements-stats" class="profile-card-stats">
 										<ul>
 											<li>
-												<div id="achievements-total-earned" class="stat-value">3/11</div>
+												<div id="achievements-total-earned" class="stat-value"><i class="fa-solid fa-circle-notch fa-spin"></i></div>
 												<div class="stat-label">Total Earned</div>
 											</li>
 											<li>
-												<div id="achievements-completion" class="stat-value">27%</div>
+												<div id="achievements-completion" class="stat-value"><i class="fa-solid fa-circle-notch fa-spin"></i></div>
 												<div class="stat-label">Completion</div>
 											</li>
 										</ul>
@@ -215,7 +217,7 @@ export default class ProfileView {
 				window.app.logout();
 			}
 			else {
-				// TODO: handle error msg
+				console.error(data.message);
 			}
 		}
 		catch (e) {
@@ -238,12 +240,50 @@ export default class ProfileView {
 				window.app.logout();
 			}
 			else {
-				// TODO: handle error msg
+				console.error(data.message);
 			}
 		}
 		catch (e) {
 			console.error(e);
 		}
+	}
+
+	async setAchievements() {
+		try {
+			const response = await fetch(`/api/profiles/${this.username}/achievements/`);
+	
+			const data = await response.json();
+			if (data.success) {
+				const totalEarned = document.getElementById('achievements-total-earned');
+				const completion = document.getElementById('achievements-completion');
+
+				totalEarned.innerHTML = data.total_earned
+				completion.innerHTML = data.completion
+
+				data.achievements.forEach(achievement => this.addAchievementToAchievements(achievement));
+			}
+			else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
+				window.app.logout();
+			}
+			else {
+				console.error(data.message);
+			}
+		}
+		catch (e) {
+			console.error(e);
+		}
+	}
+
+	addAchievementToAchievements(achievement) {
+		const itemContainer = document.getElementById('achievements-item-container');
+		
+		const item = `
+			<div class="achievement-item">
+				<div class="achievement-icon"><i class="${achievement.icon}"></i></div>	
+				<div class="achievement-title">${achievement.name}</div>
+			</div>`
+
+		itemContainer.insertAdjacentHTML("beforeend", item);
 	}
 
 	getHistoryAvatar(player) {
@@ -253,6 +293,14 @@ export default class ProfileView {
 		else
 			history_avatar += `<div class="player-loser">LOSER</div>`
 		return history_avatar;
+	}
+
+	getEloChangeIcon(gameHistory) {
+		if ((gameHistory['player_left']['is_winner'] && gameHistory['player_left']['username'] === this.username) || 
+			(gameHistory['player_right']['is_winner'] && gameHistory['player_right']['username'] === this.username))
+			return `<i class="fa-solid fa-plus"></i>`
+		else
+			return `<i class="fa-solid fa-minus"></i>`
 	}
 
 	addGameHistoryToGameHistories(gameHistory) {
@@ -293,7 +341,7 @@ export default class ProfileView {
 						`<button id="${rightProfileButtonId}" data-redirect-to="${gameHistory['player_right']['username']}">${gameHistory['player_right']['name']}</button>` :
 						gameHistory['player_right']['name']}
 				</div>
-				<div id="game-history-elo-change"><i class="fa-solid fa-plus-minus"></i> ${gameHistory['elo_change']}</div>
+				<div id="game-history-elo-change">${this.getEloChangeIcon(gameHistory)}${gameHistory['elo_change']}</div>
 			</div>`;
 		itemContainer.insertAdjacentHTML("beforeend", item);
 

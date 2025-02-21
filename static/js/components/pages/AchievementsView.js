@@ -13,11 +13,13 @@ export default class AchievementsView {
 
 	async getAchievements(username) {
 		try {
-			const response = await fetch(`/api/profiles/${username}/achievements/`);
+			const response = await fetch(`/api/achievements/${username}/`);
 			const data = await response.json();
-			if (data.success)
-				return data.achievements;
-			else {
+			if (data.success) {
+				return data;
+			} else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
+				window.app.logout();
+			} else {
 				console.error("Failed to fetch achievements:", data.message);
 				return [];
 			}
@@ -29,7 +31,10 @@ export default class AchievementsView {
 
 	async render() {
 		await window.app.renderHeader(this.container, "achievements", true, false, false, this.username);
-		const achievements = await this.getAchievements(this.username);
+		const data = await this.getAchievements(this.username);
+
+		if (!data)
+			return;
 
 		let colorArray = {
 			0: 'Blue',
@@ -44,9 +49,8 @@ export default class AchievementsView {
 			9: 'Yellow',
 		};
 
-		achievements.sort((a, b) => a.order - b.order);
 		let achievementsHTML = '';
-		achievements.forEach(achievement => {
+		data.achievements.forEach(achievement => {
 			achievementsHTML += `
 				<div class="cheevo ${achievement.unlocked ? 'success' : ''}">
 					<div class="cheevo-icon"><i class="${achievement.icon}"></i></div>
@@ -76,7 +80,16 @@ export default class AchievementsView {
 			<main>
 				<div id="achievements-card" class="card">
 					<h2 id="card-title"><i class="fa-solid fa-trophy"></i>${window.app.state.username != this.username ? '&nbsp;' + this.username.toUpperCase() + (this.username.endsWith('s') ? '\'' : '\'S'): ''} ACHIEVEMENTS</h2>
-					<div id="achievements-content">
+					${window.app.state.username === this.username ? `
+						<div id="achievements-info">
+							<i class="fa-solid fa-circle-info"></i> Play ranked games to progress and earn special color rewards - available in Customize section
+						</div>`: ''}
+					<div id="cheevos-content">
+						<div id="achievements-total-progress-bar" class="progress-bar">
+							<div class="progress-bar-percentage" style="width: ${data.completion}">
+								<span>${data.total_earned}</span>
+							</div>
+						</div>
 						${achievementsHTML}
 					</div>
 				</div>
