@@ -124,9 +124,7 @@ export default class TournamentView {
 					<h2 id="card-title"><i class="fa-solid fa-crown"></i> TOURNAMENT</h2>
 					<div id="tournament-room-content">
 					 	<div id="waiting-room">
-							<ul id="waiting-room-container">
-
-							</ul>
+							<ul id="waiting-room-container"></ul>
 						</div>
 						<button type="submit" id="join-button"><i class="fa-solid fa-user-plus"></i> Join</button>
 						<button type="submit" id="leave-button"><i class="fa-solid fa-user-minus"></i> Leave</button>
