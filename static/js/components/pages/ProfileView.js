@@ -298,9 +298,9 @@ export default class ProfileView {
 	getEloChangeIcon(gameHistory) {
 		if ((gameHistory['player_left']['is_winner'] && gameHistory['player_left']['username'] === this.username) || 
 			(gameHistory['player_right']['is_winner'] && gameHistory['player_right']['username'] === this.username))
-			return `<i class="fa-solid fa-plus"></i>`
+			return `+ `
 		else
-			return `<i class="fa-solid fa-minus"></i>`
+			return `- `
 	}
 
 	addGameHistoryToGameHistories(gameHistory) {

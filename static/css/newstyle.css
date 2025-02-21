@@ -386,7 +386,7 @@ form button:hover:not(:disabled) {
 	align-self: flex-end;
 }
 
-#start-button, #save-button, #toggle-2fa-button, #delete-account-button, #create-button {
+#start-button, #save-button, #toggle-2fa-button, #delete-account-button, #create-button, #join-button, #leave-button {
 	width: 100%;
 	margin-bottom: 1rem;
 	color: var(--secondary-color);
@@ -399,7 +399,7 @@ form button:hover:not(:disabled) {
 	height: 3rem;
 }
 
-#start-button:hover, #save-button:hover, #toggle-2fa-button:hover, #create-button:hover {
+#start-button:hover, #save-button:hover, #toggle-2fa-button:hover, #create-button:hover, #join-button:hover, #leave-button:hover {
 	border: 1px solid var(--user-color);
 	box-shadow: 0 0 15px var(--user-color);
 	transition: all 0.3s ease;
@@ -1588,12 +1588,75 @@ form button:hover:not(:disabled) {
 /*             Tournament           */
 /* ******************************** */
 
-#tournament-card {
+#tournament-create-card {
 	width: 30rem;
 	display: flex;
 	flex-direction: column;
 	align-self: flex-start;
 	justify-content: center;
+}
+
+#tournament-room-card {
+	display: none;
+	width: 30rem;
+	height: 100%;
+}
+
+#tournament-room-content {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	align-self: flex-start;
+	justify-content: center;
+}
+
+#waiting-room {
+	margin-bottom: 1rem;
+}
+
+#waiting-room-container {
+	height: 100%;
+	background-color: var(--primary-color);
+	padding: 1rem;
+	border-radius: 0.3rem;
+}
+
+#waiting-room-container li {
+	background-color: var(--selector-color);
+	height: 4rem;
+	border-radius: 0.3rem;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: flex-start;
+	list-style: none;
+	padding: 1rem;
+}
+
+#waiting-room-container li:not(:last-child) {
+	margin-bottom: 1rem;
+}
+
+.tournament-player-avatar {
+	width: 2.5rem;
+	height: 2.5rem;
+	border: 1px solid var(--user-color);
+	box-shadow: 0 0 15px var(--user-color);
+}
+
+.tournament-waiting-player-name {
+	align-self: center;
+	font-weight: bold;
+	margin-left: 0.5rem;
+}
+
+#join-button, #leave-button {
+	margin-top: auto
+}
+
+#leave-button {
+	display: none;
 }
 
 #game-size
