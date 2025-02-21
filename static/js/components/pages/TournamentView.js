@@ -31,6 +31,12 @@ export default class TournamentView {
 				this.updatePlayersList(events.players);
 				console.log("Entered tournament update");
 
+				const waitingRoomTotalPlayers = document.getElementById("waiting-room-total-players");
+				waitingRoomTotalPlayers.innerHTML = `<i class="fa-solid fa-user"></i>&nbsp; ${events.players.length}/${events.size}`
+
+				const waitingRoomTournamentGameMode = document.getElementById("waiting-room-tournament-game-mode");
+				waitingRoomTournamentGameMode.innerHTML = events.mode === "classic" ? `<i class="fa-solid fa-star"></i>&nbsp; Classic` : `<i class="fa-solid fa-bolt"></i>&nbsp; Rumble`;
+
 				const createCardTournament = document.getElementById("tournament-create-card");
 				const roomCardTournament = document.getElementById("tournament-room-card");
 				events.state === 'finished'? createCardTournament.style.display = 'flex' : createCardTournament.style.display = 'none';
@@ -96,6 +102,7 @@ export default class TournamentView {
 		let found = false;
 		const joinButton = document.getElementById("join-button");
 		const leaveButton = document.getElementById("leave-button");
+
 		for (let player of players) {
 			this.addUserToWaitingRoom(player.username, player.display, player.avatar);
 			if (player.username === window.app.state.username) {
@@ -170,9 +177,13 @@ export default class TournamentView {
 					<h2 id="card-title"><i class="fa-solid fa-crown"></i> TOURNAMENT</h2>
 					<div id="tournament-room-content">
 					 	<div id="waiting-room">
-							<ul id="waiting-room-container">
-
-							</ul>
+							<div id="waiting-room-info">
+								<div id="waiting-room-total-players"></div>
+								<div id="waiting-room-tournament-game-mode"><i class="fa-solid fa-bolt"></i>&nbsp; Rumble</div>
+							</div>
+							<div id="waiting-room-content">
+								<ul id="waiting-room-container"></ul>
+							</div>
 						</div>
 						<button type="submit" id="join-button"><i class="fa-solid fa-user-plus"></i> Join</button>
 						<button type="submit" id="leave-button"><i class="fa-solid fa-user-minus"></i> Leave</button>
