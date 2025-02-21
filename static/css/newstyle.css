@@ -256,13 +256,13 @@ main {
 	border: 1px solid var(--user-color);
 	box-shadow: 0 0 15px var(--user-color);
 	border-radius: 0.3rem;
-	padding: 2rem;
+	padding: 1rem 2rem 2rem 2rem;
 }
 
 #card-title {
 	width: 100%;
 	text-align: center;
-	margin-bottom: 2rem;
+	margin-bottom: 1rem;
 	font-weight: bold;
 }
 
@@ -397,10 +397,6 @@ form button:hover:not(:disabled) {
 	transition: all 0.3s ease;
 	font-weight: bold;
 	height: 3rem;
-}
-
-#save-button {
-	margin-bottom: 2rem;
 }
 
 #start-button:hover, #save-button:hover, #toggle-2fa-button:hover {
@@ -761,6 +757,7 @@ form button:hover:not(:disabled) {
 	justify-content: center;
 	align-items: center;
 	overflow: hidden;
+	padding: 2rem;
 }
 
 #preview {
@@ -914,6 +911,10 @@ form button:hover:not(:disabled) {
 	height: 100%;
 }
 
+.achievements-card-title {
+	margin-bottom: 0.5rem !important;
+}
+
 #cheevos-content {
 	display: flex;
 	align-content: center;
@@ -926,7 +927,7 @@ form button:hover:not(:disabled) {
 
 #achievements-info {
 	text-align: center;
-	margin-bottom: 1rem;
+	margin-bottom: 0.5rem;
 	opacity: 0.5;
 }
 
@@ -992,6 +993,7 @@ form button:hover:not(:disabled) {
 
 #achievements-total-progress-bar {
 	width: 90%;
+	margin-top: 0;
 }
 
 .progress-bar {
@@ -1094,6 +1096,10 @@ form button:hover:not(:disabled) {
 
 #settings-card button {
 	width: 100%;
+}
+
+#save-settings-button {
+	margin-bottom: 2rem;
 }
 
 #recovery-modal, #delete-modal {
@@ -1356,14 +1362,13 @@ form button:hover:not(:disabled) {
 	justify-content: space-between;
 	align-content: flex-start;
 	flex-wrap: wrap;
-	row-gap: 3rem;
+	row-gap: 1rem;
 	column-gap: 1.415rem;
 	padding: 1rem 0.5rem 1rem 1rem;
 }
 
 .achievement-item {
 	width: 5.5rem;
-	height: 5.5rem;
 }
 
 #achievements-stats {
@@ -1386,6 +1391,8 @@ form button:hover:not(:disabled) {
 	text-align: center;
 	min-width: 5.5rem;
 	min-height: 5.5rem;
+	width: 5.5rem;
+	height: 5.5rem;
 	display: flex;
 	justify-content: center;
 	align-items: center;
@@ -1684,14 +1691,4 @@ form button:hover:not(:disabled) {
 	font-size: 0.9rem;
 	opacity: 0.5;
 	font-weight: normal;
-}
-
-.paddle {
-  animation: paddle-move 2s infinite;
-}
-
-@keyframes paddle-move {
-  0% { transform: translateY(-100px); }
-  50% { transform: translateY(100px); }
-  100% { transform: translateY(-100px); }
 }

@@ -66,10 +66,6 @@ export default class CustomizeView {
 		}
 	}
 
-	async refresh_settings() {
-		await window.app.GetCustomizeConsumer();
-	}
-
 	async render() {
 		await window.app.renderHeader(this.container, "customize");
 		this.container.innerHTML += `
@@ -196,7 +192,7 @@ export default class CustomizeView {
 				if (this.previewGame)
 					this.previewGame.destroy();
 				if (!this.settings.isSaved)
-					this.refresh_settings();
+					window.app.getUserPreferences();
 			});
 		});
 	}
@@ -209,7 +205,7 @@ export default class CustomizeView {
 			if (this.previewGame)
 				this.previewGame.destroy();
 			if (!this.settings.isSaved)
-				this.refresh_settings();
+				window.app.getUserPreferences();
 		});
 	}
 }
@@ -224,7 +220,7 @@ class PreviewGame {
 	}
 
 	async initialize() {
-		if (!window.app.settings.fetched) await window.app.GetCustomizeConsumer();
+		if (!window.app.settings.fetched) await window.app.getUserPreferences();
 		console.log("Initializing preview with settings:", window.app.settings);
 		this.renderer = new Renderer(this.canvas, true);
 		console.log("calling with " + window.app.settings.quality);

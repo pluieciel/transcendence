@@ -53,7 +53,7 @@ export class Game {
 	}
 
 	async initialize(initData) {
-		if (!window.app.settings.fetched) await window.app.GetCustomizeConsumer();
+		if (!window.app.settings.fetched) await window.app.getUserPreferences();
 		this.renderer = new Renderer(this.canvas);
 		this.sceneManager = new SceneManager(this.renderer.renderer, window.app.settings.quality);
 		this.inputManager = new InputManager(this.ws);
