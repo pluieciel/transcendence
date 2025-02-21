@@ -14,11 +14,10 @@ export default class GameView {
 		this.handlePopState = this.handlePopState.bind(this);
 		window.addEventListener("popstate", this.handlePopState);
 		this.checkForBackdrop();
+		// document.getElementById("overlay").style["display"] = "flex"
 	}
 
 	checkForBackdrop() {
-		const el = document.querySelector(".modal-backdrop");
-		if (el) el.remove();
 		const els = document.querySelector(".modal-backdrop");
 		if (els) els.remove();
 	}
@@ -32,15 +31,29 @@ export default class GameView {
 					<div class="description" id="bannerDescription">Description placeholder that is long</div>
 				</div>
 				<div id="overlay">
-					<h2 id="winner-name">Winner</h2>
-					<img id="winner-avatar" src="" alt="Winner's Avatar" width="100" height="100">
-					<p id="score-text">Score</p>
-					<p id="elo-text">Elo</p>
-					<button id="returnButton">Return to Main Menu</button>
+					<div id="card-end">
+						<div class="card-end-column">
+							<img class="card-end-avatar" src="https://cdn.intra.42.fr/users/6256bf3b76f8634f1e0df573022b0b72/valgrant.JPG" alt="Winner's Avatar" width="100" height="100">
+							<span class="card-end-username">neutrou</span>
+						</div>
+						<div class="card-end-column">
+							<span class="card-end-mode"><i class="fa-solid fa-star"></i> CLASSIC <i class="fa-solid fa-star"></i></span>
+							<span class="card-end-row card-end-text">
+								<span class="card-end-score">10</span>
+								<span class="card-end-separator">-</span>
+								<span class="card-end-score">2</span>
+							</span>
+							<button id="returnButton">Return to Main Menu</button>
+						</div>
+						<div class="card-end-column">
+							<img class="card-end-avatar" src="https://cdn.intra.42.fr/users/6256bf3b76f8634f1e0df573022b0b72/valgrant.JPG" alt="Winner's Avatar" width="100" height="100">
+							<span class="card-end-username">neutrou</span>
+						</div>
+					</div>
 				</div>
 				<canvas id="gameCanvas"></canvas>
 			</div>
-		`;
+						`;
 	}
 
 	addEventListeners() {

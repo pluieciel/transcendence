@@ -1692,3 +1692,45 @@ form button:hover:not(:disabled) {
 	opacity: 0.5;
 	font-weight: normal;
 }
+
+#card-end {
+	width: 33%;
+	height: 25%;
+	position: absolute;
+	display: flex;
+	justify-content: space-around;
+	border: 2px solid var(--user-color);
+	box-shadow: 0 0 15px var(--user-color);
+	border-radius: 1rem;
+	background-color: var(--primary-color);
+}
+
+.card-end-column {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-evenly;
+}
+
+.card-end-mode {
+	font-size: 3rem;
+	text-shadow: 0 0 5px white;
+}
+
+.card-end-row {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-around;
+}
+
+.card-end-text, .card-end-username {
+	font-size: 2rem;
+}
+
+.card-end-avatar {
+	height: 6.6rem;
+	width: 6.6rem;
+	border-radius: 50%;
+	border: 2px solid var(--user-color);
+	box-shadow: 0 0 15px var(--user-color);
+	margin-top: 1.5rem;
+}
