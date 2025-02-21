@@ -757,6 +757,7 @@ form button:hover:not(:disabled) {
 	justify-content: center;
 	align-items: center;
 	overflow: hidden;
+	padding: 2rem;
 }
 
 #preview {
