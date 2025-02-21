@@ -2,6 +2,7 @@ from typing_extensions import List
 from .game_backend import GameBackend
 from channels.db import database_sync_to_async
 from django.contrib.auth import get_user_model
+from django.db.models import Q
 import logging
 from time import sleep
 
@@ -113,6 +114,48 @@ class GameManager:
 	@database_sync_to_async
 	def save_game_history(self, game_history):
 		game_history.save()
+
+	#@database_sync_to_async
+	#def tournament_player(self, user):
+	#	return self.game_history.objects.filter(
+	#		game_state='waiting',
+	#		game_type='tournament',
+	#		player_left=user
+	#	) | self.game_history.objects.filter(
+	#		game_state='waiting',
+	#		game_type='tournament',
+	#		player_right=user
+	#	)
+	
+	#@database_sync_to_async
+	#def tournament_player(self, user):
+	#	game = self.game_history.objects.filter(
+	#		game_state='waiting',
+	#		game_type='tournament',
+	#		player_left=user)
+	#	if not game.exists():
+	#		game = self.game_history.objects.filter(
+	#			game_state='waiting',
+	#			game_type='tournament',
+	#			player_right=user
+	#		)
+	#	return game
+
+	@database_sync_to_async
+	def tournament_player(self, user):
+		game = self.game_history.objects.filter(
+			game_state='waiting',
+			game_type='tournament',
+			player_left=user
+		).values_list('id', flat=True).first()
+		if not game:
+			game = self.game_history.objects.filter(
+				game_state='waiting',
+				game_type='tournament',
+				player_right=user
+			).values_list('id', flat=True).first()
+		return game
+		
 
 	@database_sync_to_async
 	def is_game_exists(self, games):
