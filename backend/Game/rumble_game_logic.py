@@ -118,11 +118,12 @@ class GameBounds:
 		self.right = Vector2D(20.42, -3.70+10.5, -15)
 
 class RumbleGameInstance:
-	def __init__(self, broadcast_fun, revert_event_fun, game_end_fun, achievement_checker_fun):
+	def __init__(self, broadcast_fun, revert_event_fun, game_end_fun, achievement_checker_fun, tournament):
 		self.bounds = GameBounds()
 		self.player_left = Player(Vector2D(self.bounds.left.x + 2, -3+10.5, -15), 0,{"ArrowUp": False, "ArrowDown": False}, self.bounds)
 		self.player_right = Player(Vector2D(self.bounds.right.x - 2, -3+10.5, -15), 0,{"ArrowUp": False, "ArrowDown": False}, self.bounds)
 		self.ball = Ball()
+		self.tournament = tournament
 		self.original_ball_acceleration = self.ball.acceleration
 		self.original_ball_base_speed = self.ball.baseSpeed
 		self.original_player_speed = DEFAULT_PLAYER_SPEED

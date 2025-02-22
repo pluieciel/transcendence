@@ -108,7 +108,7 @@ export default class GameView {
 		}, 3000 + 1000); // 2 seconds + duration of the fade-in transition
 	}
 
-	onGameEnd(winnerName, winnerUser, winnerAvatar, scoreLeft, scoreRight, eloChange) {
+	onGameEnd(winnerName, winnerUser, winnerAvatar, scoreLeft, scoreRight, eloChange, tournament) {
 		console.log("game end called");
 		const overlay = document.querySelector("#overlay");
 		let username = sessionStorage.getItem("username");
@@ -129,17 +129,26 @@ export default class GameView {
 		const returnButton = document.querySelector("#returnButton");
 		returnButton.style.display = "block";
 		returnButton.onclick = () => {
-			this.returnToMainMenu();
+			this.returnToMainMenu(tournament);
 		};
 	}
 
-	returnToMainMenu() {
+	returnToMainMenu(tournament = false) {
 		const returnButton = document.querySelector("#returnButton");
 		this.disposeGame();
 
 		window.app.ingame = false;
 		sessionStorage.setItem("ingame", "false");
-		window.app.router.navigateTo("/play");
+		if (tournament)
+		{
+			returnButton.innerHTML = "Return to Tournament";
+			window.app.router.navigateTo("/tournament");
+		}
+		else
+		{
+			returnButton.innerHTML = "Return to Main Menu";
+			window.app.router.navigateTo("/play");
+		}
 	}
 
 	hideWaitingMessage() {

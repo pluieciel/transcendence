@@ -85,7 +85,7 @@ class Tournament:
 			return False
 		self.logger.info("Appending an user to players")
 		self.players.append(self.Player(user, channel_name))
-		if (len(self.players) == self.size):
+		if (len(self.players) == 2):#self.size):
 			await self.startTournament()
 		self.logger.info("Player added")
 		return True

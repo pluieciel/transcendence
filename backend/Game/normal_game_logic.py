@@ -132,11 +132,12 @@ class GameBounds:
 		self.right = Vector2D(20.42, -3.70+10.5, -15)
 
 class ClassicGameInstance:
-	def __init__(self, broadcast_fun, game_end_fun, achievement_checker_fun):
+	def __init__(self, broadcast_fun, game_end_fun, achievement_checker_fun, tournament):
 		self.bounds = GameBounds()
 		self.player_left = Player(Vector2D(self.bounds.left.x + 2, -3+10.5, -15), 0,{"ArrowUp": False, "ArrowDown": False}, self.bounds)
 		self.player_right = Player(Vector2D(self.bounds.right.x - 2, -3+10.5, -15), 0,{"ArrowUp": False, "ArrowDown": False}, self.bounds)
 		self.ball = Ball()
+		self.tournament = tournament
 		self.paused = False
 		self.ended = False
 		self.scorer = None
@@ -223,14 +224,22 @@ class ClassicGameInstance:
 		score_right = self.player_right.score
 
 		if (winner == "LEFT"):
-			if ((score_left >= self.maxScore and score_right <= (score_left - 2))
-				or score_left >= self.maxScoreLimit):
-				return True
+			if (self.tournament):
+				if (score_left >= self.maxScore):
+					return True
+			else:
+				if ((score_left >= self.maxScore and score_right <= (score_left - 2))
+					or score_left >= self.maxScoreLimit):
+					return True
 
 		elif (winner == "RIGHT"):
-			if ((score_right >= self.maxScore and score_left <= (score_right - 2))
-				or score_right >= self.maxScoreLimit):
-				return True
+			if (self.tournament):
+				if (score_right >= self.maxScore):
+					return True
+			else:
+				if ((score_right >= self.maxScore and score_left <= (score_right - 2))
+					or score_right >= self.maxScoreLimit):
+					return True
 		return False
 
 	async def forfeit(self, side):
