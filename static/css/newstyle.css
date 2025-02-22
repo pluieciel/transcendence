@@ -1657,13 +1657,14 @@ form button:hover:not(:disabled) {
 
 #waiting-room-container li {
 	background-color: var(--selector-color);
-	height: 4rem;
+	height: 5.5rem;
 	border-radius: 0.3rem;
 	display: flex;
 	flex-direction: row;
 	align-items: center;
 	justify-content: flex-start;
 	list-style: none;
+	font-weight: bold;
 	padding: 1rem;
 }
 
@@ -1671,17 +1672,27 @@ form button:hover:not(:disabled) {
 	margin-bottom: 1rem;
 }
 
-.tournament-player-avatar {
-	width: 2.5rem;
-	height: 2.5rem;
-	border: 1px solid var(--user-color);
-	box-shadow: 0 0 15px var(--user-color);
-}
-
 .tournament-waiting-player-name {
 	align-self: center;
-	font-weight: bold;
 	margin-left: 0.5rem;
+}
+
+.tournament-waiting-player-elo, .tournament-waiting-player-top-1 {
+	display: flex;
+	flex-direction: column;
+	align-content: center;
+	justify-content: center;
+	text-align: center;
+	gap: 0.5rem;
+}
+
+.tournament-waiting-player-elo i, .tournament-waiting-player-top-1 i {
+	margin-right: 0 !important;
+}
+
+.tournament-waiting-player-elo {
+	margin-left: auto;
+	margin-right: 2rem;
 }
 
 #join-button, #leave-button {

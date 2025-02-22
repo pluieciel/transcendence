@@ -104,7 +104,7 @@ export default class TournamentView {
 		const leaveButton = document.getElementById("leave-button");
 
 		for (let player of players) {
-			this.addUserToWaitingRoom(player.username, player.display, player.avatar);
+			this.addUserToWaitingRoom(player);
 			if (player.username === window.app.state.username) {
 				found = true;
 			}
@@ -250,20 +250,15 @@ export default class TournamentView {
 		});
 	}
 
-	addUserToWaitingRoom(username, display_name, avatar) {
+	addUserToWaitingRoom(player) {
 		const waitingRoom = document.getElementById('waiting-room-container');
-		console.log(display_name);
 		const row =  `
 			<li>
-				<img src="${avatar}" class="avatar tournament-player-avatar">
-				<div class="tournament-waiting-player-name">${display_name ? display_name : username}</div>
+				<img src="${player.avatar}" class="avatar player-avatar">
+				<div class="tournament-waiting-player-name">${player.display_name ? player.display_name : player.username}</div>
+				<div class="tournament-waiting-player-elo"><i class="fa-solid fa-chart-line"></i>1000</div>
+				<div class="tournament-waiting-player-top-1"><i class="fa-solid fa-crown"></i>1</div>
 			</li>`;
-
-		// row =  `
-		// 	<li>
-		// 		<img src="${user['avatar_url']}" class="avatar tournament-player-avatar">
-		// 		<div class="tournament-waiting-player-name">${user['name']}</div>
-		// 	</li>`;
 
 		waitingRoom.insertAdjacentHTML('beforeend', row);
 	}
