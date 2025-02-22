@@ -164,9 +164,7 @@ export default class ChatBox {
 				this.updateOnlineUsersList();
 			} else if (data.recipient === "public") {
 				if (!this.blocked.includes(data.sender)) {
-					if (data.sender !== "DeepSeek") {
-						data.message = this.escapeHtml(data.message);
-					}
+					data = this.sanitize(data)
 					this.publicMessages.push(data);
 					this.updatePublicChat();
 					renderMathInElement(document.body);
@@ -185,7 +183,6 @@ export default class ChatBox {
 			} else {
 				this.handlePrivateMessage(data);
 			}
-			//console.log(this.privateMessages);
 			this.scrollToBottom();
 		};
 	}
@@ -390,7 +387,7 @@ export default class ChatBox {
 	}
 
 	handlePrivateMessage(data) {
-		data.message = this.escapeHtml(data.message);
+		data = this.sanitize(data)
 		if (!this.privateMessages[data.sender]) {
 			this.privateMessages[data.sender] = [];
 		}
@@ -727,6 +724,13 @@ export default class ChatBox {
 	scrollToBottom() {
 		const container = this.container.querySelector("#messageContainer");
 		container.scrollTop = container.scrollHeight;
+	}
+
+	sanitize(data) {
+		data.time = this.escapeHtml(data.time);
+		data.sender = this.escapeHtml(data.sender)
+		data.message = this.escapeHtml(data.message)
+		data.message_type = this.escapeHtml(data.message_type);
 	}
 
 	escapeHtml(str) {
