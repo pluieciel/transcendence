@@ -88,16 +88,6 @@ export default class PlayView {
 	}
 
 	initComponents() {
-		// const tournamentContainer = this.container.querySelector("#tournamentContainer");
-		// if (!window.app.tournament) {
-		// 	window.app.tournament = new Tournament(tournamentContainer);
-		// } else {
-		// 	window.app.tournament.container = tournamentContainer;
-		// 	window.app.tournament.render();
-		// 	window.app.tournament.addEventListeners();
-		// 	window.app.tournament.updateContent();
-		// }
-
 		const chatBoxContainer = this.container.querySelector("#chatBoxContainer");
 		if (!window.app.chatBox) {
 			window.app.chatBox = new ChatBox(chatBoxContainer);

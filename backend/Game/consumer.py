@@ -46,6 +46,12 @@ class GameConsumer(AsyncWebsocketConsumer):
 				"message": "Invalid JWT"
 			}))
 			return
+		if self.user.is_playing:
+			await self.send(text_data=json.dumps({
+				"type": "handle_error",
+				"message": "User is already playing"
+			}))
+			return
 		game_manager._get_game_history_model()
 
 		if sender: # invitation: WS msg from B, A invite B, sender is A
@@ -68,7 +74,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 				self.logger.info(f"Invalid invitation from {sender} to {self.user.username}")
 				return # invalid invitation
 			game_db = await game_manager.create_game_history(user, player_right=await self.get_user(sender), game_type='Invite', game_mode=mode)
-			self.game = GameBackend(game_db.id, 0, game_manager, False, mode)
+			self.game = GameBackend(game_db.id, 0, game_manager, False, mode, False)
 			game_manager.games[game_db.id] = self.game
 			self.game.channel_layer = self.channel_layer
 			self.game.assign_player(user, self.channel_name)

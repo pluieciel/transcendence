@@ -137,7 +137,7 @@ export class Game {
 					console.log("game end");
 					if (this.onGameEnd) {
 						console.log("calling game end fun");
-						this.onGameEnd(event.winnerName, event.winnerUser, event.winnerAvatar, event.scoreLeft, event.scoreRight, event.eloChange);
+						this.onGameEnd(event.winnerName, event.winnerUser, event.winnerAvatar, event.scoreLeft, event.scoreRight, event.eloChange, event.tournament);
 						this.dispose();
 					}
 					this.ws.close(1000);

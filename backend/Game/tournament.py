@@ -35,19 +35,27 @@ class Tournament:
 			self.round = 1
 			self.game_history = None
 			self.logger.debug("Tournament initialized")
+			self.winner = None
 			
 	class Player:
 		def __init__(self, user, channel_name):
 			self.user = user
 			self.channel_name = channel_name
 			self.ready = False
+			self.lost = False
+
 
 	class TournamentGame:
-		def __init__(self, game_id, player_left, player_right):
+		def __init__(self, game_id, player_left, player_right, round, winner = None, state = 'waiting', surrender = False):
+			self.round = round
 			self.game_id = game_id
 			self.player_left = player_left
 			self.player_right = player_right
-			self.state = 'waiting'
+			self.state = state
+			self.score_left = 0	
+			self.score_right = 0
+			self.winner = None
+			self.surrender = surrender
 
 	async def createTournament(self, size, mode, user, channel_name):
 		self.logger.info("Enter create tournament")
@@ -63,6 +71,7 @@ class Tournament:
 		self.mode = mode
 		self.size = size
 		self.state = "waiting"
+		self.round = 1
 		self.logger.info("Created tournament")
 		await self.addPlayer(user, channel_name)
 
@@ -82,41 +91,115 @@ class Tournament:
 			return False
 		self.logger.info("Appending an user to players")
 		self.players.append(self.Player(user, channel_name))
-		if (len(self.players) == 2):
+		if (len(self.players) == self.size):
 			await self.startTournament()
 		self.logger.info("Player added")
 		return True
 	
+	def isPlayer(self, user, channel_name):
+		for player in self.players:
+			if player.user == user and player.lost is False:
+				player.channel_name = channel_name
+				return True
+		return False
+	
 	async def removePlayer(self, user):
 		for player in self.players:
 			if player.user == user:
-				self.players.remove(player)
-				if len(self.players) == 0:
-					self.state = 'finished'
+				if (self.state == 'waiting'):
+					self.players.remove(player)
+					if len(self.players) == 0:
+						self.state = 'finished'
+				elif self.state == 'playing':
+					self.logger.info("Player gave up")
+					await self.giveUp(player)
 				return True
 		return False
-
-	#If is a player, forfeit it
+	
+	async def giveUp(self, player):
+		for game in self.games:
+			if game.player_left == player or game.player_right == player:
+				if game.state == 'playing':
+					await game_manager.games[game.game_id].player_disc(player.user)
+				elif game.state == 'waiting':
+					self.logger.info(f"Game didnt start yet calling game ended")
+					await self.gameEnded(game.game_id, 0, 0, game.player_left if game.player_right == player else game.player_right)
+					del game_manager.games[game.game_id]
+					self.logger.info(f"Game {game.game_id} deleted")
+					game.game_id = -1
 
 	async def startTournament(self):
 		self.state = 'playing'
 		self.logger.info("Creating games")
 		await self.createGames()
+		#Check for the next round (in case many player gave up)
+		await self.checkForNextRound()
 		self.logger.info("Tournament started")
 
 	async def createGames(self):
-		self.logger.info("Geting history model")
-		self.game_history = self.get_game_history_model()
-		self.logger.info("Creating game history")
-		game_id = (await self.create_game_history(player_left=self.players[0].user, player_right=self.players[1].user, game_mode=self.mode, game_type='tournament')).id
-		self.logger.info(f"Game history created with id {game_id}")
-		self.logger.info("Creating game backend")
-		game_manager.games[game_id] = GameBackend(game_id, 0, game_manager, False, self.mode)
-		self.logger.info("Creating tournament game")
-		tournamentGame = self.TournamentGame(game_id, self.players[0], self.players[1])
-		self.logger.info("appending tournament game")
+		self.logger.info(f"Looping games for {int(self.size / self.round)}")
+		for i in range(0, int(self.size / self.round), 2):
+			self.logger.info(f"Creating games for round {self.round} : {i} - {i+1}")
+			await self.createGame(self.players[i], self.players[i+1], self.round, self.mode)
+	
+	async def create_next_round_games(self, winners):
+		self.logger.info(f"Creating games for round {self.round}")
+		self.logger.info(f"Winners are {winners}")
+		for i in range(0, len(winners), 2):
+			await self.createGame(winners[i], winners[i+1], self.round, self.mode)
+		
+	async def createGame(self, player_left, player_right, round, mode):
+		self.logger.info(f"Creating game between {player_left.user.username} and {player_right.user.username} for round {round}")
+		if player_left.lost is False and player_right.lost is False:
+			self.logger.info("Both players are available")
+			self.game_history = self.get_game_history_model()
+			self.logger.info("Creating game history")
+			game_id = (await self.create_game_history(player_left=player_left.user, player_right=player_right.user, game_mode=mode, game_type='tournament')).id
+			game = GameBackend(game_id, 0, game_manager, False, mode, True)
+			game_manager.games[game_id] = game
+			tournamentGame = self.TournamentGame(game_id, player_left, player_right, round)
+			self.logger.info(f"Game {game_id} created between {player_left.user.username} and {player_right.user.username}")
+		else:
+			self.logger.info("One or both players have lost")
+			if player_left.lost and player_right.lost:
+				winner = player_left
+				await self.channel_layer.group_discard("players", player_right.channel_name)
+			elif player_left.lost:
+				winner = player_right
+				await self.channel_layer.group_discard("players", player_left.channel_name)
+			elif player_right.lost:
+				winner = player_left
+				await self.channel_layer.group_discard("players", player_right.channel_name)
+			tournamentGame = self.TournamentGame(-1, player_left, player_right, round, winner=winner, state='finished', surrender=True)
+			self.logger.info(f"Game created between {player_left.user.username} and {player_right.user.username} but one of them gave up")
 		self.games.append(tournamentGame)
-		self.logger.info(f"Game {game_id} created between {self.players[0].user.username} and {self.players[1].user.username}")
+		self.logger.info(f"Game appended to tournament games list")
+
+	def get_winners_of_round(self, round):
+		winners = []
+		for game in self.games:
+			if game.round == round and game.state == 'finished':
+				winners.append(game.winner)
+		return winners
+	
+	async def checkForNextRound(self):
+		self.logger.info("Checking for next round")
+		current_round = self.round
+		winners = self.get_winners_of_round(current_round)
+		
+		if len(winners) == self.size // (2 ** current_round):
+			self.logger.info(f"All games of round {current_round} are finished")
+			if len(winners) == 1:
+				self.logger.info(f"Tournament finished, winner is {winners[0].user.username}")
+				self.state = 'finished'
+				self.winner = winners[0]
+			else:
+				self.round += 1
+				self.logger.info(f"Starting round {self.round}")
+				await self.create_next_round_games(winners)
+		else:
+			self.logger.info(f"Not all games of round {current_round} are finished yet")
+
 	
 	@database_sync_to_async
 	def create_game_history(self, player_left, player_right=None, game_type='ranked', game_mode='classic', game_state='waiting', tournament_count=0, tournament_round2_game_id=-1, tournament_round2_place=-1):
@@ -135,27 +218,59 @@ class Tournament:
 			self.logger.error(f"Error in create_game_history: {e}")
 			raise
 	
+	async def gameEnded(self, game_id, scoreLeft, scoreRight, winner):
+		self.logger.info(f"Game {game_id} ended")
+		for game in self.games:
+			if game.game_id == game_id:
+				self.logger.info(f"Game {game_id} found")
+				game.state = 'finished'
+				game.score_left = scoreLeft
+				game.score_right = scoreRight
+				game.winner = winner
+				game.player_left.ready = False
+				game.player_right.ready = False
+				if winner == game.player_left:
+					game.player_right.lost = True
+					game.player_left.lost = False
+					game.winner = game.player_left
+				else:
+					game.player_left.lost = True
+					game.player_right.lost = True
+					game.winner = game.player_right
+				self.logger.info(f"Game {game_id} ended with {game.score_left} - {game.score_right}")
+				await self.checkForNextRound()
+				return
+				
+	
 	async def setReady(self, user):
 		self.logger.info("Received ready")
 		for game in self.games:
+			if (game.state != 'waiting'):
+				self.logger.info(f"Game {game.game_id} is not waiting cannot set ready")
+				continue
 			self.logger.info(f"Checking game {game.game_id}")
 			self.logger.info(f"PLeft game {game.player_left.user.username}")
 			self.logger.info(f"PRight game {game.player_right.user.username}")
-			if game.player_left.user == user:
+			if game.player_left.user == user and game.player_left.lost is False:
 				game.player_left.ready = True
 				self.logger.info("Player left set ready")
-			elif game.player_right.user == user:
+			elif game.player_right.user == user and game.player_right.lost is False:
 				game.player_right.ready = True
 				self.logger.info("Player right set ready")
 			if game.player_left.ready and game.player_right.ready:
 				game.state = 'playing'
-				self.logger.info("Both player set ready")
-				# Use the channel game of both users to send them a message to start the game
-				channel_layer = get_channel_layer()
-				await channel_layer.send(game.player_left.channel_name, {
-					"type": "start_game",
-				})
-				await channel_layer.send(game.player_right.channel_name, {
-					"type": "start_game",
-				})
-				self.logger.info(f"Game {game.game_id} started between {game.player_left.user.username} and {game.player_right.user.username}")
+				await self.sendStartGame(game)
+		if (len(self.games) == 0):
+			self.logger.warn("No games found")
+
+	async def sendStartGame(self, game):
+		self.logger.info("Sending start game")
+		channel_layer = get_channel_layer()
+		await channel_layer.send(game.player_left.channel_name, {
+			"type": "start_game",
+		})
+		await channel_layer.send(game.player_right.channel_name, {
+			"type": "start_game",
+		})
+		self.logger.info(f"Game {game.game_id} started between {game.player_left.user.username} and {game.player_right.user.username}")
+
