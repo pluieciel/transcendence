@@ -96,16 +96,38 @@ class Tournament:
 		self.logger.info("Player added")
 		return True
 	
+	def isPlayer(self, user, channel_name):
+		for player in self.players:
+			if player.user == user and player.lost is False:
+				player.channel_name = channel_name
+				return True
+		return False
+	
 	async def removePlayer(self, user):
 		for player in self.players:
 			if player.user == user:
-				self.players.remove(player)
-				if len(self.players) == 0:
-					self.state = 'finished'
+				if (self.state == 'waiting'):
+					self.players.remove(player)
+					if len(self.players) == 0:
+						self.state = 'finished'
+				elif self.state == 'playing':
+					self.logger.info("Player gave up")
+					await self.giveUp(player)
 				return True
 		return False
-
-	#If is a player, forfeit it
+	
+	async def giveUp(self, player):
+		for game in self.games:
+			if game.player_left == player or game.player_right == player:
+				if game.state == 'playing':
+					await game_manager.games[game.game_id].player_disc(player.user)
+				elif game.state == 'waiting':
+					player.lost = True
+					self.game.winner = game.player_left if game.player_right == player else game.player_right
+					game.state = 'finished'
+					game.player_left.ready = False
+					game.player_right.ready = False
+					await self.checkForNextRound()
 
 	async def startTournament(self):
 		self.state = 'playing'
@@ -145,10 +167,13 @@ class Tournament:
 			self.logger.info("One or both players have lost")
 			if player_left.lost and player_right.lost:
 				winner = player_left
+				await self.channel_layer.group_discard("players", player_right.channel_name)
 			elif player_left.lost:
 				winner = player_right
+				await self.channel_layer.group_discard("players", player_left.channel_name)
 			elif player_right.lost:
 				winner = player_left
+				await self.channel_layer.group_discard("players", player_right.channel_name)
 			tournamentGame = self.TournamentGame(-1, player_left, player_right, round, winner=winner, state='finished', surrender=True)
 			self.logger.info(f"Game created between {player_left.user.username} and {player_right.user.username} but one of them gave up")
 		self.games.append(tournamentGame)
@@ -210,9 +235,11 @@ class Tournament:
 				game.player_right.ready = False
 				if winner == game.player_left:
 					game.player_right.lost = True
+					game.player_left.lost = False
 					game.winner = game.player_left
 				else:
 					game.player_left.lost = True
+					game.player_right.lost = True
 					game.winner = game.player_right
 				self.logger.info(f"Game {game_id} ended with {game.score_left} - {game.score_right}")
 				await self.checkForNextRound()
@@ -228,10 +255,10 @@ class Tournament:
 			self.logger.info(f"Checking game {game.game_id}")
 			self.logger.info(f"PLeft game {game.player_left.user.username}")
 			self.logger.info(f"PRight game {game.player_right.user.username}")
-			if game.player_left.user == user:
+			if game.player_left.user == user and game.player_left.lost is False:
 				game.player_left.ready = True
 				self.logger.info("Player left set ready")
-			elif game.player_right.user == user:
+			elif game.player_right.user == user and game.player_right.lost is False:
 				game.player_right.ready = True
 				self.logger.info("Player right set ready")
 			if game.player_left.ready and game.player_right.ready:

@@ -125,6 +125,7 @@ export default class GameView {
 		{
 			document.querySelector("#elo-text").style.display = 'none';
 		}
+		window.app.gamews.close();
 
 		const returnButton = document.querySelector("#returnButton");
 		returnButton.style.display = "block";

@@ -89,7 +89,9 @@ export default class TournamentView {
 	}
 
 	async redirectToGame(events) {
+		console.log("Redirecting to game");
 		window.app.router.navigateTo("/game");
+		window.app.tournamentws.close();
 		const gameView = window.app.router.currentComponent;
 		if (gameView && gameView.initializeGame) {
 			gameView.initializeGame(events);

@@ -40,6 +40,8 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 		await self.accept()
 		await self.channel_layer.group_add("updates", self.channel_name)
 		await self.sendUpdates()
+		if (tournament.isPlayer(self.user, self.channel_name)):
+			await self.channel_layer.group_add("players", self.channel_name)
 
 	async def receive(self, text_data):
 		try:
@@ -98,7 +100,9 @@ class TournamentConsumer(AsyncWebsocketConsumer):
                     player.user.avatar_42 if player.user.avatar_42 else
                     player.user.avatar.url if player.user.avatar else
                     '/imgs/default_avatar.png'
-                )
+                ),
+				"ready": player.ready,
+				"lost": player.lost,
 				} for player in tournament.players
 			]
 		}
