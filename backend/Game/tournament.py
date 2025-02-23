@@ -122,12 +122,11 @@ class Tournament:
 				if game.state == 'playing':
 					await game_manager.games[game.game_id].player_disc(player.user)
 				elif game.state == 'waiting':
-					player.lost = True
-					self.game.winner = game.player_left if game.player_right == player else game.player_right
-					game.state = 'finished'
-					game.player_left.ready = False
-					game.player_right.ready = False
-					await self.checkForNextRound()
+					self.logger.info(f"Game didnt start yet calling game ended")
+					await self.gameEnded(game.game_id, 0, 0, game.player_left if game.player_right == player else game.player_right)
+					del game_manager.games[game.game_id]
+					self.logger.info(f"Game {game.game_id} deleted")
+					game.game_id = -1
 
 	async def startTournament(self):
 		self.state = 'playing'
@@ -156,11 +155,8 @@ class Tournament:
 			self.game_history = self.get_game_history_model()
 			self.logger.info("Creating game history")
 			game_id = (await self.create_game_history(player_left=player_left.user, player_right=player_right.user, game_mode=mode, game_type='tournament')).id
-			self.logger.info(f"Game {game_id} created in history between {player_left.user.username} and {player_right.user.username}")
 			game = GameBackend(game_id, 0, game_manager, False, mode, True)
-			self.logger.info(f"Game {game_id} created in backend between {player_left.user.username} and {player_right.user.username}")
 			game_manager.games[game_id] = game
-			self.logger.info(f"Game {game_id} assigned in manager between {player_left.user.username} and {player_right.user.username}")
 			tournamentGame = self.TournamentGame(game_id, player_left, player_right, round)
 			self.logger.info(f"Game {game_id} created between {player_left.user.username} and {player_right.user.username}")
 		else:

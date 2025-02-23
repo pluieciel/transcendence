@@ -29,14 +29,15 @@ export default class TournamentView {
 			console.log(events);
 			if (events.type === "tournament_update") {
 				this.updatePlayersList(events.players);
+				this.updateTournamentTree(events.games);
 				console.log("Entered tournament update");
-
+		
 				const waitingRoomTotalPlayers = document.getElementById("waiting-room-total-players");
 				waitingRoomTotalPlayers.innerHTML = `<i class="fa-solid fa-user"></i>&nbsp; ${events.players.length}/${events.size}`
-
+		
 				const waitingRoomTournamentGameMode = document.getElementById("waiting-room-tournament-game-mode");
 				waitingRoomTournamentGameMode.innerHTML = events.mode === "classic" ? `<i class="fa-solid fa-star"></i>&nbsp; Classic` : `<i class="fa-solid fa-bolt"></i>&nbsp; Rumble`;
-
+		
 				const createCardTournament = document.getElementById("tournament-create-card");
 				const roomCardTournament = document.getElementById("tournament-room-card");
 				events.state === 'finished'? createCardTournament.style.display = 'flex' : createCardTournament.style.display = 'none';
@@ -54,6 +55,42 @@ export default class TournamentView {
 			console.error("WebSocket error:", error);
 			alert("Connection error! Please try again.");
 		};
+	}
+
+	updateTournamentTree(games) {
+		const tournamentTreeContent = document.getElementById("tournament-tree-content");
+		tournamentTreeContent.innerHTML = ''; // Clear previous content
+	
+		games.forEach(game => {
+			const gameElement = document.createElement('div');
+			gameElement.classList.add('tournament-game');
+			gameElement.innerHTML = `
+				<div class="tournament-game-round">Round ${game.round}</div>
+				<div class="tournament-game-players">
+					<div class="tournament-game-player">
+						${game.player_left.user.username}
+						${game.state === 'waiting' && game.player_left.ready ? '<span class="ready">(Ready)</span>' : ''}
+						${game.state === 'finished' && game.winner !== game.player_left.user.username ? '<span class="lost">(Lost)</span>' : ''}
+					</div>
+					<div class="tournament-game-vs">vs</div>
+					<div class="tournament-game-player">
+						${game.player_right.user.username}
+						${game.state === 'waiting' && game.player_right.ready ? '<span class="ready">(Ready)</span>' : ''}
+						${game.state === 'finished' && game.winner !== game.player_right.user.username ? '<span class="lost">(Lost)</span>' : ''}
+					</div>
+				</div>
+				<div class="tournament-game-score">
+					Score: ${game.score_left} - ${game.score_right}
+				</div>
+				<div class="tournament-game-state">
+					State: ${game.state}
+				</div>
+				<div class="tournament-game-winner">
+					Winner: ${game.winner}
+				</div>
+			`;
+			tournamentTreeContent.appendChild(gameElement);
+		});
 	}
 
 	initializeGameWebSocket(wsUrl) {
@@ -178,7 +215,7 @@ export default class TournamentView {
 				<div id="tournament-room-card" class="card">
 					<h2 id="card-title"><i class="fa-solid fa-crown"></i> TOURNAMENT</h2>
 					<div id="tournament-room-content">
-					 	<div id="waiting-room">
+						<div id="waiting-room">
 							<div id="waiting-room-info">
 								<div id="waiting-room-total-players"></div>
 								<div id="waiting-room-tournament-game-mode"><i class="fa-solid fa-bolt"></i>&nbsp; Rumble</div>
@@ -193,6 +230,8 @@ export default class TournamentView {
 					</div>
 				</div>
 				<div id="tournament-tree" class="card">
+					<h2 id="card-title"><i class="fa-solid fa-sitemap"></i> TOURNAMENT TREE</h2>
+					<div id="tournament-tree-content"></div>
 					<button type="submit" id="ready-button"><i class="fa-solid fa-user-plus"></i> Ready</button>
 				</div>
 			</main>

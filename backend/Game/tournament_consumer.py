@@ -94,16 +94,39 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 			"round": tournament.round,
 			"players": [
 				{
-                "username": player.user.username,
-                "display": player.user.display_name,
-                "avatar": (
-                    player.user.avatar_42 if player.user.avatar_42 else
-                    player.user.avatar.url if player.user.avatar else
-                    '/imgs/default_avatar.png'
-                ),
-				"ready": player.ready,
-				"lost": player.lost,
+					"username": player.user.username,
+					"display": player.user.display_name,
+					"avatar": (
+						player.user.avatar_42 if player.user.avatar_42 else
+						player.user.avatar.url if player.user.avatar else
+						'/imgs/default_avatar.png'
+					),
+					"ready": player.ready,
+					"lost": player.lost,
 				} for player in tournament.players
+			],
+			"games": [
+				{
+					"round": game.round,
+					"player_left": {
+						"user": {
+							"username": game.player_left.user.username,
+						},
+						"ready": game.player_left.ready,
+						"lost": game.player_left.lost,
+					},
+					"player_right": {
+						"user": {
+							"username": game.player_right.user.username,
+						},
+						"ready": game.player_right.ready,
+						"lost": game.player_right.lost,
+					},
+					"score_left": game.score_left,
+					"score_right": game.score_right,
+					"state": game.state,
+					"winner": game.winner.user.username if game.winner else None,
+				} for game in tournament.games
 			]
 		}
 		self.logger.info("Sending updates")
