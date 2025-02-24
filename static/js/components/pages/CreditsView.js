@@ -9,6 +9,7 @@ export default class CreditsView {
 
 		await window.app.getSettings();
 		await this.render();
+		window.app.initChat();
 		window.app.addNavEventListeners();
 		await this.unlockEasterEgg();
 	}
@@ -34,6 +35,7 @@ export default class CreditsView {
 	async render() {
 		await window.app.renderHeader(this.container, "credits", true, true);
 		this.container.innerHTML += `
+			<div id="chatBoxContainer"></div>
 			<main id="credits-view">
 				<div id="credits-card" class="card">
 					<h2 id="card-title"><i class="fa-solid fa-table-tennis-paddle-ball"></i> CREDITS</h2>

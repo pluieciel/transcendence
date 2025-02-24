@@ -8,6 +8,7 @@ export default class LeaderboardView {
 	async init() {
 		await window.app.getSettings();
 		await this.render();
+		window.app.initChat();
 		this.addContent("classic");
 		this.addEventListeners();
 	}
@@ -40,6 +41,7 @@ export default class LeaderboardView {
 					</div>
 				</div>
 			</main>
+			<div id="chatBoxContainer"></div>
 		`;
 	}
 

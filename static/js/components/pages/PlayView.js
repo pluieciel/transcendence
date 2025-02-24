@@ -1,7 +1,3 @@
-import ChatBox from "../chat/ChatBox.js";
-//import Tournament from "../tournament/Tournament.js";
-import GameComponent from "../game/GameComponents.js";
-
 export default class PlayView {
 	constructor(container) {
 		this.container = container;
@@ -17,7 +13,7 @@ export default class PlayView {
 	async init() {
 		await window.app.getSettings();
 		await this.render();
-		this.initComponents();
+		window.app.initChat();
 		this.checkForBackdrop();
 		this.addEventListeners();
 	}
@@ -82,23 +78,7 @@ export default class PlayView {
 				</div>
 			</main>
 			<div id="chatBoxContainer"></div>
-			<div id="tournamentContainer"></div>
-			<div id="gameContainer"></div>
 		`;
-	}
-
-	initComponents() {
-		const chatBoxContainer = this.container.querySelector("#chatBoxContainer");
-		if (!window.app.chatBox) {
-			window.app.chatBox = new ChatBox(chatBoxContainer);
-		} else {
-			window.app.chatBox.container = chatBoxContainer;
-			window.app.chatBox.render(chatBoxContainer);
-			window.app.chatBox.addEventListeners();
-			window.app.chatBox.updateOnlineUsersList();
-		}
-
-		new GameComponent(this.container.querySelector("#gameContainer"));
 	}
 
 	checkForBackdrop() {

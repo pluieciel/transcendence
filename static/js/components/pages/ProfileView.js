@@ -8,6 +8,7 @@ export default class ProfileView {
 	async init() {
 		await window.app.getSettings();
 		await this.render();
+		window.app.initChat();
 		await this.setProfile();
 		await this.setGameHistory();
 		await this.setAchievements();
@@ -138,6 +139,7 @@ export default class ProfileView {
 					</div>
 				</div>
 			</main>
+			<div id="chatBoxContainer"></div>
 		`;
 	}
 
