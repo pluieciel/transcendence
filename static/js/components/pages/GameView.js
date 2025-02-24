@@ -144,27 +144,33 @@ export default class GameView {
 		}
 		window.app.gamews.close();
 
-		const returnButton = document.querySelector("#returnButton");
+		const returnButton = document.querySelector("#return-button");
 		returnButton.style.display = "block";
+		if (tournament)
+		{
+			returnButton.innerHTML = "Return to Tournament";
+		}
+		else
+		{
+			returnButton.innerHTML = "Return to Main Menu";
+		}
 		returnButton.onclick = () => {
 			this.returnToMainMenu(tournament);
 		};
 	}
 
 	returnToMainMenu(tournament = false) {
-		const returnButton = document.querySelector("#returnButton");
+		const returnButton = document.querySelector("#return-button");
 		this.disposeGame();
 
 		window.app.ingame = false;
 		sessionStorage.setItem("ingame", "false");
 		if (tournament)
 		{
-			returnButton.innerHTML = "Return to Tournament";
 			window.app.router.navigateTo("/tournament");
 		}
 		else
 		{
-			returnButton.innerHTML = "Return to Main Menu";
 			window.app.router.navigateTo("/play");
 		}
 	}
