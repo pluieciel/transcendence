@@ -12,7 +12,7 @@ from Game.consumer import game_manager
 import redis
 from copy import deepcopy
 from api.utils import get_secret_from_file
-from api.db_utils import get_user_by_name
+from api.db_utils import get_user_by_name, unlock_achievement
 from openai import OpenAI
 from django.core.cache import cache
 import asyncio
@@ -311,8 +311,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
 			if newfriendname != sender and not (await self.is_friend(user, newfriendname)):
 				await self.add_friend(user, newfriend)
 
-			#update friend list
 			friends = await self.get_friends_usernames(user)
+			await self.checkForPopular(user, friends)
+
 			await self.send(text_data=json.dumps({
 				'type': 'friend_list',
 				'usernames': friends
@@ -331,6 +332,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
 				'type': 'friend_list',
 				'usernames': friends
 			}))
+
+	async def checkForPopular(self, user, L):
+		if len(L) >= 5:
+			await unlock_achievement(user, 'Popular')
 
 	@database_sync_to_async
 	def get_user(self, username):
