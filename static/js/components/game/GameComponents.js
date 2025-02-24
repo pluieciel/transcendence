@@ -20,7 +20,7 @@ export default class GameComponent {
 					<div class="my-modal-content">
 						<div id="game-search-info">
 							<div id="game-search-mode"></div>
-							<div id="game-search-type"><i class="fa-solid fa-ranking-star"></i>&nbsp; Ranked</div>
+							<div id="game-search-type"></div>
 						</div>
 						<div id="game-search-loading">
 							<i id="paddle-left" class="fa-solid fa-minus fa-5x"></i>

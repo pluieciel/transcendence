@@ -8,13 +8,16 @@ export default class AchievementsView {
 	async init() {
 		await window.app.getSettings();
 		await this.render();
+		window.app.initChat();
 		window.app.addNavEventListeners();
 	}
 
 	async getAchievements(username) {
 		try {
 			const response = await fetch(`/api/achievements/${username}/`);
+			console.log(response);
 			const data = await response.json();
+			console.log(data);
 			if (data.success) {
 				return data;
 			} else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
@@ -94,6 +97,7 @@ export default class AchievementsView {
 					</div>
 				</div>
 			</main>
+			<div id="chatBoxContainer"></div>
 		`;
 	}
 }

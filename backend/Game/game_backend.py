@@ -20,10 +20,12 @@ class User:
 		self.state = state
 
 class GameBackend:
-	def __init__(self, room_id, bot, manager, ranked, mode):
+	def __init__(self, room_id, bot, manager, ranked, mode, tournament):
 		self.logger = logging.getLogger('game')
+		self.logger.info(f"Creating game in GameBackend with id {room_id}")
 		self.game_id = room_id
 		self.game_mode = mode
+		self.tournament = tournament
 		self.game = self.get_game_instance(self.game_mode)
 		self.is_ranked = ranked
 		self.channel_layer = None
@@ -36,6 +38,7 @@ class GameBackend:
 		self.remontada = None
 		self.bigRemontada = None
 		self.elo_k_factor = 40
+
 
 		if (self.bot_game):
 			self.logger.info(f'Creating a game with a bot, difficulty : {bot}')
@@ -57,9 +60,9 @@ class GameBackend:
 
 	def get_game_instance(self, mode):
 		if (mode == "classic"):
-			return ClassicGameInstance(self.broadcast_state, self.on_game_end, self.check_classic_achievement)
+			return ClassicGameInstance(self.broadcast_state, self.on_game_end, self.check_classic_achievement, self.tournament)
 		elif (mode == "rumble"):
-			return RumbleGameInstance(self.rumble_broadcast_state, self.rumble_revert_event_broadcast, self.on_game_end, self.check_rumble_achievement)
+			return RumbleGameInstance(self.rumble_broadcast_state, self.rumble_revert_event_broadcast, self.on_game_end, self.check_rumble_achievement, self.tournament)
 		else:
 			self.logger.error("Game mode not found")
 
@@ -196,74 +199,14 @@ class GameBackend:
 				self.logger.info(f"Resetting right player: {self.player_right.user.username}")
 				await user_update_game(self.player_right.user, isplaying=False, game_id=-1)
 
+			if self.tournament:
+				from .tournament import Tournament
+				tournament = Tournament.get_instance()
+				self.logger.info(f"Game ended in tournament mode, calling gameEnded in tournament, winner is {self.game.winner.username}")
+				await tournament.gameEnded(self.game_id, self.game.player_left.score, self.game.player_right.score, self.game.winner)
 			self.manager.remove_game(self.game_id)
 			game_history_db = await self.manager.get_game_by_id(self.game_id)
 			await self.manager.set_game_state(game_history_db, 'finished', self.game.player_left.score, self.game.player_right.score)
-
-			#next round for tournament
-			if game_history_db.game_type == "Tournament1":
-				next_game_place = game_history_db.tournament_round2_place
-				self.chat_consumer.tournament_info["round1"][f"game{next_game_place}"]["winner"] = self.game.winner.username
-				next_game_id = game_history_db.tournament_round2_game_id
-				new_game_history_db = await self.manager.get_game_by_id(next_game_id)
-				if next_game_place == 1:
-					await self.manager.set_game_state(new_game_history_db, 'waiting', player_left=self.game.winner)
-					self.chat_consumer.tournament_info["round2"]["game1"]["p1"] = self.game.winner.username
-				else:
-					await self.manager.set_game_state(new_game_history_db, 'waiting', player_right=self.game.winner)
-					self.chat_consumer.tournament_info["round2"]["game1"]["p2"] = self.game.winner.username
-
-				if self.chat_consumer.tournament_info["round2"]["game1"].get("p1", None) and self.chat_consumer.tournament_info["round2"]["game1"].get("p2", None):
-					self.chat_consumer.tournament_info["round2"]["game1"]["state"] = "prepare"
-					self.chat_consumer.tournament_info["state"] = "Playing2to1"
-
-				redis_client = redis.Redis(host='redis', port=6379, db=0)
-				groups = [g.decode('utf-8') for g in redis_client.smembers('active_groups')]
-				channel_layer = get_channel_layer()
-				for group in groups:
-					await channel_layer.group_send(
-						group, {
-							"type": "send_message",
-							"tournament_info": json.dumps(self.chat_consumer.tournament_info),
-							"message_type": "system",
-							"message": "update_tournament_info",
-							"sender": "admin",
-							"recipient": "update_tournament_info",
-							"time": datetime.now().strftime("%H:%M:%S")
-						}
-					)
-			elif game_history_db.game_type == "Tournament2":
-				self.chat_consumer.tournament_info["round2"]["game1"]["winner"] = self.game.winner.username
-
-				redis_client = redis.Redis(host='redis', port=6379, db=0)
-				groups = [g.decode('utf-8') for g in redis_client.smembers('active_groups')]
-				channel_layer = get_channel_layer()
-				for group in groups:
-					await channel_layer.group_send(
-						group, {
-							"type": "send_message",
-							"tournament_info": json.dumps(self.chat_consumer.tournament_info),
-							"message_type": "system",
-							"message": "update_tournament_info",
-							"sender": "admin",
-							"recipient": "update_tournament_info",
-							"time": datetime.now().strftime("%H:%M:%S")
-						}
-					)
-				await asyncio.sleep(30)
-				self.chat_consumer.tournament_info = deepcopy(self.chat_consumer.tournament_info_initial)
-				for group in groups:
-					await channel_layer.group_send(
-						group, {
-							"type": "send_message",
-							"tournament_info": json.dumps(self.chat_consumer.tournament_info),
-							"message_type": "system",
-							"message": "update_tournament_info",
-							"sender": "admin",
-							"recipient": "update_tournament_info",
-							"time": datetime.now().strftime("%H:%M:%S")
-						}
-					)
 
 		except Exception as e:
 			self.logger.error(f"Error in on_game_end: {str(e)}")
@@ -382,7 +325,8 @@ class GameBackend:
 				"winnerAvatar": avatar,
 				"scoreLeft": self.game.player_left.score,
 				"scoreRight": self.game.player_right.score,
-				"eloChange": self.elo_change
+				"eloChange": self.elo_change,
+				"tournament": self.tournament
 		})
 		if self.game.ball.lastHitter is not None:
 			if (self.game.ball.lastHitter == "LEFT"):
@@ -457,7 +401,8 @@ class GameBackend:
 				"winnerAvatar": avatar,
 				"scoreLeft": self.game.player_left.score,
 				"scoreRight": self.game.player_right.score,
-				"eloChange": self.elo_change
+				"eloChange": self.elo_change,
+				"tournament": self.tournament
 		})
 		if self.game.announceEvent or self.game.event.action != 'none':
 			self.logger.info(f"Announcing event {self.game.event.name} and {self.game.event.description}")
@@ -559,10 +504,10 @@ class GameBackend:
 	
 	async def check_remontada(self):
 		if (self.remontada is None):
-			if (self.game.ended is False and self.game.player_left.score + 5 < self.game.player_right.score):
+			if (self.game.ended is False and self.game.player_left.score + 3 < self.game.player_right.score):
 				self.remontada = self.player_left.user
 				self.logger.info("Player left elligible for Clutch")
-			elif (self.game.ended is False and self.game.player_right.score + 5 < self.game.player_left.score):
+			elif (self.game.ended is False and self.game.player_right.score + 3 < self.game.player_left.score):
 				self.remontada = self.player_right.user
 				self.logger.info("Player right elligible for Clutch")
 		elif self.game.ended and self.remontada:
@@ -573,10 +518,10 @@ class GameBackend:
 	
 	async def check_big_remontada(self):
 		if (self.bigRemontada is None):
-			if (self.game.ended is False and self.game.player_left.score == 0 and self.game.player_right.score == 9):
+			if (self.game.ended is False and self.game.player_left.score + 6 < self.game.player_right.score):
 				self.bigRemontada = self.player_left.user
 				self.logger.info("Player left elligible for God's Clutch")
-			elif (self.game.ended is False and self.game.player_right.score == 0 and self.game.player_left.score == 9):
+			elif (self.game.ended is False and self.game.player_right.score + 6 < self.game.player_left.score):
 				self.bigRemontada = self.player_right.user
 				self.logger.info("Player left elligible for God's Clutch")
 		elif self.game.ended and self.bigRemontada:
