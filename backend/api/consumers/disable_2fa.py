@@ -1,7 +1,7 @@
 from channels.generic.http import AsyncHttpConsumer
 from channels.db import database_sync_to_async
 from api.utils import jwt_to_user
-from api.db_utils import update_is_2fa_enabled, update_recovery_codes_generated
+from api.db_utils import update_is_2fa_enabled, update_recovery_codes_generated, sendResponse
 import json
 
 class Disable2FAConsumer(AsyncHttpConsumer):
@@ -18,30 +18,15 @@ class Disable2FAConsumer(AsyncHttpConsumer):
 					headers=[(b"Content-Type", b"application/json")])
 
 			if not user.is_2fa_enabled:
-				response_data = {
-					'success': False,
-					'message': '2FA not enabled'
-				}
-				return await self.send_response(409, json.dumps(response_data).encode(),
-					headers=[(b"Content-Type", b"application/json")])
+				return await sendResponse(self, False, "2FA not enabled", 409)
 			
 			await update_is_2fa_enabled(user, False)
 			await update_recovery_codes_generated(user, False)
 			await self.remove_recovery_codes(user)
 
-			response_data = {
-				'success': True,
-				'message': '2FA disabled',
-			}
-			return await self.send_response(200, json.dumps(response_data).encode(),
-				headers=[(b"Content-Type", b"application/json")])
+			return await sendResponse(self, True, "2FA disabled", 200)
 		except Exception as e:
-			response_data = {
-				'success': False,
-				'message': str(e)
-			}
-			return await self.send_response(500, json.dumps(response_data).encode(),
-					headers=[(b"Content-Type", b"application/json")])
+			return await sendResponse(self, False, str(e), 500)
 
 	@database_sync_to_async
 	def remove_recovery_codes(self, user):

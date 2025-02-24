@@ -1,7 +1,7 @@
 from channels.generic.http import AsyncHttpConsumer
 from channels.db import database_sync_to_async
 from api.utils import jwt_to_user
-from api.db_utils import get_user_preference, is_color_unlocked
+from api.db_utils import get_user_preference, is_color_unlocked, sendResponse
 import json
 import logging
 
@@ -28,12 +28,7 @@ class GetCustomizeConsumer(AsyncHttpConsumer):
 			return await self.send_response(200, json.dumps(response_data).encode(),
 				headers=[(b"Content-Type", b"application/json")])
 		except Exception as e:
-			response_data = {
-				'success': False,
-				'message': str(e)
-			}
-			return await self.send_response(500, json.dumps(response_data).encode(),
-				headers=[(b"Content-Type", b"application/json")])
+			return await sendResponse(self, False, str(e), 500)
 
 class SetCustomizeConsumer(AsyncHttpConsumer):
 	async def handle(self, body):
@@ -52,40 +47,20 @@ class SetCustomizeConsumer(AsyncHttpConsumer):
 			color = data.get('color')
 			quality = data.get('quality')
 			if (await is_color_unlocked(user, color) == False):
-				response_data = {
-					'success': False,
-					'message': 'Color is not unlocked'
-				}
-				return await self.send_response(403, json.dumps(response_data).encode(),
-					headers=[(b"Content-Type", b"application/json")])
-			
+				return await sendResponse(self, False, "Color is not unlocked", 403)
+		
 			user_preference = await get_user_preference(user)
 
 			if user_preference.color == color and user_preference.quality == quality:
-				response_data = {
-					'success': True,
-					'message': 'No changes made'
-				}
-				return await self.send_response(200, json.dumps(response_data).encode(),
-					headers=[(b"Content-Type", b"application/json")])
+				return await sendResponse(self, True, "No changes made", 200)
 
 			await self.update_user_preferences_color(user, color)
 			await self.update_user_preferences_quality(user, quality)
 
-			response_data = {
-				'success': True,
-				'message': 'Updated successfully'
-			}
-			return await self.send_response(200, json.dumps(response_data).encode(),
-				headers=[(b"Content-Type", b"application/json")])
+			return await sendResponse(self, True, "Updated successfully", 200)
 
 		except Exception as e:
-			response_data = {
-				'success': False,
-				'message': str(e)
-			}
-			return await self.send_response(500, json.dumps(response_data).encode(),
-				headers=[(b"Content-Type", b"application/json")])
+			return await sendResponse(self, False, str(e), 500)
 
 	@database_sync_to_async
 	def update_user_preferences_color(self, user, color):

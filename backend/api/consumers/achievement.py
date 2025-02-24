@@ -1,6 +1,6 @@
 from channels.generic.http import AsyncHttpConsumer
 from api.utils import jwt_to_user
-from api.db_utils import get_user_by_name, get_achievements, get_achievements_stats
+from api.db_utils import get_user_by_name, get_achievements, get_achievements_stats, sendResponse
 import json
 
 class AchievementConsumer(AsyncHttpConsumer):
@@ -18,12 +18,7 @@ class AchievementConsumer(AsyncHttpConsumer):
 
 			profile_user = await get_user_by_name(self.scope['url_route']['kwargs']['username'])
 			if not profile_user:
-				response_data = {
-					'success': False,
-					'message': 'User not found'
-				}
-				return await self.send_response(404, json.dumps(response_data).encode(),
-					headers=[(b"Content-Type", b"application/json")])
+				return await sendResponse(self, False, "User not found", 404)
 
 			response_data = {
 				'success': True,
@@ -33,9 +28,4 @@ class AchievementConsumer(AsyncHttpConsumer):
 			return await self.send_response(200, json.dumps(response_data).encode(),
 				headers=[(b"Content-Type", b"application/json")])
 		except Exception as e:
-			response_data = {
-				'success': False,
-				'message': str(e)
-			}
-			return await self.send_response(500, json.dumps(response_data).encode(),
-				headers=[(b"Content-Type", b"application/json")])
+			return await sendResponse(self, False, str(e), 500)

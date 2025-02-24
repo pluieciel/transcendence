@@ -1,5 +1,6 @@
 from channels.generic.http import AsyncHttpConsumer
 from api.utils import jwt_to_user
+from api.db_utils import sendResponse
 import json
 
 class AdminConsumer(AsyncHttpConsumer):
@@ -16,12 +17,7 @@ class AdminConsumer(AsyncHttpConsumer):
 					headers=[(b"Content-Type", b"application/json")])
 			
 			if not user.is_admin:
-				response_data = {
-					'success': False,
-					'message': 'User is not an admin'
-				}
-				return await self.send_response(401, json.dumps(response_data).encode(),
-					headers=[(b"Content-Type", b"application/json")])
+				return await sendResponse(self, False, "User is not an admin", 401)
 
 			response_data = {
 				'success': True,

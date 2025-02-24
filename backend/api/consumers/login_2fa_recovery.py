@@ -1,7 +1,7 @@
 from channels.generic.http import AsyncHttpConsumer
 from channels.db import database_sync_to_async
 from api.utils import generate_jwt_cookie, sha256_hash
-from api.db_utils import get_user_by_name
+from api.db_utils import get_user_by_name, sendResponse
 import json
 
 class Login2FARecoveryConsumer(AsyncHttpConsumer):
@@ -14,24 +14,14 @@ class Login2FARecoveryConsumer(AsyncHttpConsumer):
 			user = await get_user_by_name(username)
 
 			if not user.is_2fa_enabled:
-				response_data = {
-					'success': False,
-					'message': '2FA not enabled'
-				}
-				return await self.send_response(401, json.dumps(response_data).encode(),
-					headers=[(b"Content-Type", b"application/json")])
+				return await sendResponse(self, False, "2FA not enabled", 401)
 
 			hashed_recovery_code = sha256_hash(recovery_code)
 
 			is_recovery_code_valid = await self.verify_recovery_code(user, hashed_recovery_code)
 
 			if not is_recovery_code_valid:
-				response_data = {
-					'success': False,
-					'message': 'Invalid recovery code'
-				}
-				return await self.send_response(401, json.dumps(response_data).encode(),
-					headers=[(b"Content-Type", b"application/json")])
+				return await sendResponse(self, False, "Invalid recovery code", 401)
 
 			await self.remove_recovery_code(user, hashed_recovery_code)
 
@@ -43,12 +33,7 @@ class Login2FARecoveryConsumer(AsyncHttpConsumer):
 			return await self.send_response(200, json.dumps(response_data).encode(),
 				headers=[(b"Content-Type", b"application/json"), (b"Set-Cookie", generate_jwt_cookie(user))])
 		except Exception as e:
-			response_data = {
-				'success': False,
-				'message': str(e)
-			}
-			return await self.send_response(500, json.dumps(response_data).encode(),
-				headers=[(b"Content-Type", b"application/json")])
+			return await sendResponse(self, False, str(e), 500)
 
 	@database_sync_to_async
 	def verify_recovery_code(self, user, recovery_code):

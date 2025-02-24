@@ -2,7 +2,7 @@ from channels.generic.http import AsyncHttpConsumer
 from api.utils import jwt_to_user
 from django.contrib.auth import get_user_model
 from channels.db import database_sync_to_async
-from api.db_utils import get_user_exists
+from api.db_utils import get_user_exists, sendResponse
 import json
 
 class DeleteUserConsumer(AsyncHttpConsumer):
@@ -22,34 +22,15 @@ class DeleteUserConsumer(AsyncHttpConsumer):
 			confirm_message = data.get('confirm')
 
 			if (confirm_message != "Delete"):
-				response_data = {
-					'success': False,
-					'message': "Invalid confirmation message"
-				}
-				return await self.send_response(400, json.dumps(response_data).encode(),
-					headers=[(b"Content-Type", b"application/json")])
+				return await sendResponse(self, False, "Invalid confirmation message", 400)
 
 			if await self.delete_user(user.id):
-				response_data = {
-					'success': True,
-					'message': "Deleted user successfully"
-				}
-				return await self.send_response(200, json.dumps(response_data).encode(),
-					headers=[(b"Content-Type", b"application/json")])
-			response_data = {
-				'success': False,
-				'message': "Failed to delete the user"
-			}
-			return await self.send_response(500, json.dumps(response_data).encode(),
-				headers=[(b"Content-Type", b"application/json")])
+				return await sendResponse(self, True, "Deleted user successfully", 400)
+
+			return await sendResponse(self, False, "Failed to delete the user", 500)
 
 		except Exception as e:
-			response_data = {
-				'success': False,
-				'message': str(e)
-			}
-			return await self.send_response(500, json.dumps(response_data).encode(),
-				headers=[(b"Content-Type", b"application/json")])
+			return await sendResponse(self, False, str(e), 500)
 
 	@database_sync_to_async
 	def delete_user(self, user_id):

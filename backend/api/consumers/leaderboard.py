@@ -2,6 +2,7 @@ from channels.generic.http import AsyncHttpConsumer
 from django.contrib.auth import get_user_model
 from channels.db import database_sync_to_async
 from api.utils import jwt_to_user, get_user_avatar_url, get_users_with_stats, sort_leaderboard
+from api.db_utils import sendResponse
 import json
 
 class LeaderboardConsumer(AsyncHttpConsumer):
@@ -28,9 +29,4 @@ class LeaderboardConsumer(AsyncHttpConsumer):
 				headers=[(b"Content-Type", b"application/json")])
 
 		except Exception as e:
-			response_data = {
-				'success': False,
-				'message': str(e)
-			}
-			return await self.send_response(500, json.dumps(response_data).encode(),
-				headers=[(b"Content-Type", b"application/json")])
+			return await sendResponse(self, False, str(e), 500)

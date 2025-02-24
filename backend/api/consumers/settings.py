@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model, authenticate
 from channels.generic.http import AsyncHttpConsumer
 from channels.db import database_sync_to_async
 from api.utils import jwt_to_user, is_valid_password, sha256_hash, parse_multipart_form_data
+from api.db_utils import sendResponse
 import json
 import re
 import io
@@ -28,12 +29,7 @@ class GetSettingsConsumer(AsyncHttpConsumer):
 			return await self.send_response(200, json.dumps(response_data).encode(),
 				headers=[(b"Content-Type", b"application/json")])
 		except Exception as e:
-			response_data = {
-				'success': False,
-				'message': str(e)
-			}
-			return await self.send_response(500, json.dumps(response_data).encode(),
-				headers=[(b"Content-Type", b"application/json")])
+			return await sendResponse(self, False, str(e), 500)
 
 class SetSettingsConsumer(AsyncHttpConsumer):
 	async def handle(self, body):
@@ -59,14 +55,7 @@ class SetSettingsConsumer(AsyncHttpConsumer):
 				if display_name == "":
 					display_name = None
 				elif not (self.is_valid_display_name(display_name)):
-					response_data = {
-						'success': False,
-						'message': 'Display name invalid: \
-									must be 1-16 characters long, \
-									and contain only letters or digits'
-					}
-					return await self.send_response(400, json.dumps(response_data).encode(),
-						headers=[(b"Content-Type", b"application/json")])
+					return await sendResponse(self, False, "Display name invalid: must be 1-16 characters long, and contain only letters or digits", 400)
 
 				await self.update_display_name(user, display_name)
 				settings_updated = True
@@ -82,64 +71,26 @@ class SetSettingsConsumer(AsyncHttpConsumer):
 				settings_updated = True
 
 			if not password and not confirm_password:
-				response_data = {
-					'success': True,
-					'message': 'Updated successfully' if settings_updated else 'No changes made'
-				}
-				return await self.send_response(201, json.dumps(response_data).encode(),
-					headers=[(b"Content-Type", b"application/json")])
+				return await sendResponse(self, True, "Updated successfully" if settings_updated else "No changes made", 201)
 
 			if not password and confirm_password:
-				response_data = {
-					'success': False,
-					'message': 'Password required'
-				}
-				return await self.send_response(400, json.dumps(response_data).encode(),
-					headers=[(b"Content-Type", b"application/json")])
+				return await sendResponse(self, False, "Password required", 400)
 			
 			if not confirm_password and password:
-				response_data = {
-					'success': False,
-					'message': 'Confirm password required'
-				}
-				return await self.send_response(400, json.dumps(response_data).encode(),
-					headers=[(b"Content-Type", b"application/json")])
+				return await sendResponse(self, False, "Confirm password required", 400)
 
 			if password != confirm_password:
-				response_data = {
-					'success': False,
-					'message': 'Passwords do not match'
-				}
-				return await self.send_response(400, json.dumps(response_data).encode(),
-					headers=[(b"Content-Type", b"application/json")])
+				return await sendResponse(self, False, "Passwords do not match", 400)
 		
 			if not is_valid_password(password):
-				response_data = {
-					'success': False,
-					'message': 'Password invalid: \
-								must be 8-32 characters long, \
-								contain at least one lowercase letter, \
-								one uppercase letter,\n one digit, \
-								and one special character from @$!%*?&'
-				}
-				return await self.send_response(400, json.dumps(response_data).encode(),
-					headers=[(b"Content-Type", b"application/json")])
+				return await sendResponse(self, False, "Password invalid: must be 8-32 characters long, contain at least one lowercase letter, one uppercase letter,\n one digit, and one special character from @$!%*?&", 400)
 
 			await self.update_password(user, password)
 
-			response_data = {
-				'success': True,
-				'message': 'Updated successfully'
-			}
-			return await self.send_response(201, json.dumps(response_data).encode(),
-				headers=[(b"Content-Type", b"application/json")])
+			await sendResponse(self, True, "Updated successfully", 201)
+
 		except Exception as e:
-			response_data = {
-				'success': False,
-				'message': str(e)
-			}
-			return await self.send_response(500, json.dumps(response_data).encode(),
-				headers=[(b"Content-Type", b"application/json")])
+			await sendResponse(self, False, str(e), 500)
 
 	def is_valid_display_name(self, display_name):
 		regex = r'^[a-zA-Z0-9]{1,16}$'
