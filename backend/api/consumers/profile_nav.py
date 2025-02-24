@@ -1,6 +1,6 @@
 from channels.generic.http import AsyncHttpConsumer
 from api.utils import jwt_to_user, get_user_avatar_url
-from api.db_utils import sendResponse
+from api.db_utils import sendResponse, sendBadJWT
 import json
 
 class ProfileNavConsumer(AsyncHttpConsumer):

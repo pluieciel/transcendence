@@ -1,6 +1,6 @@
 from channels.generic.http import AsyncHttpConsumer
 from api.utils import jwt_to_user
-from api.db_utils import get_user_by_name, get_achievements_stats, get_profile_achievements, sendResponse
+from api.db_utils import get_user_by_name, get_achievements_stats, get_profile_achievements, sendResponse, sendBadJWT
 import json
 
 class ProfileAchievementConsumer(AsyncHttpConsumer):
