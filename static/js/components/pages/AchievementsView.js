@@ -8,6 +8,7 @@ export default class AchievementsView {
 	async init() {
 		await window.app.getSettings();
 		await this.render();
+		window.app.initChat();
 		window.app.addNavEventListeners();
 	}
 
@@ -96,6 +97,7 @@ export default class AchievementsView {
 					</div>
 				</div>
 			</main>
+			<div id="chatBoxContainer"></div>
 		`;
 	}
 }

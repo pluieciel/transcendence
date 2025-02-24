@@ -16,10 +16,11 @@ from time import sleep
 from api.db_utils import user_update_game, delete_game_history, get_user_statistic, get_user_by_name
 from .game_manager import GameManager
 
-
+active_connections = {}
 game_manager = GameManager.get_instance()
 
 class GameConsumer(AsyncWebsocketConsumer):
+
 
 	async def connect(self):
 		from api.models import is_valid_invite
@@ -29,6 +30,43 @@ class GameConsumer(AsyncWebsocketConsumer):
 		self.logger = logging.getLogger('game')
 		self.logger.info(f"Websocket connection made with channel name {self.channel_name}")
 
+		user = await jwt_to_user(self.scope['headers'])
+		self.user = user
+		if not self.user:
+			await self.accept()
+			await self.send(text_data=json.dumps({
+				"type": "handle_error",
+				"message": "Invalid JWT"
+			}))
+			await self.close()
+			return
+		if (user.id in active_connections):
+			await self.accept()
+			await self.send(text_data=json.dumps({
+					"type": "handle_error",
+					"message": "Multiple connections, connection refused"
+			}))
+			await self.close()
+			return
+		self.logger.info(f"User : {user.id}, created {user.created_at} playing : {user.playing}")
+		if (user.playing):
+			await self.accept()
+			await self.send(text_data=json.dumps({
+					"type": "handle_error",
+					"message": "Player is already in a game"
+			}))
+			await self.close()
+			return
+		if (user.tournament):
+			await self.accept()
+			await self.send(text_data=json.dumps({
+					"type": "handle_error",
+					"message": "Player is registered in a tournament"
+			}))
+			await self.close()
+			return
+
+		self.logger.info(user.playing)
 		query_string = self.scope["query_string"].decode()
 		query_params = parse_qs(query_string)
 		#for invitation
@@ -36,27 +74,11 @@ class GameConsumer(AsyncWebsocketConsumer):
 		mode = query_params.get("mode", [None])[0]
 		recipient = query_params.get("recipient", [None])[0]
 		watch = query_params.get("watch", [None])[0]
-
-
-		user = await jwt_to_user(self.scope['headers'])
-		self.user = user
-		if not self.user:
-			await self.send(text_data=json.dumps({
-				"type": "handle_error",
-				"message": "Invalid JWT"
-			}))
-			return
-		if self.user.is_playing:
-			await self.send(text_data=json.dumps({
-				"type": "handle_error",
-				"message": "User is already playing"
-			}))
-			return
 		game_manager._get_game_history_model()
 
 		if sender: # invitation: WS msg from B, A invite B, sender is A
 			#print(f"groupname: user_{user.username}", flush=True)
-			if user.is_playing or (await self.get_user(sender)).is_playing:
+			if user.playing or (await self.get_user(sender)).playing:
 				for group in [f"user_{user.username}", f"user_{sender}"]:
 					channel_layer = get_channel_layer()
 					await channel_layer.group_send(
@@ -78,7 +100,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 			game_manager.games[game_db.id] = self.game
 			self.game.channel_layer = self.channel_layer
 			self.game.assign_player(user, self.channel_name)
-			await user_update_game(self.user, isplaying=True, game_id=self.game.game_id)
+			await user_update_game(self.user, True, game_id=self.game.game_id)
 			await self.accept()
 
 			await self.channel_layer.group_add(str(self.game.game_id), self.channel_name)
@@ -120,8 +142,9 @@ class GameConsumer(AsyncWebsocketConsumer):
 			self.game = game_manager.games[game_db.id]
 			self.game.channel_layer = self.channel_layer
 			self.game.assign_player(user, self.channel_name)
-			await user_update_game(self.user, isplaying=True, game_id=self.game.game_id)
+			await user_update_game(self.user, True, game_id=self.game.game_id)
 			await self.accept()
+			active_connections[self.user.id] = self
 
 			await self.channel_layer.group_add(str(self.game.game_id), self.channel_name)
 
@@ -151,7 +174,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 				self.game = await game_manager.get_game(user, bot, mode)
 			self.game.channel_layer = self.channel_layer
 			self.game.assign_player(user, self.channel_name)
-			await user_update_game(self.user, isplaying=True, game_id=self.game.game_id)
+			await user_update_game(self.user, True, self.game.game_id)
 			await self.accept()
 
 			await self.channel_layer.group_add(str(self.game.game_id), self.channel_name)
@@ -187,6 +210,8 @@ class GameConsumer(AsyncWebsocketConsumer):
 
 
 	async def disconnect(self, close_code):
+		if self.user.id in active_connections:
+			del active_connections[self.user.id]
 		if (self.spectator):
 			self.logger.info(f"Spectator disconnected")
 			await self.channel_layer.group_discard(str(self.game.game_id), self.channel_name)
@@ -195,7 +220,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 			if (self.game.is_full()):
 				await self.channel_layer.group_discard(str(self.game.game_id), self.channel_name)
 				self.logger.info(f"Disconnecting user {self.user.username}")
-				await user_update_game(self.user, isplaying=False, game_id=-1)
+				await user_update_game(self.user, False, game_id=-1)
 				await self.game.player_disc(self.user)
 			else:
 				self.logger.info(f"Deleting game n {self.game.game_id}")
@@ -236,7 +261,6 @@ class GameConsumer(AsyncWebsocketConsumer):
 			else:
 				return color
 		except:
-			logging.getLogger('game').warn(f"no color found in settings defaulting to cyan")
 			return "#00BDD1" #Cyan
 
 	async def send_initial_game_state(self, instance):

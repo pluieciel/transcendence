@@ -17,6 +17,7 @@ export default class CustomizeView {
 	async init() {
 		await window.app.getSettings();
 		await this.render();
+		window.app.initChat();
 		this.addEventListeners();
 		this.settings = {
 			color: window.app.settings.color,
@@ -93,6 +94,7 @@ export default class CustomizeView {
 					<canvas id="preview"></canvas>
 				</div>
 			</main>
+			<div id="chatBoxContainer"></div>
 		`;
 	}
 

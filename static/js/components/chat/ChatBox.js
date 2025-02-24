@@ -1,5 +1,3 @@
-import { Game } from "../game/Game.js";
-
 export default class ChatBox {
 	constructor(container) {
 		this.container = container;
@@ -138,15 +136,15 @@ export default class ChatBox {
 
 		this.chatSocket.onmessage = (e) => {
 			const data = JSON.parse(e.data);
-			//console.log(data);
+			// console.log(data);
 			if (data.message_type === "system" && data.message === "all_user_list") {
 				this.allusers = data.usernames.sort((a, b) => a.localeCompare(b));
 				this.updateOnlineUsersList();
-			} else if (data.message_type === "system" && data.message === "update_tournament_info") {
-				//console.log(data.tournament_info);
-				window.app.tournament.info = JSON.parse(data.tournament_info);
-				window.app.tournament.updateContent();
-				window.app.tournament.updateGame();
+			// } else if (data.message_type === "system" && data.message === "update_tournament_info") {
+			// 	//console.log(data.tournament_info);
+			// 	window.app.tournament.info = JSON.parse(data.tournament_info);
+			// 	window.app.tournament.updateContent();
+			// 	window.app.tournament.updateGame();
 			} else if (data.type == "friend_list") {
 				this.friends = data.usernames.sort((a, b) => a.localeCompare(b));
 				this.updateOnlineUsersList();
@@ -155,19 +153,19 @@ export default class ChatBox {
 				//console.log(data);
 				this.onlineusers = dict.online_users.filter((user) => user !== this.username).sort((a, b) => a.localeCompare(b));
 				this.onlineusers.unshift(this.username);
-				this.waiting_users = dict.waiting_users;
-				window.app.tournament.info = dict.tournament_info;
-				window.app.tournament.updateContent();
+				// this.waiting_users = dict.waiting_users;
+				// window.app.tournament.info = dict.tournament_info;
+				// window.app.tournament.updateContent();
 				this.updateOnlineUsersList();
 			} else if (data.message_type === "system" && data.recipient === "update_waiting_users") {
 				this.waiting_users = JSON.parse(data.message);
 				this.updateOnlineUsersList();
 			} else if (data.recipient === "public") {
 				if (!this.blocked.includes(data.sender)) {
-					data = this.sanitize(data)
+					this.sanitize(data)
 					this.publicMessages.push(data);
 					this.updatePublicChat();
-					renderMathInElement(document.body);
+					// renderMathInElement(document.body);
 				}
 			} else if (data.message_type === "system_accept") {
 				console.log(data);
@@ -387,7 +385,7 @@ export default class ChatBox {
 	}
 
 	handlePrivateMessage(data) {
-		data = this.sanitize(data)
+		this.sanitize(data)
 		if (!this.privateMessages[data.sender]) {
 			this.privateMessages[data.sender] = [];
 		}
@@ -727,10 +725,10 @@ export default class ChatBox {
 	}
 
 	sanitize(data) {
-		data.time = this.escapeHtml(data.time);
-		data.sender = this.escapeHtml(data.sender)
-		data.message = this.escapeHtml(data.message)
-		data.message_type = this.escapeHtml(data.message_type);
+		if (data.time) data.time = this.escapeHtml(data.time);
+		if (data.sender) data.sender = this.escapeHtml(data.sender)
+		if (data.message) data.message = this.escapeHtml(data.message)
+		if (data.message_type) data.message_type = this.escapeHtml(data.message_type);
 	}
 
 	escapeHtml(str) {

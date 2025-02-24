@@ -33,19 +33,21 @@ export default class GameView {
 					<div id="card-end">
 						<div class="card-end-column">
 							<img class="card-end-avatar" src="https://cdn.intra.42.fr/users/6256bf3b76f8634f1e0df573022b0b72/valgrant.JPG" alt="Winner's Avatar" width="100" height="100">
+							<span class="card-end-username">+15</span>
 							<span class="card-end-username">neutrou</span>
-						</div>
-						<div class="card-end-column">
+							</div>
+							<div class="card-end-column">
 							<span class="card-end-mode"><i class="fa-solid fa-star"></i> CLASSIC <i class="fa-solid fa-star"></i></span>
 							<span class="card-end-row card-end-text">
-								<span class="card-end-score">10</span>
-								<span class="card-end-separator">-</span>
-								<span class="card-end-score">2</span>
+							<span class="card-end-score">10</span>
+							<span class="card-end-separator">-</span>
+							<span class="card-end-score">2</span>
 							</span>
 							<button id="returnButton">Return to Main Menu</button>
-						</div>
-						<div class="card-end-column">
+							</div>
+							<div class="card-end-column">
 							<img class="card-end-avatar" src="https://cdn.intra.42.fr/users/6256bf3b76f8634f1e0df573022b0b72/valgrant.JPG" alt="Winner's Avatar" width="100" height="100">
+							<span class="card-end-username">+15</span>
 							<span class="card-end-username">neutrou</span>
 						</div>
 					</div>

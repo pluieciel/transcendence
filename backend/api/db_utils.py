@@ -5,10 +5,23 @@ import json
 from django.utils import timezone
 
 @database_sync_to_async
-def user_update_game(user, isplaying, game_id):
-	user.isplaying = isplaying
-	user.current_game_id = game_id
-	user.save()
+def user_update_game(user, playing, game_id):
+	try:
+		user.playing = playing
+		user.current_game_id = game_id
+		logging.getLogger('game').info(f"User {user.username} is now playing : {playing}")
+		user.save()
+	except:
+		pass
+
+@database_sync_to_async
+def user_update_tournament(user, tournament):
+	try:
+		user.tournament = tournament
+		logging.getLogger('game').info(f"User {user.username} state tournament : {tournament}")
+		user.save()
+	except:
+		pass
 
 @database_sync_to_async
 def get_user_exists(username):

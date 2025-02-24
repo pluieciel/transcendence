@@ -8,6 +8,7 @@ export default class TournamentView {
 	async init() {
 		await window.app.getSettings();
 		await this.render();
+		window.app.initChat();
 		this.addEventListeners();
 		window.app.settings["tournament-game-size"] = "4";
 		window.app.settings["tournament-game-mode"] = "classic";
@@ -260,6 +261,7 @@ export default class TournamentView {
 					</div>
 				</div>
 			</main>
+			<div id="chatBoxContainer"></div>
 		`;
 	}
 
