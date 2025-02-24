@@ -2,6 +2,7 @@ from typing_extensions import List
 from .game_backend import GameBackend
 from channels.db import database_sync_to_async
 from django.contrib.auth import get_user_model
+from django.db.models import Q
 import logging
 from time import sleep
 
@@ -70,7 +71,7 @@ class GameManager:
 			game_id = (await self.create_game_history(user, game_mode=mode)).id
 		else:
 			game_id = (await self.create_game_history(user, game_type='AI', game_mode=mode)).id
-		self.games[game_id] = GameBackend(game_id, bot, self, ranked and bot == 0, mode)
+		self.games[game_id] = GameBackend(game_id, bot, self, ranked and bot == 0, mode, False)
 		return self.games[game_id]
 
 	async def create_tournament_empty_games(self, tournament_info):
@@ -83,9 +84,9 @@ class GameManager:
 		game_id3 = (await self.create_game_history(None, None, game_type='Tournament2', tournament_count=self.tournament_count)).id
 		game_id1 = (await self.create_game_history(await self.get_user(p1), await self.get_user(p2), game_type='Tournament1', tournament_count=self.tournament_count, tournament_round2_game_id=game_id3, tournament_round2_place=1)).id
 		game_id2 = (await self.create_game_history(await self.get_user(p3), await self.get_user(p4), game_type='Tournament1', tournament_count=self.tournament_count, tournament_round2_game_id=game_id3, tournament_round2_place=2)).id
-		self.games[game_id1] = GameBackend(game_id1, 0, self, False, 'classic')
-		self.games[game_id2] = GameBackend(game_id2, 0, self, False, 'classic')
-		self.games[game_id3] = GameBackend(game_id3, 0, self, False, 'classic')
+		self.games[game_id1] = GameBackend(game_id1, 0, self, False, 'classic', False)
+		self.games[game_id2] = GameBackend(game_id2, 0, self, False, 'classic', False)
+		self.games[game_id3] = GameBackend(game_id3, 0, self, False, 'classic', False)
 		print(f"3games created {game_id1}, {game_id2}, {game_id3}, players: {p1}, {p2}, {p3}, {p4}", flush=True)
 
 	@database_sync_to_async
@@ -113,6 +114,48 @@ class GameManager:
 	@database_sync_to_async
 	def save_game_history(self, game_history):
 		game_history.save()
+
+	#@database_sync_to_async
+	#def tournament_player(self, user):
+	#	return self.game_history.objects.filter(
+	#		game_state='waiting',
+	#		game_type='tournament',
+	#		player_left=user
+	#	) | self.game_history.objects.filter(
+	#		game_state='waiting',
+	#		game_type='tournament',
+	#		player_right=user
+	#	)
+	
+	#@database_sync_to_async
+	#def tournament_player(self, user):
+	#	game = self.game_history.objects.filter(
+	#		game_state='waiting',
+	#		game_type='tournament',
+	#		player_left=user)
+	#	if not game.exists():
+	#		game = self.game_history.objects.filter(
+	#			game_state='waiting',
+	#			game_type='tournament',
+	#			player_right=user
+	#		)
+	#	return game
+
+	@database_sync_to_async
+	def tournament_player(self, user):
+		game = self.game_history.objects.filter(
+			game_state='waiting',
+			game_type='tournament',
+			player_left=user
+		).values_list('id', flat=True).first()
+		if not game:
+			game = self.game_history.objects.filter(
+				game_state='waiting',
+				game_type='tournament',
+				player_right=user
+			).values_list('id', flat=True).first()
+		return game
+		
 
 	@database_sync_to_async
 	def is_game_exists(self, games):

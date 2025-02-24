@@ -16,6 +16,7 @@ from time import sleep
 from api.db_utils import user_update_game, delete_game_history, get_user_statistic, get_user_by_name
 from .game_manager import GameManager
 
+
 game_manager = GameManager.get_instance()
 
 class GameConsumer(AsyncWebsocketConsumer):
@@ -73,7 +74,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 				self.logger.info(f"Invalid invitation from {sender} to {self.user.username}")
 				return # invalid invitation
 			game_db = await game_manager.create_game_history(user, player_right=await self.get_user(sender), game_type='Invite', game_mode=mode)
-			self.game = GameBackend(game_db.id, 0, game_manager, False, mode)
+			self.game = GameBackend(game_db.id, 0, game_manager, False, mode, False)
 			game_manager.games[game_db.id] = self.game
 			self.game.channel_layer = self.channel_layer
 			self.game.assign_player(user, self.channel_name)
@@ -129,7 +130,6 @@ class GameConsumer(AsyncWebsocketConsumer):
 				await game_manager.set_game_state(await game_manager.get_game_by_id(self.game.game_id), 'playing')
 				await self.send_initial_game_state(self.game)
 			return
-
 		else: # quick match or bot
 			bot = int(query_params.get("bot", [0])[0])
 			if not mode:
@@ -142,8 +142,13 @@ class GameConsumer(AsyncWebsocketConsumer):
 			self.logger.info("Searching for a game for " + user.username)
 			await database_sync_to_async(user.refresh_from_db)() # refresh user object
 			self.logger.debug(game_manager.games)
-			self.game = game_manager.get_player_current_game(user)
-			self.game = await game_manager.get_game(user, bot, mode)
+			tournament_game_id = await game_manager.tournament_player(user)
+			if tournament_game_id:
+				self.logger.info(f"User {user.username} is already in a tournament: {tournament_game_id}")
+				self.game = game_manager.games[tournament_game_id]
+			else:
+				self.game = game_manager.get_player_current_game(user)
+				self.game = await game_manager.get_game(user, bot, mode)
 			self.game.channel_layer = self.channel_layer
 			self.game.assign_player(user, self.channel_name)
 			await user_update_game(self.user, isplaying=True, game_id=self.game.game_id)
@@ -156,6 +161,8 @@ class GameConsumer(AsyncWebsocketConsumer):
 				await game_manager.set_game_state(await game_manager.get_game_by_id(self.game.game_id), 'playing')
 				await self.send_initial_game_state(self.game)
 
+
+	
 	async def receive(self, text_data):
 		try:
 			data = json.loads(text_data)

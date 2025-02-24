@@ -13,6 +13,7 @@ from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack
 from Chat.routing import websocket_urlpatterns as chat_websocket_patterns
 from Game.routing import websocket_urlpatterns as game_websocket_patterns
+from Game.routing import websocket_urlpatternsTournament as tournament_websocket_patterns
 from django.urls import path, re_path
 from api.consumers.leaderboard import LeaderboardConsumer
 from api.consumers.login_2fa import Login2FAConsumer
@@ -26,13 +27,13 @@ from api.consumers.login_oauth import LoginOAuthConsumer
 from api.consumers.game_history import GameHistoryConsumer
 from api.consumers.profile import ProfileConsumer
 from api.consumers.profile_achievement import ProfileAchievementConsumer
+from api.consumers.achievement import AchievementConsumer
 from api.consumers.profile_nav import ProfileNavConsumer
 from api.consumers.settings import GetSettingsConsumer, SetSettingsConsumer
 from api.consumers.colors import ColorsConsumer
 from api.consumers.avatar import AvatarConsumer
 from api.consumers.login import LoginConsumer
 from api.consumers.signup import SignupConsumer
-from api.consumers.achievement import AchievementConsumer
 from api.consumers.recaptcha import RecaptchaConsumer
 from api.consumers.easter_egg import EasterEggConsumer
 from api.consumers.customize import GetCustomizeConsumer, SetCustomizeConsumer
@@ -48,6 +49,7 @@ websocket_patterns = [
     path('ws/chat/', URLRouter(chat_websocket_patterns)),
     path('ws/game/', URLRouter(game_websocket_patterns)),
     path('ws/game/invite', URLRouter(game_websocket_patterns)),
+    path('ws/tournament/', URLRouter(tournament_websocket_patterns)),
 ]
 
 http_patterns = [
@@ -64,9 +66,8 @@ http_patterns = [
     re_path(r'^api/profiles/(?P<username>.*)/history/$', GameHistoryConsumer.as_asgi()),
     re_path(r'^api/profiles/(?P<username>.*)/colors/$', ColorsConsumer.as_asgi()),
     re_path(r'^api/profiles/(?P<username>.*)/$', ProfileConsumer.as_asgi()),
-    
     re_path(r'^api/achievements/(?P<username>.*)/$', AchievementConsumer.as_asgi()),
-
+    
     path('api/settings/', GetSettingsConsumer.as_asgi()),
     path('api/settings/update/', SetSettingsConsumer.as_asgi()),
 	path('api/settings/customize/', GetCustomizeConsumer.as_asgi()),
