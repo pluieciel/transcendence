@@ -2,6 +2,7 @@ from channels.generic.http import AsyncHttpConsumer
 from channels.db import database_sync_to_async
 from secrets import token_bytes
 from api.utils import jwt_to_user, generate_totp
+from api.db_utils import sendResponse, sendBadJWT
 import time
 import base64
 import json
@@ -13,29 +14,13 @@ class Generate2FAQRConsumer(AsyncHttpConsumer):
 		try:
 			user = await jwt_to_user(self.scope['headers'])
 			if not user:
-				response_data = {
-					'success': False,
-					'is_jwt_valid': False,
-					'message': 'Invalid JWT'
-				}
-				return await self.send_response(401, json.dumps(response_data).encode(),
-					headers=[(b"Content-Type", b"application/json")])
+				return await sendBadJWT(self)
 
 			if user.is_42_user:
-				response_data = {
-					'success': False,
-					'message': '2FA is not available for oauth'
-				}
-				return await self.send_response(403, json.dumps(response_data).encode(),
-					headers=[(b"Content-Type", b"application/json")])
+				return await sendResponse(self, False, "2FA is not available for oauth", 403)
 
 			if user.is_2fa_enabled:
-				response_data = {
-					'success': False,
-					'message': '2FA already enabled'
-				}
-				return await self.send_response(409, json.dumps(response_data).encode(),
-					headers=[(b"Content-Type", b"application/json")])
+				return await sendResponse(self, False, "2FA already enabled", 409)
 
 			totp_secret = self.generate_totp_secret()
 			await self.update_totp_secret(user, totp_secret)
@@ -47,12 +32,7 @@ class Generate2FAQRConsumer(AsyncHttpConsumer):
 			return await self.send_response(200, json.dumps(response_data).encode(),
 				headers=[(b"Content-Type", b"application/json")])
 		except Exception as e:
-			response_data = {
-				'success': False,
-				'message': str(e)
-			}
-			return await self.send_response(500, json.dumps(response_data).encode(),
-					headers=[(b"Content-Type", b"application/json")])
+			return await sendResponse(self, False, str(e), 500)
 
 	@database_sync_to_async
 	def update_totp_secret(self, user, totp_secret):

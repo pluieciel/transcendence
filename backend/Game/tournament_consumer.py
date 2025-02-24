@@ -28,7 +28,7 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 		self.groups = ['updates', 'players']
 
 	async def connect(self):
-		self.logger.info("connected to ws")
+		self.logger.info("Connected to tournament websocket")
 		user = await jwt_to_user(self.scope['headers'])
 		self.user = user
 		if not self.user:
@@ -39,9 +39,10 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 			return
 		await self.accept()
 		await self.channel_layer.group_add("updates", self.channel_name)
-		await self.sendUpdates()
 		if (tournament.isPlayer(self.user, self.channel_name)):
+			self.logger.info("New connection was already a player, adding to player channel")
 			await self.channel_layer.group_add("players", self.channel_name)
+		await tournament.send_tournament_update()
 
 	async def receive(self, text_data):
 		try:
@@ -49,22 +50,22 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 			if data["action"] == 'create':	
 				size = int(data['size'])
 				mode = data['mode']
-				self.logger.info(self.user)
-				self.logger.info(f"Size {size}, Mode {mode}")
+				self.logger.info("Create action received, calling createTournament")
 				await tournament.createTournament(size, mode, self.user, self.channel_name)
 			elif data["action"] == 'join':
-				self.logger.info("Joining tournament")
+				self.logger.info("Join action received, calling addPlayer")
 				if (await tournament.addPlayer(self.user, self.channel_name)):
 					await self.channel_layer.group_add("players", self.channel_name)	
 			elif data["action"] == 'leave':
-				self.logger.info("Leaving tournament")
+				self.logger.info("Leave action received, calling removePlayer")
 				if (await tournament.removePlayer(self.user)):
 					await self.channel_layer.group_discard("players", self.channel_name)
 			elif data["action"] == 'spectate':
+				self.logger.info("Spectate action received, calling spectate")
 				pass
 			elif data["action"] == 'ready':
+				self.logger.info("Ready action received, calling setReady")
 				await tournament.setReady(self.user)
-			await self.sendUpdates()
 
 
 		except json.JSONDecodeError:
@@ -75,68 +76,13 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 	async def disconnect(self, close_code):
 		pass
 
-	#Send visual updates
-	#Receive players joining tournament
-	#Receive player leaving tournament
-	#Receive tournamnent creation
 
-
-	#Send start game to players
-	#Receive ready state for tournament
-	#Receive spectate game
-
-	async def sendUpdates(self):
-		tournament_state = {
-			"type": "tournament_update",
-			"state": tournament.state,
-			"size": tournament.size,
-			"mode": tournament.mode,
-			"round": tournament.round,
-			"players": [
-				{
-					"username": player.user.username,
-					"display": player.user.display_name,
-					"avatar": (
-						player.user.avatar_42 if player.user.avatar_42 else
-						player.user.avatar.url if player.user.avatar else
-						'/imgs/default_avatar.png'
-					),
-					"ready": player.ready,
-					"lost": player.lost,
-				} for player in tournament.players
-			],
-			"games": [
-				{
-					"round": game.round,
-					"player_left": {
-						"user": {
-							"username": game.player_left.user.username,
-						},
-						"ready": game.player_left.ready,
-						"lost": game.player_left.lost,
-					},
-					"player_right": {
-						"user": {
-							"username": game.player_right.user.username,
-						},
-						"ready": game.player_right.ready,
-						"lost": game.player_right.lost,
-					},
-					"score_left": game.score_left,
-					"score_right": game.score_right,
-					"state": game.state,
-					"winner": game.winner.user.username if game.winner else None,
-				} for game in tournament.games
-			]
-		}
-		self.logger.info("Sending updates")
-		await self.channel_layer.group_send(
-			"updates",
-			{
-				"type": "send_tournament_update",
-				"message": tournament_state
-			}
-		)
+	async def tournament_update(self, event):
+		message = event["message"]
+		await self.send(text_data=json.dumps({
+            "type": "tournament_update",
+            "message": message,
+        }))
 
 	async def send_tournament_update(self, event):
 		await self.send(text_data=json.dumps(event["message"]))
