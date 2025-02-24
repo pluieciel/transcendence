@@ -12,6 +12,7 @@ import CustomizeView from './components/pages/CustomizeView.js';
 import LeaderboardView from './components/pages/LeaderboardView.js';
 import GameView from './components/pages/GameView.js';
 import AchievementsView from './components/pages/AchievementsView.js';
+import ChatBox from "./components/chat/ChatBox.js";
 
 
 class App {
@@ -236,6 +237,19 @@ class App {
 		}
 		header += `</header>`;
 		container.innerHTML = header;
+	}
+
+	initChat() {
+		const chatBoxContainer = document.querySelector("#chatBoxContainer");
+		if (!this.chatBox) {
+			this.chatBox = new ChatBox(chatBoxContainer);
+		} else {
+			this.chatBox.container = chatBoxContainer;
+			this.chatBox.render(chatBoxContainer);
+			this.chatBox.addEventListeners();
+			this.chatBox.updateOnlineUsersList();
+			this.chatBox.updatePublicChat();
+		}
 	}
 
 	async addNavEventListeners() {
