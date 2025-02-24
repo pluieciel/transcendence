@@ -1,6 +1,6 @@
 from channels.generic.http import AsyncHttpConsumer
 from api.utils import generate_jwt_cookie, verify_totp
-from api.db_utils import get_user_by_name
+from api.db_utils import get_user_by_name, sendResponse
 import json
 
 class Login2FAConsumer(AsyncHttpConsumer):
@@ -13,22 +13,12 @@ class Login2FAConsumer(AsyncHttpConsumer):
 			user = await get_user_by_name(username)
 
 			if not user.is_2fa_enabled:
-				response_data = {
-					'success': False,
-					'message': '2FA not enabled'
-				}
-				return await self.send_response(401, json.dumps(response_data).encode(),
-					headers=[(b"Content-Type", b"application/json")])
+				return await sendResponse(self, False, "2FA not enabled", 401)
 
 			is_totp_valid = verify_totp(user.totp_secret, totp_input)
 
 			if not is_totp_valid:
-				response_data = {
-					'success': False,
-					'message': 'Invalid totp code'
-				}
-				return await self.send_response(401, json.dumps(response_data).encode(),
-					headers=[(b"Content-Type", b"application/json")])
+				return await sendResponse(self, False, "Invalid totp code", 401)
 
 			response_data = {
 				'success': True,
@@ -38,9 +28,4 @@ class Login2FAConsumer(AsyncHttpConsumer):
 			return await self.send_response(200, json.dumps(response_data).encode(),
 				headers=[(b"Content-Type", b"application/json"), (b"Set-Cookie", generate_jwt_cookie(user))])
 		except Exception as e:
-			response_data = {
-				'success': False,
-				'message': str(e)
-			}
-			return await self.send_response(500, json.dumps(response_data).encode(),
-				headers=[(b"Content-Type", b"application/json")])
+			return await sendResponse(self, False, str(e), 500)

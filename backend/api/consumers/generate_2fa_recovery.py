@@ -1,7 +1,7 @@
 from channels.generic.http import AsyncHttpConsumer
 from channels.db import database_sync_to_async
 from api.utils import jwt_to_user, sha256_hash
-from api.db_utils import update_recovery_codes_generated
+from api.db_utils import update_recovery_codes_generated, sendResponse, sendBadJWT
 from secrets import token_hex
 import json
 
@@ -10,21 +10,10 @@ class Generate2FARecoveryConsumer(AsyncHttpConsumer):
 		try:
 			user = await jwt_to_user(self.scope['headers'])
 			if not user:
-				response_data = {
-					'success': False,
-					'is_jwt_valid': False,
-					'message': 'Invalid JWT'
-				}
-				return await self.send_response(401, json.dumps(response_data).encode(),
-					headers=[(b"Content-Type", b"application/json")])
+				return await sendBadJWT(self)
 
 			if user.recovery_codes_generated:
-				response_data = {
-					'success': False,
-					'message': '2FA recovery codes already generated once'
-				}
-				return await self.send_response(409, json.dumps(response_data).encode(),
-					headers=[(b"Content-Type", b"application/json")])
+				return await sendResponse(self, False, "2FA recovery codes already generated once", 409)
 
 			recovery_codes = [token_hex(8) for _ in range(6)]
 			for code in recovery_codes:
@@ -41,12 +30,7 @@ class Generate2FARecoveryConsumer(AsyncHttpConsumer):
 			return await self.send_response(200, json.dumps(response_data).encode(),
 				headers=[(b"Content-Type", b"application/json")])
 		except Exception as e:
-			response_data = {
-				'success': False,
-				'message': str(e)
-			}
-			return await self.send_response(500, json.dumps(response_data).encode(),
-					headers=[(b"Content-Type", b"application/json")])
+			return await sendResponse(self, False, str(e), 500)
 
 	@database_sync_to_async
 	def create_recovery_code(self, user, recovery_code):
