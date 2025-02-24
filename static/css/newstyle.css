@@ -386,7 +386,7 @@ form button:hover:not(:disabled) {
 	align-self: flex-end;
 }
 
-#start-button, #save-button, #toggle-2fa-button, #delete-account-button, #create-button, #join-button, #leave-button, #ready-button {
+#start-button, #save-button, #toggle-2fa-button, #delete-account-button, #create-button, #join-button, #leave-button, #ready-button, #forfeit-button {
 	width: 100%;
 	margin-bottom: 1rem;
 	color: var(--secondary-color);
@@ -399,7 +399,7 @@ form button:hover:not(:disabled) {
 	height: 3rem;
 }
 
-#start-button:hover, #save-button:hover, #toggle-2fa-button:hover, #create-button:hover, #join-button:hover, #leave-button:hover, #ready-button:hover {
+#start-button:hover, #save-button:hover, #toggle-2fa-button:hover, #create-button:hover, #join-button:hover, #leave-button:hover, #ready-button:hover, #forfeit-button:hover {
 	border: 1px solid var(--user-color);
 	box-shadow: 0 0 15px var(--user-color);
 	transition: all 0.3s ease;

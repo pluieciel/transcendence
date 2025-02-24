@@ -226,6 +226,7 @@ export default class TournamentView {
 								<ul id="waiting-room-container"></ul>
 							</div>
 						</div>
+						<button type="submit" id="forfeit-button"><i class="fa-solid fa-flag"></i> Forfeit</button>
 						<button type="submit" id="ready-button"><i class="fa-regular fa-circle-check"></i> Ready</button>
 						<button type="submit" id="join-button"><i class="fa-solid fa-user-plus"></i> Join</button>
 						<button type="submit" id="leave-button"><i class="fa-solid fa-user-minus"></i> Leave</button>
@@ -234,23 +235,13 @@ export default class TournamentView {
 				<div id="tournament-tree-card" class="card">
 					<div id="tournament-tree">
 						<h2 id="card-title"><i class="fa-solid fa-sitemap"></i> TOURNAMENT CLASSIC #1</h2>
-						<div id="tournament-winner" class="tournament-tree-node">
-							<div id="winner-avatar">
-								<div id="winner-crown">
-									<i class="fa-solid fa-crown fa-2xl"></i>
-								</div>
-								<button id="tournament-0-winner-avatar" data-redirect-to="/profiles/user1"><img src="/imgs/default_avatar.png" id="winner-player-avatar" class="avatar player-avatar"></button>
-								<div id="player-right-tournament-name">
-									<button id="tournament-0-winner-name" data-redirect-to="/profiles/user1">user1</button>
-								</div>
-							</div>
-						</div>
+						<div id="tournament-winner" class="tournament-tree-node"></div>
 						<div id="tournament-final" class="tournament-tree-node">
-							<div class="tournament-game">${this.truc()}</div>
+							<div class="tournament-game"></div>
 						</div>
 						<div id="tournament-semi-final" class="tournament-tree-node">
-							<div class="tournament-game">${this.truc()}</div>
-							<div class="tournament-game">${this.truc()}</div>
+							<div class="tournament-game"></div>
+							<div class="tournament-game"></div>
 						</div>
 						<div id="tournament-quarter-final" class="tournament-tree-node">
 							<div class="tournament-game">${this.truc()}</div>
@@ -285,6 +276,19 @@ export default class TournamentView {
 				</div>
 			</div>
 			<div id="tournament-player-right-state"><i class="fa-regular fa-circle fa-lg"></i></div>`
+	}
+
+	truc2() {
+		return `
+			<div id="winner-avatar">
+				<div id="winner-crown">
+					<i class="fa-solid fa-crown fa-2xl"></i>
+				</div>
+				<button id="tournament-0-winner-avatar" data-redirect-to="/profiles/user1"><img src="/imgs/default_avatar.png" id="winner-player-avatar" class="avatar player-avatar"></button>
+				<div id="player-right-tournament-name">
+					<button id="tournament-0-winner-name" data-redirect-to="/profiles/user1">user1</button>
+				</div>
+			</div>`
 	}
 
 	addEventListeners() {
