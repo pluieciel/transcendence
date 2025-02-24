@@ -2,7 +2,7 @@ from channels.generic.http import AsyncHttpConsumer
 from api.utils import jwt_to_user
 from django.contrib.auth import get_user_model
 from channels.db import database_sync_to_async
-from api.db_utils import get_user_exists, sendResponse
+from api.db_utils import get_user_exists, sendResponse, sendBadJWT
 import json
 
 class DeleteUserConsumer(AsyncHttpConsumer):
@@ -10,13 +10,7 @@ class DeleteUserConsumer(AsyncHttpConsumer):
 		try:
 			user = await jwt_to_user(self.scope['headers'])
 			if not user:
-				response_data = {
-					'success': False,
-					'is_jwt_valid': False,
-					'message': 'Invalid JWT'
-				}
-				return await self.send_response(401, json.dumps(response_data).encode(),
-					headers=[(b"Content-Type", b"application/json")])
+				return await sendBadJWT(self)
 
 			data = json.loads(body.decode())
 			confirm_message = data.get('confirm')

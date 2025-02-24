@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model, authenticate
 from channels.generic.http import AsyncHttpConsumer
 from channels.db import database_sync_to_async
 from api.utils import jwt_to_user, is_valid_password, sha256_hash, parse_multipart_form_data
-from api.db_utils import sendResponse
+from api.db_utils import sendResponse, sendBadJWT
 import json
 import re
 import io
@@ -13,13 +13,7 @@ class GetSettingsConsumer(AsyncHttpConsumer):
 		try:
 			user = await jwt_to_user(self.scope['headers'])
 			if not user:
-				response_data = {
-					'success': False,
-					'is_jwt_valid': False,
-					'message': 'Invalid JWT'
-				}
-				return await self.send_response(401, json.dumps(response_data).encode(),
-					headers=[(b"Content-Type", b"application/json")])
+				return await sendBadJWT(self)
 			response_data = {
 				'success': True,
 				'display_name': user.display_name,
@@ -36,13 +30,7 @@ class SetSettingsConsumer(AsyncHttpConsumer):
 		try:
 			user = await jwt_to_user(self.scope['headers'])
 			if not user:
-				response_data = {
-					'success': False,
-					'is_jwt_valid': False,
-					'message': 'Invalid JWT'
-				}
-				return await self.send_response(401, json.dumps(response_data).encode(),
-					headers=[(b"Content-Type", b"application/json")])
+				return await sendBadJWT(self)
 
 			data = await parse_multipart_form_data(body=body)
 			display_name = data.get('display_name')

@@ -5,7 +5,7 @@ from django.db.models import Q
 from django.utils import timezone
 from django.utils.timesince import timesince
 from api.utils import jwt_to_user, get_user_avatar_url
-from api.db_utils import get_user, get_user_by_name, sendResponse
+from api.db_utils import get_user, get_user_by_name, sendResponse, sendBadJWT
 import json
 
 class GameHistoryConsumer(AsyncHttpConsumer):
@@ -13,13 +13,7 @@ class GameHistoryConsumer(AsyncHttpConsumer):
 		try:
 			user = await jwt_to_user(self.scope['headers'])
 			if not user:
-				response_data = {
-					'success': False,
-					'is_jwt_valid': False,
-					'message': 'Invalid JWT'
-				}
-				return await self.send_response(401, json.dumps(response_data).encode(),
-					headers=[(b"Content-Type", b"application/json")])
+				return await sendBadJWT(self)
 
 			profile_user = await get_user_by_name(self.scope['url_route']['kwargs']['username'])
 			if not profile_user:

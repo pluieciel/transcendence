@@ -2,7 +2,7 @@ from channels.generic.http import AsyncHttpConsumer
 from channels.db import database_sync_to_async
 from secrets import token_bytes
 from api.utils import jwt_to_user, generate_totp
-from api.db_utils import sendResponse
+from api.db_utils import sendResponse, sendBadJWT
 import time
 import base64
 import json
@@ -14,13 +14,7 @@ class Generate2FAQRConsumer(AsyncHttpConsumer):
 		try:
 			user = await jwt_to_user(self.scope['headers'])
 			if not user:
-				response_data = {
-					'success': False,
-					'is_jwt_valid': False,
-					'message': 'Invalid JWT'
-				}
-				return await self.send_response(401, json.dumps(response_data).encode(),
-					headers=[(b"Content-Type", b"application/json")])
+				return await sendBadJWT(self)
 
 			if user.is_42_user:
 				return await sendResponse(self, False, "2FA is not available for oauth", 403)

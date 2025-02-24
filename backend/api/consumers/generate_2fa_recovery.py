@@ -1,7 +1,7 @@
 from channels.generic.http import AsyncHttpConsumer
 from channels.db import database_sync_to_async
 from api.utils import jwt_to_user, sha256_hash
-from api.db_utils import update_recovery_codes_generated, sendResponse
+from api.db_utils import update_recovery_codes_generated, sendResponse, sendBadJWT
 from secrets import token_hex
 import json
 
@@ -10,13 +10,7 @@ class Generate2FARecoveryConsumer(AsyncHttpConsumer):
 		try:
 			user = await jwt_to_user(self.scope['headers'])
 			if not user:
-				response_data = {
-					'success': False,
-					'is_jwt_valid': False,
-					'message': 'Invalid JWT'
-				}
-				return await self.send_response(401, json.dumps(response_data).encode(),
-					headers=[(b"Content-Type", b"application/json")])
+				return await sendBadJWT(self)
 
 			if user.recovery_codes_generated:
 				return await sendResponse(self, False, "2FA recovery codes already generated once", 409)

@@ -1,7 +1,7 @@
 from channels.generic.http import AsyncHttpConsumer
 from channels.db import database_sync_to_async
 from api.utils import generate_jwt_cookie, sha256_hash
-from api.db_utils import get_user_by_name, sendResponse
+from api.db_utils import get_user_by_name, sendResponse, sendBadJWT
 import json
 
 class Login2FARecoveryConsumer(AsyncHttpConsumer):

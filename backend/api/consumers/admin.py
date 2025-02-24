@@ -1,6 +1,6 @@
 from channels.generic.http import AsyncHttpConsumer
 from api.utils import jwt_to_user
-from api.db_utils import sendResponse
+from api.db_utils import sendResponse, sendBadJWT
 import json
 
 class AdminConsumer(AsyncHttpConsumer):
@@ -8,13 +8,7 @@ class AdminConsumer(AsyncHttpConsumer):
 		try:
 			user = await jwt_to_user(self.scope['headers'])
 			if not user:
-				response_data = {
-					'success': False,
-					'is_jwt_valid': False,
-					'message': 'Invalid JWT'
-				}
-				return await self.send_response(401, json.dumps(response_data).encode(),
-					headers=[(b"Content-Type", b"application/json")])
+				return await sendBadJWT(self)
 			
 			if not user.is_admin:
 				return await sendResponse(self, False, "User is not an admin", 401)
