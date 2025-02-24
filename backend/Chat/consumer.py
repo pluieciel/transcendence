@@ -12,7 +12,7 @@ from Game.consumer import game_manager
 import redis
 from copy import deepcopy
 from api.utils import get_secret_from_file
-from api.db_utils import get_user_by_name
+from api.db_utils import get_user_by_name, unlock_achievement, update_achievement_progression
 from openai import OpenAI
 from django.core.cache import cache
 import asyncio
@@ -194,13 +194,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
 					}
 				)
 			
-			if message.startswith("[AI]"):
-				#anti-spam
-				current_usage = cache.get(sender, 0)
-				if current_usage >= 5:
-					return
-				cache.set(sender, current_usage + 1, timeout=25)
-				await self.handle_ai_message(message[4:], groups, recipient, time)
+			# if message.startswith("[AI]"):
+			# 	#anti-spam
+			# 	current_usage = cache.get(sender, 0)
+			# 	if current_usage >= 5:
+			# 		return
+			# 	cache.set(sender, current_usage + 1, timeout=25)
+			# 	await self.handle_ai_message(message[4:], groups, recipient, time)
 
 		elif message_type == "system" and message == "update_tournament_info":
 			if operation == "add" and self.username not in ChatConsumer.tournament_info["wait_list"] and ChatConsumer.tournament_info["state"] == "Waiting":
@@ -311,8 +311,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
 			if newfriendname != sender and not (await self.is_friend(user, newfriendname)):
 				await self.add_friend(user, newfriend)
 
-			#update friend list
 			friends = await self.get_friends_usernames(user)
+			await self.checkForPopular(user, friends)
+
 			await self.send(text_data=json.dumps({
 				'type': 'friend_list',
 				'usernames': friends
@@ -331,6 +332,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
 				'type': 'friend_list',
 				'usernames': friends
 			}))
+
+	async def checkForPopular(self, user, L):
+		if len(L) >= 5:
+			await unlock_achievement(user, 'Popular')
+		else:
+			await update_achievement_progression(user, 'Popular', len(L))
 
 	@database_sync_to_async
 	def get_user(self, username):
@@ -383,46 +390,46 @@ class ChatConsumer(AsyncWebsocketConsumer):
 	#             stream=False
 	#         )
 
-	async def deepseek_request(self, client, text):
-		try:
-			self.ai_chat_history.append({"role": "user", "content": text})
-			# Run the sync API call in a thread
-			loop = asyncio.get_event_loop()
-			response = await loop.run_in_executor(
-				None,  # Uses default ThreadPoolExecutor
-				lambda: client.chat.completions.create(
-							model="deepseek-chat",
-							messages=self.ai_chat_history,
-							stream=False
-						)
-				)
-			if response:
-				self.ai_chat_history.append({
-					"role": "assistant",
-					"content": response.choices[0].message.content
-				})
-			return response
-		except Exception as e:
-			print(f"DeepSeek API error: {e}", flush=True)
-			return None
+	# async def deepseek_request(self, client, text):
+	# 	try:
+	# 		self.ai_chat_history.append({"role": "user", "content": text})
+	# 		# Run the sync API call in a thread
+	# 		loop = asyncio.get_event_loop()
+	# 		response = await loop.run_in_executor(
+	# 			None,  # Uses default ThreadPoolExecutor
+	# 			lambda: client.chat.completions.create(
+	# 						model="deepseek-chat",
+	# 						messages=self.ai_chat_history,
+	# 						stream=False
+	# 					)
+	# 			)
+	# 		if response:
+	# 			self.ai_chat_history.append({
+	# 				"role": "assistant",
+	# 				"content": response.choices[0].message.content
+	# 			})
+	# 		return response
+	# 	except Exception as e:
+	# 		print(f"DeepSeek API error: {e}", flush=True)
+	# 		return None
 
-	async def handle_ai_message(self, text, groups, recipient, time):
-		try:
-			async def process_ai():
-				response = await self.deepseek_request(self.client, text)
-				#print(response.choices[0].message.content, flush=True)
-				for group in groups:
-					await self.channel_layer.group_send(
-						group, {
-							"type": "send_message",
-							"message": markdown.markdown(response.choices[0].message.content.replace('\\', '\\\\')),
-							"message_type": "chat",
-							"sender": "DeepSeek",
-							"recipient": recipient,
-							"time": time,
-						}
-					)
-			asyncio.create_task(process_ai())
+	# async def handle_ai_message(self, text, groups, recipient, time):
+	# 	try:
+	# 		async def process_ai():
+	# 			response = await self.deepseek_request(self.client, text)
+	# 			#print(response.choices[0].message.content, flush=True)
+	# 			for group in groups:
+	# 				await self.channel_layer.group_send(
+	# 					group, {
+	# 						"type": "send_message",
+	# 						"message": markdown.markdown(response.choices[0].message.content.replace('\\', '\\\\')),
+	# 						"message_type": "chat",
+	# 						"sender": "DeepSeek",
+	# 						"recipient": recipient,
+	# 						"time": time,
+	# 					}
+	# 				)
+	# 		asyncio.create_task(process_ai())
 
-		except Exception as e:
-			print(f"AI message error: {e}", flush=True)
+	# 	except Exception as e:
+	# 		print(f"AI message error: {e}", flush=True)
