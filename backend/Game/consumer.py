@@ -16,10 +16,11 @@ from time import sleep
 from api.db_utils import user_update_game, delete_game_history, get_user_statistic, get_user_by_name
 from .game_manager import GameManager
 
-
+active_connections = {}
 game_manager = GameManager.get_instance()
 
 class GameConsumer(AsyncWebsocketConsumer):
+
 
 	async def connect(self):
 		from api.models import is_valid_invite
@@ -29,15 +30,6 @@ class GameConsumer(AsyncWebsocketConsumer):
 		self.logger = logging.getLogger('game')
 		self.logger.info(f"Websocket connection made with channel name {self.channel_name}")
 
-		query_string = self.scope["query_string"].decode()
-		query_params = parse_qs(query_string)
-		#for invitation
-		sender = query_params.get("sender", [None])[0]
-		mode = query_params.get("mode", [None])[0]
-		recipient = query_params.get("recipient", [None])[0]
-		watch = query_params.get("watch", [None])[0]
-
-
 		user = await jwt_to_user(self.scope['headers'])
 		self.user = user
 		if not self.user:
@@ -46,6 +38,17 @@ class GameConsumer(AsyncWebsocketConsumer):
 				"message": "Invalid JWT"
 			}))
 			return
+		if (user.id in active_connections):
+			await self.close()
+
+		query_string = self.scope["query_string"].decode()
+		query_params = parse_qs(query_string)
+		#for invitation
+		sender = query_params.get("sender", [None])[0]
+		mode = query_params.get("mode", [None])[0]
+		recipient = query_params.get("recipient", [None])[0]
+		watch = query_params.get("watch", [None])[0]
+
 		if self.user.is_playing:
 			await self.send(text_data=json.dumps({
 				"type": "handle_error",
@@ -122,6 +125,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 			self.game.assign_player(user, self.channel_name)
 			await user_update_game(self.user, isplaying=True, game_id=self.game.game_id)
 			await self.accept()
+			active_connections[self.user.id] = self
 
 			await self.channel_layer.group_add(str(self.game.game_id), self.channel_name)
 
@@ -187,6 +191,8 @@ class GameConsumer(AsyncWebsocketConsumer):
 
 
 	async def disconnect(self, close_code):
+		if self.user.id in active_connections:
+			del active_connections[self.user.id]
 		if (self.spectator):
 			self.logger.info(f"Spectator disconnected")
 			await self.channel_layer.group_discard(str(self.game.game_id), self.channel_name)
