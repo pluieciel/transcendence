@@ -12,7 +12,7 @@ from Game.consumer import game_manager
 import redis
 from copy import deepcopy
 from api.utils import get_secret_from_file
-from api.db_utils import get_user_by_name, unlock_achievement
+from api.db_utils import get_user_by_name, unlock_achievement, update_achievement_progression
 from openai import OpenAI
 from django.core.cache import cache
 import asyncio
@@ -336,6 +336,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
 	async def checkForPopular(self, user, L):
 		if len(L) >= 5:
 			await unlock_achievement(user, 'Popular')
+		else:
+			await update_achievement_progression(user, 'Popular', len(L))
 
 	@database_sync_to_async
 	def get_user(self, username):
