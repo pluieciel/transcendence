@@ -76,9 +76,6 @@ class GameConsumer(AsyncWebsocketConsumer):
 		watch = query_params.get("watch", [None])[0]
 		game_manager._get_game_history_model()
 
-		userB = await get_user_by_name('user1')
-		self.logger.info(userB.playing)
-
 		if sender: # invitation: WS msg from B, A invite B, sender is A
 			#print(f"groupname: user_{user.username}", flush=True)
 			if user.playing or (await self.get_user(sender)).playing:
@@ -178,8 +175,6 @@ class GameConsumer(AsyncWebsocketConsumer):
 			self.game.channel_layer = self.channel_layer
 			self.game.assign_player(user, self.channel_name)
 			await user_update_game(self.user, True, self.game.game_id)
-			await database_sync_to_async(user.refresh_from_db)()
-			self.logger.info(f"user is playing {user.playing}")
 			await self.accept()
 
 			await self.channel_layer.group_add(str(self.game.game_id), self.channel_name)
