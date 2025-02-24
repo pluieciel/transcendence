@@ -60,9 +60,6 @@ class SignupConsumer(AsyncHttpConsumer):
 			if not recaptcha_token:
 				return await sendResponse(self, False, "Please verify that you are not a robot", 400)
 
-			if not response.json()['success']:
-				return await sendResponse(self, False, "01100110 01110101 01100011 01101011 00100000 01111001 01101111 01110101 00100000 01110010 01101111 01100010 01101111 01110100", 400)
-
 			if avatar:
 				image_bytes = avatar.file.read()
 				image = Image.open(io.BytesIO(image_bytes))
@@ -78,6 +75,9 @@ class SignupConsumer(AsyncHttpConsumer):
 				'remoteip': ip_addr,
 			}
 			response = requests.post(url, data=params)
+
+			if not response.json()['success']:
+				return await sendResponse(self, False, "01100110 01110101 01100011 01101011 00100000 01111001 01101111 01110101 00100000 01110010 01101111 01100010 01101111 01110100", 400)
 
 			await self.create_user(username, password, avatar)
 
