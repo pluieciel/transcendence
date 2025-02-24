@@ -352,6 +352,7 @@ export default class TournamentView {
 				<div class="tournament-waiting-player-name">${player.display_name ? player.display_name : player.username}</div>
 				<div class="tournament-waiting-player-elo"><i class="fa-solid fa-chart-line"></i>1000</div>
 				<div class="tournament-waiting-player-top-1"><i class="fa-solid fa-crown"></i>1</div>
+				<div class="tournament-player-state"><i class="fa-regular fa-circle fa-lg"></i></div>
 			</li>`;
 
 		waitingRoom.insertAdjacentHTML('beforeend', row);
