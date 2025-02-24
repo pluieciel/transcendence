@@ -51,11 +51,9 @@ class Bot:
 
 	def calculate_ball_landing_position(self):
 		if not self.ball_position or not self.ball_velocity:
-			self.logger.info("Ball position or velocity not available yet")
 			return None
 
 		if not self.paddle_position:
-			self.logger.info("Paddle position not available yet")
 			return None
 
 		# Only calculate if ball is moving towards the bot (right side)

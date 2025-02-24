@@ -193,11 +193,11 @@ class GameBackend:
 
 			if self.player_left:
 				self.logger.info(f"Resetting left player: {self.player_left.user.username}")
-				await user_update_game(self.player_left.user, isplaying=False, game_id=-1)
+				await user_update_game(self.player_left.user, False, game_id=-1)
 
 			if self.player_right and self.bot == 0:
 				self.logger.info(f"Resetting right player: {self.player_right.user.username}")
-				await user_update_game(self.player_right.user, isplaying=False, game_id=-1)
+				await user_update_game(self.player_right.user, False, game_id=-1)
 
 			if self.tournament:
 				from .tournament import Tournament
@@ -280,7 +280,6 @@ class GameBackend:
 			else:
 				return color
 		except:
-			logging.getLogger('game').warn(f"no color found in settings defaulting to cyan")
 			return "#00BDD1"
 
 	async def broadcast_state(self):
@@ -484,7 +483,7 @@ class GameBackend:
 			self.logger.info(f"Error {e}")
 
 	async def check_classic_achievement(self):
-		if (self.is_ranked):
+		if (self.is_ranked or self.tournament):
 			await self.check_remontada()
 			await self.check_big_remontada()
 			await self.check_flawless_victory()
@@ -492,7 +491,7 @@ class GameBackend:
 			await self.check_wins()
 	
 	async def check_rumble_achievement(self):
-		if (self.is_ranked):
+		if (self.is_ranked or self.tournament):
 			await self.check_remontada()
 			await self.check_big_remontada()
 			await self.check_flawless_victory()

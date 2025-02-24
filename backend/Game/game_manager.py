@@ -51,7 +51,7 @@ class GameManager:
 		#TODO uncomment
 		#self.logger.info(f"currentGame {user.current_game_id}")
 		#self.logger.info(self.games)
-		#if (user.is_playing and self.games and self.games[user.current_game_id]):
+		#if (user.playing and self.games and self.games[user.current_game_id]):
 		#	return (self.games[user.current_game_id])
 	#	if user.current_game_id != -1:
 		#		return self.games.get(user.current_game_id, None)
