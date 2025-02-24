@@ -1,3 +1,5 @@
+import GameComponent from "../game/GameComponents.js";
+
 export default class PlayView {
 	constructor(container) {
 		this.container = container;
@@ -16,6 +18,8 @@ export default class PlayView {
 		window.app.initChat();
 		this.checkForBackdrop();
 		this.addEventListeners();
+		console.log("PlayView initialized");
+		new GameComponent(this.container.querySelector("#gameContainer"));
 	}
 
 	async render() {
@@ -78,6 +82,7 @@ export default class PlayView {
 				</div>
 			</main>
 			<div id="chatBoxContainer"></div>
+			<div id="gameContainer"></div>
 		`;
 	}
 

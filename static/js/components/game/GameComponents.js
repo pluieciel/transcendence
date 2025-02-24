@@ -7,6 +7,7 @@ export default class GameComponent {
 
 		this.render();
 		this.addEventListeners();
+		console.log("GameComponent initialized");
 	}
 
 	render() {
