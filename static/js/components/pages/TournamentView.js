@@ -270,13 +270,52 @@ export default class TournamentView {
 						<button type="submit" id="leave-button"><i class="fa-solid fa-user-minus"></i> Leave</button>
 					</div>
 				</div>
-				<div id="tournament-tree" class="card">
-					<h2 id="card-title"><i class="fa-solid fa-sitemap"></i> TOURNAMENT TREE</h2>
-					<div id="tournament-tree-content"></div>
-					<button type="submit" id="ready-button"><i class="fa-solid fa-user-plus"></i> Ready</button>
+				<div id="tournament-tree-card" class="card">
+					<table id="tournament-tree">
+						<tr id="winner-node">
+							<td colspan="4">user8</td>
+						</tr>
+						<tr id="final-node">
+							<td colspan="4">user3 vs user8</td>
+						</tr>
+						<tr id="semi-final-node">
+							<td colspan="2">user2 vs user3</td>
+							<td colspan="2">user5 vs user8</td>
+						</tr>
+						<tr id="quarter-node">
+							<td>user1 vs user2</td>
+							<td>user3 vs user4</td>
+							<td>user5 vs user6</td>
+							<td>user7 vs user8</td>
+						</tr>
+					</table>
 				</div>
 			</main>
 		`;
+	}
+
+	truc() {
+		return `
+			<div class="game-history-item">
+				<div id="game-history-middle">
+					<div id="player-left-history-avatar">
+						<button id="" data-redirect-to="/profiles/user2">
+							<img src="/imgs/default_avatar.png" class="avatar player-avatar">
+							<button id="" data-redirect-to="/profiles/user2">user2</button>
+						</button>
+					</div>
+					<div id="game-middle-info">
+						<div id="game-history-score">10 - 5</div>
+						<i class="fa-solid fa-eye"></i>
+					</div>
+					<div id="player-right-history-avatar">
+						<button id="" data-redirect-to="/profiles/user1">
+							<img src="/imgs/default_avatar.png" class="avatar player-avatar">
+							<button id="" data-redirect-to="/profiles/user1">user1</button>
+						</button>
+					</div>
+				</div>
+			</div>`
 	}
 
 	addEventListeners() {
