@@ -24,15 +24,15 @@ export default class GameView {
 	render() {
 		this.container.innerHTML = `
 			<div id="gameDiv">
+				<div id="waitingMessage" class="waiting-message">No game found</div>
 				<div class="outer" id="banner">
 					<div class="title" id="bannerTitle">Title Placeholder</div>
 					<div class="description" id="bannerDescription">Description placeholder that is long</div>
 				</div>
-				<div class="my-modal-background" style="display: flex">
+				<div class="my-modal-background">
 					<div id="game-summary-modal" class="my-modal">
 						<div class="modal-header">
 							<h5 class="modal-title"><i class="fa-solid fa-clock-rotate-left"></i>&nbsp; Game Summary</h5>
-							<i class="modal-quit fa-solid fa-xmark fa-xl"></i>
 						</div>
 						<div class="my-modal-content">
 							<div id="game-summary-info">
@@ -128,10 +128,8 @@ export default class GameView {
 	}
 
 	onGameEnd(winnerName, winnerUser, winnerAvatar, scoreLeft, scoreRight, eloChange, tournament) {
-		console.log("game end called");
-		const overlay = document.querySelector("#overlay");
-		let username = sessionStorage.getItem("username");
-		overlay.style.display = "flex";
+		const gameSummaryModal = document.getElementById('game-summary-modal');
+		gameSummaryModal.parentElement.style.display = 'flex';
 		document.querySelector("#winner-name").textContent = `Winner: ${winnerName}`;
 		document.querySelector("#winner-avatar").src = winnerAvatar;
 		document.querySelector("#score-text").textContent = `Final Score: ${scoreLeft} - ${scoreRight}`;
