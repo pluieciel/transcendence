@@ -41,6 +41,14 @@ class SignupConsumer(AsyncHttpConsumer):
 				return await self.send_response(400, json.dumps(response_data).encode(),
 					headers=[(b"Content-Type", b"application/json")])
 
+			if "admin" in username.lower():
+				response_data = {
+					'success': False,
+					'message': 'Admin as username is forbidden'
+				}
+				return await self.send_response(400, json.dumps(response_data).encode(),
+					headers=[(b"Content-Type", b"application/json")])
+
 			if not password:
 				response_data = {
 					'success': False,
