@@ -1729,6 +1729,10 @@ form button:hover:not(:disabled) {
 	border-radius: 0.3rem;
 }
 
+#tournament-tree tr {
+	height: 5.5rem;
+}
+
 /* #tournament-tree {
 	border-collapse: separate;
 	border-spacing: 1rem;
@@ -1750,6 +1754,14 @@ form button:hover:not(:disabled) {
 #tournament-tree td {
 	background-color: var(--primary-color);
 	text-align: center;
+	padding: 1rem;
+}
+
+.truc {
+	width: 100%;
+	height: 5.5rem;
+	background-color: var(--selector-color);
+	border-radius: 0.3rem;
 }
 
 #final-node, #winner-node td {
