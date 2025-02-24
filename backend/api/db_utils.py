@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from channels.db import database_sync_to_async
 import logging
+import json
 from django.utils import timezone
 
 @database_sync_to_async
@@ -193,3 +194,20 @@ def update_achievement_progression(user, name, progression):
 def get_users():
 	User = get_user_model()
 	return list(User.objects.values('username'))
+
+async def sendResponse(http, success, message, code):
+	response_data = {
+		'success': success,
+		'message': message
+	}
+	return await http.send_response(code, json.dumps(response_data).encode(),
+		headers=[(b"Content-Type", b"application/json")])
+
+async def sendBadJWT(http):
+	response_data = {
+		'success': False,
+		'is_jwt_valid': False,
+		'message': 'Invalid JWT'
+	}
+	return await http.send_response(401, json.dumps(response_data).encode(),
+		headers=[(b"Content-Type", b"application/json")])

@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from django.core.cache import cache
 from channels.generic.http import AsyncHttpConsumer
 from channels.db import database_sync_to_async
-from api.db_utils import get_user_exists
+from api.db_utils import get_user_exists, sendResponse
 from api.utils import get_secret_from_file, is_valid_password, sha256_hash, parse_multipart_form_data
 import json
 import re
@@ -34,74 +34,34 @@ class SignupConsumer(AsyncHttpConsumer):
 			recaptcha_token = data.get('recaptcha_token')
 
 			if not username:
-				response_data = {
-					'success': False,
-					'message': 'Username required'
-				}
-				return await self.send_response(400, json.dumps(response_data).encode(),
-					headers=[(b"Content-Type", b"application/json")])
+				return await sendResponse(self, False, "Username required", 400)
 
 			if "admin" in username.lower():
-				response_data = {
-					'success': False,
-					'message': 'Admin as username is forbidden'
-				}
-				return await self.send_response(400, json.dumps(response_data).encode(),
-					headers=[(b"Content-Type", b"application/json")])
+				return await sendResponse(self, False, "Admin as username is forbidden", 400)
 
 			if not password:
-				response_data = {
-					'success': False,
-					'message': 'Password required'
-				}
-				return await self.send_response(400, json.dumps(response_data).encode(),
-					headers=[(b"Content-Type", b"application/json")])
+				return await sendResponse(self, False, "Password required", 400)
 			
 			if not confirm_password:
-				response_data = {
-					'success': False,
-					'message': 'Confirm password required'
-				}
-				return await self.send_response(400, json.dumps(response_data).encode(),
-					headers=[(b"Content-Type", b"application/json")])
+				return await sendResponse(self, False, "Confirm password required", 400)
 
 			if not (self.is_valid_username(username)):
-				response_data = {
-					'success': False,
-					'message': 'Username invalid: \
-								must be 1-16 characters long, \
-								and contain only letters or digits'
-				}
-				return await self.send_response(400, json.dumps(response_data).encode(),
-					headers=[(b"Content-Type", b"application/json")])
+				return await sendResponse(self, False, "Username invalid: must be 1-16 characters long, and contain only letters or digits", 400)
 
 			if password != confirm_password:
-				response_data = {
-					'success': False,
-					'message': 'Passwords do not match'
-				}
-				return await self.send_response(400, json.dumps(response_data).encode(),
-					headers=[(b"Content-Type", b"application/json")])
+				return await sendResponse(self, False, "Passwords do not match", 400)
 			
 			if not is_valid_password(password):
-				response_data = {
-					'success': False,
-					'message': 'Password invalid: \
-								must be 8-32 characters long, \
-								contain at least one lowercase letter, \
-								one uppercase letter,\n one digit, \
-								and one special character from @$!%*?&'
-				}
-				return await self.send_response(400, json.dumps(response_data).encode(),
-					headers=[(b"Content-Type", b"application/json")])
+				return await sendResponse(self, False, "Password invalid: must be 8-32 characters long, contain at least one lowercase letter, one uppercase letter,\n one digit, and one special character from @$!%*?&", 400)
 
 			if await get_user_exists(username):
-				response_data = {
-					'success': False,
-					'message': 'Username already exists'
-				}
-				return await self.send_response(400, json.dumps(response_data).encode(),
-					headers=[(b"Content-Type", b"application/json")])
+				return await sendResponse(self, False, "Username already exists", 400)
+
+			if not recaptcha_token:
+				return await sendResponse(self, False, "Please verify that you are not a robot", 400)
+
+			if not response.json()['success']:
+				return await sendResponse(self, False, "01100110 01110101 01100011 01101011 00100000 01111001 01101111 01110101 00100000 01110010 01101111 01100010 01101111 01110100", 400)
 
 			if avatar:
 				image_bytes = avatar.file.read()
@@ -111,14 +71,6 @@ class SignupConsumer(AsyncHttpConsumer):
 				img_byte_arr.seek(0)
 				avatar.file = img_byte_arr 
 
-			if not recaptcha_token:
-				response_data = {
-					'success': False,
-					'message': 'Please verify that you are not a robot'
-				}
-				return await self.send_response(400, json.dumps(response_data).encode(),
-					headers=[(b"Content-Type", b"application/json")])
-
 			url = 'https://www.google.com/recaptcha/api/siteverify'
 			params = {
 				'secret': get_secret_from_file('RECAPTCHA_CLIENT_SECRET_FILE'),
@@ -127,32 +79,12 @@ class SignupConsumer(AsyncHttpConsumer):
 			}
 			response = requests.post(url, data=params)
 
-			if not response.json()['success']:
-				response_data = {
-					'success': False,
-					'message': '01100110 01110101 01100011 01101011 00100000 01111001 01101111 01110101 00100000 01110010 01101111 01100010 01101111 01110100'
-				}
-				return await self.send_response(401, json.dumps(response_data).encode(),
-					headers=[(b"Content-Type", b"application/json")])
-
 			await self.create_user(username, password, avatar)
 
-			response_data = {
-				'success': True,
-				'message': 'Signup successful'
-			}
-
-			return await self.send_response(201,
-				json.dumps(response_data).encode(),
-				headers=[(b"Content-Type", b"application/json")])
+			return await sendResponse(self, True, "Signup successful", 201)
 
 		except Exception as e:
-			response_data = {
-				'success': False,
-				'message': str(e)
-			}
-			return await self.send_response(500, json.dumps(response_data).encode(),
-				headers=[(b"Content-Type", b"application/json")])
+			return await sendResponse(self, False, str(e), 500)
 
 	def is_valid_username(self, username):
 		regex = r'^[a-zA-Z0-9]{1,16}$'

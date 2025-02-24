@@ -1,5 +1,6 @@
 from channels.generic.http import AsyncHttpConsumer
 from api.utils import get_secret_from_file
+from api.db_utils import sendResponse
 import json
 
 class RecaptchaConsumer(AsyncHttpConsumer):
@@ -14,9 +15,4 @@ class RecaptchaConsumer(AsyncHttpConsumer):
 			return await self.send_response(200, json.dumps(response_data).encode(),
 				headers=[(b"Content-Type", b"application/json")])
 		except Exception as e:
-			response_data = {
-				'success': False,
-				'message': str(e)
-			}
-			return await self.send_response(500, json.dumps(response_data).encode(),
-				headers=[(b"Content-Type", b"application/json")])
+			return await sendResponse(self, False, "User not found", 404)
