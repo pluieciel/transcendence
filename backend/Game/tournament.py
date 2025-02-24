@@ -4,6 +4,7 @@ from .game_manager import GameManager
 from channels.db import database_sync_to_async
 from django.contrib.auth import get_user_model
 from channels.layers import get_channel_layer
+from api.db_utils import user_update_tournament
 import logging
 import time
 import asyncio
@@ -104,6 +105,7 @@ class Tournament:
 				self.logger.info("Player was already inside the list of players")
 				return False
 		self.players.append(self.Player(user, channel_name))
+		await user_update_tournament(user, True)
 		self.logger.warn(f"User {user.username} appended to the list of players")
 		if (len(self.players) == self.size):
 			self.logger.warn(f"Player count reached the size of the tournament, starting tournament")
@@ -125,12 +127,14 @@ class Tournament:
 			if player.user == user:
 				if (self.state == 'waiting'):
 					self.players.remove(player)
+					await user_update_tournament(user, False)
 					self.logger.warn(f"Tournament was in waiting state, removing player")
 					if len(self.players) == 0:
 						self.state = 'finished'
 						self.logger.warn(f"Player count reached 0, finishing the tournament")
 				elif (self.state == 'starting'):
 					self.players.remove(player)
+					await user_update_tournament(user, False)
 					self.asyncioCreateTask.cancel()
 					self.state = 'waiting'
 					self.logger.warn(f"Tournament was starting, removing the player and canceling tournament start")
@@ -150,6 +154,7 @@ class Tournament:
 					self.logger.info(f"Player gave up while playing, disconnecting player from game {game.game_id}")
 					await game_manager.games[game.game_id].player_disc(player.user)
 					await self.send_tournament_update()
+					await user_update_tournament(player.user, False)
 				elif game.state == 'waiting':
 					self.logger.info(f"Game didnt start yet calling game ended")
 					await self.gameEnded(game.game_id, 0, 0, game.player_left if game.player_right == player else game.player_right)

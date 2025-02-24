@@ -40,7 +40,6 @@ export default class GameComponent {
 		const gameModeCheckbox = document.getElementById("game-mode-checkbox");
 		const gameTypeCheckbox = document.getElementById("game-type-checkbox");
 		
-		
 		playButton.addEventListener("click", () => {
 			const searchGameModal = document.getElementById('search-game-modal');
 			const gameSearchMode = document.getElementById('game-search-mode');
@@ -106,8 +105,14 @@ export default class GameComponent {
 
 		window.app.gamews.onmessage = (event) => {
 			const events = JSON.parse(event.data);
+			console.log(events);
+			console.log(events.message_type);
 			if (events.message_type === "init") {
 				this.redirectToGame(events);
+			}
+			else if(events.type === 'handle_error')
+			{
+				alert(events.message);
 			}
 		};
 
@@ -117,8 +122,10 @@ export default class GameComponent {
 			sessionStorage.setItem("ingame", "true");
 		};
 
-		window.app.gamews.onclose = () => {
+		window.app.gamews.onclose = (event) => {
+			console.log(event);
 			console.log("Disconnected from server");
+			console.log(event.wasClean);
 			window.app.ingame = false;
 			sessionStorage.setItem("ingame", "false");
 		};

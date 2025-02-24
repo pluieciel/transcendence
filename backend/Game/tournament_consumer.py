@@ -17,7 +17,7 @@ from copy import deepcopy
 from api.utils import jwt_to_user
 from .tournament import Tournament
 
-
+active_connections = {}
 tournament = Tournament.get_instance()
 
 class TournamentConsumer(AsyncWebsocketConsumer):
@@ -29,15 +29,28 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 
 	async def connect(self):
 		self.logger.info("Connected to tournament websocket")
+
 		user = await jwt_to_user(self.scope['headers'])
 		self.user = user
 		if not self.user:
+			await self.accept()
 			await self.send(text_data=json.dumps({
 				"type": "handle_error",
 				"message": "Invalid JWT"
 			}))
+			await self.close()
 			return
+		if (user.id in active_connections):
+			await self.accept()
+			await self.send(text_data=json.dumps({
+					"type": "handle_error",
+					"message": "Multiple connections, connection refused"
+			}))
+			await self.close()
+			return
+		
 		await self.accept()
+		active_connections[user.id] = self
 		await self.channel_layer.group_add("updates", self.channel_name)
 		if (tournament.isPlayer(self.user, self.channel_name)):
 			self.logger.info("New connection was already a player, adding to player channel")
@@ -74,7 +87,8 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 			print(f"Error handling message: {e}")
 
 	async def disconnect(self, close_code):
-		pass
+		if self.user.id in active_connections:
+			del active_connections[self.user.id]
 
 
 	async def tournament_update(self, event):

@@ -3,7 +3,6 @@ export default class TournamentView {
 		this.container = container;
 		this.username = window.app.state.username;
 		this.init();
-		this.timerInterval = null;
 	}
 
 	async init() {
@@ -44,11 +43,6 @@ export default class TournamentView {
 				const roomCardTournament = document.getElementById("tournament-room-card");
 				events.state === 'finished'? createCardTournament.style.display = 'flex' : createCardTournament.style.display = 'none';
 				events.state !== 'finished'? roomCardTournament.style.display = 'flex' : roomCardTournament.style.display = 'none';
-
-				if (events.state == 'starting')
-				{
-					this.startTimer(events.start_time);
-				}
 			}
 			else if (events.type === "start_game") {
 				const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
@@ -62,40 +56,6 @@ export default class TournamentView {
 			console.error("WebSocket error:", error);
 			alert("Connection error! Please try again.");
 		};
-	}
-
-
-	startTimer(start_time) {
-		this.updateTimerDisplay(start_time)
-
-	}
-
-	updateTimerDisplay(start_time) {
-		console.log('Start time : ' + start_time);
-		const currentTime = Date.now(); 
-		console.log('Current time : ' + currentTime);
-		
-		// Convert start_time to milliseconds
-		const startTimeInMilliseconds = start_time * 1000; // Convert seconds to milliseconds
-		const remainingTime = Math.max(0, Math.floor((startTimeInMilliseconds - currentTime) / 1000));
-		console.log('Remaining time : ' + remainingTime);
-	
-		const timerElement = document.getElementById("waiting-room-timer");
-		const minutes = Math.floor(remainingTime / 60);
-		const seconds = remainingTime % 60;
-		timerElement.innerHTML = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-	
-		if (remainingTime > 0) {
-			this.timerInterval = setTimeout(() => this.updateTimerDisplay(start_time), 1000);
-		} else {
-			clearInterval(this.timerInterval);
-			timerElement.innerHTML = "Time's up!";
-		}
-	}
-
-	handleTimerDone() {
-		const timerElement = document.getElementById("waiting-room-timer");
-		timerElement.innerHTML = "Time's up!";
 	}
 
 	updateTournamentTree(games) {
@@ -260,7 +220,6 @@ export default class TournamentView {
 							<div id="waiting-room-info">
 								<div id="waiting-room-total-players"></div>
 								<div id="waiting-room-tournament-game-mode"><i class="fa-solid fa-bolt"></i>&nbsp; Rumble</div>
-								<div id="waiting-room-timer">00:00</div>
 							</div>
 							<div id="tournament-state"><i class="fa-solid fa-hourglass-half fa-spin"></i>&nbsp; Waiting for players...</div>
 							<div id="waiting-room-content">
@@ -274,20 +233,36 @@ export default class TournamentView {
 				<div id="tournament-tree-card" class="card">
 					<table id="tournament-tree">
 						<tr id="winner-node">
-							<td colspan="4">user8</td>
+							<td colspan="4">
+								<div class="truc"></div>
+							</td>
 						</tr>
 						<tr id="final-node">
-							<td colspan="4">user3 vs user8</td>
+							<td colspan="4">
+								<div class="truc"></div>
+							</td>
 						</tr>
 						<tr id="semi-final-node">
-							<td colspan="2">user2 vs user3</td>
-							<td colspan="2">user5 vs user8</td>
+							<td colspan="2">
+								<div class="truc"></div>
+							</td>
+							<td colspan="2">
+								<div class="truc"></div>
+							</td>
 						</tr>
 						<tr id="quarter-node">
-							<td>user1 vs user2</td>
-							<td>user3 vs user4</td>
-							<td>user5 vs user6</td>
-							<td>user7 vs user8</td>
+							<td>
+								<div class="truc"></div>
+							</td>
+							<td>
+								<div class="truc"></div>
+							</td>
+							<td>
+								<div class="truc"></div>
+							</td>
+							<td>
+								<div class="truc"></div>
+							</td>
 						</tr>
 					</table>
 				</div>

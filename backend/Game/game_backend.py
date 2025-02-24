@@ -193,11 +193,11 @@ class GameBackend:
 
 			if self.player_left:
 				self.logger.info(f"Resetting left player: {self.player_left.user.username}")
-				await user_update_game(self.player_left.user, isplaying=False, game_id=-1)
+				await user_update_game(self.player_left.user, False, game_id=-1)
 
 			if self.player_right and self.bot == 0:
 				self.logger.info(f"Resetting right player: {self.player_right.user.username}")
-				await user_update_game(self.player_right.user, isplaying=False, game_id=-1)
+				await user_update_game(self.player_right.user, False, game_id=-1)
 
 			if self.tournament:
 				from .tournament import Tournament
@@ -280,7 +280,6 @@ class GameBackend:
 			else:
 				return color
 		except:
-			logging.getLogger('game').warn(f"no color found in settings defaulting to cyan")
 			return "#00BDD1"
 
 	async def broadcast_state(self):
@@ -358,6 +357,20 @@ class GameBackend:
 		except Exception as e:
 			self.logger.info(f"Error {e}")
 
+	def getUserAvatar(self, user):
+		if (user.avatar_42):
+			return user.avatar_42
+		elif (user.avatar):
+			return user.avatar.url
+		else:
+			return '/imgs/default_avatar.png'
+	
+	def getUserName(self, user):
+		if (user.display_name):
+			return user.display_name
+		else:
+			return user.username
+
 	async def rumble_broadcast_state(self):
 		events = []
 		if self.game.scored:
@@ -382,24 +395,26 @@ class GameBackend:
 			})
 			self.game.scored = False
 		if self.game.ended:
-			if (self.game.winner.avatar_42):
-				avatar = self.game.winner.avatar_42
-			elif (self.game.winner.avatar):
-				avatar = self.game.winner.avatar.url
+			avatar = self.getUserAvatar(self.game.winner)
+			username = self.getUserName(self.game.winner)
+			if self.game.winner is self.player_left.user:
+				side = "LEFT"
+			elif self.game.winner is self.player_right.user:
+				side = "RIGHT"
 			else:
-				avatar = '/imgs/default_avatar.png'
+				self.logger.info("Unknown winner")
 
-			self.logger.info(f"Appending winner info with {self.game.winner.username}")
-			if (self.game.winner.display_name):
-				username = self.game.winner.display_name
-			else:
-				username = self.game.winner.username
 			events.append({
 				"type": "game_end",
 				"winnerName": username,
+				"winner" : side,
 				"winnerUser" : self.game.winner.username,
 				"winnerAvatar": avatar,
+				"playerLeftName" : self.getUserName(self.player_left.user),
+				"playerLeftAvatar" : self.getUserAvatar(self.player_left.user),
 				"scoreLeft": self.game.player_left.score,
+				"playerRightName" : self.getUserName(self.player_right.user),
+				"playerRightAvatar" : self.getUserAvatar(self.player_right.user),
 				"scoreRight": self.game.player_right.score,
 				"eloChange": self.elo_change,
 				"tournament": self.tournament
@@ -484,7 +499,7 @@ class GameBackend:
 			self.logger.info(f"Error {e}")
 
 	async def check_classic_achievement(self):
-		if (self.is_ranked):
+		if (self.is_ranked or self.tournament):
 			await self.check_remontada()
 			await self.check_big_remontada()
 			await self.check_flawless_victory()
@@ -492,7 +507,7 @@ class GameBackend:
 			await self.check_wins()
 	
 	async def check_rumble_achievement(self):
-		if (self.is_ranked):
+		if (self.is_ranked or self.tournament):
 			await self.check_remontada()
 			await self.check_big_remontada()
 			await self.check_flawless_victory()
