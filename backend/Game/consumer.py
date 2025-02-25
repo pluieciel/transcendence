@@ -102,6 +102,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 			self.game.assign_player(user, self.channel_name)
 			await user_update_game(self.user, True, game_id=self.game.game_id)
 			await self.accept()
+			self.logger.info("User accepted")
 
 			await self.channel_layer.group_add(str(self.game.game_id), self.channel_name)
 
@@ -175,6 +176,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 			self.game.channel_layer = self.channel_layer
 			self.game.assign_player(user, self.channel_name)
 			await user_update_game(self.user, True, self.game.game_id)
+			self.logger.info("User accepted")
 			await self.accept()
 
 			await self.channel_layer.group_add(str(self.game.game_id), self.channel_name)

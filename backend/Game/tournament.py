@@ -307,7 +307,7 @@ class Tournament:
 					self.logger.info(f"Winner is player right, {game.player_left.user.username} lost, {game.player_right.user.username} wins")
 				else:
 					self.logger.info('Game ended no winenr match')
-				self.logger.info(f"Game {game_id} ended with {game.score_left} - {game.score_right}, the winner is {winner}")
+				self.logger.info(f"Game {game_id} ended with {game.score_left} - {game.score_right}, the winner is {winner.username}")
 				await self.checkForNextRound()
 				return
 				
@@ -391,9 +391,9 @@ class Tournament:
 			"start_time": self.startTime,
 			"winner" : self.winner,
 			"winnerName": self.getUserName(self.winner.user) if self.winner and self.winner.user else None,
-			"winnerUserName": self.winner.user.username if self.winner and self.winner.user else None,
+			"winnerUsername": self.winner.user.username if self.winner and self.winner.user else None,
 			"winnerAvatar": self.getUserAvatar(self.winner.user) if self.winner and self.winner.user else None,
-			"players": player_data,
+			"players": player_data if player_data else None,
 			"games": [
 				{
 					"player_left": {
