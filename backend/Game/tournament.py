@@ -143,6 +143,7 @@ class Tournament:
 					await self.giveUp(player)
 				else:
 					self.logger.info("Tournament is in unknown state")
+				await self.send_tournament_update()
 				return True
 		await self.send_tournament_update()	
 		return False
