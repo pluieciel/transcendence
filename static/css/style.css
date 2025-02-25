@@ -198,8 +198,9 @@
 
 /* Footer */
 .card-footer {
-	flex-shrink: 0; /* Prevent footer from shrinking */
-	height: 40px; /* Set explicit height for footer */
+	flex-shrink: 0;
+	height: 40px;
+	margin-bottom: 0.5rem;
 }
 
 .chat-message {
@@ -266,11 +267,9 @@
 	color: #888;
 }
 
-.sendButton {
-	color: white;
-	border: none;
-	border-radius: 4px;
-	cursor: pointer;
+#sendButton {
+    height: 3rem;
+    border-radius: 0;
 }
 
 .OAuth {
