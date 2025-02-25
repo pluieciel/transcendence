@@ -217,10 +217,10 @@ class GameConsumer(AsyncWebsocketConsumer):
 			await self.channel_layer.group_discard(str(self.game.game_id), self.channel_name)
 			return
 		if (self.game and self.game.game_id):
+			await user_update_game(self.user, False, game_id=-1)
 			if (self.game.is_full()):
 				await self.channel_layer.group_discard(str(self.game.game_id), self.channel_name)
 				self.logger.info(f"Disconnecting user {self.user.username}")
-				await user_update_game(self.user, False, game_id=-1)
 				await self.game.player_disc(self.user)
 			else:
 				self.logger.info(f"Deleting game n {self.game.game_id}")
