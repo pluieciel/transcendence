@@ -62,6 +62,18 @@
     is_42_avatar_used: true
     avatar_42: https://cdn.intra.42.fr/users/d8221528b165c21340f94f59f223807f/yuzhao.jpg
     created_at: "2025-01-01T00:00:00Z"
+- model: api.user
+  pk: 9
+  fields:
+    username: user5
+    password: pbkdf2_sha256$600000$anoz2ImzZApp8TTDKN0Qee$0l6fCE+Zdp7JTga58XkuPsr+q9Wr3XTf7YQ349T1d0w=
+    created_at: "2025-01-01T00:00:00Z"
+- model: api.user   
+  pk: 10
+  fields:
+    username: user6
+    password: pbkdf2_sha256$600000$anoz2ImzZApp8TTDKN0Qee$0l6fCE+Zdp7JTga58XkuPsr+q9Wr3XTf7YQ349T1d0w=
+    created_at: "2025-01-01T00:00:00Z"
 - model: api.userpreference
   pk: 1
   fields:

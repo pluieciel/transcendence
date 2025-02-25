@@ -4,6 +4,7 @@ export default class TournamentView {
 		this.username = window.app.state.username;
 		this.init();
 		this.timerInterval = null;
+		this.timerIntervalReady = null;
 	}
 
 	async init() {
@@ -48,27 +49,80 @@ export default class TournamentView {
 				events.state === 'finished'? createCardTournament.style.display = 'flex' : createCardTournament.style.display = 'none';
 				events.state !== 'finished'? roomCardTournament.style.display = 'flex' : roomCardTournament.style.display = 'none';
 				console.log(events.state);
+				
+				let inTournament = false;
+				let isReady = false;
+				let isLost = false;
+				if (events.players)
+				{
+					events.players.forEach(player => 
+						{
+							if (player.username === window.app.state.username)
+							{
+								isReady = player.ready;
+								isLost = player.lost;
+								inTournament = !isLost;
+							}
+						}
+					);
+				}
 				if (events.state == 'waiting')
 				{
-					console.log("HERHEHHR");
 					document.getElementById('tournament-state').innerHTML = `<i class="fa-solid fa-hourglass-half fa-spin"></i>&nbsp; Waiting for players...`
-					document.getElementById('leave-button').style.display = 'block';
+					if (inTournament)
+					{
+						document.getElementById('join-button').style.display = 'none';
+						document.getElementById('leave-button').style.display = 'block';
+					}
+					else
+					{
+						document.getElementById('leave-button').style.display = 'none';
+						document.getElementById('join-button').style.display = 'block';
+					}
+					document.getElementById('ready-button').style.display = 'none';
 					document.getElementById('forfeit-button').style.display = 'none';
+
 				}
 				else if (events.state == 'starting')
 				{
 					this.startTimer(events.start_time)
-					document.getElementById('leave-button').style.display = 'block';
+					if (inTournament)
+					{
+						document.getElementById('leave-button').style.display = 'block';
+					}
+					else
+					{
+						document.getElementById('leave-button').style.display = 'none';
+					}
 					document.getElementById('forfeit-button').style.display = 'none';
 				}
 				else if (events.state == 'playing')
 				{
 					document.getElementById('tournament-state').innerHTML = `<i class="fa-solid fa-gamepad"></i> Tournament in progress`;
-					document.getElementById('forfeit-button').style.display = 'block';
-					document.getElementById('leave-button').style.display = 'none';
-				}
-				{
-					console.log("asoidhsaoihd " + events.state);
+					if (inTournament)
+					{
+						document.getElementById('forfeit-button').style.display = 'block';
+						document.getElementById('leave-button').style.display = 'none';
+						if (!isReady)
+						{
+							document.getElementById('ready-button').disabled = false;
+							this.startTimerReady(events.give_up_end_time);
+						}
+						else
+						{
+							this.clearIntervalReady();
+							document.getElementById('ready-button').disabled = true;
+							document.getElementById('ready-button').innerHTML = `<i class="fa-regular fa-circle-check"></i> You are ready`;
+						}
+
+					}
+					else
+					{
+						document.getElementById('forfeit-button').style.display = 'none';
+						document.getElementById('leave-button').style.display = 'none';
+						document.getElementById('ready-button').style.display = 'none';
+						document.getElementById('join-button').style.display = 'none';
+					}
 				}
 				let gameSize = 0;
 				if (events.state != 'playing')
@@ -166,8 +220,40 @@ export default class TournamentView {
 		};
 	}
 
+	startTimerReady(start_time) {
+		this.updateTimerDisplayReady(start_time)
+
+	}
+
+	updateTimerDisplayReady(start_time) {
+		console.log('Start time : ' + start_time);
+		const currentTime = Date.now(); 
+		console.log('Current time : ' + currentTime);
+		
+		// Convert start_time to milliseconds
+		const startTimeInMilliseconds = start_time * 1000; // Convert seconds to milliseconds
+		const remainingTime = Math.max(0, Math.floor((startTimeInMilliseconds - currentTime) / 1000));
+		console.log('Remaining time : ' + remainingTime);
+	
+		const timerElement = document.getElementById('ready-button');
+		const minutes = Math.floor(remainingTime / 60);
+		const seconds = remainingTime % 60;
+		timerElement.innerHTML = `<i class="fa-regular fa-circle-check"></i> Not ready [${minutes}:${seconds < 10 ? '0' : ''}${seconds}]`;
+	
+		if (remainingTime > 0) {
+			this.timerIntervalReady = setTimeout(() => this.updateTimerDisplayReady(start_time), 1000);
+		} else {
+			clearInterval(this.timerIntervalReady);
+		}
+	}
+
+	handleTimerDoneReady() {
+		const timerElement = document.getElementById('ready-button');
+		timerElement.innerHTML = `<i class="fa-regular fa-circle-check"></i> Ready`
+	}
+
 	startTimer(start_time) {
-		this.updateTimerDisplay(start_time)
+		this.updateTimerDisplayReady(start_time)
 
 	}
 
