@@ -140,10 +140,10 @@ export default class GameView {
 		score.innerHTML = event.scoreLeft + " - " + event.scoreRight;
 
 		playerLeftAvatar.insertAdjacentHTML("beforeend", `
-			<${event.bot ? 'div' : 'button'} id="player-left-redirect">
+			<button id="player-left-redirect">
 				<img src="${event.playerLeftAvatar}" class="avatar player-avatar">
 				${this.getPlayerWinner(event.winner, "LEFT")}
-			</${event.bot ? 'div' : 'button'}>`);
+			</button}>`);
 
 		playerRightAvatar.insertAdjacentHTML("beforeend", `
 			<${event.bot ? 'div' : 'button'} id="player-right-redirect">
@@ -152,9 +152,9 @@ export default class GameView {
 			</${event.bot ? 'div' : 'button'}>`);
 
 		playerLeftSummaryName.insertAdjacentHTML("beforeend", `
-			<${event.bot ? 'div' : 'button'} id="player-left-name-redirect">
+			<button id="player-left-name-redirect">
 				${event.playerLeftName}
-			</${event.bot ? 'div' : 'button'}>`);
+			</button}>`);
 
 		playerRightSummaryName.insertAdjacentHTML("beforeend", `
 			<${event.bot ? 'div' : 'button'} id="player-right-name-redirect">
@@ -180,21 +180,22 @@ export default class GameView {
 			this.returnToMainMenu(tournament);
 		};
 
+		const playerLeftNameRedirect = document.getElementById('player-left-name-redirect');
+		const playerLeftRedirect = document.getElementById('player-left-redirect');
+
+		playerLeftNameRedirect.onclick = () => {
+			window.app.router.navigateTo(`/profiles/${event.playerLeftUsername}`);
+		};
+
+		playerLeftRedirect.onclick = () => {
+			window.app.router.navigateTo(`/profiles/${event.playerLeftUsername}`);
+		};
+
 		if (!event.bot) {
-			const playerLeftNameRedirect = document.getElementById('player-left-name-redirect');
 			const playerRightNameRedirect = document.getElementById('player-right-name-redirect');
-			const playerLeftRedirect = document.getElementById('player-left-redirect');
 			const playerRightRedirect = document.getElementById('player-right-redirect');
 
-			playerLeftNameRedirect.onclick = () => {
-				window.app.router.navigateTo(`/profiles/${event.playerLeftUsername}`);
-			};
-
 			playerRightNameRedirect.onclick = () => {
-				window.app.router.navigateTo(`/profiles/${event.playerLeftUsername}`);
-			};
-
-			playerLeftRedirect.onclick = () => {
 				window.app.router.navigateTo(`/profiles/${event.playerLeftUsername}`);
 			};
 
