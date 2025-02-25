@@ -54,18 +54,18 @@ export default class TournamentView {
 					}
 					else if (events.games.length == '7')
 					{
-						document.getElementById("tournament-quarter-final").style.display = 'block';
+						document.getElementById("tournament-quarter-final").style.display = 'flex';
 						gameSize = 8;
 					}
 					else
 					{
-						document.getElementById("tournament-quarter-final").style.display = 'block';
+						document.getElementById("tournament-quarter-final").style.display = 'flex';
 						gameSize = 8;
 					}
 				}
 				else if (events.size == 8)
 				{
-					document.getElementById("tournament-quarter-final").style.display = 'block';
+					document.getElementById("tournament-quarter-final").style.display = 'flex';
 					gameSize = 8;
 				}
 				else if (events.size == 4)
