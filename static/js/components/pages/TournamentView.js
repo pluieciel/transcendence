@@ -15,12 +15,14 @@ export default class TournamentView {
 		const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
 		const host = window.location.host;
 		const wsUrl = `${protocol}//${host}/ws/tournament/`;
+		console.log(window.app.tournamentws);
 		this.initializeWebSocket(wsUrl);
 	}
 
 	initializeWebSocket(wsUrl) {
 		if (window.app.tournamentws) {
-			window.app.tournamentws.close(); // Ensure previous connection is closed
+			window.app.tournamentws.close();
+			window.app.tournamentws = undefined;
 		}
 
 		window.app.tournamentws = new WebSocket(wsUrl);
@@ -126,13 +128,17 @@ export default class TournamentView {
 				const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
 				const host = window.location.host;
 				const wsGameUrl = `${protocol}//${host}/ws/game/`;
+				if (window.app.tournamentws)
+				{
+					window.app.tournamentws.close();
+					window.app.tournamentws = undefined;
+				}
 				this.initializeGameWebSocket(wsGameUrl);
 			}
 		};
 
 		window.app.tournamentws.onerror = (error) => {
 			console.error("WebSocket error:", error);
-			alert("Connection error! Please try again.");
 		};
 	}
 
@@ -230,7 +236,11 @@ export default class TournamentView {
 	async redirectToGame(events) {
 		console.log("Redirecting to game");
 		window.app.router.navigateTo("/game");
-		window.app.tournamentws.close();
+		if (window.app.tournamentws)
+		{
+			window.app.tournamentws.close();
+			window.app.tournamentws = undefined;
+		}
 		const gameView = window.app.router.currentComponent;
 		if (gameView && gameView.initializeGame) {
 			gameView.initializeGame(events);

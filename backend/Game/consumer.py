@@ -169,6 +169,9 @@ class GameConsumer(AsyncWebsocketConsumer):
 			tournament_game_id = await game_manager.tournament_player(user)
 			if tournament_game_id:
 				self.logger.info(f"User {user.username} is already in a tournament: {tournament_game_id}")
+				if not game_manager.games[tournament_game_id]:
+					self.logger.error("Game not found in the game manager")
+					return
 				self.game = game_manager.games[tournament_game_id]
 			else:
 				self.game = game_manager.get_player_current_game(user)

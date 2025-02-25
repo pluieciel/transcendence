@@ -204,9 +204,10 @@ class GameBackend:
 				tournament = Tournament.get_instance()
 				self.logger.info(f"Game ended in tournament mode, calling gameEnded in tournament, winner is {self.game.winner.username}")
 				await tournament.gameEnded(self.game_id, self.game.player_left.score, self.game.player_right.score, self.game.winner)
-			self.manager.remove_game(self.game_id)
-			game_history_db = await self.manager.get_game_by_id(self.game_id)
-			await self.manager.set_game_state(game_history_db, 'finished', self.game.player_left.score, self.game.player_right.score)
+			else:
+				self.manager.remove_game(self.game_id)
+				game_history_db = await self.manager.get_game_by_id(self.game_id)
+				await self.manager.set_game_state(game_history_db, 'finished', self.game.player_left.score, self.game.player_right.score)
 
 		except Exception as e:
 			self.logger.error(f"Error in on_game_end: {str(e)}")

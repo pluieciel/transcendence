@@ -142,7 +142,7 @@ class Tournament:
 					self.logger.info("Tournament was playing, calling give up player")
 					await self.giveUp(player)
 				else:
-					self.logger.info("Tournament is in unknown state")
+					self.logger.info(f"Tournament is in unknown state {self.state}")
 				return True
 		await self.send_tournament_update()	
 		return False
@@ -156,8 +156,8 @@ class Tournament:
 					await self.send_tournament_update()
 					await user_update_tournament(player.user, False)
 				elif game.state == 'waiting':
-					self.logger.info(f"Game didnt start yet calling game ended")
-					await self.gameEnded(game.game_id, 0, 0, game.player_left if game.player_right == player else game.player_right)
+					self.logger.info(f"Player gave up before game begins")
+					await self.gameEnded(game.game_id, 0, 0, game.player_left.user if game.player_right.user == player else game.player_right.user)
 					del game_manager.games[game.game_id]
 					self.logger.info(f"Game {game.game_id} deleted")
 					game.game_id = -1
@@ -256,7 +256,7 @@ class Tournament:
 			self.logger.info(f"All games of round {current_round} are finished")
 			if len(winners) == 1:
 				self.state = 'finished'
-				self.winner = winners[0]
+				self.winner = winners[0].user
 				self.logger.info(f"Tournament finished, winner is {winners[0].user.username}")
 			else:
 				self.round += 1
@@ -283,6 +283,10 @@ class Tournament:
 		except Exception as e:
 			self.logger.error(f"Error in create_game_history: {e}")
 			raise
+
+	@database_sync_to_async
+	def get_game_by_id(self, game_id):
+		return self.game_history.objects.get(id=game_id)
 	
 	async def gameEnded(self, game_id, scoreLeft, scoreRight, winner):
 		self.logger.info(f"Game {game_id} ended")
@@ -307,11 +311,21 @@ class Tournament:
 					self.logger.info(f"Winner is player right, {game.player_left.user.username} lost, {game.player_right.user.username} wins")
 				else:
 					self.logger.info('Game ended no winenr match')
+				self.logger.info('a')
+				if (game_id != -1):
+					if (game_manager.games[game_id]):
+						self.logger.info('b')
+						game_manager.remove_game(game_id)
+					self.logger.info('c')
+					game_history_db = await self.get_game_by_id(game_id)
+					self.logger.info(game_history_db)
+					if (game_history_db):
+						self.logger.info('f')
+						await game_manager.set_game_state(game_history_db, 'finished', scoreLeft, scoreRight)
 				self.logger.info(f"Game {game_id} ended with {game.score_left} - {game.score_right}, the winner is {winner.username}")
 				await self.checkForNextRound()
 				return
 				
-	
 	async def setReady(self, user):
 		self.logger.info("Received ready")
 		for game in self.games:
@@ -389,11 +403,11 @@ class Tournament:
 			"mode": self.mode,
 			"round": self.round,
 			"start_time": self.startTime,
-			"winner" : self.winner,
-			"winnerName": self.getUserName(self.winner.user) if self.winner and self.winner.user else None,
-			"winnerUsername": self.winner.user.username if self.winner and self.winner.user else None,
-			"winnerAvatar": self.getUserAvatar(self.winner.user) if self.winner and self.winner.user else None,
-			"players": player_data if player_data else None,
+			"winner" : True if(self.winner) else False,
+			"winnerName": self.getUserName(self.winner) if self.winner else None,
+			"winnerUsername": self.winner.username if self.winner else None,
+			"winnerAvatar": self.getUserAvatar(self.winner) if self.winner else None,
+			"players": player_data if player_data else '',
 			"games": [
 				{
 					"player_left": {

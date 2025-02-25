@@ -91,8 +91,9 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 			print(f"Error handling message: {e}")
 
 	async def disconnect(self, close_code):
-		if self.user.id in active_connections:
-			del active_connections[self.user.id]
+		self.logger.info("Disconnected from tournament websocket")
+		# if self.user.id in active_connections:
+		# 	del active_connections[self.user.id]
 
 
 	async def tournament_update(self, event):
