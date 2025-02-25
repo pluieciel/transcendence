@@ -377,12 +377,11 @@ export default class SettingsView {
 					const totpInput = document.getElementById('totp-input');
 					const totpModal = document.getElementById('totp-modal');
 					totpInput.value = '';
-					totpModal.parentElement.style.display = 'none';
-
+					
 					const response = await fetch('/api/settings/2fa/recovery/generate/');
-
+					
 					const data = await response.json();
-
+					
 					const recoveryCodes = document.getElementById('recovery-codes');
 					recoveryCodes.innerHTML = '';
 					recoveryCodes.append(Object.assign(document.createElement('li'), {textContent: data.recovery_code_1}));
@@ -391,9 +390,10 @@ export default class SettingsView {
 					recoveryCodes.append(Object.assign(document.createElement('li'), {textContent: data.recovery_code_4}));
 					recoveryCodes.append(Object.assign(document.createElement('li'), {textContent: data.recovery_code_5}));
 					recoveryCodes.append(Object.assign(document.createElement('li'), {textContent: data.recovery_code_6}));
-
+					
 					const recoveryModal = document.getElementById('recovery-modal');
 					recoveryModal.parentElement.style.display = 'flex';
+					totpModal.parentElement.style.display = 'none';
 				} else if (response.status === 401 && data.hasOwnProperty('is_jwt_valid') && !data.is_jwt_valid) {
 					window.app.logout();
 				} else if (response.status == 409) {
