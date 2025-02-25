@@ -29,36 +29,53 @@ export default class GameView {
 					<div class="title" id="bannerTitle">Title Placeholder</div>
 					<div class="description" id="bannerDescription">Description placeholder that is long</div>
 				</div>
-				<div id="overlay">
-					<div id="card-end">
-						<div class="card-end-column">
-							<img class="card-end-avatar" src="https://cdn.intra.42.fr/users/6256bf3b76f8634f1e0df573022b0b72/valgrant.JPG" alt="Winner's Avatar" width="100" height="100">
-							<span class="card-end-username">+15</span>
-							<span class="card-end-username">neutrou</span>
+				<div class="my-modal-background">
+					<div id="game-summary-modal" class="my-modal">
+						<div class="modal-header">
+							<h5 class="modal-title"><i class="fa-solid fa-clock-rotate-left"></i>&nbsp; Game Summary</h5>
+						</div>
+						<div class="my-modal-content">
+							<div id="game-summary-info">
+								<div id="game-summary-mode"><i class="fa-solid fa-bolt"></i>&nbsp; Rumble</div>
+								<div id="game-summary-type"><i class="fa-solid fa-ranking-star"></i>&nbsp; Ranked</div>
 							</div>
-							<div class="card-end-column">
-							<span class="card-end-mode"><i class="fa-solid fa-star"></i> CLASSIC <i class="fa-solid fa-star"></i></span>
-							<span class="card-end-row card-end-text">
-							<span class="card-end-score">10</span>
-							<span class="card-end-separator">-</span>
-							<span class="card-end-score">2</span>
-							</span>
-							<button id="returnButton">Return to Main Menu</button>
+							<div id="game-summary">
+								<div id="player-left-summary-name">
+									<button id="player-left-name-redirect" data-redirect-to="/profiles/user2">user2</button>
+								</div>
+								<div id="game-summary-middle">
+									<div id="player-left-avatar">
+										<button id="player-left-redirect" data-redirect-to="/profiles/user2">
+											<img src="/imgs/default_avatar.png" class="avatar player-avatar">
+											<div class="player-loser">LOSER</div>
+										</button>
+									</div>
+									<div id="game-middle-info">
+										<div id="game-summary-score">10 - 5</div>
+										<div id="game-summary-elo"><i class="fa-solid fa-plus-minus fa-xs"></i>&nbsp; 15</div>
+									</div>
+									<div id="player-right-avatar">
+										<button id="player-right-redirect" data-redirect-to="/profiles/user1">
+											<img src="/imgs/default_avatar.png" class="avatar player-avatar">
+											<div class="player-winner">WINNER</div>
+										</button>
+									</div>
+								</div>
+								<div id="player-right-summary-name">
+									<button id="player-right-name-redirect" data-redirect-to="/profiles/user1">user1</button>
+								</div>
 							</div>
-							<div class="card-end-column">
-							<img class="card-end-avatar" src="https://cdn.intra.42.fr/users/6256bf3b76f8634f1e0df573022b0b72/valgrant.JPG" alt="Winner's Avatar" width="100" height="100">
-							<span class="card-end-username">+15</span>
-							<span class="card-end-username">neutrou</span>
+							<button id="return-button" type="submit"><i class="fa-solid fa-rotate-left"></i> Return to Menu</button>
 						</div>
 					</div>
 				</div>
 				<canvas id="gameCanvas"></canvas>
 			</div>
-						`;
+		`;
 	}
 
 	addEventListeners() {
-		const returnButton = document.getElementById("returnButton");
+		const returnButton = document.getElementById("return-button");
 		const gameDiv = document.getElementById("gameDiv");
 
 		if (returnButton) {
@@ -111,10 +128,8 @@ export default class GameView {
 	}
 
 	onGameEnd(winnerName, winnerUser, winnerAvatar, scoreLeft, scoreRight, eloChange, tournament) {
-		console.log("game end called");
-		const overlay = document.querySelector("#overlay");
-		let username = sessionStorage.getItem("username");
-		overlay.style.display = "flex";
+		const gameSummaryModal = document.getElementById('game-summary-modal');
+		gameSummaryModal.parentElement.style.display = 'flex';
 		document.querySelector("#winner-name").textContent = `Winner: ${winnerName}`;
 		document.querySelector("#winner-avatar").src = winnerAvatar;
 		document.querySelector("#score-text").textContent = `Final Score: ${scoreLeft} - ${scoreRight}`;
@@ -129,27 +144,33 @@ export default class GameView {
 		}
 		window.app.gamews.close();
 
-		const returnButton = document.querySelector("#returnButton");
+		const returnButton = document.querySelector("#return-button");
 		returnButton.style.display = "block";
+		if (tournament)
+		{
+			returnButton.innerHTML = "Return to Tournament";
+		}
+		else
+		{
+			returnButton.innerHTML = "Return to Main Menu";
+		}
 		returnButton.onclick = () => {
 			this.returnToMainMenu(tournament);
 		};
 	}
 
 	returnToMainMenu(tournament = false) {
-		const returnButton = document.querySelector("#returnButton");
+		const returnButton = document.querySelector("#return-button");
 		this.disposeGame();
 
 		window.app.ingame = false;
 		sessionStorage.setItem("ingame", "false");
 		if (tournament)
 		{
-			returnButton.innerHTML = "Return to Tournament";
 			window.app.router.navigateTo("/tournament");
 		}
 		else
 		{
-			returnButton.innerHTML = "Return to Main Menu";
 			window.app.router.navigateTo("/play");
 		}
 	}

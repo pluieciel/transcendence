@@ -417,7 +417,11 @@ class GameBackend:
 				"playerRightAvatar" : self.getUserAvatar(self.player_right.user),
 				"scoreRight": self.game.player_right.score,
 				"eloChange": self.elo_change,
-				"tournament": self.tournament
+				"tournament": self.tournament,
+				"gameMode": self.game_mode,
+				"ranked": self.is_ranked,
+				"bot": self.bot > 0
+
 		})
 		if self.game.announceEvent or self.game.event.action != 'none':
 			self.logger.info(f"Announcing event {self.game.event.name} and {self.game.event.description}")

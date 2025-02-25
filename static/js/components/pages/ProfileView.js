@@ -323,16 +323,16 @@ export default class ProfileView {
 						gameHistory['player_left']['name']}
 				</div>
 				<div id="game-history-middle">
-					<div id="player-left-history-avatar">
+					<div id="player-left-avatar">
 						${gameHistory['player_left']['is_opponent'] ? 
 							`<button id="${leftAvatarButtonId}" data-redirect-to="${gameHistory['player_left']['username']}">${this.getHistoryAvatar(gameHistory['player_left'])}</button>` :
 							this.getHistoryAvatar(gameHistory['player_left'])}
 					</div>
 					<div id="game-middle-info">
-						<div id="game-history-score">${gameHistory['score_left']} - ${gameHistory['score_right']}</div>
+						<div id="game-score">${gameHistory['score_left']} - ${gameHistory['score_right']}</div>
 						<div id="game-history-time">${gameHistory['time_since_game']}</div>
 					</div>
-					<div id="player-right-history-avatar">
+					<div id="player-right-avatar">
 						${gameHistory['player_right']['is_opponent'] ? 
 							`<button id="${rightAvatarButtonId}" data-redirect-to="${gameHistory['player_right']['username']}">${this.getHistoryAvatar(gameHistory['player_right'])}</button>` :
 							this.getHistoryAvatar(gameHistory['player_right'])}

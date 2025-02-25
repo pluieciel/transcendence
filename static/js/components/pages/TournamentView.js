@@ -30,7 +30,7 @@ export default class TournamentView {
 			console.log(events);
 			if (events.type === "tournament_update") {
 				this.updatePlayersList(events.players);
-				this.updateTournamentTree(events.games);
+				// this.updateTournamentTree(events.games);
 				console.log("Entered tournament update");
 		
 				const waitingRoomTotalPlayers = document.getElementById("waiting-room-total-players");
@@ -58,41 +58,41 @@ export default class TournamentView {
 		};
 	}
 
-	updateTournamentTree(games) {
-		const tournamentTreeContent = document.getElementById("tournament-tree-content");
-		tournamentTreeContent.innerHTML = ''; // Clear previous content
+	// updateTournamentTree(games) {
+	// 	const tournamentTreeContent = document.getElementById("tournament-tree-content");
+	// 	tournamentTreeContent.innerHTML = ''; // Clear previous content
 	
-		games.forEach(game => {
-			const gameElement = document.createElement('div');
-			gameElement.classList.add('tournament-game');
-			gameElement.innerHTML = `
-				<div class="tournament-game-round">Round ${game.round}</div>
-				<div class="tournament-game-players">
-					<div class="tournament-game-player">
-						${game.player_left.user.username}
-						${game.state === 'waiting' && game.player_left.ready ? '<span class="ready">(Ready)</span>' : ''}
-						${game.state === 'finished' && game.winner !== game.player_left.user.username ? '<span class="lost">(Lost)</span>' : ''}
-					</div>
-					<div class="tournament-game-vs">vs</div>
-					<div class="tournament-game-player">
-						${game.player_right.user.username}
-						${game.state === 'waiting' && game.player_right.ready ? '<span class="ready">(Ready)</span>' : ''}
-						${game.state === 'finished' && game.winner !== game.player_right.user.username ? '<span class="lost">(Lost)</span>' : ''}
-					</div>
-				</div>
-				<div class="tournament-game-score">
-					Score: ${game.score_left} - ${game.score_right}
-				</div>
-				<div class="tournament-game-state">
-					State: ${game.state}
-				</div>
-				<div class="tournament-game-winner">
-					Winner: ${game.winner}
-				</div>
-			`;
-			tournamentTreeContent.appendChild(gameElement);
-		});
-	}
+	// 	games.forEach(game => {
+	// 		const gameElement = document.createElement('div');
+	// 		gameElement.classList.add('tournament-game');
+	// 		gameElement.innerHTML = `
+	// 			<div class="tournament-game-round">Round ${game.round}</div>
+	// 			<div class="tournament-game-players">
+	// 				<div class="tournament-game-player">
+	// 					${game.player_left.user.username}
+	// 					${game.state === 'waiting' && game.player_left.ready ? '<span class="ready">(Ready)</span>' : ''}
+	// 					${game.state === 'finished' && game.winner !== game.player_left.user.username ? '<span class="lost">(Lost)</span>' : ''}
+	// 				</div>
+	// 				<div class="tournament-game-vs">vs</div>
+	// 				<div class="tournament-game-player">
+	// 					${game.player_right.user.username}
+	// 					${game.state === 'waiting' && game.player_right.ready ? '<span class="ready">(Ready)</span>' : ''}
+	// 					${game.state === 'finished' && game.winner !== game.player_right.user.username ? '<span class="lost">(Lost)</span>' : ''}
+	// 				</div>
+	// 			</div>
+	// 			<div class="tournament-game-score">
+	// 				Score: ${game.score_left} - ${game.score_right}
+	// 			</div>
+	// 			<div class="tournament-game-state">
+	// 				State: ${game.state}
+	// 			</div>
+	// 			<div class="tournament-game-winner">
+	// 				Winner: ${game.winner}
+	// 			</div>
+	// 		`;
+	// 		tournamentTreeContent.appendChild(gameElement);
+	// 	});
+	// }
 
 	initializeGameWebSocket(wsUrl) {
 		if (window.app.gamews) {
@@ -144,7 +144,7 @@ export default class TournamentView {
 		const leaveButton = document.getElementById("leave-button");
 
 		for (let player of players) {
-			this.addUserToWaitingRoom(player.username, player.display, player.avatar);
+			this.addUserToWaitingRoom(player);
 			if (player.username === window.app.state.username) {
 				found = true;
 			}
@@ -226,45 +226,30 @@ export default class TournamentView {
 								<ul id="waiting-room-container"></ul>
 							</div>
 						</div>
+						<button type="submit" id="forfeit-button"><i class="fa-solid fa-flag"></i> Forfeit</button>
+						<button type="submit" id="ready-button"><i class="fa-regular fa-circle-check"></i> Ready</button>
 						<button type="submit" id="join-button"><i class="fa-solid fa-user-plus"></i> Join</button>
 						<button type="submit" id="leave-button"><i class="fa-solid fa-user-minus"></i> Leave</button>
 					</div>
 				</div>
 				<div id="tournament-tree-card" class="card">
-					<table id="tournament-tree">
-						<tr id="winner-node">
-							<td colspan="4">
-								<div class="truc"></div>
-							</td>
-						</tr>
-						<tr id="final-node">
-							<td colspan="4">
-								<div class="truc"></div>
-							</td>
-						</tr>
-						<tr id="semi-final-node">
-							<td colspan="2">
-								<div class="truc"></div>
-							</td>
-							<td colspan="2">
-								<div class="truc"></div>
-							</td>
-						</tr>
-						<tr id="quarter-node">
-							<td>
-								<div class="truc"></div>
-							</td>
-							<td>
-								<div class="truc"></div>
-							</td>
-							<td>
-								<div class="truc"></div>
-							</td>
-							<td>
-								<div class="truc"></div>
-							</td>
-						</tr>
-					</table>
+					<div id="tournament-tree">
+						<h2 id="card-title"><i class="fa-solid fa-sitemap"></i> TOURNAMENT CLASSIC #1</h2>
+						<div id="tournament-winner" class="tournament-tree-node"></div>
+						<div id="tournament-final" class="tournament-tree-node">
+							<div class="tournament-game"></div>
+						</div>
+						<div id="tournament-semi-final" class="tournament-tree-node">
+							<div class="tournament-game"></div>
+							<div class="tournament-game"></div>
+						</div>
+						<div id="tournament-quarter-final" class="tournament-tree-node">
+							<div class="tournament-game">${this.truc()}</div>
+							<div class="tournament-game">${this.truc()}</div>
+							<div class="tournament-game">${this.truc()}</div>
+							<div class="tournament-game">${this.truc()}</div>
+						</div>
+					</div>
 				</div>
 			</main>
 			<div id="chatBoxContainer"></div>
@@ -273,24 +258,35 @@ export default class TournamentView {
 
 	truc() {
 		return `
-			<div class="game-history-item">
-				<div id="game-history-middle">
-					<div id="player-left-history-avatar">
-						<button id="" data-redirect-to="/profiles/user2">
-							<img src="/imgs/default_avatar.png" class="avatar player-avatar">
-							<button id="" data-redirect-to="/profiles/user2">user2</button>
-						</button>
-					</div>
-					<div id="game-middle-info">
-						<div id="game-history-score">10 - 5</div>
-						<i class="fa-solid fa-eye"></i>
-					</div>
-					<div id="player-right-history-avatar">
-						<button id="" data-redirect-to="/profiles/user1">
-							<img src="/imgs/default_avatar.png" class="avatar player-avatar">
-							<button id="" data-redirect-to="/profiles/user1">user1</button>
-						</button>
-					</div>
+			<div id="tournament-player-left-state"><i class="fa-regular fa-circle fa-lg"></i></div>
+			<div id="player-left-avatar">
+				<button id="" data-redirect-to="/profiles/user2"><img src="/imgs/default_avatar.png" class="avatar player-avatar"></button>
+				<div id="player-left-tournament-name">
+					<button id="" data-redirect-to="/profiles/user2">user2</button>
+				</div>
+			</div>
+			<div id="game-middle-info">
+				<div id="game-score">10 - 5</div>
+				<button id="game-spectate-button" data-redirect-to="/profiles/user2"><i class="fa-solid fa-eye fa-lg"></i></button>
+			</div>
+			<div id="player-right-avatar">
+				<button id="" data-redirect-to="/profiles/user1"><img src="/imgs/default_avatar.png" class="avatar player-avatar"></button>
+				<div id="player-right-tournament-name">
+					<button id="" data-redirect-to="/profiles/user1">user1</button>
+				</div>
+			</div>
+			<div id="tournament-player-right-state"><i class="fa-regular fa-circle fa-lg"></i></div>`
+	}
+
+	truc2() {
+		return `
+			<div id="winner-avatar">
+				<div id="winner-crown">
+					<i class="fa-solid fa-crown fa-2xl"></i>
+				</div>
+				<button id="tournament-0-winner-avatar" data-redirect-to="/profiles/user1"><img src="/imgs/default_avatar.png" id="winner-player-avatar" class="avatar player-avatar"></button>
+				<div id="player-right-tournament-name">
+					<button id="tournament-0-winner-name" data-redirect-to="/profiles/user1">user1</button>
 				</div>
 			</div>`
 	}
@@ -348,20 +344,16 @@ export default class TournamentView {
 		});
 	}
 
-	addUserToWaitingRoom(username, display_name, avatar) {
+	addUserToWaitingRoom(player) {
 		const waitingRoom = document.getElementById('waiting-room-container');
-		console.log(display_name);
 		const row =  `
 			<li>
-				<img src="${avatar}" class="avatar tournament-player-avatar">
-				<div class="tournament-waiting-player-name">${display_name ? display_name : username}</div>
+				<img src="${player.avatar}" class="avatar player-avatar">
+				<div class="tournament-waiting-player-name">${player.display_name ? player.display_name : player.username}</div>
+				<div class="tournament-waiting-player-elo"><i class="fa-solid fa-chart-line"></i>1000</div>
+				<div class="tournament-waiting-player-top-1"><i class="fa-solid fa-crown"></i>1</div>
+				<div class="tournament-player-state"><i class="fa-regular fa-circle fa-lg"></i></div>
 			</li>`;
-
-		// row =  `
-		// 	<li>
-		// 		<img src="${user['avatar_url']}" class="avatar tournament-player-avatar">
-		// 		<div class="tournament-waiting-player-name">${user['name']}</div>
-		// 	</li>`;
 
 		waitingRoom.insertAdjacentHTML('beforeend', row);
 	}

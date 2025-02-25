@@ -386,7 +386,7 @@ form button:hover:not(:disabled) {
 	align-self: flex-end;
 }
 
-#start-button, #save-button, #toggle-2fa-button, #delete-account-button, #create-button, #join-button, #leave-button {
+#start-button, #save-button, #toggle-2fa-button, #delete-account-button, #create-button, #join-button, #leave-button, #ready-button, #forfeit-button {
 	width: 100%;
 	margin-bottom: 1rem;
 	color: var(--secondary-color);
@@ -399,7 +399,7 @@ form button:hover:not(:disabled) {
 	height: 3rem;
 }
 
-#start-button:hover, #save-button:hover, #toggle-2fa-button:hover, #create-button:hover, #join-button:hover, #leave-button:hover {
+#start-button:hover, #save-button:hover, #toggle-2fa-button:hover, #create-button:hover, #join-button:hover, #leave-button:hover, #ready-button:hover, #forfeit-button:hover {
 	border: 1px solid var(--user-color);
 	box-shadow: 0 0 15px var(--user-color);
 	transition: all 0.3s ease;
@@ -1451,18 +1451,18 @@ form button:hover:not(:disabled) {
 	margin-bottom: 1rem;
 }
 
-#player-left-history-avatar, #player-right-history-avatar {
+#player-left-avatar, #player-right-avatar, #winner-avatar {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
 }
 
-#player-left-history-avatar {
+#player-left-avatar {
 	margin: 0 1rem 0 0.5rem;
 }
 
-#player-right-history-avatar {
+#player-right-avatar {
 	margin: 0 0.5rem 0 1rem;
 }
 
@@ -1497,7 +1497,7 @@ form button:hover:not(:disabled) {
 	flex-grow: 1;
 }
 
-#player-left-history-avatar button, #player-right-history-avatar button, 
+#player-left-avatar button, #player-right-avatar button, #winner-avatar button, 
 #player-left-history-name button, #player-right-history-name button {
 	border: none;
 	background-color: transparent;
@@ -1506,7 +1506,7 @@ form button:hover:not(:disabled) {
 	width: 100%;
 }
 
-#player-left-history-avatar button:hover, #player-right-history-avatar button:hover, 
+#player-left-avatar button:hover, #player-right-avatar button:hover, #winner-avatar button:hover,
 #player-left-history-name button:hover, #player-right-history-name button:hover {
 	opacity: 0.5;
 }
@@ -1657,13 +1657,14 @@ form button:hover:not(:disabled) {
 
 #waiting-room-container li {
 	background-color: var(--selector-color);
-	height: 4rem;
+	height: 5.5rem;
 	border-radius: 0.3rem;
 	display: flex;
 	flex-direction: row;
 	align-items: center;
 	justify-content: flex-start;
 	list-style: none;
+	font-weight: bold;
 	padding: 1rem;
 }
 
@@ -1671,20 +1672,34 @@ form button:hover:not(:disabled) {
 	margin-bottom: 1rem;
 }
 
-.tournament-player-avatar {
-	width: 2.5rem;
-	height: 2.5rem;
-	border: 1px solid var(--user-color);
-	box-shadow: 0 0 15px var(--user-color);
-}
-
 .tournament-waiting-player-name {
 	align-self: center;
-	font-weight: bold;
 	margin-left: 0.5rem;
 }
 
-#join-button, #leave-button {
+.tournament-player-state {
+	margin-left: 1.5rem;
+}
+
+.tournament-waiting-player-elo, .tournament-waiting-player-top-1 {
+	display: flex;
+	flex-direction: column;
+	align-content: center;
+	justify-content: center;
+	text-align: center;
+	gap: 0.5rem;
+}
+
+.tournament-waiting-player-elo i, .tournament-waiting-player-top-1 i {
+	margin-right: 0 !important;
+}
+
+.tournament-waiting-player-elo {
+	margin-left: auto;
+	margin-right: 2rem;
+}
+
+#join-button, #leave-button, #ready-button {
 	margin-top: auto
 }
 
@@ -1726,54 +1741,79 @@ form button:hover:not(:disabled) {
 #tournament-tree {
 	width: 100%;
 	height: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
 	border-radius: 0.3rem;
-}
-
-#tournament-tree tr {
-	height: 5.5rem;
-}
-
-/* #tournament-tree {
-	border-collapse: separate;
-	border-spacing: 1rem;
-} */
-
-#tournament-tree tr:first-child td {
-    border-top-left-radius: 0.3rem;
-    border-top-right-radius: 0.3rem;
-}
-
-#tournament-tree tr:last-child td:first-child {
-    border-bottom-left-radius: 0.3rem;
-}
-    
-#tournament-tree tr:last-child td:last-child {
-    border-bottom-right-radius: 0.3rem;
-}
-
-#tournament-tree td {
 	background-color: var(--primary-color);
-	text-align: center;
+	gap: 1rem;
 	padding: 1rem;
 }
 
-.truc {
+.tournament-tree-node {
 	width: 100%;
-	height: 5.5rem;
+	height: 25%;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-around;
+	gap: 1rem;
+}
+
+.tournament-game {
+	width: 25%;
+	height: 6.5rem;
 	background-color: var(--selector-color);
 	border-radius: 0.3rem;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+	font-weight: bold;
+	padding: 1rem;
 }
 
-#final-node, #winner-node td {
+#player-left-tournament-name, #player-right-tournament-name {
+	width: 100%;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	max-width: 8ch;
+	font-weight: bold;
+	text-align: center;
+}
+
+.tournament-game #player-left-avatar, .tournament-game #player-right-avatar {
+	flex-grow: 1;
+}
+
+#winner-avatar button, #player-left-tournament-name button, #player-right-tournament-name button {
+	border: none;
+	background-color: transparent;
+	color: var(--secondary-color);
+	font-weight: bold;
 	width: 100%;
 }
 
-#semi-final-node td {
-	width: 50%;
+#winner-avatar button:hover, #player-left-tournament-name button:hover, #player-right-tournament-name button:hover {
+	opacity: 0.5;
 }
 
-#quarter-node td {
-	width: 25%;
+#game-spectate-button {
+	margin-top: 0.5rem;
+	background-color: transparent;
+	color: var(--secondary-color);
+	border: none;
+}
+
+#winner-player-avatar {
+	width: 5.5rem;
+	height: 5.5rem;
+}
+
+#winner-crown {
+	margin-bottom: 1rem;
 }
 
 /* ******************************** */
@@ -1816,6 +1856,107 @@ form button:hover:not(:disabled) {
 
 #admin-view {
 	flex-wrap: wrap;
+}
+
+/* ******************************** */
+/*                Game              */
+/* ******************************** */
+
+#game-summary-modal {
+	margin-top: 0;
+	width: 45rem;
+}
+
+#game-summary-info {
+	width: 100%;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-around;
+	margin-bottom: 1rem;
+	font-weight: bold;
+	font-size: 1.1rem;
+}
+
+#game-summary {
+	width: 100%;
+	height: 12rem;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 1rem;
+}
+
+#game-summary-middle {
+	height: 100%;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	font-weight: bold;
+	font-size: 1.1rem;
+}
+
+#game-summary-middle #game-middle-info {
+	margin: 0 1rem;
+}
+
+#game-summary-elo {
+	margin-top: 1rem;
+}
+
+#player-left-redirect .avatar, #player-right-redirect .avatar {
+	width: 5.5rem;
+	height: 5.5rem;
+}
+
+#player-left-redirect .player-loser, #player-right-redirect .player-loser,
+#player-left-redirect .player-winner, #player-right-redirect .player-winner  {
+	font-size: 1rem;
+}
+
+#player-left-summary-name, #player-right-summary-name {
+	width: 100%;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	max-width: 16ch;
+	font-weight: bold;
+	text-align: center;
+	flex-grow: 1;
+	font-size: 1.1rem;
+}
+
+#player-left-summary-name button, #player-right-summary-name button {
+	border: none;
+	background-color: transparent;
+	color: var(--secondary-color);
+	font-weight: bold;
+	width: 100%;
+}
+
+#player-left-summary-name button:hover, #player-right-summary-name button:hover {
+	opacity: 0.5;
+}
+
+#return-button {
+	margin-bottom: 1rem;
+	color: var(--secondary-color);
+	background-color: var(--primary-color);
+	border: 1px solid var(--primary-color);
+	border-radius: 0.3rem;
+	padding: 0.4rem;
+	height: 3rem;
+	font-weight: bold;
+	width: 100%;
+}
+
+#return-button:hover {
+	border: 1px solid var(--user-color);
+	box-shadow: 0 0 15px var(--user-color);
+	transition: all 0.3s ease;
 }
 
 /* ******************************** */
