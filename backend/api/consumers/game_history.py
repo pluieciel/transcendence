@@ -24,7 +24,6 @@ class GameHistoryConsumer(AsyncHttpConsumer):
 			response_data = {
 				'success': True,
 			}
-
 			for index, game_history in enumerate(game_histories):
 				player_left =  await self.get_player_left(game_history)
 				player_right =  await self.get_player_right(game_history)

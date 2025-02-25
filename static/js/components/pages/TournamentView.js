@@ -487,7 +487,6 @@ export default class TournamentView {
 				</div>
 				<div id="tournament-tree-card" class="card">
 					<div id="tournament-tree">
-						<h2 id="card-title"><i class="fa-solid fa-sitemap"></i> TOURNAMENT CLASSIC #1</h2>
 						<div id="tournament-winner" class="tournament-tree-node"></div>
 						<div id="tournament-final" class="tournament-tree-node">
 							<div class="tournament-game" id="final-0"></div>
@@ -597,13 +596,12 @@ export default class TournamentView {
 		let avatarRight = game.player_right.user.avatar;
 
 		let html = 
-
 		`
 			<div id="tournament-player-left-state">${leftState}</div>
 			<div id="player-left-avatar">
-				<button id="" data-redirect-to="/profiles/user2"><img src="${avatarLeft}" class="avatar player-avatar"></button>
+				<button data-redirect-to="/profiles/${usernameLeft}"><img src="${avatarLeft}" class="avatar player-avatar"></button>
 				<div id="player-left-tournament-name">
-					<button id="" data-redirect-to="/profiles/${usernameLeft}">${nameLeft}</button>
+					<button data-redirect-to="/profiles/${usernameLeft}">${nameLeft}</button>
 				</div>
 			</div>
 			<div id="game-middle-info">
@@ -611,14 +609,23 @@ export default class TournamentView {
 				${spectate}
 			</div>
 			<div id="player-right-avatar">
-				<button id="" data-redirect-to="/profiles/user1"><img src="${avatarRight}" class="avatar player-avatar"></button>
+				<button data-redirect-to="/profiles/${usernameRight}"><img src="${avatarRight}" class="avatar player-avatar"></button>
 				<div id="player-right-tournament-name">
-					<button id="" data-redirect-to="/profiles/${usernameRight}">${nameRight}</button>
+					<button data-redirect-to="/profiles/${usernameRight}">${nameRight}</button>
 				</div>
 			</div>
 			<div id="tournament-player-right-state">${rightState}</i></div>
 		`
-		gameSelector.innerHTML = html
+		gameSelector.innerHTML = html;
+
+		const buttons = document.querySelectorAll('[data-redirect-to]');
+		buttons.forEach(button => {
+			button.addEventListener('click', (e) => {
+				e.preventDefault();
+				const redirectTo = e.currentTarget.dataset.redirectTo;
+				window.app.router.navigateTo(redirectTo);
+			});
+		});
 	}
 
 	displayWinner(winnerName, winnerUsername, winnerAvatar)
@@ -629,12 +636,12 @@ export default class TournamentView {
 				<div id="winner-crown">
 					<i class="fa-solid fa-crown fa-2xl"></i>
 				</div>
-				<button id="tournament-0-winner-avatar" data-redirect-to="/profiles/user1"><img src=${winnerAvatar} id="winner-player-avatar" class="avatar player-avatar"></button>
+				<button data-redirect-to="/profiles/${winnerUsername}"><img src=${winnerAvatar} id="winner-player-avatar" class="avatar player-avatar"></button>
 				<div id="player-right-tournament-name">
-					<button id="tournament-0-winner-name" data-redirect-to="/profiles/${winnerUsername}">${winnerName}</button>
+					<button data-redirect-to="/profiles/${winnerUsername}">${winnerName}</button>
 				</div>
 			</div>
-		`;	
+		`;
 	}
 
 	addEventListeners() {
@@ -654,8 +661,6 @@ export default class TournamentView {
 			window.app.settings["tournament-game-size"] = gameSizeCheckbox.checked ? "8" : "4";
 		});
 	}
-
-
 
 	addGameModeCheckboxEventListeners() {
 		const gameModeCheckbox = document.getElementById("game-mode-checkbox");
