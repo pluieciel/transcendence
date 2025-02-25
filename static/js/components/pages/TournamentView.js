@@ -117,6 +117,10 @@ export default class TournamentView {
 						this.displayGame(game, round, index++);
 					});
 				}
+				if (events.winner)
+				{
+					this.displayWinner(events.winnerName, events.winnerUsername, events.winnerAvatar);
+				}
 			}
 			else if (events.type === "start_game") {
 				const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
@@ -139,7 +143,7 @@ export default class TournamentView {
 			<h2 id="card-title"><i class="fa-solid fa-sitemap"></i> TOURNAMENT CLASSIC #1</h2>
 			<div id="tournament-winner" class="tournament-tree-node"></div>
 			<div id="tournament-final" class="tournament-tree-node">
-				<div class="tournament-game id="final-0""></div>
+				<div class="tournament-game" id="final-0"></div>
 			</div>
 			<div id="tournament-semi-final" class="tournament-tree-node">
 				<div class="tournament-game" id="semi-0"></div>
@@ -334,7 +338,7 @@ export default class TournamentView {
 						<h2 id="card-title"><i class="fa-solid fa-sitemap"></i> TOURNAMENT CLASSIC #1</h2>
 						<div id="tournament-winner" class="tournament-tree-node"></div>
 						<div id="tournament-final" class="tournament-tree-node">
-							<div class="tournament-game id="final-0""></div>
+							<div class="tournament-game" id="final-0"></div>
 						</div>
 						<div id="tournament-semi-final" class="tournament-tree-node">
 							<div class="tournament-game" id="semi-0"></div>
@@ -387,12 +391,12 @@ export default class TournamentView {
 		{
 			if (game.winner)
 			{
-				if (game.player_left.user.username == winner)
+				if (game.player_left.user.username == game.winner)
 				{
 					leftState = winState;
 					rightState = loseState;
 				}
-				else if (game.player_right.user.username == winner)
+				else if (game.player_right.user.username == game.winner)
 				{
 					rightState = winState;
 					leftState = loseState;
@@ -420,7 +424,7 @@ export default class TournamentView {
 		{
 			if (game.game_id != -1)
 			{
-				eye = `<button id="game-spectate-button?${game.game_id}"><i class="fa-solid fa-eye fa-lg"></i></button>`
+				spectate = `<button id="game-spectate-button?${game.game_id}"><i class="fa-solid fa-eye fa-lg"></i></button>`
 			}
 			leftState = playingState;
 			rightState = playingState;
@@ -463,6 +467,22 @@ export default class TournamentView {
 			<div id="tournament-player-right-state">${rightState}</i></div>
 		`
 		gameSelector.innerHTML = html
+	}
+
+	displayWinner(winnerName, winnerUsername, winnerAvatar)
+	{
+		document.getElementById('tournament-winner').innerHTML =
+		`
+			<div id="winner-avatar">
+				<div id="winner-crown">
+					<i class="fa-solid fa-crown fa-2xl"></i>
+				</div>
+				<button id="tournament-0-winner-avatar" data-redirect-to="/profiles/user1"><img src=${winnerAvatar} id="winner-player-avatar" class="avatar player-avatar"></button>
+				<div id="player-right-tournament-name">
+					<button id="tournament-0-winner-name" data-redirect-to="/profiles/${winnerUsername}">${winnerName}</button>
+				</div>
+			</div>
+		`;	
 	}
 	
 	truc2() {
