@@ -29,6 +29,7 @@ export default class TournamentView {
 			const events = JSON.parse(bla.data);
 			console.log(events);
 			if (events.type === "tournament_update") {
+				this.clearTree();
 				this.updatePlayersList(events.players);
 				// this.updateTournamentTree(events.games);
 				console.log("Entered tournament update");
@@ -43,6 +44,79 @@ export default class TournamentView {
 				const roomCardTournament = document.getElementById("tournament-room-card");
 				events.state === 'finished'? createCardTournament.style.display = 'flex' : createCardTournament.style.display = 'none';
 				events.state !== 'finished'? roomCardTournament.style.display = 'flex' : roomCardTournament.style.display = 'none';
+				let gameSize = 0;
+				if (events.state != 'playing')
+				{
+					if (events.games.length == '3')
+					{
+						document.getElementById("tournament-quarter-final").style.display = 'none';
+						gameSize = 4;
+					}
+					else if (events.games.length == '7')
+					{
+						document.getElementById("tournament-quarter-final").style.display = 'block';
+						gameSize = 8;
+					}
+					else
+					{
+						document.getElementById("tournament-quarter-final").style.display = 'block';
+						gameSize = 8;
+					}
+				}
+				else if (events.size == 8)
+				{
+					document.getElementById("tournament-quarter-final").style.display = 'block';
+					gameSize = 8;
+				}
+				else if (events.size == 4)
+				{
+					document.getElementById("tournament-quarter-final").style.display = 'none';
+					gameSize = 4;
+				}
+				console.log(events.size);
+				if (gameSize == 8)
+				{
+					let index = 0;
+					let round = '';
+					events.games.forEach(game => 
+					{
+						if (game.round == 1 && round != 'quarter')
+						{
+							index = 0
+							round = 'quarter';
+						}
+						else if (game.round == 2 && round != 'semi')
+						{
+							round = 'semi';
+							index = 0
+						}
+						else if (game.round == 3 && round != 'final')
+						{
+							round = 'final';
+							index = 0;
+						}
+						this.displayGame(game, round, index++);
+					});
+				}
+				else if (gameSize == 4)
+				{
+					let index = 0;
+					let round = '';
+					events.games.forEach(game => 
+					{
+						if (game.round == 1 && round != 'semi')
+						{
+							round = 'semi';
+							index = 0
+						}
+						else if (game.round == 2 && round != 'final')
+						{
+							round = 'final';
+							index = 0;
+						}
+						this.displayGame(game, round, index++);
+					});
+				}
 			}
 			else if (events.type === "start_game") {
 				const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
@@ -56,6 +130,29 @@ export default class TournamentView {
 			console.error("WebSocket error:", error);
 			alert("Connection error! Please try again.");
 		};
+	}
+
+	clearTree()
+	{
+		document.getElementById('tournament-tree').innerHTML = 
+		`
+			<h2 id="card-title"><i class="fa-solid fa-sitemap"></i> TOURNAMENT CLASSIC #1</h2>
+			<div id="tournament-winner" class="tournament-tree-node"></div>
+			<div id="tournament-final" class="tournament-tree-node">
+				<div class="tournament-game id="final-0""></div>
+			</div>
+			<div id="tournament-semi-final" class="tournament-tree-node">
+				<div class="tournament-game" id="semi-0"></div>
+				<div class="tournament-game" id="semi-1"></div>
+			</div>
+			<div id="tournament-quarter-final" class="tournament-tree-node">
+				<div class="tournament-game" id="quarter-0"></div>
+				<div class="tournament-game" id="quarter-1"></div>
+				<div class="tournament-game" id="quarter-2"></div>
+				<div class="tournament-game" id="quarter-3"></div>
+			</div>
+			</div>
+		`
 	}
 
 	// updateTournamentTree(games) {
@@ -237,17 +334,17 @@ export default class TournamentView {
 						<h2 id="card-title"><i class="fa-solid fa-sitemap"></i> TOURNAMENT CLASSIC #1</h2>
 						<div id="tournament-winner" class="tournament-tree-node"></div>
 						<div id="tournament-final" class="tournament-tree-node">
-							<div class="tournament-game"></div>
+							<div class="tournament-game id="final-0""></div>
 						</div>
 						<div id="tournament-semi-final" class="tournament-tree-node">
-							<div class="tournament-game"></div>
-							<div class="tournament-game"></div>
+							<div class="tournament-game" id="semi-0"></div>
+							<div class="tournament-game" id="semi-1"></div>
 						</div>
 						<div id="tournament-quarter-final" class="tournament-tree-node">
-							<div class="tournament-game">${this.truc()}</div>
-							<div class="tournament-game">${this.truc()}</div>
-							<div class="tournament-game">${this.truc()}</div>
-							<div class="tournament-game">${this.truc()}</div>
+							<div class="tournament-game" id="quarter-0"></div>
+							<div class="tournament-game" id="quarter-1"></div>
+							<div class="tournament-game" id="quarter-2"></div>
+							<div class="tournament-game" id="quarter-3"></div>
 						</div>
 					</div>
 				</div>
@@ -256,48 +353,118 @@ export default class TournamentView {
 		`;
 	}
 
-	displayGame()
+	getName(username, displayName)
 	{
-		//Pleft state
-		//Pleft username
-		//Pleft displayName
-		//Pleft avatar
-		//Pleft score
-
-		//Pright state
-		//Pright username
-		//Pright displayName
-		//Pright avatar
-		//Pright score
-
-		//Game state
-		//Game id
-		//Game round
-		//Game winener
-
+		if (displayName)
+			return displayName
+		else
+			return username
 	}
-	truc() {
-		return `
-			<div id="tournament-player-left-state"><i class="fa-regular fa-circle fa-lg"></i></div>
+
+	displayGame(game, round, index)
+	{
+		let gameSelector = null
+		if ((round === 'quarter' && index < 4) || (round === 'semi' && index < 2) || ((round === 'final' && index == 0)))
+		{
+			console.log(`${round}-${index}`);
+			gameSelector = document.getElementById(`${round}-${index}`);
+		}
+		else
+		{
+			console.error("Unrecognized round or invalid index");
+		}
+
+		let winState = '<i class="fa-solid fa-medal"></i>';
+		let loseState = '<i class="fa-solid fa-flag"></i>';
+		let readyState = '<i class="fa-regular fa-circle-check"></i>';
+		let notReadyState = '<i class="fa-regular fa-circle"></i>';
+		let playingState = '<i class="fa-solid fa-gamepad"></i>';
+		let spectate = '';
+		let leftState = '';
+		let rightState = '';
+
+		if (game.state === 'finished')
+		{
+			if (game.winner)
+			{
+				if (game.player_left.user.username == winner)
+				{
+					leftState = winState;
+					rightState = loseState;
+				}
+				else if (game.player_right.user.username == winner)
+				{
+					rightState = winState;
+					leftState = loseState;
+				}
+				else
+				{
+					leftState = winState;
+					rightState = loseState;
+					console.error("Winner username does not match any player");
+				}
+			}
+			else
+			{
+				leftState = winState;
+				rightState = loseState;
+				console.error("Game is finished but no winner was given");
+			}
+		}
+		else if (game.state === 'waiting')
+		{
+			leftState = (game.player_left.ready ? readyState : notReadyState);
+			rightState = (game.player_right.ready ? readyState : notReadyState);
+		}		
+		else if (game.state === 'playing')
+		{
+			if (game.game_id != -1)
+			{
+				eye = `<button id="game-spectate-button?${game.game_id}"><i class="fa-solid fa-eye fa-lg"></i></button>`
+			}
+			leftState = playingState;
+			rightState = playingState;
+		}
+		else
+		{
+			console.error("Game state not recognized");
+			leftState = notReadyState;
+			rightState = notReadyState;
+		}
+		let nameLeft = this.getName(game.player_left.user.username, game.player_left.user.displayName)
+		let usernameLeft = game.player_left.user.username
+		let scoreLeft = game.player_left.score;
+		let avatarLeft = game.player_left.user.avatar;
+		let scoreRight = game.player_right.score;
+		let nameRight = this.getName(game.player_right.user.username, game.player_right.user.displayName)
+		let usernameRight = game.player_right.user.username
+		let avatarRight = game.player_right.user.avatar;
+
+		let html = 
+
+		`
+			<div id="tournament-player-left-state">${leftState}</div>
 			<div id="player-left-avatar">
-				<button id="" data-redirect-to="/profiles/user2"><img src="/imgs/default_avatar.png" class="avatar player-avatar"></button>
+				<button id="" data-redirect-to="/profiles/user2"><img src="${avatarLeft}" class="avatar player-avatar"></button>
 				<div id="player-left-tournament-name">
-					<button id="" data-redirect-to="/profiles/user2">user2</button>
+					<button id="" data-redirect-to="/profiles/${usernameLeft}">${nameLeft}</button>
 				</div>
 			</div>
 			<div id="game-middle-info">
-				<div id="game-score">10 - 5</div>
-				<button id="game-spectate-button" data-redirect-to="/profiles/user2"><i class="fa-solid fa-eye fa-lg"></i></button>
+				<div id="game-score">${scoreLeft} - ${scoreRight}</div>
+				${spectate}
 			</div>
 			<div id="player-right-avatar">
-				<button id="" data-redirect-to="/profiles/user1"><img src="/imgs/default_avatar.png" class="avatar player-avatar"></button>
+				<button id="" data-redirect-to="/profiles/user1"><img src="${avatarRight}" class="avatar player-avatar"></button>
 				<div id="player-right-tournament-name">
-					<button id="" data-redirect-to="/profiles/user1">user1</button>
+					<button id="" data-redirect-to="/profiles/${usernameRight}">${nameRight}</button>
 				</div>
 			</div>
-			<div id="tournament-player-right-state"><i class="fa-regular fa-circle fa-lg"></i></div>`
+			<div id="tournament-player-right-state">${rightState}</i></div>
+		`
+		gameSelector.innerHTML = html
 	}
-
+	
 	truc2() {
 		return `
 			<div id="winner-avatar">

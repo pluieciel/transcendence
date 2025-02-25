@@ -377,7 +377,7 @@ class Tournament:
 				{
 					"username": player.user.username,
 					"display": player.user.display_name,
-					"avatar": self.getUserName(player.user),
+					"avatar": self.getUserAvatar(player.user),
 					"ready": player.ready,
 					"lost": player.lost,
 				} for player in self.players
@@ -388,7 +388,7 @@ class Tournament:
 						"user": {
 							"username": game.player_left.user.username,
 							"displayName" : game.player_left.user.display_name,
-							"avatar" : self.getAvatar(game.player_left.user)
+							"avatar" : self.getUserAvatar(game.player_left.user)
 						},
 						"ready": game.player_left.ready,
 						"lost": game.player_left.lost,
@@ -398,7 +398,7 @@ class Tournament:
 						"user": {
 							"username": game.player_right.user.username,
 							"displayName" : game.player_right.user.display_name,
-							"avatar" : self.getAvatar(game.player_right.user)
+							"avatar" : self.getUserAvatar(game.player_right.user)
 						},
 						"ready": game.player_right.ready,
 						"lost": game.player_right.lost,
