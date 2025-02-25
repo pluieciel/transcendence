@@ -346,9 +346,23 @@ class Tournament:
 		self.logger.info(f"Game {game.game_id} started between {game.player_left.user.username} and {game.player_right.user.username}")
 
 
+	def getUserAvatar(self, user):
+		if (user.avatar_42):
+			return user.avatar_42
+		elif (user.avatar):
+			return user.avatar.url
+		else:
+			return '/imgs/default_avatar.png'
+	
+	def getUserName(self, user):
+		if (user.display_name):
+			return user.display_name
+		else:
+			return user.username
+		
 	async def send_tournament_update(self):
 		if (self.winner and self.winner.user):
-			winner = self.winner.user.username
+			winner = self.getUserName(self.winner.user)
 		else:
 			winner = None
 		tournament_state = {
@@ -363,36 +377,37 @@ class Tournament:
 				{
 					"username": player.user.username,
 					"display": player.user.display_name,
-					"avatar": (
-						player.user.avatar_42 if player.user.avatar_42 else
-						player.user.avatar.url if player.user.avatar else
-						'/imgs/default_avatar.png'
-					),
+					"avatar": self.getUserName(player.user),
 					"ready": player.ready,
 					"lost": player.lost,
 				} for player in self.players
 			],
 			"games": [
 				{
-					"round": game.round,
 					"player_left": {
 						"user": {
 							"username": game.player_left.user.username,
+							"displayName" : game.player_left.user.display_name,
+							"avatar" : self.getAvatar(game.player_left.user)
 						},
 						"ready": game.player_left.ready,
 						"lost": game.player_left.lost,
+						"score": game.score_left
 					},
 					"player_right": {
 						"user": {
 							"username": game.player_right.user.username,
+							"displayName" : game.player_right.user.display_name,
+							"avatar" : self.getAvatar(game.player_right.user)
 						},
 						"ready": game.player_right.ready,
 						"lost": game.player_right.lost,
+						"score": game.score_right
 					},
-					"score_left": game.score_left,
-					"score_right": game.score_right,
+					"round": game.round,
 					"state": game.state,
 					"winner": game.winner.user.username if game.winner else None,
+					"game_id" : game.game_id
 				} for game in self.games
 			]
 		}

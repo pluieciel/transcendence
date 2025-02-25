@@ -41,30 +41,18 @@ export default class GameView {
 								<div id="game-summary-type"></div>
 							</div>
 							<div id="game-summary">
-								<div id="player-left-summary-name">
-									<button id="player-left-name-redirect">user2</button>
-								</div>
+								<div id="player-left-summary-name"></div>
 								<div id="game-summary-middle">
-									<div id="player-left-avatar">
-										<button id="player-left-redirect">
-											<img src="/imgs/default_avatar.png" class="avatar player-avatar">
-										</button>
-									</div>
+									<div id="player-left-avatar"></div>
 									<div id="game-middle-info">
 										<div id="game-summary-score"></div>
 										<div id="game-summary-elo"></div>
 									</div>
-									<div id="player-right-avatar">
-										<button id="player-right-redirect">
-											<img src="/imgs/default_avatar.png" class="avatar player-avatar">
-										</button>
-									</div>
+									<div id="player-right-avatar"></div>
 								</div>
-								<div id="player-right-summary-name">
-									<button id="player-right-name-redirect">user1</button>
-								</div>
+								<div id="player-right-summary-name"></div>
 							</div>
-							<button id="return-button" type="submit"><i class="fa-solid fa-rotate-left"></i> Return to Menu</button>
+							<button id="return-button" type="submit"></button>
 						</div>
 					</div>
 				</div>
@@ -127,18 +115,15 @@ export default class GameView {
 	}
 
 	onGameEnd(event) {
-		console.log(event);
 		const gameSummaryModal = document.getElementById('game-summary-modal');
 		gameSummaryModal.parentElement.style.display = 'flex';
 		
 		const gameMode = document.getElementById('game-summary-mode');
 		const gameType = document.getElementById('game-summary-type');
-		const playerLeftName = document.getElementById('player-left-name-redirect');
-		const playerRightName = document.getElementById('player-right-name-redirect');
-		const playerLeftAvatar = document.querySelector('#player-left-redirect .player-avatar');
-		const playerRightAvatar = document.querySelector('#player-right-redirect .player-avatar');
-		const playerLeft = document.querySelector('#player-left-redirect');
-		const playerRight = document.querySelector('#player-right-redirect');
+		const playerLeftSummaryName = document.getElementById('player-left-summary-name');
+		const playerRightSummaryName = document.getElementById('player-right-summary-name');
+		const playerLeftAvatar = document.getElementById('player-left-avatar');
+		const playerRightAvatar = document.getElementById('player-right-avatar');
 		const score = document.getElementById('game-summary-score');
 		const elo = document.getElementById('game-summary-elo');
 		gameMode.innerHTML = event.gameMode === "classic" ? '<i class="fa-solid fa-star"></i>&nbsp; Classic' : '<i class="fa-solid fa-bolt"></i>&nbsp; Rumble';
@@ -152,36 +137,29 @@ export default class GameView {
 		else
 			gameType.innerHTML = '<i class="fa-solid fa-user-check"></i>&nbsp; Invite';
 
-		playerLeftName.innerHTML = event.playerLeftName;
-		playerRightName.innerHTML = event.playerRightName;
-		playerLeftAvatar.src = event.playerLeftAvatar;
-		playerRightAvatar.src = event.playerRightAvatar;
 		score.innerHTML = event.scoreLeft + " - " + event.scoreRight;
 
-		if (event.winner === "RIGHT")
-		{
-			const playerLeftDiv = document.createElement('div');
-			playerLeftDiv.classList.add('player-loser');
-			playerLeftDiv.textContent = 'LOSER';
-			playerLeft.appendChild(playerLeftDiv);
+		playerLeftAvatar.insertAdjacentHTML("beforeend", `
+			<button id="player-left-redirect">
+				<img src="${event.playerLeftAvatar}" class="avatar player-avatar">
+				${this.getPlayerWinner(event.winner, "LEFT")}
+			</button}>`);
 
-			const playerRightDiv = document.createElement('div');
-			playerRightDiv.classList.add('player-winner');
-			playerRightDiv.textContent = 'WINNER';
-			playerRight.appendChild(playerRightDiv);
-		}
-		else
-		{
-			const playerLeftDiv = document.createElement('div');
-			playerLeftDiv.classList.add('player-winner');
-			playerLeftDiv.textContent = 'WINNER';
-			playerLeft.appendChild(playerLeftDiv);
+		playerRightAvatar.insertAdjacentHTML("beforeend", `
+			<${event.bot ? 'div' : 'button'} id="player-right-redirect">
+				<img src="${event.playerRightAvatar}" class="avatar player-avatar">
+				${this.getPlayerWinner(event.winner, "RIGHT")}
+			</${event.bot ? 'div' : 'button'}>`);
 
-			const playerRightDiv = document.createElement('div');
-			playerRightDiv.classList.add('player-loser');
-			playerRightDiv.textContent = 'LOSER';
-			playerRight.appendChild(playerRightDiv);
-		}
+		playerLeftSummaryName.insertAdjacentHTML("beforeend", `
+			<button id="player-left-name-redirect">
+				${event.playerLeftName}
+			</button}>`);
+
+		playerRightSummaryName.insertAdjacentHTML("beforeend", `
+			<${event.bot ? 'div' : 'button'} id="player-right-name-redirect">
+				${event.playerRightName}
+			</${event.bot ? 'div' : 'button'}>`);
 
 		if (event.eloChange > 0)
 		{
@@ -193,30 +171,56 @@ export default class GameView {
 		window.app.gamews.close();
 
 		const returnButton = document.querySelector("#return-button");
-		if (tournament)
-			returnButton.innerHTML = "Return to Tournament";
-
+		if (event.tournament)
+			returnButton.innerHTML = '<i class="fa-solid fa-rotate-left"></i> Return to Tournament';
 		else
-			returnButton.innerHTML = "Return to Main Menu";
+			returnButton.innerHTML = '<i class="fa-solid fa-rotate-left"></i> Return to Menu';
+
 		returnButton.onclick = () => {
 			this.returnToMainMenu(tournament);
 		};
+
+		const playerLeftNameRedirect = document.getElementById('player-left-name-redirect');
+		const playerLeftRedirect = document.getElementById('player-left-redirect');
+
+		playerLeftNameRedirect.onclick = () => {
+			window.app.router.navigateTo(`/profiles/${event.playerLeftUsername}`);
+		};
+
+		playerLeftRedirect.onclick = () => {
+			window.app.router.navigateTo(`/profiles/${event.playerLeftUsername}`);
+		};
+
+		if (!event.bot) {
+			const playerRightNameRedirect = document.getElementById('player-right-name-redirect');
+			const playerRightRedirect = document.getElementById('player-right-redirect');
+
+			playerRightNameRedirect.onclick = () => {
+				window.app.router.navigateTo(`/profiles/${event.playerLeftUsername}`);
+			};
+
+			playerRightRedirect.onclick = () => {
+				window.app.router.navigateTo(`/profiles/${event.playerLeftUsername}`);
+			};
+		}
+	}
+
+	getPlayerWinner(winnerSide, playerSide) {
+		if (winnerSide === playerSide)
+			return '<div class="player-winner">WINNER</div>';
+		else
+			return '<div class="player-loser">LOSER</div>';
 	}
 
 	returnToMainMenu(tournament = false) {
-		const returnButton = document.querySelector("#return-button");
 		this.disposeGame();
 
 		window.app.ingame = false;
 		sessionStorage.setItem("ingame", "false");
 		if (tournament)
-		{
 			window.app.router.navigateTo("/tournament");
-		}
 		else
-		{
 			window.app.router.navigateTo("/play");
-		}
 	}
 
 	hideWaitingMessage() {

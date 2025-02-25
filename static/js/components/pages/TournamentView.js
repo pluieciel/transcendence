@@ -256,6 +256,26 @@ export default class TournamentView {
 		`;
 	}
 
+	displayGame()
+	{
+		//Pleft state
+		//Pleft username
+		//Pleft displayName
+		//Pleft avatar
+		//Pleft score
+
+		//Pright state
+		//Pright username
+		//Pright displayName
+		//Pright avatar
+		//Pright score
+
+		//Game state
+		//Game id
+		//Game round
+		//Game winener
+
+	}
 	truc() {
 		return `
 			<div id="tournament-player-left-state"><i class="fa-regular fa-circle fa-lg"></i></div>
@@ -299,6 +319,7 @@ export default class TournamentView {
 		this.addJoinTournamentEventListeners();
 		this.addLeaveTournamentEventListeners();
 		this.addReadyButtonEventListeners();
+		this.addGiveUpButtonEventListeners();
 	}
 
 	addGameSizeCheckboxEventListeners() {
@@ -307,6 +328,8 @@ export default class TournamentView {
 			window.app.settings["tournament-game-size"] = gameSizeCheckbox.checked ? "8" : "4";
 		});
 	}
+
+
 
 	addGameModeCheckboxEventListeners() {
 		const gameModeCheckbox = document.getElementById("game-mode-checkbox");
@@ -319,6 +342,12 @@ export default class TournamentView {
 		const createButton = document.getElementById("create-button");
 		createButton.addEventListener("click", () => {
 			this.sendCreateTournament(window.app.settings["tournament-game-size"], window.app.settings["tournament-game-mode"]);
+		});
+	}
+	addGiveUpButtonEventListeners() {
+		const gameSizeCheckbox = document.getElementById("forfeit-button");
+		gameSizeCheckbox.addEventListener("click", () => {
+			this.sendAction('leave');
 		});
 	}
 
