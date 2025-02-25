@@ -4,7 +4,7 @@ from .game_manager import GameManager
 from channels.db import database_sync_to_async
 from django.contrib.auth import get_user_model
 from channels.layers import get_channel_layer
-from api.db_utils import user_update_tournament, get_user_statistic
+from api.db_utils import user_update_tournament, get_user_statistic, unlock_achievement
 import logging
 import time
 import asyncio
@@ -38,7 +38,7 @@ class Tournament:
 			self.game_history = None
 			self.logger.debug("Tournament initialized")
 			self.winner = None
-			self.tournamentStartDelay = 5
+			self.tournamentStartDelay = 20
 			self.startTime = None
 			self.asyncioCreateTask = None
 
@@ -258,6 +258,7 @@ class Tournament:
 			if len(winners) == 1:
 				self.state = 'finished'
 				self.winner = winners[0].user
+				await unlock_achievement(self.winner, "Champion")
 				self.logger.info(f"Tournament finished, winner is {winners[0].user.username}")
 			else:
 				self.round += 1
