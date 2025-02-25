@@ -379,8 +379,8 @@ export default class TournamentView {
 			<li>
 				<img src="${player.avatar}" class="avatar player-avatar">
 				<div class="tournament-waiting-player-name">${player.display_name ? player.display_name : player.username}</div>
-				<div class="tournament-waiting-player-elo"><i class="fa-solid fa-chart-line"></i>1000</div>
-				<div class="tournament-waiting-player-top-1"><i class="fa-solid fa-crown"></i>1</div>
+				<div class="tournament-waiting-player-elo"><i class="fa-solid fa-chart-line"></i>${player.elo}</div>
+				<div class="tournament-waiting-player-top-1"><i class="fa-solid fa-crown"></i>${player.top_1}</div>
 				<div class="tournament-player-state"><i class="fa-regular fa-circle fa-lg"></i></div>
 			</li>`;
 

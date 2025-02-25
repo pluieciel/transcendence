@@ -4,7 +4,7 @@ from .game_manager import GameManager
 from channels.db import database_sync_to_async
 from django.contrib.auth import get_user_model
 from channels.layers import get_channel_layer
-from api.db_utils import user_update_tournament
+from api.db_utils import user_update_tournament, get_user_statistic
 import logging
 import time
 import asyncio
@@ -345,6 +345,13 @@ class Tournament:
 		})
 		self.logger.info(f"Game {game.game_id} started between {game.player_left.user.username} and {game.player_right.user.username}")
 
+	async def getUserElo(self, user, game_mode):
+		user_statistic = await get_user_statistic(user)
+		return user_statistic.classic_elo if game_mode == "classic" else user_statistic.rumble_elo
+
+	async def getUserTournamentTop1(self, user):
+		user_statistic = await get_user_statistic(user)
+		return user_statistic.tournament_top_1
 
 	def getUserAvatar(self, user):
 		if (user.avatar_42):
@@ -361,10 +368,20 @@ class Tournament:
 			return user.username
 		
 	async def send_tournament_update(self):
-		if (self.winner and self.winner.user):
-			winner = self.getUserName(self.winner.user)
-		else:
-			winner = None
+		player_data = []
+		for player in self.players:
+			elo = await self.getUserElo(player.user, self.mode)
+			top_1 = await self.getUserTournamentTop1(player.user)
+			player_data.append({
+				"elo": elo,
+				"top_1": top_1,
+				"username": player.user.username,
+				"display": player.user.display_name,
+				"avatar": self.getUserAvatar(player.user),
+				"ready": player.ready,
+				"lost": player.lost,
+			})
+
 		tournament_state = {
 			"type": "tournament_update",
 			"state": self.state,
@@ -372,16 +389,8 @@ class Tournament:
 			"mode": self.mode,
 			"round": self.round,
 			"start_time": self.startTime,
-			"winner" : winner,
-			"players": [
-				{
-					"username": player.user.username,
-					"display": player.user.display_name,
-					"avatar": self.getUserAvatar(player.user),
-					"ready": player.ready,
-					"lost": player.lost,
-				} for player in self.players
-			],
+			"winner": self.getUserName(self.winner.user) if self.winner and self.winner.user else None,
+			"players": player_data,
 			"games": [
 				{
 					"player_left": {
