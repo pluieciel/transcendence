@@ -4,7 +4,7 @@ from .game_manager import GameManager
 from channels.db import database_sync_to_async
 from django.contrib.auth import get_user_model
 from channels.layers import get_channel_layer
-from api.db_utils import user_update_tournament
+from api.db_utils import user_update_tournament, get_user_statistic
 import logging
 import time
 import asyncio
@@ -143,6 +143,7 @@ class Tournament:
 					await self.giveUp(player)
 				else:
 					self.logger.info("Tournament is in unknown state")
+				await self.send_tournament_update()
 				return True
 		await self.send_tournament_update()	
 		return False
@@ -156,8 +157,8 @@ class Tournament:
 					await self.send_tournament_update()
 					await user_update_tournament(player.user, False)
 				elif game.state == 'waiting':
-					self.logger.info(f"Game didnt start yet calling game ended")
-					await self.gameEnded(game.game_id, 0, 0, game.player_left if game.player_right == player else game.player_right)
+					self.logger.info(f"Player gave up before game begins")
+					await self.gameEnded(game.game_id, 0, 0, game.player_left.user if game.player_right.user == player else game.player_right.user)
 					del game_manager.games[game.game_id]
 					self.logger.info(f"Game {game.game_id} deleted")
 					game.game_id = -1
@@ -256,7 +257,7 @@ class Tournament:
 			self.logger.info(f"All games of round {current_round} are finished")
 			if len(winners) == 1:
 				self.state = 'finished'
-				self.winner = winners[0]
+				self.winner = winners[0].user
 				self.logger.info(f"Tournament finished, winner is {winners[0].user.username}")
 			else:
 				self.round += 1
@@ -283,6 +284,10 @@ class Tournament:
 		except Exception as e:
 			self.logger.error(f"Error in create_game_history: {e}")
 			raise
+
+	@database_sync_to_async
+	def get_game_by_id(self, game_id):
+		return self.game_history.objects.get(id=game_id)
 	
 	async def gameEnded(self, game_id, scoreLeft, scoreRight, winner):
 		self.logger.info(f"Game {game_id} ended")
@@ -307,11 +312,21 @@ class Tournament:
 					self.logger.info(f"Winner is player right, {game.player_left.user.username} lost, {game.player_right.user.username} wins")
 				else:
 					self.logger.info('Game ended no winenr match')
-				self.logger.info(f"Game {game_id} ended with {game.score_left} - {game.score_right}, the winner is {winner}")
+				self.logger.info('a')
+				if (game_id != -1):
+					if (game_manager.games[game_id]):
+						self.logger.info('b')
+						game_manager.remove_game(game_id)
+					self.logger.info('c')
+					game_history_db = await self.get_game_by_id(game_id)
+					self.logger.info(game_history_db)
+					if (game_history_db):
+						self.logger.info('f')
+						await game_manager.set_game_state(game_history_db, 'finished', scoreLeft, scoreRight)
+				self.logger.info(f"Game {game_id} ended with {game.score_left} - {game.score_right}, the winner is {winner.username}")
 				await self.checkForNextRound()
 				return
 				
-	
 	async def setReady(self, user):
 		self.logger.info("Received ready")
 		for game in self.games:
@@ -345,6 +360,13 @@ class Tournament:
 		})
 		self.logger.info(f"Game {game.game_id} started between {game.player_left.user.username} and {game.player_right.user.username}")
 
+	async def getUserElo(self, user, game_mode):
+		user_statistic = await get_user_statistic(user)
+		return user_statistic.classic_elo if game_mode == "classic" else user_statistic.rumble_elo
+
+	async def getUserTournamentTop1(self, user):
+		user_statistic = await get_user_statistic(user)
+		return user_statistic.tournament_top_1
 
 	def getUserAvatar(self, user):
 		if (user.avatar_42):
@@ -361,10 +383,20 @@ class Tournament:
 			return user.username
 		
 	async def send_tournament_update(self):
-		if (self.winner and self.winner.user):
-			winner = self.getUserName(self.winner.user)
-		else:
-			winner = None
+		player_data = []
+		for player in self.players:
+			elo = await self.getUserElo(player.user, self.mode)
+			top_1 = await self.getUserTournamentTop1(player.user)
+			player_data.append({
+				"elo": elo,
+				"top_1": top_1,
+				"username": player.user.username,
+				"display": player.user.display_name,
+				"avatar": self.getUserAvatar(player.user),
+				"ready": player.ready,
+				"lost": player.lost,
+			})
+
 		tournament_state = {
 			"type": "tournament_update",
 			"state": self.state,
@@ -372,23 +404,18 @@ class Tournament:
 			"mode": self.mode,
 			"round": self.round,
 			"start_time": self.startTime,
-			"winner" : winner,
-			"players": [
-				{
-					"username": player.user.username,
-					"display": player.user.display_name,
-					"avatar": self.getUserName(player.user),
-					"ready": player.ready,
-					"lost": player.lost,
-				} for player in self.players
-			],
+			"winner" : True if(self.winner) else False,
+			"winnerName": self.getUserName(self.winner) if self.winner else None,
+			"winnerUsername": self.winner.username if self.winner else None,
+			"winnerAvatar": self.getUserAvatar(self.winner) if self.winner else None,
+			"players": player_data if player_data else '',
 			"games": [
 				{
 					"player_left": {
 						"user": {
 							"username": game.player_left.user.username,
 							"displayName" : game.player_left.user.display_name,
-							"avatar" : self.getAvatar(game.player_left.user)
+							"avatar" : self.getUserAvatar(game.player_left.user)
 						},
 						"ready": game.player_left.ready,
 						"lost": game.player_left.lost,
@@ -398,7 +425,7 @@ class Tournament:
 						"user": {
 							"username": game.player_right.user.username,
 							"displayName" : game.player_right.user.display_name,
-							"avatar" : self.getAvatar(game.player_right.user)
+							"avatar" : self.getUserAvatar(game.player_right.user)
 						},
 						"ready": game.player_right.ready,
 						"lost": game.player_right.lost,

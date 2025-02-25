@@ -177,7 +177,7 @@ export default class GameView {
 			returnButton.innerHTML = '<i class="fa-solid fa-rotate-left"></i> Return to Menu';
 
 		returnButton.onclick = () => {
-			this.returnToMainMenu(tournament);
+			this.returnToMainMenu(event.tournament);
 		};
 
 		const playerLeftNameRedirect = document.getElementById('player-left-name-redirect');

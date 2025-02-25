@@ -40,22 +40,26 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 			}))
 			await self.close()
 			return
-		if (user.id in active_connections):
-			await self.accept()
-			await self.send(text_data=json.dumps({
-					"type": "handle_error",
-					"message": "Multiple connections, connection refused"
-			}))
-			await self.close()
-			return
+		self.logger.info(f"User {user.username} connected to tournament websocket")
+		# if (user.id in active_connections):
+		# 	await self.accept()
+		# 	await self.send(text_data=json.dumps({
+		# 			"type": "handle_error",
+		# 			"message": "Multiple connections, connection refused"
+		# 	}))
+		# 	await self.close()
+		# 	return
 		
 		await self.accept()
+		self.logger.info(f"User {user.username} accepted in tournament websocket")
 		active_connections[user.id] = self
 		await self.channel_layer.group_add("updates", self.channel_name)
 		if (tournament.isPlayer(self.user, self.channel_name)):
 			self.logger.info("New connection was already a player, adding to player channel")
 			await self.channel_layer.group_add("players", self.channel_name)
+			self.logger.info(f"User {user.username} added in the player group")
 		await tournament.send_tournament_update()
+		self.logger.info(f"Tournament update sent in consumer")
 
 	async def receive(self, text_data):
 		try:
@@ -87,8 +91,9 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 			print(f"Error handling message: {e}")
 
 	async def disconnect(self, close_code):
-		if self.user.id in active_connections:
-			del active_connections[self.user.id]
+		self.logger.info("Disconnected from tournament websocket")
+		# if self.user.id in active_connections:
+		# 	del active_connections[self.user.id]
 
 
 	async def tournament_update(self, event):

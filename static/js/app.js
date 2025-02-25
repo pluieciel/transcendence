@@ -158,7 +158,7 @@ class App {
 		let header = `
 			<header>
 				<h1 id="header-title">P
-					<button id="${inLogin ? 'login-credits-button' : 'credits-button'}" ${creditsDisabled ? 'disabled' : ''}>
+					<button id="${inLogin ? 'login-credits-button' : 'credits-button'}" class="nav-button" ${creditsDisabled ? 'disabled' : ''}>
 						<i class="fa-solid fa-table-tennis-paddle-ball fa-xs"></i>
 					</button>
 					N G

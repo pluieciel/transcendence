@@ -32,39 +32,39 @@ class GameConsumer(AsyncWebsocketConsumer):
 
 		user = await jwt_to_user(self.scope['headers'])
 		self.user = user
-		if not self.user:
-			await self.accept()
-			await self.send(text_data=json.dumps({
-				"type": "handle_error",
-				"message": "Invalid JWT"
-			}))
-			await self.close()
-			return
-		if (user.id in active_connections):
-			await self.accept()
-			await self.send(text_data=json.dumps({
-					"type": "handle_error",
-					"message": "Multiple connections, connection refused"
-			}))
-			await self.close()
-			return
-		self.logger.info(f"User : {user.id}, created {user.created_at} playing : {user.playing}")
-		if (user.playing):
-			await self.accept()
-			await self.send(text_data=json.dumps({
-					"type": "handle_error",
-					"message": "Player is already in a game"
-			}))
-			await self.close()
-			return
-		if (user.tournament):
-			await self.accept()
-			await self.send(text_data=json.dumps({
-					"type": "handle_error",
-					"message": "Player is registered in a tournament"
-			}))
-			await self.close()
-			return
+		#if not self.user:
+		#	await self.accept()
+		#	await self.send(text_data=json.dumps({
+		#		"type": "handle_error",
+		#		"message": "Invalid JWT"
+		#	}))
+		#	await self.close()
+		#	return
+		#if (user.id in active_connections):
+		#	await self.accept()
+		#	await self.send(text_data=json.dumps({
+		#			"type": "handle_error",
+		#			"message": "Multiple connections, connection refused"
+		#	}))
+		#	await self.close()
+		#	return
+		#self.logger.info(f"User : {user.id}, created {user.created_at} playing : {user.playing}")
+		#if (user.playing):
+		#	await self.accept()
+		#	await self.send(text_data=json.dumps({
+		#			"type": "handle_error",
+		#			"message": "Player is already in a game"
+		#	}))
+		#	await self.close()
+		#	return
+		#if (user.tournament):
+		#	await self.accept()
+		#	await self.send(text_data=json.dumps({
+		#			"type": "handle_error",
+		#			"message": "Player is registered in a tournament"
+		#	}))
+		#	await self.close()
+		#	return
 
 		self.logger.info(user.playing)
 		query_string = self.scope["query_string"].decode()
@@ -102,6 +102,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 			self.game.assign_player(user, self.channel_name)
 			await user_update_game(self.user, True, game_id=self.game.game_id)
 			await self.accept()
+			self.logger.info("User accepted")
 
 			await self.channel_layer.group_add(str(self.game.game_id), self.channel_name)
 
@@ -168,6 +169,9 @@ class GameConsumer(AsyncWebsocketConsumer):
 			tournament_game_id = await game_manager.tournament_player(user)
 			if tournament_game_id:
 				self.logger.info(f"User {user.username} is already in a tournament: {tournament_game_id}")
+				if not game_manager.games[tournament_game_id]:
+					self.logger.error("Game not found in the game manager")
+					return
 				self.game = game_manager.games[tournament_game_id]
 			else:
 				self.game = game_manager.get_player_current_game(user)
@@ -175,6 +179,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 			self.game.channel_layer = self.channel_layer
 			self.game.assign_player(user, self.channel_name)
 			await user_update_game(self.user, True, self.game.game_id)
+			self.logger.info("User accepted")
 			await self.accept()
 
 			await self.channel_layer.group_add(str(self.game.game_id), self.channel_name)
