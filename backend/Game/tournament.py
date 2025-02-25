@@ -158,7 +158,7 @@ class Tournament:
 					await user_update_tournament(player.user, False)
 				elif game.state == 'waiting':
 					self.logger.info(f"Player gave up before game begins")
-					await self.gameEnded(game.game_id, 0, 0, game.player_left.user if game.player_right.user == player else game.player_right.user)
+					await self.gameEnded(game.game_id, 0, 0, game.player_left.user if game.player_right.user == player.user else game.player_right.user)
 					del game_manager.games[game.game_id]
 					self.logger.info(f"Game {game.game_id} deleted")
 					game.game_id = -1
