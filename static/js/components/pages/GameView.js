@@ -137,7 +137,7 @@ export default class GameView {
 		const playerRightName = document.getElementById('player-right-name-redirect');
 		const playerLeftAvatar = document.querySelector('#player-left-redirect .player-avatar');
 		const playerRightAvatar = document.querySelector('#player-right-redirect .player-avatar');
-		const playerLeft = document.querySelector('#player-right-redirect');
+		const playerLeft = document.querySelector('#player-left-redirect');
 		const playerRight = document.querySelector('#player-right-redirect');
 		const score = document.getElementById('game-summary-score');
 		const elo = document.getElementById('game-summary-elo');
@@ -160,13 +160,27 @@ export default class GameView {
 
 		if (event.winner === "RIGHT")
 		{
-			playerLeft.appendChild(document.createElement('<div class="player-loser">LOSER</div>'));
-			playerRight.appendChild(document.createElement('<div class="player-winner">WINNER</div>'));
+			const playerLeftDiv = document.createElement('div');
+			playerLeftDiv.classList.add('player-loser');
+			playerLeftDiv.textContent = 'LOSER';
+			playerLeft.appendChild(playerLeftDiv);
+
+			const playerRightDiv = document.createElement('div');
+			playerRightDiv.classList.add('player-winner');
+			playerRightDiv.textContent = 'WINNER';
+			playerRight.appendChild(playerRightDiv);
 		}
 		else
 		{
-			playerLeft.appendChild(document.createElement('<div class="player-winner">WINNER</div>'));
-			playerRight.appendChild(document.createElement('<div class="player-loser">LOSER</div>'));
+			const playerLeftDiv = document.createElement('div');
+			playerLeftDiv.classList.add('player-winner');
+			playerLeftDiv.textContent = 'WINNER';
+			playerLeft.appendChild(playerLeftDiv);
+
+			const playerRightDiv = document.createElement('div');
+			playerRightDiv.classList.add('player-loser');
+			playerRightDiv.textContent = 'LOSER';
+			playerRight.appendChild(playerRightDiv);
 		}
 
 		if (event.eloChange > 0)
