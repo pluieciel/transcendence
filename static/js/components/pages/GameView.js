@@ -6,6 +6,7 @@ export default class GameView {
 		this.game = null;
 		this.render();
 		window.app.getSettings();
+		this.username = window.app.state.username;
 		this.settings = {
 			color: window.app.settings.color,
 			quality: window.app.settings.quality,
@@ -36,33 +37,31 @@ export default class GameView {
 						</div>
 						<div class="my-modal-content">
 							<div id="game-summary-info">
-								<div id="game-summary-mode"><i class="fa-solid fa-bolt"></i>&nbsp; Rumble</div>
-								<div id="game-summary-type"><i class="fa-solid fa-ranking-star"></i>&nbsp; Ranked</div>
+								<div id="game-summary-mode"></div>
+								<div id="game-summary-type"></div>
 							</div>
 							<div id="game-summary">
 								<div id="player-left-summary-name">
-									<button id="player-left-name-redirect" data-redirect-to="/profiles/user2">user2</button>
+									<button id="player-left-name-redirect">user2</button>
 								</div>
 								<div id="game-summary-middle">
 									<div id="player-left-avatar">
-										<button id="player-left-redirect" data-redirect-to="/profiles/user2">
+										<button id="player-left-redirect">
 											<img src="/imgs/default_avatar.png" class="avatar player-avatar">
-											<div class="player-loser">LOSER</div>
 										</button>
 									</div>
 									<div id="game-middle-info">
-										<div id="game-summary-score">10 - 5</div>
-										<div id="game-summary-elo"><i class="fa-solid fa-plus-minus fa-xs"></i>&nbsp; 15</div>
+										<div id="game-summary-score"></div>
+										<div id="game-summary-elo"></div>
 									</div>
 									<div id="player-right-avatar">
-										<button id="player-right-redirect" data-redirect-to="/profiles/user1">
+										<button id="player-right-redirect">
 											<img src="/imgs/default_avatar.png" class="avatar player-avatar">
-											<div class="player-winner">WINNER</div>
 										</button>
 									</div>
 								</div>
 								<div id="player-right-summary-name">
-									<button id="player-right-name-redirect" data-redirect-to="/profiles/user1">user1</button>
+									<button id="player-right-name-redirect">user1</button>
 								</div>
 							</div>
 							<button id="return-button" type="submit"><i class="fa-solid fa-rotate-left"></i> Return to Menu</button>
@@ -127,33 +126,64 @@ export default class GameView {
 		}, 3000 + 1000); // 2 seconds + duration of the fade-in transition
 	}
 
-	onGameEnd(winnerName, winnerUser, winnerAvatar, scoreLeft, scoreRight, eloChange, tournament) {
+	onGameEnd(event) {
+		console.log(event);
 		const gameSummaryModal = document.getElementById('game-summary-modal');
 		gameSummaryModal.parentElement.style.display = 'flex';
-		document.querySelector("#winner-name").textContent = `Winner: ${winnerName}`;
-		document.querySelector("#winner-avatar").src = winnerAvatar;
-		document.querySelector("#score-text").textContent = `Final Score: ${scoreLeft} - ${scoreRight}`;
-		if (eloChange > 0)
+		
+		const gameMode = document.getElementById('game-summary-mode');
+		const gameType = document.getElementById('game-summary-type');
+		const playerLeftName = document.getElementById('player-left-name-redirect');
+		const playerRightName = document.getElementById('player-right-name-redirect');
+		const playerLeftAvatar = document.querySelector('#player-left-redirect .player-avatar');
+		const playerRightAvatar = document.querySelector('#player-right-redirect .player-avatar');
+		const playerLeft = document.querySelector('#player-right-redirect');
+		const playerRight = document.querySelector('#player-right-redirect');
+		const score = document.getElementById('game-summary-score');
+		const elo = document.getElementById('game-summary-elo');
+		gameMode.innerHTML = event.gameMode === "classic" ? '<i class="fa-solid fa-star"></i>&nbsp; Classic' : '<i class="fa-solid fa-bolt"></i>&nbsp; Rumble';
+
+		if (event.bot)
+			gameType.innerHTML = '<i class="fa-solid fa-robot"></i>&nbsp; AI';
+		else if (event.ranked)
+			gameType.innerHTML = '<i class="fa-solid fa-ranking-star"></i>&nbsp; Ranked';
+		else if (event.tournament)
+			gameType.innerHTML = '<i class="fa-solid fa-crown"></i>&nbsp; Tournament';
+		else
+			gameType.innerHTML = '<i class="fa-solid fa-user-check"></i>&nbsp; Invite';
+
+		playerLeftName.innerHTML = event.playerLeftName;
+		playerRightName.innerHTML = event.playerRightName;
+		playerLeftAvatar.src = event.playerLeftAvatar;
+		playerRightAvatar.src = event.playerRightAvatar;
+		score.innerHTML = event.scoreLeft + " - " + event.scoreRight;
+
+		if (event.winner === "RIGHT")
 		{
-			document.querySelector("#elo-text").style.display = 'block';
-			document.querySelector("#elo-text").textContent = `ELO Change: ${winnerUser == username ? "+" : "-"}${eloChange}`;
+			playerLeft.appendChild(document.createElement('<div class="player-loser">LOSER</div>'));
+			playerRight.appendChild(document.createElement('<div class="player-winner">WINNER</div>'));
 		}
 		else
 		{
-			document.querySelector("#elo-text").style.display = 'none';
+			playerLeft.appendChild(document.createElement('<div class="player-winner">WINNER</div>'));
+			playerRight.appendChild(document.createElement('<div class="player-loser">LOSER</div>'));
 		}
+
+		if (event.eloChange > 0)
+		{
+			elo.style.display = 'block';
+			elo.innerHTML = `${event.winnerUser == this.username ? "+" : "-"}${event.eloChange}`;
+		}
+		else
+			elo.style.display = 'none';
 		window.app.gamews.close();
 
 		const returnButton = document.querySelector("#return-button");
-		returnButton.style.display = "block";
 		if (tournament)
-		{
 			returnButton.innerHTML = "Return to Tournament";
-		}
+
 		else
-		{
 			returnButton.innerHTML = "Return to Main Menu";
-		}
 		returnButton.onclick = () => {
 			this.returnToMainMenu(tournament);
 		};
