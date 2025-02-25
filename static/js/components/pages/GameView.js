@@ -64,7 +64,7 @@ export default class GameView {
 									<button id="player-right-name-redirect">user1</button>
 								</div>
 							</div>
-							<button id="return-button" type="submit"><i class="fa-solid fa-rotate-left"></i> Return to Menu</button>
+							<button id="return-button" type="submit"></button>
 						</div>
 					</div>
 				</div>
@@ -127,7 +127,6 @@ export default class GameView {
 	}
 
 	onGameEnd(event) {
-		console.log(event);
 		const gameSummaryModal = document.getElementById('game-summary-modal');
 		gameSummaryModal.parentElement.style.display = 'flex';
 		
@@ -193,30 +192,41 @@ export default class GameView {
 		window.app.gamews.close();
 
 		const returnButton = document.querySelector("#return-button");
-		if (tournament)
-			returnButton.innerHTML = "Return to Tournament";
-
+		if (event.tournament)
+			returnButton.innerHTML = '<i class="fa-solid fa-rotate-left"></i> Return to Tournament';
 		else
-			returnButton.innerHTML = "Return to Main Menu";
+			returnButton.innerHTML = '<i class="fa-solid fa-rotate-left"></i> Return to Menu';
+
 		returnButton.onclick = () => {
 			this.returnToMainMenu(tournament);
+		};
+
+		playerLeftName.onclick = () => {
+			window.app.router.navigateTo(`/profiles/${event.playerLeftUsername}`);
+		};
+
+		playerRightName.onclick = () => {
+			window.app.router.navigateTo(`/profiles/${event.playerRightUsername}`);
+		};
+
+		playerLeft.onclick = () => {
+			window.app.router.navigateTo(`/profiles/${event.playerLeftUsername}`);
+		};
+
+		playerRight.onclick = () => {
+			window.app.router.navigateTo(`/profiles/${event.playerRightUsername}`);
 		};
 	}
 
 	returnToMainMenu(tournament = false) {
-		const returnButton = document.querySelector("#return-button");
 		this.disposeGame();
 
 		window.app.ingame = false;
 		sessionStorage.setItem("ingame", "false");
 		if (tournament)
-		{
 			window.app.router.navigateTo("/tournament");
-		}
 		else
-		{
 			window.app.router.navigateTo("/play");
-		}
 	}
 
 	hideWaitingMessage() {
