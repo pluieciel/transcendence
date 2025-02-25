@@ -389,7 +389,10 @@ class Tournament:
 			"mode": self.mode,
 			"round": self.round,
 			"start_time": self.startTime,
-			"winner": self.getUserName(self.winner.user) if self.winner and self.winner.user else None,
+			"winner" : self.winner,
+			"winnerName": self.getUserName(self.winner.user) if self.winner and self.winner.user else None,
+			"winnerUserName": self.winner.user.username if self.winner and self.winner.user else None,
+			"winnerAvatar": self.getUserAvatar(self.winner.user) if self.winner and self.winner.user else None,
 			"players": player_data,
 			"games": [
 				{
