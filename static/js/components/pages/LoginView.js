@@ -3,6 +3,7 @@ export default class LoginView {
 		this.container = container;
 		this.render();
 		this.addEventListeners();
+		window.app.chatBox = null;
 	}
 
 	render() {

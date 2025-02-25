@@ -5,8 +5,8 @@ from channels.layers import get_channel_layer
 from datetime import datetime
 from django.contrib.auth import get_user_model, authenticate
 from channels.db import database_sync_to_async
-import jwt
-import os
+# import jwt
+# import os
 import re
 from Game.consumer import game_manager
 import redis
@@ -15,9 +15,12 @@ from api.utils import get_secret_from_file
 from api.db_utils import get_user_by_name, unlock_achievement, update_achievement_progression
 from openai import OpenAI
 from django.core.cache import cache
-import asyncio
-import markdown
+# import asyncio
+# import markdown
+from api.utils import jwt_to_user
 
+
+active_connections = {}
 def get_cookie(headers, name):
 	cookies = headers.get('cookie', None)
 	return re.search(f'{name}=([^;]+)', cookies)
@@ -38,35 +41,40 @@ class ChatConsumer(AsyncWebsocketConsumer):
 		self.register_invite = register_invite
 		self.is_valid_invite = is_valid_invite
 		self.redis_client = redis.Redis(host='redis', port=6379, db=0)
-		self.apikey = get_secret_from_file('DEEPSEEK_API_KEY_FILE')
-		self.client = OpenAI(api_key=self.apikey, base_url="https://api.deepseek.com")
+		# self.apikey = get_secret_from_file('DEEPSEEK_API_KEY_FILE')
+		# self.client = OpenAI(api_key=self.apikey, base_url="https://api.deepseek.com")
 		self.ai_chat_history = []
 
 	async def connect(self):
-		headers_dict = dict((key.decode('utf-8'), value.decode('utf-8')) for key, value in self.scope['headers'])
-		jwt_cookie = get_cookie(headers_dict, 'jwt')
-		self.token = jwt_cookie.group(1)
-		try:
-			payload = jwt.decode(self.token, get_secret_from_file('JWT_SECRET_KEY_FILE'), algorithms=['HS256'])
-			self.username = payload.get('username')
-
-		except jwt.ExpiredSignatureError:
-			return
-		except jwt.InvalidTokenError:
-			return
-
-		self.room_group_name = f"user_{self.username}"
-
-		if self.username is None:
+		# print(len(active_connections), flush=True)
+		user = await jwt_to_user(self.scope['headers'])
+		self.user = user
+		self.username = user.username
+		if not self.user:
+			await self.accept()
+			await self.send(text_data=json.dumps({
+				"type": "handle_error",
+				"message": "Invalid JWT"
+			}))
 			await self.close()
-			print("No username provided")
 			return
-
+		if (user.id in active_connections):
+			# await self.accept()
+			# await self.send(text_data=json.dumps({
+			# 		"type": "handle_error",
+			# 		"message": "Multiple connections, connection refused"
+			# }))
+			await self.close()
+			return
+		
+		self.room_group_name = f"user_{self.username}"
+		
 		await self.channel_layer.group_add(
 			self.room_group_name,
 			self.channel_name
 		)
 		await self.accept()
+		active_connections[self.user.id] = self
 
 		if self.username:
 			ChatConsumer.online_users.add(self.username)
@@ -129,6 +137,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
 		return list(users)
 
 	async def disconnect(self, close_code):
+		if self.user.id in active_connections:
+			del active_connections[self.user.id]
 		self.redis_client.srem('active_groups', str(self.room_group_name))
 		# await self.channel_layer.group_discard(
 		#     self.room_group_name,
@@ -188,7 +198,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 						"type": "send_message",
 						"message": message,
 						"message_type": "chat",
-						"sender": sender,
+						"sender": self.username,
 						"recipient": recipient,
 						"time": time
 					}

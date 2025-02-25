@@ -63,12 +63,22 @@ export default class ChatBox {
                         <ul class="nav flex-column nav-tabs custom-tabs" id="chatTabs">
                             <li class="nav-item">
                                 <a class="chat-nav-link active" data-tab="online" title="Online Users">
-                                    <i class="fas fa-user"></i>
+                                    <i class="fas fa-user-group"></i>
+                                </a>
+                            </li>
+							<li class="nav-item">
+                                <a class="chat-nav-link" data-tab="allusers" title="All Users">
+                                    <i class="fas fa-users"></i>
+                                </a>
+                            </li>
+							<li class="nav-item">
+                                <a class="chat-nav-link" data-tab="friends" title="Friends">
+                                    <i class="fas fa-heart"></i>
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a class="chat-nav-link" data-tab="public" title="Public Chatroom">
-                                    <i class="fas fa-users"></i>
+                                    <i class="fas fa-comment-dots"></i>
                                 </a>
                             </li>
                             <div id="userTabs"></div>
@@ -239,7 +249,7 @@ export default class ChatBox {
                             <button class="btn btn-primary square-btn ${this.blocked.includes(user) ? "square-btn-red" : ""}"
                                     data-action="block"
                                     data-user="${user}">
-                                <i class="fas fa-ban"></i>
+                                <i class="fas fa-comment-slash"></i>
                             </button>
                         </span>
                     `
@@ -294,7 +304,7 @@ export default class ChatBox {
 								? ""
 								: `<span class="d-flex align-items-center">
                             <button class="btn btn-primary square-btn me-1" data-action="addfriend" data-user="${user}">
-                                <i class="fa-solid fa-plus"></i>
+                                <i class="fa-solid fa-user-plus"></i>
                             </button>
                         </span>`
 						}
@@ -357,7 +367,7 @@ export default class ChatBox {
 									: ""
 							}
                             <button class="btn btn-primary square-btn me-1 square-btn-red" data-action="removefriend" data-user="${user}">
-                                <i class="fa-solid fa-trash"></i>
+                                <i class="fa-solid fa-user-xmark"></i>
                             </button>
                         </span>
 
@@ -525,9 +535,18 @@ export default class ChatBox {
 
 			if (tab === "online") {
 				this.container.querySelector("#onlineUsers").classList.remove("d-none");
-				if (this.activeTab === "online") {
-					this.showingOnlineUsers = (this.showingOnlineUsers + 1) % 3;
-				}
+				// if (this.activeTab === "online") {
+				// 	this.showingOnlineUsers = (this.showingOnlineUsers + 1) % 3;
+				// }
+				this.showingOnlineUsers = 0;
+				this.updateOnlineUsersList();
+			} else if (tab === "allusers") {
+				this.container.querySelector("#onlineUsers").classList.remove("d-none");
+				this.showingOnlineUsers = 1;
+				this.updateOnlineUsersList();
+			} else if (tab === "friends") {
+				this.container.querySelector("#onlineUsers").classList.remove("d-none");
+				this.showingOnlineUsers = 2;
 				this.updateOnlineUsersList();
 			} else if (tab === "public") {
 				this.container.querySelector("#publicChat").classList.remove("d-none");
@@ -725,10 +744,11 @@ export default class ChatBox {
 	}
 
 	sanitize(data) {
-		if (data.time) data.time = this.escapeHtml(data.time);
-		if (data.sender) data.sender = this.escapeHtml(data.sender)
-		if (data.message) data.message = this.escapeHtml(data.message)
-		if (data.message_type) data.message_type = this.escapeHtml(data.message_type);
+		for (let key in data) {
+			if (data[key]) {  // Ensure the key belongs to the object
+				data[key] = this.escapeHtml(data[key]);
+			}
+		}
 	}
 
 	escapeHtml(str) {
