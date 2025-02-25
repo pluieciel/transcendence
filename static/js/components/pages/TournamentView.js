@@ -3,6 +3,7 @@ export default class TournamentView {
 		this.container = container;
 		this.username = window.app.state.username;
 		this.init();
+		this.timerInterval = null;
 	}
 
 	async init() {
@@ -46,6 +47,29 @@ export default class TournamentView {
 				const roomCardTournament = document.getElementById("tournament-room-card");
 				events.state === 'finished'? createCardTournament.style.display = 'flex' : createCardTournament.style.display = 'none';
 				events.state !== 'finished'? roomCardTournament.style.display = 'flex' : roomCardTournament.style.display = 'none';
+				console.log(events.state);
+				if (events.state == 'waiting')
+				{
+					console.log("HERHEHHR");
+					document.getElementById('tournament-state').innerHTML = `<i class="fa-solid fa-hourglass-half fa-spin"></i>&nbsp; Waiting for players...`
+					document.getElementById('leave-button').style.display = 'block';
+					document.getElementById('forfeit-button').style.display = 'none';
+				}
+				else if (events.state == 'starting')
+				{
+					this.startTimer(events.start_time)
+					document.getElementById('leave-button').style.display = 'block';
+					document.getElementById('forfeit-button').style.display = 'none';
+				}
+				else if (events.state == 'playing')
+				{
+					document.getElementById('tournament-state').innerHTML = `<i class="fa-solid fa-gamepad"></i> Tournament in progress`;
+					document.getElementById('forfeit-button').style.display = 'block';
+					document.getElementById('leave-button').style.display = 'none';
+				}
+				{
+					console.log("asoidhsaoihd " + events.state);
+				}
 				let gameSize = 0;
 				if (events.state != 'playing')
 				{
@@ -140,6 +164,38 @@ export default class TournamentView {
 		window.app.tournamentws.onerror = (error) => {
 			console.error("WebSocket error:", error);
 		};
+	}
+
+	startTimer(start_time) {
+		this.updateTimerDisplay(start_time)
+
+	}
+
+	updateTimerDisplay(start_time) {
+		console.log('Start time : ' + start_time);
+		const currentTime = Date.now(); 
+		console.log('Current time : ' + currentTime);
+		
+		// Convert start_time to milliseconds
+		const startTimeInMilliseconds = start_time * 1000; // Convert seconds to milliseconds
+		const remainingTime = Math.max(0, Math.floor((startTimeInMilliseconds - currentTime) / 1000));
+		console.log('Remaining time : ' + remainingTime);
+	
+		const timerElement = document.getElementById('tournament-state');
+		const minutes = Math.floor(remainingTime / 60);
+		const seconds = remainingTime % 60;
+		timerElement.innerHTML = `<i class="fa-solid fa-clock"></i> Tournament starting in : ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+	
+		if (remainingTime > 0) {
+			this.timerInterval = setTimeout(() => this.updateTimerDisplay(start_time), 1000);
+		} else {
+			clearInterval(this.timerInterval);
+		}
+	}
+
+	handleTimerDone() {
+		const timerElement = document.getElementById("waiting-room-timer");
+		timerElement.innerHTML = "Time's up!";
 	}
 
 	clearTree()
@@ -493,19 +549,6 @@ export default class TournamentView {
 				</div>
 			</div>
 		`;	
-	}
-	
-	truc2() {
-		return `
-			<div id="winner-avatar">
-				<div id="winner-crown">
-					<i class="fa-solid fa-crown fa-2xl"></i>
-				</div>
-				<button id="tournament-0-winner-avatar" data-redirect-to="/profiles/user1"><img src="/imgs/default_avatar.png" id="winner-player-avatar" class="avatar player-avatar"></button>
-				<div id="player-right-tournament-name">
-					<button id="tournament-0-winner-name" data-redirect-to="/profiles/user1">user1</button>
-				</div>
-			</div>`
 	}
 
 	addEventListeners() {
