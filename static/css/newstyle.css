@@ -1875,7 +1875,7 @@ form button:hover:not(:disabled) {
 	justify-content: space-around;
 	margin-bottom: 1rem;
 	font-weight: bold;
-	font-size: 1.1rem;
+	font-size: 1.2rem;
 }
 
 #game-summary {
@@ -1896,7 +1896,7 @@ form button:hover:not(:disabled) {
 	justify-content: center;
 	flex-shrink: 0;
 	font-weight: bold;
-	font-size: 1.1rem;
+	font-size: 1.2rem;
 }
 
 #game-summary-middle #game-middle-info {
@@ -1926,7 +1926,7 @@ form button:hover:not(:disabled) {
 	font-weight: bold;
 	text-align: center;
 	flex-grow: 1;
-	font-size: 1.1rem;
+	font-size: 1.2rem;
 }
 
 #player-left-summary-name button, #player-right-summary-name button {
