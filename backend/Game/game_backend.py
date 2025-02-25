@@ -306,26 +306,32 @@ class GameBackend:
 			})
 			self.game.scored = False
 		if self.game.ended:
-			if (self.game.winner.avatar_42):
-				avatar = self.game.winner.avatar_42
-			elif (self.game.winner.avatar):
-				avatar = self.game.winner.avatar.url
+			avatar = self.getUserAvatar(self.game.winner)
+			username = self.getUserName(self.game.winner)
+			if self.game.winner is self.player_left.user:
+				side = "LEFT"
+			elif self.game.winner is self.player_right.user:
+				side = "RIGHT"
 			else:
-				avatar = '/imgs/default_avatar.png'
-
-			self.logger.info(f"Appending winner info with {self.game.winner.username}")
-			if (self.game.winner.display_name):
-				username = self.game.winner.display_name
-			else:
-				username = self.game.winner.username
+				self.logger.info("Unknown winner")
+			
 			events.append({
 				"type": "game_end",
 				"winnerName": username,
+				"winner" : side,
+				"winnerUser" : self.game.winner.username,
 				"winnerAvatar": avatar,
+				"playerLeftName" : self.getUserName(self.player_left.user),
+				"playerLeftAvatar" : self.getUserAvatar(self.player_left.user),
 				"scoreLeft": self.game.player_left.score,
+				"playerRightName" : self.getUserName(self.player_right.user),
+				"playerRightAvatar" : self.getUserAvatar(self.player_right.user),
 				"scoreRight": self.game.player_right.score,
 				"eloChange": self.elo_change,
-				"tournament": self.tournament
+				"tournament": self.tournament,
+				"gameMode": self.game_mode,
+				"ranked": self.is_ranked,
+				"bot": self.bot > 0
 		})
 		if self.game.ball.lastHitter is not None:
 			if (self.game.ball.lastHitter == "LEFT"):
