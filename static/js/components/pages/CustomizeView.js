@@ -112,7 +112,7 @@ export default class CustomizeView {
 			this.previewGame.updateColor(this.settings.color);
 			this.settings.isSaved = false;
 
-			console.log(this.unlockedColors.has(7));
+			
 			this.setSaveButtonActive(this.unlockedColors.has(this.settings.color));
 		});
 
@@ -223,9 +223,9 @@ class PreviewGame {
 
 	async initialize() {
 		if (!window.app.settings.fetched) await window.app.getUserPreferences();
-		console.log("Initializing preview with settings:", window.app.settings);
+		
 		this.renderer = new Renderer(this.canvas, true);
-		console.log("calling with " + window.app.settings.quality);
+		
 		this.sceneManager = new SceneManager(this.renderer.renderer, window.app.settings.quality);
 		await this.sceneManager.initialize_preview(this.getColor(window.app.settings.color));
 		this.previewRunning = true;
@@ -272,7 +272,7 @@ class PreviewGame {
 	}
 
 	destroy() {
-		console.log("Destroying preview...");
+		
 		this.previewRunning = false;
 		if (this.animationFrameId) {
 			cancelAnimationFrame(this.animationFrameId);
@@ -286,7 +286,7 @@ class PreviewGame {
 			this.renderer.dispose();
 			this.renderer = null;
 		}
-		console.log("Preview destroyed.");
+		
 	}
 
 	animate() {
@@ -313,7 +313,7 @@ class PreviewGame {
 		color = this.getColor(color);
 		const table = this.sceneManager.table;
 		const paddle = this.sceneManager.leftPaddle;
-		console.log(color + "  " + colorTextureMap[color]);
+		
 
 		table.traverse((obj) => {
 			if (obj.isMesh) {

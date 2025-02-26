@@ -28,8 +28,8 @@ export class Game {
 		this.factor = 0.1;
 		this.editor = true;
 
-		this.keydownListener = this.enableDebugMode.bind(this);
-		window.addEventListener("keydown", this.keydownListener);
+		// this.keydownListener = this.enableDebugMode.bind(this);
+		// window.addEventListener("keydown", this.keydownListener);
 	}
 
 	dispose() {
@@ -80,7 +80,7 @@ export class Game {
 		};
 
 		this.ws.onclose = () => {
-			console.log("WebSocket closed");
+			
 			this.clean();
 		};
 	}
@@ -130,34 +130,34 @@ export class Game {
 						this.sceneManager.textManager.updateScore("left", event.score_left.toString());
 						this.sceneManager.textManager.updateScore("right", event.score_right.toString());
 					} catch (e) {
-						console.log(e);
+						
 					}
 				}
 				if (event.type === "game_end") {
-					console.log("game end");
+					
 					if (this.onGameEnd) {
-						console.log("calling game end fun");
+						
 						this.onGameEnd(event);
 						this.dispose();
 					}
 					this.ws.close(1000);
-					console.log("Websocket closed");
+					
 				}
 				if (event.type == "ball_last_hitter") {
 					this.sceneManager.updateBallColor(event.color, event.color);
 				}
 				if (event.type == "event") {
 					try {
-						console.log(event);
+						
 						if (event.announce) {
 							this.showBanner(event.icon, event.name, event.description);
 						}
 						if (event.action != "none") {
-							console.log("Activating event");
+							
 							this.activateEvent(event);
 						}
 					} catch (e) {
-						console.log("Error showing banner" + e.message);
+						
 					}
 				}
 			});
@@ -165,15 +165,15 @@ export class Game {
 	}
 
 	activateEvent(event) {
-		console.log(event.name);
+		
 		switch (event.name) {
 			case "Lights Out":
 				if (event.action == "on") {
-					console.log("lights turned on");
+					
 					this.sceneManager.light.visible = true;
 					this.sceneManager.light.intensity = 8;
 				} else {
-					console.log("lights turned off");
+					
 					this.sceneManager.light.visible = false;
 					this.sceneManager.light.intensity = 0;
 				}
@@ -220,159 +220,159 @@ export class Game {
 
 	/******************************DEBUG************************************/
 	printSceneObjects() {
-		console.log("Scene Objects:");
+		
 		this.sceneManager.scene.children.forEach((child, index) => {
-			console.log(`Object ${index}:`, child);
+			
 		});
 	}
 
-	enableDebugMode(event) {
-		let objectToModify = null;
-		if (event.code === "Space") {
-			this.sceneManager.toggleDebugMode();
-		}
-		if (this.editor) {
-			if (event.code == "KeyG") {
-				console.log("Entering position mode");
-				console.log(objectToModify);
-				this.mode = "position";
-			} else if (event.code == "KeyO") {
-				objectToModify = this.sceneManager.camera;
-				if (objectToModify && objectToModify.geometry) {
-					objectToModify.geometry.computeBoundingBox();
-					const box = objectToModify.geometry.boundingBox;
-					const centerX = objectToModify.position.x + ((box.max.x + box.min.x) / 2) * objectToModify.scale.x;
-					console.log("Object set. Current center X: " + centerX);
-				}
-			} else if (event.code == "KeyS") {
-				this.mode = "scale";
-				console.log("Entering scale mode");
-			} else if (event.code == "KeyZ") {
-				this.mode = "zoom";
-				console.log("Entering zoom mode");
-			} else if (event.code == "KeyR") {
-				this.mode = "rotate";
-				console.log("Entering rotate mode");
-			} else if (event.code == "NumpadAdd") {
-				if (this.mode == "scale") {
-					if (this.axis == "x") {
-						objectToModify.scale.x += this.factor;
-						console.log("New x scale is : " + objectToModify.scale.x);
-					} else if (this.axis == "y") {
-						objectToModify.scale.y += this.factor;
-						console.log("New scale y is : " + objectToModify.scale.y);
-					} else if (this.axis == "z") {
-						objectToModify.scale.z += this.factor;
-						console.log("New scale z is : " + objectToModify.scale.z);
-					} else if (this.axis == "all") {
-						objectToModify.scale.x += this.factor;
-						objectToModify.scale.y += this.factor;
-						objectToModify.scale.z += this.factor;
-						console.log("New scale x is : " + objectToModify.scale.x);
-						console.log("New scale y is : " + objectToModify.scale.y);
-						console.log("New scale z is : " + objectToModify.scale.z);
-					}
-				} else if (this.mode == "position") {
-					if (this.axis == "x") {
-						objectToModify.position.x += this.factor;
-						// Calculate and display center position
-						if (objectToModify.geometry) {
-							objectToModify.geometry.computeBoundingBox();
-							const box = objectToModify.geometry.boundingBox;
-							const centerX = objectToModify.position.x + ((box.max.x + box.min.x) / 2) * objectToModify.scale.x;
-							console.log("New position x: " + objectToModify.position.x);
-							console.log("Current center X: " + centerX);
-						}
-					} else if (this.axis == "y") {
-						objectToModify.position.y += this.factor;
-						console.log("New position y is : " + objectToModify.position.y);
-					} else if (this.axis == "z") {
-						objectToModify.position.z += this.factor;
-						console.log("New position z is : " + objectToModify.position.z);
-					}
-				} else if (this.mode == "rotate") {
-					if (this.axis == "x") {
-						objectToModify.rotation.x += this.factor;
-						console.log("New x rotation is : " + objectToModify.rotation.x);
-					} else if (this.axis == "y") {
-						objectToModify.rotation.y += this.factor;
-						console.log("New rotation y is : " + objectToModify.rotation.y);
-					} else if (this.axis == "z") {
-						objectToModify.rotation.z += this.factor;
-						console.log("New rotation z is : " + objectToModify.rotation.z);
-					}
-				} else if (this.mode == "zoom") {
-					if (objectToModify.fov) {
-						objectToModify.fov -= this.factor * 10;
-						objectToModify.updateProjectionMatrix();
-						console.log("Zooming in, new FOV is : " + objectToModify.fov);
-					} else {
-						console.log("Object cannot zoom");
-					}
-				}
-			} else if (event.code == "NumpadSubtract") {
-				if (this.mode == "scale") {
-					if (this.axis == "x") {
-						objectToModify.scale.x -= this.factor;
-						console.log("New x scale is : " + objectToModify.scale.x);
-					} else if (this.axis == "y") {
-						objectToModify.scale.y -= this.factor;
-						console.log("New scale y is : " + objectToModify.scale.y);
-					} else if (this.axis == "z") {
-						objectToModify.scale.z -= this.factor;
-						console.log("New scale z is : " + objectToModify.scale.z);
-					} else if (this.axis == "all") {
-						objectToModify.scale.x -= this.factor;
-						objectToModify.scale.y -= this.factor;
-						objectToModify.scale.z -= this.factor;
-						console.log("New scale x is : " + objectToModify.scale.x);
-						console.log("New scale y is : " + objectToModify.scale.y);
-						console.log("New scale z is : " + objectToModify.scale.z);
-					}
-				} else if (this.mode == "position") {
-					if (this.axis == "x") {
-						objectToModify.position.x -= this.factor;
-						console.log("New x position is : " + objectToModify.position.x);
-					} else if (this.axis == "y") {
-						objectToModify.position.y -= this.factor;
-						console.log("New y position is : " + objectToModify.position.y);
-					} else if (this.axis == "z") {
-						objectToModify.position.z -= this.factor;
-						console.log("New z position is : " + objectToModify.position.z);
-					}
-				} else if (this.mode == "rotate") {
-					if (this.axis == "x") {
-						objectToModify.rotation.x -= this.factor;
-						console.log("New x rotation is : " + objectToModify.rotation.x);
-					} else if (this.axis == "y") {
-						objectToModify.rotation.y -= this.factor;
-						console.log("New rotation y is : " + objectToModify.rotation.y);
-					} else if (this.axis == "z") {
-						objectToModify.rotation.z -= this.factor;
-						console.log("New rotation z is : " + objectToModify.rotation.z);
-					}
-				} else if (this.mode == "zoom") {
-					if (objectToModify.fov) {
-						objectToModify.fov += this.factor * 10;
-						objectToModify.updateProjectionMatrix();
-						console.log("Zooming in, new FOV is : " + objectToModify.fov);
-					} else {
-						console.log("Object cannot zoom");
-					}
-				}
-			} else if (event.code == "KeyX") {
-				this.axis = "x";
-				console.log("Axis set to x");
-			} else if (event.code == "KeyY") {
-				this.axis = "y";
-				console.log("Axis set to y");
-			} else if (event.code == "KeyZ") {
-				this.axis = "z";
-				console.log("Axis set to z");
-			} else if (event.code == "KeyA") {
-				this.axis = "all";
-				console.log("Axis set to all");
-			}
-		}
-	}
+	// enableDebugMode(event) {
+	// 	let objectToModify = null;
+	// 	if (event.code === "Space") {
+	// 		this.sceneManager.toggleDebugMode();
+	// 	}
+	// 	if (this.editor) {
+	// 		if (event.code == "KeyG") {
+				
+				
+	// 			this.mode = "position";
+	// 		} else if (event.code == "KeyO") {
+	// 			objectToModify = this.sceneManager.camera;
+	// 			if (objectToModify && objectToModify.geometry) {
+	// 				objectToModify.geometry.computeBoundingBox();
+	// 				const box = objectToModify.geometry.boundingBox;
+	// 				const centerX = objectToModify.position.x + ((box.max.x + box.min.x) / 2) * objectToModify.scale.x;
+					
+	// 			}
+	// 		} else if (event.code == "KeyS") {
+	// 			this.mode = "scale";
+				
+	// 		} else if (event.code == "KeyZ") {
+	// 			this.mode = "zoom";
+				
+	// 		} else if (event.code == "KeyR") {
+	// 			this.mode = "rotate";
+				
+	// 		} else if (event.code == "NumpadAdd") {
+	// 			if (this.mode == "scale") {
+	// 				if (this.axis == "x") {
+	// 					objectToModify.scale.x += this.factor;
+						
+	// 				} else if (this.axis == "y") {
+	// 					objectToModify.scale.y += this.factor;
+						
+	// 				} else if (this.axis == "z") {
+	// 					objectToModify.scale.z += this.factor;
+						
+	// 				} else if (this.axis == "all") {
+	// 					objectToModify.scale.x += this.factor;
+	// 					objectToModify.scale.y += this.factor;
+	// 					objectToModify.scale.z += this.factor;
+						
+						
+						
+	// 				}
+	// 			} else if (this.mode == "position") {
+	// 				if (this.axis == "x") {
+	// 					objectToModify.position.x += this.factor;
+	// 					// Calculate and display center position
+	// 					if (objectToModify.geometry) {
+	// 						objectToModify.geometry.computeBoundingBox();
+	// 						const box = objectToModify.geometry.boundingBox;
+	// 						const centerX = objectToModify.position.x + ((box.max.x + box.min.x) / 2) * objectToModify.scale.x;
+							
+							
+	// 					}
+	// 				} else if (this.axis == "y") {
+	// 					objectToModify.position.y += this.factor;
+						
+	// 				} else if (this.axis == "z") {
+	// 					objectToModify.position.z += this.factor;
+						
+	// 				}
+	// 			} else if (this.mode == "rotate") {
+	// 				if (this.axis == "x") {
+	// 					objectToModify.rotation.x += this.factor;
+						
+	// 				} else if (this.axis == "y") {
+	// 					objectToModify.rotation.y += this.factor;
+						
+	// 				} else if (this.axis == "z") {
+	// 					objectToModify.rotation.z += this.factor;
+						
+	// 				}
+	// 			} else if (this.mode == "zoom") {
+	// 				if (objectToModify.fov) {
+	// 					objectToModify.fov -= this.factor * 10;
+	// 					objectToModify.updateProjectionMatrix();
+						
+	// 				} else {
+						
+	// 				}
+	// 			}
+	// 		} else if (event.code == "NumpadSubtract") {
+	// 			if (this.mode == "scale") {
+	// 				if (this.axis == "x") {
+	// 					objectToModify.scale.x -= this.factor;
+						
+	// 				} else if (this.axis == "y") {
+	// 					objectToModify.scale.y -= this.factor;
+						
+	// 				} else if (this.axis == "z") {
+	// 					objectToModify.scale.z -= this.factor;
+						
+	// 				} else if (this.axis == "all") {
+	// 					objectToModify.scale.x -= this.factor;
+	// 					objectToModify.scale.y -= this.factor;
+	// 					objectToModify.scale.z -= this.factor;
+						
+						
+						
+	// 				}
+	// 			} else if (this.mode == "position") {
+	// 				if (this.axis == "x") {
+	// 					objectToModify.position.x -= this.factor;
+						
+	// 				} else if (this.axis == "y") {
+	// 					objectToModify.position.y -= this.factor;
+						
+	// 				} else if (this.axis == "z") {
+	// 					objectToModify.position.z -= this.factor;
+						
+	// 				}
+	// 			} else if (this.mode == "rotate") {
+	// 				if (this.axis == "x") {
+	// 					objectToModify.rotation.x -= this.factor;
+						
+	// 				} else if (this.axis == "y") {
+	// 					objectToModify.rotation.y -= this.factor;
+						
+	// 				} else if (this.axis == "z") {
+	// 					objectToModify.rotation.z -= this.factor;
+						
+	// 				}
+	// 			} else if (this.mode == "zoom") {
+	// 				if (objectToModify.fov) {
+	// 					objectToModify.fov += this.factor * 10;
+	// 					objectToModify.updateProjectionMatrix();
+						
+	// 				} else {
+						
+	// 				}
+	// 			}
+	// 		} else if (event.code == "KeyX") {
+	// 			this.axis = "x";
+				
+	// 		} else if (event.code == "KeyY") {
+	// 			this.axis = "y";
+				
+	// 		} else if (event.code == "KeyZ") {
+	// 			this.axis = "z";
+				
+	// 		} else if (event.code == "KeyA") {
+	// 			this.axis = "all";
+				
+	// 		}
+	// 	}
+	// }
 }

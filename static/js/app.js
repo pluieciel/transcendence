@@ -42,7 +42,7 @@ class App {
 		this.ingame = sessionStorage.getItem("ingame") === "true";
 		window.app = this;
 		this.router = new Router(this.routes);
-		console.log("qsd initialized");
+		
 	}
 
 	setColor(color) {

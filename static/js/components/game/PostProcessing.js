@@ -96,7 +96,7 @@ export class PostProcessing {
 	}
 
 	dispose() {
-		console.log("Disposing PostProcessing...");
+		
 		window.removeEventListener("resize", this.onWindowResize.bind(this));
 
 		if (this.renderTarget) {
@@ -110,6 +110,6 @@ export class PostProcessing {
 			});
 			this.composer = null;
 		}
-		console.log("PostProcessing disposed.");
+		
 	}
 }

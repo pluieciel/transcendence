@@ -36,7 +36,7 @@ export class SceneManager {
 	}
 
 	dispose() {
-		console.log("Disposing SceneManager...");
+		
 
 		if (this.scene) {
 			this.scene.traverse((object) => {
@@ -94,7 +94,7 @@ export class SceneManager {
 			this.high_composer.dispose();
 		}
 
-		console.log("SceneManager disposed.");
+		
 	}
 
 	shakeCamera(intensity = 0.05, duration = 500) {
@@ -298,7 +298,7 @@ export class SceneManager {
 		const leftColor = base_color;
 		const rightColor = "#00BDD1";
 
-		console.log(base_color);
+		
 		this.table = await this.loadModelTable("/js/components/game/Table.glb", loader, leftColor, rightColor, tableScale, tablePos, "Table");
 		this.leftPaddle = await this.loadModel("/js/components/game/Paddle.glb", loader, leftColor, leftPaddleScale, leftPaddlePos, "Left Paddle");
 		this.rightPaddle = await this.loadModel("/js/components/game/Paddle.glb", loader, rightColor, rightPaddleScale, rightPaddlePos, "Right Paddle");
