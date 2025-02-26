@@ -34,9 +34,7 @@ export default class TournamentView {
 			
 			if (events.type === "tournament_update") {
 				this.clearTree();
-				this.updatePlayersList(events.players);
-				// this.updateTournamentTree(events.games);
-				
+				this.updatePlayersList(events.players);				
 		
 				const waitingRoomTotalPlayers = document.getElementById("waiting-room-total-players");
 				waitingRoomTotalPlayers.innerHTML = `<i class="fa-solid fa-user"></i>&nbsp; ${events.players.length}/${events.size}`
@@ -54,6 +52,7 @@ export default class TournamentView {
 				let isReady = false;
 				let isLost = false;
 				let isWin = false;
+				console.log(events);
 				if (events.players)
 				{
 					events.players.forEach(player => 
@@ -140,7 +139,6 @@ export default class TournamentView {
 							document.getElementById('ready-button').style.display = 'block';
 							document.getElementById('ready-button').disabled = false;
 							this.intervalReady = setInterval(this.startingReadyTimer, 1, events.give_up_end_time);
-							this.startTimerReady(events.give_up_end_time);
 						}
 						else if (isReady && !isWin)
 						{
@@ -294,10 +292,12 @@ export default class TournamentView {
 		const startTimeInMilliseconds = giveUpTime * 1000;
 		const remainingTime = Math.max(0, Math.floor((startTimeInMilliseconds - currentTime) / 1000));
 	
-		const timerElement = document.getElementById('ready-button');
+		const timerElement = document.getElementById("ready-button");
+		if (!timerElement)
+			return
 		const minutes = Math.floor(remainingTime / 60);
 		const seconds = remainingTime % 60;
-		timerElement.innerHTML = `<i class="fa-regular fa-circle-xmark"></i> Not ready [${minutes}:${seconds < 10 ? '0' : ''}${seconds}]`;
+		timerElement.innerHTML = `<i class="fa-regular fa-circle-xmark"></i> Click to get ready [${minutes}:${seconds < 10 ? '0' : ''}${seconds}]`;
 	
 		if (remainingTime < 0) {
 			clearInterval(this.intervalReady);
@@ -716,8 +716,8 @@ export default class TournamentView {
 	}
 
 	addReadyButtonEventListeners() {
-		const leaveButton = document.getElementById("ready-button");
-		leaveButton.addEventListener("click", () => {
+		const readyButton = document.getElementById("ready-button");
+		readyButton.addEventListener("click", () => {
 			
 			this.sendAction('ready');
 		});

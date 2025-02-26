@@ -166,8 +166,7 @@ class Tournament:
 				elif game.state == 'waiting':
 					self.logger.info(f"Player gave up before game begins")
 					await self.gameEnded(game.game_id, 0, 0, game.player_left.user if game.player_right.user == player.user else game.player_right.user, delay)
-
-					#if (not delay):
+					await user_update_tournament(player.user, False)
 					if (game_manager.games and game_manager.games[game.game_id]):
 						self.logger.info("here3")
 						del game_manager.games[game.game_id]
@@ -193,7 +192,7 @@ class Tournament:
 	# 	await asyncio.sleep(self.giveUpDelay)
 	# 	await self.checkGiveUpDelay(round)
 
-	async def checkGiveUpDelay(self, round):
+	async def checkGiveUpDelay(self, round, games):
 		if (round != self.round):
 			return
 		self.logger.info(f"Give up delay for round {round} is up")
@@ -201,26 +200,27 @@ class Tournament:
 			self.logger.warning(f"Round {round} is not the current round, doesn't do anything")
 			return
 		self.logger.info(f"Checking for x games : {len(self.games)}")
-		for game in self.games:
-			if game.round == round and game.state == 'waiting':
-				self.logger.info(f"Game {game.game_id} is waiting and correct round")
-			else:
-				self.logger.info(f"Game {game.game_id} is not waiting or not the right round {game.round}, should not give up")		
-		for game in self.games:
-			if game.round == round and game.state == 'waiting':
-				self.logger.info(f"Game {game.game_id} is waiting, giving up player")
-				if game.player_right.ready is False:
-					self.logger.info(f"Player right is not ready after delay, making him give up {game.player_right.user.username}")
-					await self.giveUp(game.player_right, True)
-				elif game.player_left.ready is False:
-					self.logger.info(f"Player left is not ready after delay, making him give up {game.player_left.user.username}")
-					await self.giveUp(game.player_left, True)
+		if (self.state != 'playing'):
+			return
+		found = False
+		for game in games:
+			if (game in self.games):
+				found = True
+				if game.round == round and game.state == 'waiting':
+					self.logger.info(f"Game {game.game_id} is waiting, giving up player")
+					if game.player_right.ready is False:
+						self.logger.info(f"Player right is not ready after delay, making him give up {game.player_right.user.username}")
+						await self.giveUp(game.player_right, True)
+					elif game.player_left.ready is False:
+						self.logger.info(f"Player left is not ready after delay, making him give up {game.player_left.user.username}")
+						await self.giveUp(game.player_left, True)
+					else:
+						self.logger.warning("Both players are ready after give up delay, should not happen")
 				else:
-					self.logger.warning("Both players are ready after give up delay, should not happen")
-			else:
-				self.logger.info(f"Game {game.game_id} is not waiting or not the right round {game.round}, should not give up")
-		await self.checkForNextRound()
-		await self.send_tournament_update()
+					self.logger.info(f"Game {game.game_id} is not waiting or not the right round {game.round}, should not give up")
+		if (found):
+			await self.checkForNextRound()
+			await self.send_tournament_update()
 	
 	async def beginTournament(self):
 		self.logger.info("Tournament delay is up, creating games and starting the tournament")
@@ -246,27 +246,29 @@ class Tournament:
 
 
 	async def createGames(self):
+		games = []
 		for i in range(0, int(self.size / self.round), 2):
 			self.logger.info(f"Creating games for round {self.round} : {i} - {i+1}")
-			await self.createGame(self.players[i], self.players[i+1], self.round, self.mode)
+			games.append(await self.createGame(self.players[i], self.players[i+1], self.round, self.mode))
 			loop = asyncio.get_event_loop()
 			self.logger.info("Setting up timer")
 			self.giveUpEndTime = time.time() + self.giveUpDelay
 			await self.send_tournament_update()
 			self.logger.info(self.giveUpEndTime)
-			loop.call_later(self.giveUpDelay, partial(asyncio.create_task, self.checkGiveUpDelay(self.round)))
+			loop.call_later(self.giveUpDelay, partial(asyncio.create_task, self.checkGiveUpDelay(self.round, games)))
 	
 	async def create_next_round_games(self, winners):
 		self.logger.info(f"Creating games for round {self.round}")
 		self.logger.info(f"Winners are {winners}")
+		games = []
 		for i in range(0, len(winners), 2):
-			await self.createGame(winners[i], winners[i+1], self.round, self.mode)
+			games.append(await self.createGame(winners[i], winners[i+1], self.round, self.mode))
 		loop = asyncio.get_event_loop()
 		self.logger.info("Setting up timer")
 		self.giveUpEndTime = time.time() + self.giveUpDelay
 		await self.send_tournament_update()
 		self.logger.info(self.giveUpEndTime)
-		loop.call_later(self.giveUpDelay, partial(asyncio.create_task, self.checkGiveUpDelay(self.round)))
+		loop.call_later(self.giveUpDelay, partial(asyncio.create_task, self.checkGiveUpDelay(self.round, games)))
 		
 	async def createGame(self, player_left, player_right, round, mode):
 		self.logger.info(f"Creating game between {player_left.user.username} and {player_right.user.username} for round {round}")
@@ -297,6 +299,7 @@ class Tournament:
 		self.games.append(tournamentGame)
 		self.logger.info(f"Game appended to tournament games list")
 		await self.send_tournament_update()
+		return tournamentGame
 
 	def get_winners_of_round(self, round):
 		winners = []
