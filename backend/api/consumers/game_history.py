@@ -62,7 +62,8 @@ class GameHistoryConsumer(AsyncHttpConsumer):
 				headers=[(b"Content-Type", b"application/json")])
 
 		except Exception as e:
-			return await sendResponse(self, False, str(e), 500)
+			import traceback
+			return await sendResponse(self, False, str(traceback.format_exc()), 500)
 
 	@database_sync_to_async
 	def get_player_left(self, game_history):
@@ -82,6 +83,6 @@ class GameHistoryConsumer(AsyncHttpConsumer):
 	@database_sync_to_async
 	def get_game_histories(self, user):
 		from api.models import GameHistory
-		return list(GameHistory.objects.filter((Q(player_left=user) | Q(player_right=user)) & Q(game_state='finished'))
+		return list(GameHistory.objects.filter((Q(player_left=user) | Q(player_right=user)) & Q(game_state='finished') & ~Q(game_type='tournament'))
 			.order_by('-created_at')[:20])
 
