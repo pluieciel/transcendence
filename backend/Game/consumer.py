@@ -34,6 +34,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 		self.user = user
 		if not self.user:
 			await self.accept()
+			self.logger.error("GameConsumer : Invalid JWT")
 			await self.send(text_data=json.dumps({
 				"type": "handle_error",
 				"message": "Invalid JWT"
@@ -42,20 +43,25 @@ class GameConsumer(AsyncWebsocketConsumer):
 			return
 		if (user.playing):
 			await self.accept()
+			self.logger.error(f"GameConsumer : User {user.username} already in a game")
 			await self.send(text_data=json.dumps({
 					"type": "handle_error",
 					"message": "Player is already in a game"
 			}))
 			await self.close()
 			return
+		game_manager._get_game_history_model()
 		if (user.tournament):
-			await self.accept()
-			await self.send(text_data=json.dumps({
-					"type": "handle_error",
-					"message": "Player is registered in a tournament"
-			}))
-			await self.close()
-			return
+			tournament_game_id = await game_manager.tournament_player(self.user)
+			if not tournament_game_id:
+				await self.accept()
+				self.logger.error(f"GameConsumer : User {user.username} already in a tournament")
+				await self.send(text_data=json.dumps({
+						"type": "handle_error",
+						"message": "Player is registered in a tournament"
+				}))
+				await self.close()
+				return
 		if (user.id in active_connections):
 			await active_connections[user.id].close()
 		self.logger.info(f"User : {user.id}, created {user.created_at} playing : {user.playing}")
@@ -69,7 +75,6 @@ class GameConsumer(AsyncWebsocketConsumer):
 		recipient = query_params.get("recipient", [None])[0]
 		watch = query_params.get("watch", [None])[0]
 		watchId = query_params.get("watchId", [None])[0]
-		game_manager._get_game_history_model()
 
 		if sender: # invitation: WS msg from B, A invite B, sender is A
 			#print(f"groupname: user_{user.username}", flush=True)
