@@ -166,7 +166,6 @@ class Tournament:
 				elif game.state == 'waiting':
 					self.logger.info(f"Player gave up before game begins")
 					await self.gameEnded(game.game_id, 0, 0, game.player_left.user if game.player_right.user == player.user else game.player_right.user, delay)
-					await user_update_tournament(player.user, False)
 					if (game_manager.games and game_manager.games[game.game_id]):
 						self.logger.info("here3")
 						del game_manager.games[game.game_id]
@@ -320,16 +319,66 @@ class Tournament:
 				self.state = 'finished'
 				self.winner = winners[0].user
 				await unlock_achievement(self.winner, "Champion")
+				user_statistic = await get_user_statistic(winners[0].user)
+				await self.update_user_statistic_top_1(user_statistic)
+				await self.update_user_statistic_streak(user_statistic)
 				self.logger.info(f"Tournament finished, winner is {winners[0].user.username}")
+				for player in self.players:
+					await user_update_tournament(player.user, False)
+					user_statistic = await get_user_statistic(player.user)
+					await self.update_user_statistic_participation(user_statistic)
 			else:
 				self.round += 1
 				self.logger.info(f"Starting round {self.round}")
 				for winner in winners:
 					winner.win = False
+					if (self.size == 4 and self.round == 2):
+						user_statistic = await get_user_statistic(winner.user)
+						await self.update_user_statistic_top_2(user_statistic)
+					elif (self.size == 8 and self.round == 3):
+						user_statistic = await get_user_statistic(winner.user)
+						await self.update_user_statistic_top_2(user_statistic)		
 				await self.create_next_round_games(winners)
 		else:
 			self.logger.info(f"Not all games of round {current_round} are finished yet")
 		await self.send_tournament_update()
+
+	@database_sync_to_async
+	def update_user_statistic_top_1(self, user_statistic):
+		from api.models import UserStatistic
+		user_statistic.tournament_top_1 += 1
+		user_statistic.save()
+	
+	@database_sync_to_async
+	def update_user_statistic_top_2(self, user_statistic):
+		from api.models import UserStatistic
+		user_statistic.tournament_top_2 += 1
+		user_statistic.save()
+
+	@database_sync_to_async
+	def update_user_statistic_participation(self, user_statistic):
+		from api.models import UserStatistic
+		user_statistic.tournament_total_participated += 1
+		user_statistic.save()
+
+	@database_sync_to_async
+	def update_user_statistic_streak(self, user_statistic):
+		from api.models import UserStatistic
+
+		current_streak = user_statistic.tournament_current_streak + 1
+		user_statistic.tournament_current_streak = current_streak
+
+		if (user_statistic.tournament_max_streak <= current_streak):
+			user_statistic.tournament_max_streak = current_streak
+
+		user_statistic.save()
+
+	@database_sync_to_async
+	def update_user_statistic_stop_streak(self, user_statistic):
+		from api.models import UserStatistic
+
+		user_statistic.tournament_current_streak = 0
+		user_statistic.save()
 
 	
 	@database_sync_to_async
@@ -369,11 +418,17 @@ class Tournament:
 					game.player_left.lost = False
 					game.winner = game.player_left
 					self.logger.info(f"Winner is player left, {game.player_right.user.username} lost, {game.player_left.user.username} wins")
+					await user_update_tournament(game.player_right.user, False)
+					user_statistic = await get_user_statistic(game.player_right.user)
+					await self.update_user_statistic_stop_streak(user_statistic)
 				elif winner == game.player_right.user:
 					game.player_left.lost = True
 					game.player_right.lost = False
 					game.winner = game.player_right
 					self.logger.info(f"Winner is player right, {game.player_left.user.username} lost, {game.player_right.user.username} wins")
+					await user_update_tournament(game.player_left.user, False)
+					user_statistic = await get_user_statistic(game.player_left.user)
+					await self.update_user_statistic_stop_streak(user_statistic)
 				else:
 					self.logger.info('Game ended no winenr match')
 				game.winner.win = True

@@ -29,6 +29,10 @@ class GameConsumer(AsyncWebsocketConsumer):
 		self.spectator = False
 		self.logger = logging.getLogger('game')
 		self.logger.info(f"Websocket connection made with channel name {self.channel_name}")
+		query_string = self.scope["query_string"].decode()
+		query_params = parse_qs(query_string)
+		watchId = query_params.get("watchId", [None])[0]
+		watch = query_params.get("watch", [None])[0]
 
 		user = await jwt_to_user(self.scope['headers'])
 		self.user = user
@@ -51,7 +55,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 			await self.close()
 			return
 		game_manager._get_game_history_model()
-		if (user.tournament):
+		if (user.tournament and not watch and not watchId):
 			tournament_game_id = await game_manager.tournament_player(self.user)
 			if not tournament_game_id:
 				await self.accept()
@@ -67,14 +71,12 @@ class GameConsumer(AsyncWebsocketConsumer):
 		self.logger.info(f"User : {user.id}, created {user.created_at} playing : {user.playing}")
 
 		self.logger.info(user.playing)
-		query_string = self.scope["query_string"].decode()
-		query_params = parse_qs(query_string)
+
 		#for invitation
 		sender = query_params.get("sender", [None])[0]
 		mode = query_params.get("mode", [None])[0]
 		recipient = query_params.get("recipient", [None])[0]
 		watch = query_params.get("watch", [None])[0]
-		watchId = query_params.get("watchId", [None])[0]
 
 		if sender: # invitation: WS msg from B, A invite B, sender is A
 			#print(f"groupname: user_{user.username}", flush=True)
