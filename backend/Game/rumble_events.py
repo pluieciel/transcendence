@@ -113,12 +113,12 @@ class LightsOutEvent(GameEvent):
 		self.action = 'on'
 
 
-class SmokeCloudEvent(GameEvent):
+class InvisibilityFieldEvent(GameEvent):
 	def __init__(self, game: 'RumbleGameInstance'):
 		super().__init__(game)
 		self.game = game
 		self.icon = "fa-solid fa-smog"
-		self.name = "SmokeCloud"
+		self.name = "Invisibility Field"
 		self.action = 'smoke'
 		self.description = "The ball disappears when in the middle of the field !"
 

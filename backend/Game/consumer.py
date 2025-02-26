@@ -32,14 +32,14 @@ class GameConsumer(AsyncWebsocketConsumer):
 
 		user = await jwt_to_user(self.scope['headers'])
 		self.user = user
-		if not self.user:
-			await self.accept()
-			await self.send(text_data=json.dumps({
-				"type": "handle_error",
-				"message": "Invalid JWT"
-			}))
-			await self.close()
-			return
+		# if not self.user:
+		# 	await self.accept()
+		# 	await self.send(text_data=json.dumps({
+		# 		"type": "handle_error",
+		# 		"message": "Invalid JWT"
+		# 	}))
+		# 	await self.close()
+		# 	return
 		#if (user.id in active_connections):
 		#	await self.accept()
 		#	await self.send(text_data=json.dumps({
