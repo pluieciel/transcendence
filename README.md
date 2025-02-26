@@ -24,7 +24,7 @@ ft_transcendance is a full-stack web application designed as a modern multiplaye
 ### Installation
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/ft_transcendance.git
+   git clone https://github.com/pluieciel/transcendance.git
    cd ft_transcendance
    ```
 2. Configure the environment variables:
