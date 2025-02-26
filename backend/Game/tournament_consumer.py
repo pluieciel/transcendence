@@ -40,15 +40,8 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 			}))
 			await self.close()
 			return
-		self.logger.info(f"User {user.username} connected to tournament websocket")
-		# if (user.id in active_connections):
-		# 	await self.accept()
-		# 	await self.send(text_data=json.dumps({
-		# 			"type": "handle_error",
-		# 			"message": "Multiple connections, connection refused"
-		# 	}))
-		# 	await self.close()
-		# 	return
+		if (user.id in active_connections):
+			await active_connections[user.id].close()
 		
 		await self.accept()
 		self.logger.info(f"User {user.username} accepted in tournament websocket")
@@ -92,8 +85,8 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 
 	async def disconnect(self, close_code):
 		self.logger.info("Disconnected from tournament websocket")
-		# if self.user.id in active_connections:
-		# 	del active_connections[self.user.id]
+		if self.user.id in active_connections:
+			del active_connections[self.user.id]
 
 
 	async def tournament_update(self, event):
