@@ -37,7 +37,9 @@ export default class LeaderboardView {
 							<div class="lb-card-winrate lb-card-att"><i class="fa-solid fa-percent"></i> Winrate</div>
 							<div class="lb-card-games lb-card-att"><i class="fa-solid fa-gamepad"></i> Games</div>
 						</div>
-						<div id="leaderboard-table"></div>
+						<div id="leaderboard-table">
+							<div id="leaderboard-table-container"></div>
+						</div>
 					</div>
 				</div>
 			</main>
@@ -66,7 +68,7 @@ export default class LeaderboardView {
 			const data = await response.json();
 	
 			if (data.success) {
-				const leaderboardTable = document.getElementById("leaderboard-table");
+				const leaderboardTable = document.getElementById("leaderboard-table-container");
 				leaderboardTable.innerHTML = "";
 				let i = 0;
 				while (i < data.leaderboard.length) {
@@ -86,7 +88,7 @@ export default class LeaderboardView {
 	}
 
 	addUserToLB(user, rank) {
-		const lb = document.getElementById("leaderboard-table");
+		const lb = document.getElementById("leaderboard-table-container");
 		const name = user.display_name == null ? user.username : user.display_name;
 		let profileButtonId = `lb-card-redirect-profile-${rank}`;
 		const row = `

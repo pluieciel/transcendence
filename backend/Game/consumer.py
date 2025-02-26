@@ -32,14 +32,14 @@ class GameConsumer(AsyncWebsocketConsumer):
 
 		user = await jwt_to_user(self.scope['headers'])
 		self.user = user
-		#if not self.user:
-		#	await self.accept()
-		#	await self.send(text_data=json.dumps({
-		#		"type": "handle_error",
-		#		"message": "Invalid JWT"
-		#	}))
-		#	await self.close()
-		#	return
+		if not self.user:
+			await self.accept()
+			await self.send(text_data=json.dumps({
+				"type": "handle_error",
+				"message": "Invalid JWT"
+			}))
+			await self.close()
+			return
 		#if (user.id in active_connections):
 		#	await self.accept()
 		#	await self.send(text_data=json.dumps({
@@ -74,6 +74,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 		mode = query_params.get("mode", [None])[0]
 		recipient = query_params.get("recipient", [None])[0]
 		watch = query_params.get("watch", [None])[0]
+		watchId = query_params.get("watchId", [None])[0]
 		game_manager._get_game_history_model()
 
 		if sender: # invitation: WS msg from B, A invite B, sender is A
@@ -123,6 +124,23 @@ class GameConsumer(AsyncWebsocketConsumer):
 		elif watch:
 			user=await get_user_by_name(watch)
 			game_id = user.current_game_id
+			if (game_id == -1):
+				return
+			self.game = game_manager.games.get(int(game_id))
+			if not self.game:
+				await self.send(text_data=json.dumps({
+					"type": "handle_error",
+					"message": "Game not found."
+				}))
+				return
+			self.logger.info(f"Spectator connected to game {game_id}")
+			self.spectator = True
+			await self.accept()
+			await self.channel_layer.group_add(str(self.game.game_id), self.channel_name)
+			await self.send_initial_game_state(self.game)
+
+		elif watchId:
+			game_id = int(watchId)
 			if (game_id == -1):
 				return
 			self.game = game_manager.games.get(int(game_id))
