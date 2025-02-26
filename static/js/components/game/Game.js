@@ -28,8 +28,8 @@ export class Game {
 		this.factor = 0.1;
 		this.editor = true;
 
-		this.keydownListener = this.enableDebugMode.bind(this);
-		window.addEventListener("keydown", this.keydownListener);
+		// this.keydownListener = this.enableDebugMode.bind(this);
+		// window.addEventListener("keydown", this.keydownListener);
 	}
 
 	dispose() {
@@ -215,153 +215,153 @@ export class Game {
 		});
 	}
 
-	enableDebugMode(event) {
-		let objectToModify = null;
-		if (event.code === "Space") {
-			this.sceneManager.toggleDebugMode();
-		}
-		if (this.editor) {
-			if (event.code == "KeyG") {
+	// enableDebugMode(event) {
+	// 	let objectToModify = null;
+	// 	if (event.code === "Space") {
+	// 		this.sceneManager.toggleDebugMode();
+	// 	}
+	// 	if (this.editor) {
+	// 		if (event.code == "KeyG") {
 				
 				
-				this.mode = "position";
-			} else if (event.code == "KeyO") {
-				objectToModify = this.sceneManager.camera;
-				if (objectToModify && objectToModify.geometry) {
-					objectToModify.geometry.computeBoundingBox();
-					const box = objectToModify.geometry.boundingBox;
-					const centerX = objectToModify.position.x + ((box.max.x + box.min.x) / 2) * objectToModify.scale.x;
+	// 			this.mode = "position";
+	// 		} else if (event.code == "KeyO") {
+	// 			objectToModify = this.sceneManager.camera;
+	// 			if (objectToModify && objectToModify.geometry) {
+	// 				objectToModify.geometry.computeBoundingBox();
+	// 				const box = objectToModify.geometry.boundingBox;
+	// 				const centerX = objectToModify.position.x + ((box.max.x + box.min.x) / 2) * objectToModify.scale.x;
 					
-				}
-			} else if (event.code == "KeyS") {
-				this.mode = "scale";
+	// 			}
+	// 		} else if (event.code == "KeyS") {
+	// 			this.mode = "scale";
 				
-			} else if (event.code == "KeyZ") {
-				this.mode = "zoom";
+	// 		} else if (event.code == "KeyZ") {
+	// 			this.mode = "zoom";
 				
-			} else if (event.code == "KeyR") {
-				this.mode = "rotate";
+	// 		} else if (event.code == "KeyR") {
+	// 			this.mode = "rotate";
 				
-			} else if (event.code == "NumpadAdd") {
-				if (this.mode == "scale") {
-					if (this.axis == "x") {
-						objectToModify.scale.x += this.factor;
+	// 		} else if (event.code == "NumpadAdd") {
+	// 			if (this.mode == "scale") {
+	// 				if (this.axis == "x") {
+	// 					objectToModify.scale.x += this.factor;
 						
-					} else if (this.axis == "y") {
-						objectToModify.scale.y += this.factor;
+	// 				} else if (this.axis == "y") {
+	// 					objectToModify.scale.y += this.factor;
 						
-					} else if (this.axis == "z") {
-						objectToModify.scale.z += this.factor;
+	// 				} else if (this.axis == "z") {
+	// 					objectToModify.scale.z += this.factor;
 						
-					} else if (this.axis == "all") {
-						objectToModify.scale.x += this.factor;
-						objectToModify.scale.y += this.factor;
-						objectToModify.scale.z += this.factor;
+	// 				} else if (this.axis == "all") {
+	// 					objectToModify.scale.x += this.factor;
+	// 					objectToModify.scale.y += this.factor;
+	// 					objectToModify.scale.z += this.factor;
 						
 						
 						
-					}
-				} else if (this.mode == "position") {
-					if (this.axis == "x") {
-						objectToModify.position.x += this.factor;
-						// Calculate and display center position
-						if (objectToModify.geometry) {
-							objectToModify.geometry.computeBoundingBox();
-							const box = objectToModify.geometry.boundingBox;
-							const centerX = objectToModify.position.x + ((box.max.x + box.min.x) / 2) * objectToModify.scale.x;
+	// 				}
+	// 			} else if (this.mode == "position") {
+	// 				if (this.axis == "x") {
+	// 					objectToModify.position.x += this.factor;
+	// 					// Calculate and display center position
+	// 					if (objectToModify.geometry) {
+	// 						objectToModify.geometry.computeBoundingBox();
+	// 						const box = objectToModify.geometry.boundingBox;
+	// 						const centerX = objectToModify.position.x + ((box.max.x + box.min.x) / 2) * objectToModify.scale.x;
 							
 							
-						}
-					} else if (this.axis == "y") {
-						objectToModify.position.y += this.factor;
+	// 					}
+	// 				} else if (this.axis == "y") {
+	// 					objectToModify.position.y += this.factor;
 						
-					} else if (this.axis == "z") {
-						objectToModify.position.z += this.factor;
+	// 				} else if (this.axis == "z") {
+	// 					objectToModify.position.z += this.factor;
 						
-					}
-				} else if (this.mode == "rotate") {
-					if (this.axis == "x") {
-						objectToModify.rotation.x += this.factor;
+	// 				}
+	// 			} else if (this.mode == "rotate") {
+	// 				if (this.axis == "x") {
+	// 					objectToModify.rotation.x += this.factor;
 						
-					} else if (this.axis == "y") {
-						objectToModify.rotation.y += this.factor;
+	// 				} else if (this.axis == "y") {
+	// 					objectToModify.rotation.y += this.factor;
 						
-					} else if (this.axis == "z") {
-						objectToModify.rotation.z += this.factor;
+	// 				} else if (this.axis == "z") {
+	// 					objectToModify.rotation.z += this.factor;
 						
-					}
-				} else if (this.mode == "zoom") {
-					if (objectToModify.fov) {
-						objectToModify.fov -= this.factor * 10;
-						objectToModify.updateProjectionMatrix();
+	// 				}
+	// 			} else if (this.mode == "zoom") {
+	// 				if (objectToModify.fov) {
+	// 					objectToModify.fov -= this.factor * 10;
+	// 					objectToModify.updateProjectionMatrix();
 						
-					} else {
+	// 				} else {
 						
-					}
-				}
-			} else if (event.code == "NumpadSubtract") {
-				if (this.mode == "scale") {
-					if (this.axis == "x") {
-						objectToModify.scale.x -= this.factor;
+	// 				}
+	// 			}
+	// 		} else if (event.code == "NumpadSubtract") {
+	// 			if (this.mode == "scale") {
+	// 				if (this.axis == "x") {
+	// 					objectToModify.scale.x -= this.factor;
 						
-					} else if (this.axis == "y") {
-						objectToModify.scale.y -= this.factor;
+	// 				} else if (this.axis == "y") {
+	// 					objectToModify.scale.y -= this.factor;
 						
-					} else if (this.axis == "z") {
-						objectToModify.scale.z -= this.factor;
+	// 				} else if (this.axis == "z") {
+	// 					objectToModify.scale.z -= this.factor;
 						
-					} else if (this.axis == "all") {
-						objectToModify.scale.x -= this.factor;
-						objectToModify.scale.y -= this.factor;
-						objectToModify.scale.z -= this.factor;
+	// 				} else if (this.axis == "all") {
+	// 					objectToModify.scale.x -= this.factor;
+	// 					objectToModify.scale.y -= this.factor;
+	// 					objectToModify.scale.z -= this.factor;
 						
 						
 						
-					}
-				} else if (this.mode == "position") {
-					if (this.axis == "x") {
-						objectToModify.position.x -= this.factor;
+	// 				}
+	// 			} else if (this.mode == "position") {
+	// 				if (this.axis == "x") {
+	// 					objectToModify.position.x -= this.factor;
 						
-					} else if (this.axis == "y") {
-						objectToModify.position.y -= this.factor;
+	// 				} else if (this.axis == "y") {
+	// 					objectToModify.position.y -= this.factor;
 						
-					} else if (this.axis == "z") {
-						objectToModify.position.z -= this.factor;
+	// 				} else if (this.axis == "z") {
+	// 					objectToModify.position.z -= this.factor;
 						
-					}
-				} else if (this.mode == "rotate") {
-					if (this.axis == "x") {
-						objectToModify.rotation.x -= this.factor;
+	// 				}
+	// 			} else if (this.mode == "rotate") {
+	// 				if (this.axis == "x") {
+	// 					objectToModify.rotation.x -= this.factor;
 						
-					} else if (this.axis == "y") {
-						objectToModify.rotation.y -= this.factor;
+	// 				} else if (this.axis == "y") {
+	// 					objectToModify.rotation.y -= this.factor;
 						
-					} else if (this.axis == "z") {
-						objectToModify.rotation.z -= this.factor;
+	// 				} else if (this.axis == "z") {
+	// 					objectToModify.rotation.z -= this.factor;
 						
-					}
-				} else if (this.mode == "zoom") {
-					if (objectToModify.fov) {
-						objectToModify.fov += this.factor * 10;
-						objectToModify.updateProjectionMatrix();
+	// 				}
+	// 			} else if (this.mode == "zoom") {
+	// 				if (objectToModify.fov) {
+	// 					objectToModify.fov += this.factor * 10;
+	// 					objectToModify.updateProjectionMatrix();
 						
-					} else {
+	// 				} else {
 						
-					}
-				}
-			} else if (event.code == "KeyX") {
-				this.axis = "x";
+	// 				}
+	// 			}
+	// 		} else if (event.code == "KeyX") {
+	// 			this.axis = "x";
 				
-			} else if (event.code == "KeyY") {
-				this.axis = "y";
+	// 		} else if (event.code == "KeyY") {
+	// 			this.axis = "y";
 				
-			} else if (event.code == "KeyZ") {
-				this.axis = "z";
+	// 		} else if (event.code == "KeyZ") {
+	// 			this.axis = "z";
 				
-			} else if (event.code == "KeyA") {
-				this.axis = "all";
+	// 		} else if (event.code == "KeyA") {
+	// 			this.axis = "all";
 				
-			}
-		}
-	}
+	// 		}
+	// 	}
+	// }
 }
