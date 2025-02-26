@@ -48,8 +48,8 @@ ft_transcendance is a full-stack web application designed as a modern multiplaye
 - Register or log in using OAuth2.
 - Start a game or chat with other users.
 
-## Contributors
-@pluieciel
-@jlefonde
-@siul008
-@neutrou
+## Contributors:
+# - @pluieciel: https://github.com/pluieciel
+# - @jlefonde: https://github.com/jlefonde
+# - @siul008: https://github.com/siul008
+# - @neutrou: https://github.com/neutrou
