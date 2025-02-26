@@ -56,6 +56,7 @@ export default class PlayView {
 						</div>
 						<button id="selector-right-arrow"><i class="fa-solid fa-arrow-right fa-lg"></i></button>
 					</div>
+					<div id="input-message"></div>
 					<button type="submit" id="start-button"><i class="fa-solid fa-gamepad"></i> Play</button>
 				</div>
 				<div id="how-to-play-card" class="card">
