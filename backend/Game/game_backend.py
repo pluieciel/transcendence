@@ -464,7 +464,7 @@ class GameBackend:
 
 		ballX = self.game.ball.position.x
 
-		if (self.game.event.name == 'SmokeCloud' and ballX >= -6 and ballX <= 6):
+		if (self.game.event.name == 'Invisibility Field' and ballX >= -6 and ballX <= 6):
 			ball_pos = {
 				"x": 1000,
 				"y": 1000,

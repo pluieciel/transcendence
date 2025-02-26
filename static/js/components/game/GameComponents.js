@@ -113,7 +113,7 @@ export default class GameComponent {
 			}
 			else if(events.type === 'handle_error')
 			{
-				alert(events.message);
+				window.app.showErrorMsg('#input-message', events.message);
 			}
 		};
 
