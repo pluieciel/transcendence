@@ -697,12 +697,20 @@ export default class TournamentView {
 		const waitingRoom = document.getElementById('waiting-room-container');
 		const row =  `
 			<li>
-				<img src="${player.avatar}" class="avatar player-avatar">
-				<div class="tournament-waiting-player-name">${player.display_name ? player.display_name : player.username}</div>
-				<div class="tournament-waiting-player-elo"><i class="fa-solid fa-chart-line"></i>${player.elo}</div>
-				<div class="tournament-waiting-player-top-1"><i class="fa-solid fa-crown"></i>${player.top_1}</div>
+				<button class="redirect-to-profile-button" data-redirect-to="/profiles/${player.username}">
+					<img src="${player.avatar}" class="avatar player-avatar">
+					<div class="tournament-waiting-player-name">${player.display_name ? player.display_name : player.username}</div>
+					<div class="tournament-waiting-player-elo"><i class="fa-solid fa-chart-line"></i>${player.elo}</div>
+					<div class="tournament-waiting-player-top-1"><i class="fa-solid fa-crown"></i>${player.top_1}</div>
+				</button>
 			</li>`;
 
 		waitingRoom.insertAdjacentHTML('beforeend', row);
+		const redirectButton = waitingRoom.querySelector('[data-redirect-to]');
+		redirectButton.addEventListener('click', (e) => {
+			e.preventDefault();
+			const redirectTo = e.currentTarget.dataset.redirectTo;
+			window.app.router.navigateTo(redirectTo);
+		});
 	}
 }

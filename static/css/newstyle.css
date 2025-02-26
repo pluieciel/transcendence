@@ -1659,10 +1659,6 @@ form button:hover:not(:disabled) {
 	background-color: var(--selector-color);
 	height: 5.5rem;
 	border-radius: 0.3rem;
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	justify-content: flex-start;
 	list-style: none;
 	font-weight: bold;
 	padding: 1rem;
@@ -1814,6 +1810,22 @@ form button:hover:not(:disabled) {
 
 #winner-crown {
 	margin-bottom: 1rem;
+}
+
+.redirect-to-profile-button {
+	width: 100%;
+	background-color: transparent;
+	color: var(--secondary-color);
+	border: none;
+	font-weight: bold;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: flex-start;
+}
+
+.redirect-to-profile-button:hover {
+	opacity: 0.5;
 }
 
 /* ******************************** */
