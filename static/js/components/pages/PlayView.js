@@ -33,6 +33,16 @@ export default class PlayView {
 						<div class="checkbox-button">
 							<input type="checkbox" id="game-mode-checkbox" class="checkbox">
 							<div class="knobs">
+								<span id="game-mode-classic"><i class="fa-solid fa-house-user"></i> Local</span>
+								<span id="game-mode-rumble"><i class="fa-solid fa-globe"></i> Multiplayer</span>
+							</div>
+							<div class="layer"></div>
+						</div>
+					</div>
+					<div id="game-mode">
+						<div class="checkbox-button">
+							<input type="checkbox" id="game-mode-checkbox" class="checkbox">
+							<div class="knobs">
 								<span id="game-mode-classic"><i class="fa-solid fa-star"></i> Classic</span>
 								<span id="game-mode-rumble"><i class="fa-solid fa-bolt"></i> Rumble</span>
 							</div>
@@ -44,7 +54,7 @@ export default class PlayView {
 							<input type="checkbox" id="game-type-checkbox" class="checkbox">
 							<div class="knobs">
 								<span id="game-type-ai"><i class="fa-solid fa-robot"></i> AI</span>
-								<span id="game-type-ranked"><i class="fa-solid fa-ranking-star"></i> Ranked</span>
+								<span id="game-type-ranked"><i class="fa-solid fa-user-group"></i> 1 vs 1</span>
 							</div>
 							<div class="layer"></div>
 						</div>
