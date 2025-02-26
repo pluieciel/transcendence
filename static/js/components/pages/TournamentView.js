@@ -618,9 +618,12 @@ export default class TournamentView {
 		`
 		gameSelector.innerHTML = html;
 
-		const buttons = document.querySelectorAll('[data-redirect-to]');
+		const buttons = gameSelector.querySelectorAll('[data-redirect-to]');
 		buttons.forEach(button => {
-			button.addEventListener('click', (e) => {
+			const newButton = button.cloneNode(true);
+			button.parentNode.replaceChild(newButton, button);
+
+			newButton.addEventListener('click', (e) => {
 				e.preventDefault();
 				const redirectTo = e.currentTarget.dataset.redirectTo;
 				window.app.router.navigateTo(redirectTo);
@@ -642,6 +645,18 @@ export default class TournamentView {
 				</div>
 			</div>
 		`;
+		
+		const buttons = document.querySelectorAll('#tournament-winner [data-redirect-to]');
+		buttons.forEach(button => {
+			const newButton = button.cloneNode(true);
+			button.parentNode.replaceChild(newButton, button);
+
+			newButton.addEventListener('click', (e) => {
+				e.preventDefault();
+				const redirectTo = e.currentTarget.dataset.redirectTo;
+				window.app.router.navigateTo(redirectTo);
+			});
+		});
 	}
 
 	addEventListeners() {
@@ -712,7 +727,6 @@ export default class TournamentView {
 				<div class="tournament-waiting-player-name">${player.display_name ? player.display_name : player.username}</div>
 				<div class="tournament-waiting-player-elo"><i class="fa-solid fa-chart-line"></i>${player.elo}</div>
 				<div class="tournament-waiting-player-top-1"><i class="fa-solid fa-crown"></i>${player.top_1}</div>
-				<div class="tournament-player-state"><i class="fa-regular fa-circle fa-lg"></i></div>
 			</li>`;
 
 		waitingRoom.insertAdjacentHTML('beforeend', row);
