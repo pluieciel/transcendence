@@ -113,7 +113,8 @@ export default class GameComponent {
 			}
 			else if(events.type === 'handle_error')
 			{
-				alert(events.message);
+				document.getElementById('search-game-modal').parentElement.style.display = 'none';
+				window.app.showErrorMsg('#input-message', events.message);
 			}
 		};
 

@@ -192,6 +192,17 @@ export class Game {
 					this.sceneManager.paddles[1].scale.y = this.sceneManager.base_debug_height;
 				}
 				break;
+			case "Invisibility Field":
+				{
+					if (event.action == 'smoke')
+					{
+						this.sceneManager.invisibilityField.visible = true;
+					}
+					else if (event.action == 'reset')
+					{
+						this.sceneManager.invisibilityField.visible = false;
+					}
+				}
 		}
 	}
 

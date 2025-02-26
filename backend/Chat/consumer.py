@@ -59,13 +59,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 			await self.close()
 			return
 		if (user.id in active_connections):
-			# await self.accept()
-			# await self.send(text_data=json.dumps({
-			# 		"type": "handle_error",
-			# 		"message": "Multiple connections, connection refused"
-			# }))
-			await self.close()
-			return
+			await active_connections[self.user.id].close()
 		
 		self.room_group_name = f"user_{self.username}"
 		
