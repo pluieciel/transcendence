@@ -513,8 +513,8 @@ export default class TournamentView {
 			console.error("Unrecognized round or invalid index");
 		}
 
-		let winState = '<i class="fa-solid fa-medal"></i>';
-		let loseState = '<i class="fa-solid fa-flag"></i>';
+		let winState = '<i class="fa-solid fa-w" style="color: #00aa00"></i>';
+		let loseState = '<i class="fa-solid fa-l" style="color: #aa0000"></i>';
 		let readyState = '<i class="fa-regular fa-circle-check"></i>';
 		let notReadyState = '<i class="fa-regular fa-circle"></i>';
 		let playingState = '<i class="fa-solid fa-gamepad"></i>';
