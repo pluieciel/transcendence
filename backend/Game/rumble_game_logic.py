@@ -5,7 +5,7 @@ import math
 import logging
 from .game_helper_class import BounceMethods, MovementMethod, Vector2D, DEFAULT_BALL_POS, RIGHT_SIDE_DIR, LEFT_SIDE_DIR, DEFAULT_BALL_ACCELERATION, DEFAULT_BALL_BASE_SPEED, DEFAULT_PLAYER_SPEED, random_angle
 from .rumble_custom_method import MirrorBounce, RandomBounce, IcyMovement, InvertedMovements, NoStoppingMovements, NormalBounce, NormalMovements, KillerBall
-from .rumble_events import InvertedControlsEvent, RandomBouncesEvent, MirrorBallEvent, LightsOutEvent, SmokeCloudEvent, ReverseBallEvent, ShrinkingPaddleEvent, IcyPaddlesEvent, NoStoppingEvent, VisibleTrajectoryEvent, KillerBallEvent, BreathingTimeEvent, SupersonicBallEvent, InfiniteSpeedEvent, RampingBallEvent
+from .rumble_events import InvertedControlsEvent, RandomBouncesEvent, MirrorBallEvent, LightsOutEvent, InvisibilityFieldEvent, ReverseBallEvent, ShrinkingPaddleEvent, IcyPaddlesEvent, NoStoppingEvent, VisibleTrajectoryEvent, KillerBallEvent, BreathingTimeEvent, SupersonicBallEvent, InfiniteSpeedEvent, RampingBallEvent
 
 
 
@@ -120,6 +120,23 @@ class GameBounds:
 class RumbleGameInstance:
 	def __init__(self, broadcast_fun, revert_event_fun, game_end_fun, achievement_checker_fun, tournament):
 		self.bounds = GameBounds()
+		self.event_weights = {
+			"InvertedControlsEvent": 800,
+			"RandomBouncesEvent": 15500,
+			"MirrorBallEvent": 1000,
+			"LightsOutEvent": 300,
+			"InvisibilityFieldEvent": 15000,
+			"InfiniteSpeedEvent": 1000,
+			"ReverseBallEvent": 1500,
+			"ShrinkingPaddleEvent": 1000,
+			"IcyPaddlesEvent": 1000,
+			"NoStoppingEvent": 1000,
+			"VisibleTrajectoryEvent": 1200,
+			"KillerBallEvent": 1500,
+			"BreathingTimeEvent": 300,
+			"SupersonicBallEvent": 1200,
+			"RampingBallEvent": 1000
+		}
 		self.player_left = Player(Vector2D(self.bounds.left.x + 2, -3+10.5, -15), 0,{"ArrowUp": False, "ArrowDown": False}, self.bounds)
 		self.player_right = Player(Vector2D(self.bounds.right.x - 2, -3+10.5, -15), 0,{"ArrowUp": False, "ArrowDown": False}, self.bounds)
 		self.ball = Ball()
@@ -349,20 +366,43 @@ class RumbleGameInstance:
 
 	def get_event(self):
 		events = [
-			InvertedControlsEvent(self),
-			RandomBouncesEvent(self),
-			MirrorBallEvent(self),
-			LightsOutEvent(self),
-			SmokeCloudEvent(self),
-			InfiniteSpeedEvent(self),
-			ReverseBallEvent(self),
-			ShrinkingPaddleEvent(self),
-			IcyPaddlesEvent(self),
-			NoStoppingEvent(self),
-			VisibleTrajectoryEvent(self),
-			KillerBallEvent(self),
-			BreathingTimeEvent(self),
-			SupersonicBallEvent(self),
-			RampingBallEvent(self)
+			(InvertedControlsEvent(self), self.event_weights["InvertedControlsEvent"]),
+			(RandomBouncesEvent(self), self.event_weights["RandomBouncesEvent"]),
+			(MirrorBallEvent(self), self.event_weights["MirrorBallEvent"]),
+			(LightsOutEvent(self), self.event_weights["LightsOutEvent"]),
+			(InvisibilityFieldEvent(self), self.event_weights["InvisibilityFieldEvent"]),
+			(InfiniteSpeedEvent(self), self.event_weights["InfiniteSpeedEvent"]),
+			(ReverseBallEvent(self), self.event_weights["ReverseBallEvent"]),
+			(ShrinkingPaddleEvent(self), self.event_weights["ShrinkingPaddleEvent"]),
+			(IcyPaddlesEvent(self), self.event_weights["IcyPaddlesEvent"]),
+			(NoStoppingEvent(self), self.event_weights["NoStoppingEvent"]),
+			(VisibleTrajectoryEvent(self), self.event_weights["VisibleTrajectoryEvent"]),
+			(KillerBallEvent(self), self.event_weights["KillerBallEvent"]),
+			(BreathingTimeEvent(self), self.event_weights["BreathingTimeEvent"]),
+			(SupersonicBallEvent(self), self.event_weights["SupersonicBallEvent"]),
+			(RampingBallEvent(self), self.event_weights["RampingBallEvent"])
 		]
-		return random.choice(events)
+		
+		total_weight = sum(weight for _, weight in events)
+		cumulative_weights = []
+		cumulative_sum = 0
+
+		for event, weight in events:
+			cumulative_sum += weight
+			cumulative_weights.append((cumulative_sum, event))
+		
+		random_choice = random.uniform(0, total_weight)
+
+		for cumulative_weight, event in cumulative_weights:
+			if random_choice <= cumulative_weight:
+				if (self.event_weights[self.get_event_name(event)] / 2 <= 1):
+					self.event_weights[self.get_event_name(event)] = 1
+				else:
+					self.event_weights[self.get_event_name(event)] /= 2
+				return event
+
+		return None
+
+	def get_event_name(self, event):
+
+		return event.__class__.__name__

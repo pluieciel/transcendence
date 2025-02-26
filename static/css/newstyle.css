@@ -1191,6 +1191,7 @@ form button:hover:not(:disabled) {
 	height: 100%;
 	overflow: hidden;
 	position: relative;
+	padding-top: 2rem;
 }
 
 #profile-card-header {

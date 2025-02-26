@@ -31,6 +31,8 @@ export class SceneManager {
 		this.light = null;
 		this.textManager = null;
 		this.colorTextureMap = this.getTextureMap();
+
+		this.invisibilityField = null;
 	}
 
 	dispose() {
@@ -166,6 +168,56 @@ export class SceneManager {
 		this.scene.add(this.light);
 	}
 
+	createInvisibilityField(data, colorLeft, colorRight)
+	{
+		const positions = data.positions;
+	
+		// Use MeshBasicMaterial instead of LineBasicMaterial for emissive properties
+		const middleMat = new THREE.MeshBasicMaterial({ 
+			color: 0x000000, 
+			opacity: 0.1 
+			
+			//emissive: 0xe3e6e5, 
+			//emissiveIntensity: 0, // Adjusted for visibility
+		});
+
+		const leftMat = new THREE.MeshStandardMaterial({ 
+			color: 0xe3e6e5, 
+			emissive: colorLeft, 
+			emissiveIntensity: 5
+		});
+
+		const rightMat = new THREE.MeshStandardMaterial({ 
+			color: 0xe3e6e5, 
+			emissive: colorRight, 
+			emissiveIntensity: 5
+		});
+	
+		const lineGeometry = new THREE.BoxGeometry(0.3, 30, 0.2);
+		const middleGeometry = new THREE.BoxGeometry(12, 30, 0.2);
+	
+		const leftEdges = new THREE.EdgesGeometry(lineGeometry);
+		const rightEdges = new THREE.EdgesGeometry(lineGeometry);
+
+		const middle = new THREE.Mesh(middleGeometry, middleMat);
+		const right = new THREE.Mesh(rightEdges, rightMat);
+		const left = new THREE.Mesh(leftEdges, leftMat);
+	
+		middle.position.set(0, positions.borders.left.y, positions.borders.left.z);
+		right.position.set(6, positions.borders.right.y, positions.borders.right.z);
+		left.position.set(-6, positions.borders.left.y, positions.borders.left.z);
+
+		right.rotation.set(0,1,0);
+		left.rotation.set(0,-1,0);
+		
+		this.invisibilityField = new THREE.Group();
+		this.invisibilityField.add(middle);
+		this.invisibilityField.add(right);
+		this.invisibilityField.add(left);
+		this.scene.add(this.invisibilityField);
+		this.invisibilityField.visible = false;
+	}
+
 	async createGameObjects(data) {
 		await Promise.all([
 			this.createDebugBall(),
@@ -176,6 +228,7 @@ export class SceneManager {
 			this.createPlayerAvatar(data.player.right.avatar, new THREE.Vector3(16.1, 25, -9.6), data.player.right.color),
 			//LEFT
 			this.createPlayerAvatar(data.player.left.avatar, new THREE.Vector3(-16.7, 25, -9.6), data.player.left.color),
+			this.createInvisibilityField(data, data.player.left.color, data.player.right.color),
 		]);
 		this.createDebugPaddles();
 	}
