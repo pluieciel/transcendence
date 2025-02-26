@@ -33,7 +33,7 @@ ft_transcendance is a full-stack web application designed as a modern multiplaye
    - Add your secrets in `OAUTH_CLIENT_ID_FILE` and `OAUTH_CLIENT_SECRET_FILE` if you want to use the 42 logging
 
 5. Start the application:
-   - **Using Docker**
+   - **Using the Makefile**
      ```bash
      make all
      ```
