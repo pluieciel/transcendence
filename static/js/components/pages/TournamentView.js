@@ -727,7 +727,7 @@ export default class TournamentView {
 		const waitingRoom = document.getElementById('waiting-room-container');
 		const row =  `
 			<li>
-				<button class="redirect-to-profile-button" data-redirect-to="/profiles/${player.username}">
+				<button id="redirect-to-${player.username}" class="redirect-to-profile-button" data-redirect-to="/profiles/${player.username}">
 					<img src="${player.avatar}" class="avatar player-avatar">
 					<div class="tournament-waiting-player-name">${player.display_name ? player.display_name : player.username}</div>
 					<div class="tournament-waiting-player-elo"><i class="fa-solid fa-chart-line"></i>${player.elo}</div>
@@ -736,9 +736,12 @@ export default class TournamentView {
 			</li>`;
 
 		waitingRoom.insertAdjacentHTML('beforeend', row);
-		const redirectButton = waitingRoom.querySelector('[data-redirect-to]');
+		const redirectButton = document.getElementById(`redirect-to-${player.username}`);
 		redirectButton.addEventListener('click', (e) => {
 			e.preventDefault();
+
+			const newRedirectButton = redirectButton.cloneNode(true);
+			redirectButton.parentNode.replaceChild(newRedirectButton, redirectButton);
 			const redirectTo = e.currentTarget.dataset.redirectTo;
 			window.app.router.navigateTo(redirectTo);
 		});
