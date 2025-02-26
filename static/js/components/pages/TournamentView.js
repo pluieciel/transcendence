@@ -310,7 +310,6 @@ export default class TournamentView {
 	{
 		document.getElementById('tournament-tree').innerHTML = 
 		`
-			<h2 id="card-title"><i class="fa-solid fa-sitemap"></i> TOURNAMENT CLASSIC #1</h2>
 			<div id="tournament-winner" class="tournament-tree-node"></div>
 			<div id="tournament-final" class="tournament-tree-node">
 				<div class="tournament-game" id="final-0"></div>
@@ -324,7 +323,6 @@ export default class TournamentView {
 				<div class="tournament-game" id="quarter-1"></div>
 				<div class="tournament-game" id="quarter-2"></div>
 				<div class="tournament-game" id="quarter-3"></div>
-			</div>
 			</div>
 		`
 	}
@@ -561,7 +559,7 @@ export default class TournamentView {
 		{
 			if (game.game_id != -1)
 			{
-				spectate = `<button id="game-spectate-button?${game.game_id}"><i class="fa-solid fa-eye fa-lg"></i></button>`
+				spectate = `<button class="game-spectate-button" data-game-id="${game.game_id}"><i class="fa-solid fa-eye fa-lg"></i></button>`
 			}
 			leftState = playingState;
 			rightState = playingState;
@@ -613,6 +611,18 @@ export default class TournamentView {
 				e.preventDefault();
 				const redirectTo = e.currentTarget.dataset.redirectTo;
 				window.app.router.navigateTo(redirectTo);
+			});
+		});
+
+		const spectateButtons = gameSelector.querySelectorAll('[data-game-id]');
+		spectateButtons.forEach(spectateButton => {
+			const newSpectateButton = spectateButton.cloneNode(true);
+			spectateButton.parentNode.replaceChild(newSpectateButton, spectateButton);
+
+			newSpectateButton.addEventListener('click', (e) => {
+				e.preventDefault();
+				const gameId = e.currentTarget.dataset.gameId;
+				alert(gameId);
 			});
 		});
 	}
@@ -709,12 +719,20 @@ export default class TournamentView {
 		const waitingRoom = document.getElementById('waiting-room-container');
 		const row =  `
 			<li>
-				<img src="${player.avatar}" class="avatar player-avatar">
-				<div class="tournament-waiting-player-name">${player.display_name ? player.display_name : player.username}</div>
-				<div class="tournament-waiting-player-elo"><i class="fa-solid fa-chart-line"></i>${player.elo}</div>
-				<div class="tournament-waiting-player-top-1"><i class="fa-solid fa-crown"></i>${player.top_1}</div>
+				<button class="redirect-to-profile-button" data-redirect-to="/profiles/${player.username}">
+					<img src="${player.avatar}" class="avatar player-avatar">
+					<div class="tournament-waiting-player-name">${player.display_name ? player.display_name : player.username}</div>
+					<div class="tournament-waiting-player-elo"><i class="fa-solid fa-chart-line"></i>${player.elo}</div>
+					<div class="tournament-waiting-player-top-1"><i class="fa-solid fa-crown"></i>${player.top_1}</div>
+				</button>
 			</li>`;
 
 		waitingRoom.insertAdjacentHTML('beforeend', row);
+		const redirectButton = waitingRoom.querySelector('[data-redirect-to]');
+		redirectButton.addEventListener('click', (e) => {
+			e.preventDefault();
+			const redirectTo = e.currentTarget.dataset.redirectTo;
+			window.app.router.navigateTo(redirectTo);
+		});
 	}
 }
