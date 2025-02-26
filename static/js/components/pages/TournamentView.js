@@ -3,8 +3,8 @@ export default class TournamentView {
 		this.container = container;
 		this.username = window.app.state.username;
 		this.init();
-		this.timerInterval = null;
-		this.timerIntervalReady = null;
+		this.intervalStarting = null;
+		this.intervalReady = null;
 	}
 
 	async init() {
@@ -53,6 +53,7 @@ export default class TournamentView {
 				let inTournament = false;
 				let isReady = false;
 				let isLost = false;
+				let isWin = false;
 				if (events.players)
 				{
 					events.players.forEach(player => 
@@ -61,13 +62,30 @@ export default class TournamentView {
 							{
 								isReady = player.ready;
 								isLost = player.lost;
+								isWin = player.win;
+								console.log(isWin);
 								inTournament = !isLost;
 							}
 						}
 					);
 				}
+				if (this.intervalStarting)
+				{
+					clearInterval(this.intervalStarting);
+					this.intervalStarting = null;
+				}
+				if (this.intervalReady)
+				{
+					clearInterval(this.intervalReady);
+					this.intervalReady = null;
+				}
 				if (events.state == 'waiting')
 				{
+					if (this.intervalStarting)
+					{
+						clearInterval(this.intervalStarting);
+						this.intervalStarting = null;
+					}
 					document.getElementById('tournament-state').innerHTML = `<i class="fa-solid fa-hourglass-half fa-spin"></i>&nbsp; Waiting for players...`
 					if (inTournament)
 					{
@@ -85,7 +103,12 @@ export default class TournamentView {
 				}
 				else if (events.state == 'starting')
 				{
-					this.startTimer(events.start_time)
+					if (this.intervalStarting)
+					{
+						clearInterval(this.intervalStarting);
+						this.intervalStarting = null;
+					}
+					this.intervalStarting = setInterval(this.startingTournamentTimer, 1, events.start_time);
 					if (inTournament)
 					{
 						document.getElementById('leave-button').style.display = 'block';
@@ -95,29 +118,52 @@ export default class TournamentView {
 						document.getElementById('leave-button').style.display = 'none';
 					}
 					document.getElementById('forfeit-button').style.display = 'none';
+					document.getElementById('join-button').style.display = 'none';
 				}
 				else if (events.state == 'playing')
 				{
+					if (this.intervalStarting)
+					{
+						clearInterval(this.intervalStarting);
+						this.intervalStarting = null;
+					}
+					console.log("Playing tournament");
 					document.getElementById('tournament-state').innerHTML = `<i class="fa-solid fa-gamepad"></i> Tournament in progress`;
 					if (inTournament)
 					{
+						console.log("In tournament");
 						document.getElementById('forfeit-button').style.display = 'block';
 						document.getElementById('leave-button').style.display = 'none';
-						if (!isReady)
+						if (!isReady && !isWin)
 						{
+							console.log("Not ready tournament");
+							document.getElementById('ready-button').style.display = 'block';
 							document.getElementById('ready-button').disabled = false;
+							this.intervalReady = setInterval(this.startingReadyTimer, 1, events.give_up_end_time);
 							this.startTimerReady(events.give_up_end_time);
 						}
-						else
+						else if (isReady && !isWin)
 						{
-							this.clearIntervalReady();
+							console.log("Ready tournament");
+							if (this.intervalReady)
+							{
+								clearInterval(this.intervalReady);
+    							this.intervalReady = null;
+							}
 							document.getElementById('ready-button').disabled = true;
 							document.getElementById('ready-button').innerHTML = `<i class="fa-regular fa-circle-check"></i> You are ready`;
+						}
+						else if (isWin)
+						{
+							document.getElementById('ready-button').disabled = true;
+							document.getElementById('ready-button').style.display = 'none';
+							document.getElementById('forfeit-button').style.display = 'none';
 						}
 
 					}
 					else
 					{
+						console.log("Not in tournament");
 						document.getElementById('forfeit-button').style.display = 'none';
 						document.getElementById('leave-button').style.display = 'none';
 						document.getElementById('ready-button').style.display = 'none';
@@ -220,68 +266,44 @@ export default class TournamentView {
 		};
 	}
 
-	startTimerReady(start_time) {
-		this.updateTimerDisplayReady(start_time)
 
-	}
 
-	updateTimerDisplayReady(start_time) {
-		console.log('Start time : ' + start_time);
+	startingTournamentTimer(start_time)
+	{
+		const timerElement = document.getElementById('tournament-state')
 		const currentTime = Date.now(); 
-		console.log('Current time : ' + currentTime);
 		
-		// Convert start_time to milliseconds
-		const startTimeInMilliseconds = start_time * 1000; // Convert seconds to milliseconds
+		const startTimeInMilliseconds = start_time * 1000; 
 		const remainingTime = Math.max(0, Math.floor((startTimeInMilliseconds - currentTime) / 1000));
-		console.log('Remaining time : ' + remainingTime);
-	
-		const timerElement = document.getElementById('ready-button');
-		const minutes = Math.floor(remainingTime / 60);
-		const seconds = remainingTime % 60;
-		timerElement.innerHTML = `<i class="fa-regular fa-circle-check"></i> Not ready [${minutes}:${seconds < 10 ? '0' : ''}${seconds}]`;
-	
-		if (remainingTime > 0) {
-			this.timerIntervalReady = setTimeout(() => this.updateTimerDisplayReady(start_time), 1000);
-		} else {
-			clearInterval(this.timerIntervalReady);
+		
+		if (remainingTime < 0)
+		{
+			clearInterval(this.intervalStarting);
+			this.intervalStarting = null;
+			return ;
 		}
-	}
-
-	handleTimerDoneReady() {
-		const timerElement = document.getElementById('ready-button');
-		timerElement.innerHTML = `<i class="fa-regular fa-circle-check"></i> Ready`
-	}
-
-	startTimer(start_time) {
-		this.updateTimerDisplayReady(start_time)
-
-	}
-
-	updateTimerDisplay(start_time) {
-		console.log('Start time : ' + start_time);
-		const currentTime = Date.now(); 
-		console.log('Current time : ' + currentTime);
-		
-		// Convert start_time to milliseconds
-		const startTimeInMilliseconds = start_time * 1000; // Convert seconds to milliseconds
-		const remainingTime = Math.max(0, Math.floor((startTimeInMilliseconds - currentTime) / 1000));
-		console.log('Remaining time : ' + remainingTime);
-	
-		const timerElement = document.getElementById('tournament-state');
 		const minutes = Math.floor(remainingTime / 60);
 		const seconds = remainingTime % 60;
 		timerElement.innerHTML = `<i class="fa-solid fa-clock"></i> Tournament starting in : ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-	
-		if (remainingTime > 0) {
-			this.timerInterval = setTimeout(() => this.updateTimerDisplay(start_time), 1000);
-		} else {
-			clearInterval(this.timerInterval);
-		}
 	}
 
-	handleTimerDone() {
-		const timerElement = document.getElementById("waiting-room-timer");
-		timerElement.innerHTML = "Time's up!";
+	startingReadyTimer(giveUpTime)
+	{
+		const currentTime = Date.now(); 
+		
+		const startTimeInMilliseconds = giveUpTime * 1000;
+		const remainingTime = Math.max(0, Math.floor((startTimeInMilliseconds - currentTime) / 1000));
+	
+		const timerElement = document.getElementById('ready-button');
+		const minutes = Math.floor(remainingTime / 60);
+		const seconds = remainingTime % 60;
+		timerElement.innerHTML = `<i class="fa-regular fa-circle-xmark"></i> Not ready [${minutes}:${seconds < 10 ? '0' : ''}${seconds}]`;
+	
+		if (remainingTime < 0) {
+			clearInterval(this.intervalReady);
+			this.intervalReady = null;
+			return;
+		}
 	}
 
 	clearTree()
@@ -306,42 +328,6 @@ export default class TournamentView {
 			</div>
 		`
 	}
-
-	// updateTournamentTree(games) {
-	// 	const tournamentTreeContent = document.getElementById("tournament-tree-content");
-	// 	tournamentTreeContent.innerHTML = ''; // Clear previous content
-	
-	// 	games.forEach(game => {
-	// 		const gameElement = document.createElement('div');
-	// 		gameElement.classList.add('tournament-game');
-	// 		gameElement.innerHTML = `
-	// 			<div class="tournament-game-round">Round ${game.round}</div>
-	// 			<div class="tournament-game-players">
-	// 				<div class="tournament-game-player">
-	// 					${game.player_left.user.username}
-	// 					${game.state === 'waiting' && game.player_left.ready ? '<span class="ready">(Ready)</span>' : ''}
-	// 					${game.state === 'finished' && game.winner !== game.player_left.user.username ? '<span class="lost">(Lost)</span>' : ''}
-	// 				</div>
-	// 				<div class="tournament-game-vs">vs</div>
-	// 				<div class="tournament-game-player">
-	// 					${game.player_right.user.username}
-	// 					${game.state === 'waiting' && game.player_right.ready ? '<span class="ready">(Ready)</span>' : ''}
-	// 					${game.state === 'finished' && game.winner !== game.player_right.user.username ? '<span class="lost">(Lost)</span>' : ''}
-	// 				</div>
-	// 			</div>
-	// 			<div class="tournament-game-score">
-	// 				Score: ${game.score_left} - ${game.score_right}
-	// 			</div>
-	// 			<div class="tournament-game-state">
-	// 				State: ${game.state}
-	// 			</div>
-	// 			<div class="tournament-game-winner">
-	// 				Winner: ${game.winner}
-	// 			</div>
-	// 		`;
-	// 		tournamentTreeContent.appendChild(gameElement);
-	// 	});
-	// }
 
 	initializeGameWebSocket(wsUrl) {
 		if (window.app.gamews) {
