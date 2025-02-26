@@ -1573,6 +1573,10 @@ form button:hover:not(:disabled) {
 /*                Credits           */
 /* ******************************** */
 
+#subject-card {
+	padding: 1rem;
+}
+
 #credits-card, #subject-card {
 	text-align: center;
 	width: 30rem;
