@@ -18,7 +18,7 @@ export default class PlayView {
 		window.app.initChat();
 		this.checkForBackdrop();
 		this.addEventListeners();
-		console.log("PlayView initialized");
+		
 		new GameComponent(this.container.querySelector("#gameContainer"));
 	}
 

@@ -137,21 +137,19 @@ export default class ChatBox {
 		this.chatSocket = new WebSocket(`${this.protocol}${this.host}/ws/chat/`);
 
 		this.chatSocket.onopen = () => {
-			console.log("WebSocket connection established");
+			
 		};
 
 		this.chatSocket.onclose = () => {
-			console.log("WebSocket connection closed");
+			
 		};
 
 		this.chatSocket.onmessage = (e) => {
 			const data = JSON.parse(e.data);
-			// console.log(data);
 			if (data.message_type === "system" && data.message === "all_user_list") {
 				this.allusers = data.usernames.sort((a, b) => a.localeCompare(b));
 				this.updateOnlineUsersList();
 			// } else if (data.message_type === "system" && data.message === "update_tournament_info") {
-			// 	//console.log(data.tournament_info);
 			// 	window.app.tournament.info = JSON.parse(data.tournament_info);
 			// 	window.app.tournament.updateContent();
 			// 	window.app.tournament.updateGame();
@@ -160,7 +158,7 @@ export default class ChatBox {
 				this.updateOnlineUsersList();
 			} else if (data.message_type === "system" && data.recipient === "update_online_users") {
 				const dict = JSON.parse(data.message);
-				//console.log(data);
+				//
 				this.onlineusers = dict.online_users.filter((user) => user !== this.username).sort((a, b) => a.localeCompare(b));
 				this.onlineusers.unshift(this.username);
 				// this.waiting_users = dict.waiting_users;
@@ -178,10 +176,10 @@ export default class ChatBox {
 					// renderMathInElement(document.body);
 				}
 			} else if (data.message_type === "system_accept") {
-				console.log(data);
+				
 				// TODO: add start game logic
 				window.app.gamews = new WebSocket(`${this.protocol}${this.host}/ws/game/invite?recipient=${data.sender}`);
-				console.log(`${this.protocol}${this.host}/ws/game/invite?recipient=${data.sender}`);
+				
 				window.app.gamews.onmessage = (event) => {
 					const events = JSON.parse(event.data);
 					if (events.message_type === "init") {
@@ -517,7 +515,7 @@ export default class ChatBox {
 		const tabsContainer = this.container.querySelector("#chatTabs");
 		tabsContainer.addEventListener("click", (e) => {
 			const tabLink = e.target.closest(".chat-nav-link");
-			//console.log(tabLink);
+			//
 			if (!tabLink) return;
 
 			// Update active tab
@@ -691,7 +689,7 @@ export default class ChatBox {
 			const mode = button.dataset.mode;
 
 			if (action === "accept") {
-				//console.log("accept invite");
+				//
 				const messageData = {
 					message: "accept_invite",
 					sender: this.username,
@@ -703,7 +701,7 @@ export default class ChatBox {
 				this.chatSocket.send(JSON.stringify(messageData));
 				// TODO: add start game logic
 				window.app.gamews = new WebSocket(`${this.protocol}${this.host}/ws/game/invite?sender=${user}&mode=${mode}`);
-				console.log(`${this.protocol}${this.host}/ws/game/invite?sender=${user}&mode=${mode}`);
+				
 				window.app.gamews.onmessage = (event) => {
 					const events = JSON.parse(event.data);
 					if (events.message_type === "init") {
@@ -711,12 +709,12 @@ export default class ChatBox {
 					}
 				};
 				window.app.gamews.onopen = function (event) {
-					console.log("WebSocket invite connection established");
+					
 					window.app.ingame = true;
 					sessionStorage.setItem("ingame", "true");
 				};
 				window.app.gamews.onclose = function (event) {
-					console.log("WebSocket invite connection closed", event.code, event.reason);
+					
 					window.app.ingame = false;
 					sessionStorage.setItem("ingame", "false");
 				};

@@ -22,7 +22,7 @@ export class TextManager {
 
 	async initialize(data) {
 		await this.loadFont();
-		console.log(`Initializing texts with data: ${JSON.stringify(data)}`);
+		
 		await this.createInitialTexts(
 			data.player.left.name,
 			data.player.right.name,
@@ -110,7 +110,7 @@ export class TextManager {
 	}
 
 	updateText(id, newText, scale = 1) {
-		console.log(`Updating text for id: ${id} with text: ${newText}`);
+		
 		if (this.meshes.has(id)) {
 			this.scene.remove(this.meshes.get(id));
 		}

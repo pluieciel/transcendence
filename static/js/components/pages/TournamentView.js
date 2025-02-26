@@ -17,7 +17,7 @@ export default class TournamentView {
 		const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
 		const host = window.location.host;
 		const wsUrl = `${protocol}//${host}/ws/tournament/`;
-		console.log(window.app.tournamentws);
+		
 		this.initializeWebSocket(wsUrl);
 	}
 
@@ -31,12 +31,12 @@ export default class TournamentView {
 
 		window.app.tournamentws.onmessage = (bla) => {
 			const events = JSON.parse(bla.data);
-			console.log(events);
+			
 			if (events.type === "tournament_update") {
 				this.clearTree();
 				this.updatePlayersList(events.players);
 				// this.updateTournamentTree(events.games);
-				console.log("Entered tournament update");
+				
 		
 				const waitingRoomTotalPlayers = document.getElementById("waiting-room-total-players");
 				waitingRoomTotalPlayers.innerHTML = `<i class="fa-solid fa-user"></i>&nbsp; ${events.players.length}/${events.size}`
@@ -48,7 +48,7 @@ export default class TournamentView {
 				const roomCardTournament = document.getElementById("tournament-room-card");
 				events.state === 'finished'? createCardTournament.style.display = 'flex' : createCardTournament.style.display = 'none';
 				events.state !== 'finished'? roomCardTournament.style.display = 'flex' : roomCardTournament.style.display = 'none';
-				console.log(events.state);
+				
 				
 				let inTournament = false;
 				let isReady = false;
@@ -63,7 +63,7 @@ export default class TournamentView {
 								isReady = player.ready;
 								isLost = player.lost;
 								isWin = player.win;
-								console.log(isWin);
+								
 								inTournament = !isLost;
 							}
 						}
@@ -127,16 +127,16 @@ export default class TournamentView {
 						clearInterval(this.intervalStarting);
 						this.intervalStarting = null;
 					}
-					console.log("Playing tournament");
+					
 					document.getElementById('tournament-state').innerHTML = `<i class="fa-solid fa-gamepad"></i> Tournament in progress`;
 					if (inTournament)
 					{
-						console.log("In tournament");
+						
 						document.getElementById('forfeit-button').style.display = 'block';
 						document.getElementById('leave-button').style.display = 'none';
 						if (!isReady && !isWin)
 						{
-							console.log("Not ready tournament");
+							
 							document.getElementById('ready-button').style.display = 'block';
 							document.getElementById('ready-button').disabled = false;
 							this.intervalReady = setInterval(this.startingReadyTimer, 1, events.give_up_end_time);
@@ -144,7 +144,7 @@ export default class TournamentView {
 						}
 						else if (isReady && !isWin)
 						{
-							console.log("Ready tournament");
+							
 							if (this.intervalReady)
 							{
 								clearInterval(this.intervalReady);
@@ -163,7 +163,7 @@ export default class TournamentView {
 					}
 					else
 					{
-						console.log("Not in tournament");
+						
 						document.getElementById('forfeit-button').style.display = 'none';
 						document.getElementById('leave-button').style.display = 'none';
 						document.getElementById('ready-button').style.display = 'none';
@@ -199,7 +199,7 @@ export default class TournamentView {
 					document.getElementById("tournament-quarter-final").style.display = 'none';
 					gameSize = 4;
 				}
-				console.log(events.size);
+				
 				if (gameSize == 8)
 				{
 					let index = 0;
@@ -342,13 +342,13 @@ export default class TournamentView {
 		};
 
 		window.app.gamews.onopen = () => {
-			console.log("Connected to server");
+			
 			window.app.ingame = true;
 			sessionStorage.setItem("ingame", "true");
 		};
 
 		window.app.gamews.onclose = () => {
-			console.log("Disconnected from server");
+			
 			window.app.ingame = false;
 			sessionStorage.setItem("ingame", "false");
 		};
@@ -360,7 +360,7 @@ export default class TournamentView {
 	}
 
 	async redirectToGame(events) {
-		console.log("Redirecting to game");
+		
 		window.app.router.navigateTo("/game");
 		if (window.app.tournamentws)
 		{
@@ -400,7 +400,7 @@ export default class TournamentView {
 
 	sendAction(action) {
 		if (window.app.tournamentws && window.app.tournamentws.readyState === WebSocket.OPEN) {
-			console.log(`Sending action ${action}`); // Debug log
+			 // Debug log
 			window.app.tournamentws.send(
 				JSON.stringify({
 					action: action
@@ -411,7 +411,7 @@ export default class TournamentView {
 
 	sendCreateTournament(size, mode) {
 		if (window.app.tournamentws && window.app.tournamentws.readyState === WebSocket.OPEN) {
-			console.log(`Sending create tournament ${size} ${mode}`);
+			
 			window.app.tournamentws.send(
 				JSON.stringify({
 					action: 'create',
@@ -505,7 +505,7 @@ export default class TournamentView {
 		let gameSelector = null
 		if ((round === 'quarter' && index < 4) || (round === 'semi' && index < 2) || ((round === 'final' && index == 0)))
 		{
-			console.log(`${round}-${index}`);
+			
 			gameSelector = document.getElementById(`${round}-${index}`);
 		}
 		else
@@ -718,7 +718,7 @@ export default class TournamentView {
 	addReadyButtonEventListeners() {
 		const leaveButton = document.getElementById("ready-button");
 		leaveButton.addEventListener("click", () => {
-			console.log("Ready button clicked");
+			
 			this.sendAction('ready');
 		});
 	}

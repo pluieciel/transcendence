@@ -30,7 +30,7 @@ export class InputManager {
 
 	sendKeyEvent(type, key) {
 		if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-			console.log(`Sending key event: ${type} ${key}`); // Debug log
+			 // Debug log
 			this.ws.send(
 				JSON.stringify({
 					type: type,
