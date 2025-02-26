@@ -288,7 +288,6 @@ export default class TournamentView {
 	{
 		document.getElementById('tournament-tree').innerHTML = 
 		`
-			<h2 id="card-title"><i class="fa-solid fa-sitemap"></i> TOURNAMENT CLASSIC #1</h2>
 			<div id="tournament-winner" class="tournament-tree-node"></div>
 			<div id="tournament-final" class="tournament-tree-node">
 				<div class="tournament-game" id="final-0"></div>
@@ -303,45 +302,8 @@ export default class TournamentView {
 				<div class="tournament-game" id="quarter-2"></div>
 				<div class="tournament-game" id="quarter-3"></div>
 			</div>
-			</div>
 		`
 	}
-
-	// updateTournamentTree(games) {
-	// 	const tournamentTreeContent = document.getElementById("tournament-tree-content");
-	// 	tournamentTreeContent.innerHTML = ''; // Clear previous content
-	
-	// 	games.forEach(game => {
-	// 		const gameElement = document.createElement('div');
-	// 		gameElement.classList.add('tournament-game');
-	// 		gameElement.innerHTML = `
-	// 			<div class="tournament-game-round">Round ${game.round}</div>
-	// 			<div class="tournament-game-players">
-	// 				<div class="tournament-game-player">
-	// 					${game.player_left.user.username}
-	// 					${game.state === 'waiting' && game.player_left.ready ? '<span class="ready">(Ready)</span>' : ''}
-	// 					${game.state === 'finished' && game.winner !== game.player_left.user.username ? '<span class="lost">(Lost)</span>' : ''}
-	// 				</div>
-	// 				<div class="tournament-game-vs">vs</div>
-	// 				<div class="tournament-game-player">
-	// 					${game.player_right.user.username}
-	// 					${game.state === 'waiting' && game.player_right.ready ? '<span class="ready">(Ready)</span>' : ''}
-	// 					${game.state === 'finished' && game.winner !== game.player_right.user.username ? '<span class="lost">(Lost)</span>' : ''}
-	// 				</div>
-	// 			</div>
-	// 			<div class="tournament-game-score">
-	// 				Score: ${game.score_left} - ${game.score_right}
-	// 			</div>
-	// 			<div class="tournament-game-state">
-	// 				State: ${game.state}
-	// 			</div>
-	// 			<div class="tournament-game-winner">
-	// 				Winner: ${game.winner}
-	// 			</div>
-	// 		`;
-	// 		tournamentTreeContent.appendChild(gameElement);
-	// 	});
-	// }
 
 	initializeGameWebSocket(wsUrl) {
 		if (window.app.gamews) {

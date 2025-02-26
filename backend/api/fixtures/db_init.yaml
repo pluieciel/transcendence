@@ -66,25 +66,25 @@
   pk: 9
   fields:
     username: user5
-    password: pbkdf2_sha256$600000$anoz2ImzZApp8TTDKN0Qee$0l6fCE+Zdp7JTga58XkuPsr+q9Wr3XTf7YQ349T1d0w=
+    password: pbkdf2_sha256$600000$i2sAr45bwxj5YtnlOf35kb$UaChVaqmasjdVRpfsLesMCuXkOa8Eoq5/jId752P5ps=
     created_at: "2025-01-01T00:00:00Z"
 - model: api.user   
   pk: 10
   fields:
     username: user6
-    password: pbkdf2_sha256$600000$anoz2ImzZApp8TTDKN0Qee$0l6fCE+Zdp7JTga58XkuPsr+q9Wr3XTf7YQ349T1d0w=
+    password: pbkdf2_sha256$600000$MGdr1hx39awcAUZC311Pqi$EO0Vv5FMEQ8GO5b1hgXJ5/YfhDZcAXD+KpfWiYek1Y0=
     created_at: "2025-01-01T00:00:00Z"
 - model: api.user
   pk: 11
   fields:
     username: user7
-    password: pbkdf2_sha256$600000$anoz2ImzZApp8TTDKN0Qee$0l6fCE+Zdp7JTga58XkuPsr+q9Wr3XTf7YQ349T1d0w=
+    password: pbkdf2_sha256$600000$rZg6a2fTmVMf8QVknyWc6s$se6llN5CEQqSZtUgxzsRNkkMZNyzjM4HgBW5I2NbOpQ=
     created_at: "2025-01-01T00:00:00Z"
 - model: api.user   
   pk: 12
   fields:
     username: user8
-    password: pbkdf2_sha256$600000$anoz2ImzZApp8TTDKN0Qee$0l6fCE+Zdp7JTga58XkuPsr+q9Wr3XTf7YQ349T1d0w=
+    password: pbkdf2_sha256$600000$qkwVgj84SOaRMxVFtMZXgH$Ajfm7Hj3X7DPgzSqEPpdsxDTwdBBW/OF2ItVrFuTu20=
     created_at: "2025-01-01T00:00:00Z"
 - model: api.userpreference
   pk: 1
