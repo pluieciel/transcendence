@@ -423,7 +423,7 @@ export default class ChatBox {
             <div class="chat-message ${msg.sender === this.username ? "right" : msg.message_type === "chat" ? "left" : "admin"}">
                 <div class="message-content ${msg.message_type !== "chat" ? (msg.message_type === "system" ? "admin-message" : "invite-message") : ""}">
                     <div class="message-header">
-                        <span class="message-username">${this.capitalizeFirstLetter(msg.sender)}</span>
+                        <span class="message-username">${msg.sender}</span>
                         <span class="message-timestamp">${msg.time}</span>
                     </div>
 					<span class="message-text" id="invite-message">${
@@ -731,11 +731,6 @@ export default class ChatBox {
 			this.blocked.push(user);
 		}
 		this.updateOnlineUsersList();
-	}
-
-	capitalizeFirstLetter(string) {
-		if (!string) return "";
-		return string.charAt(0).toUpperCase() + string.slice(1);
 	}
 
 	scrollToBottom() {
