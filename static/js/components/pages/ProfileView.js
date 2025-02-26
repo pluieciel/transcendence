@@ -92,10 +92,6 @@ export default class ProfileView {
 											<div class="stat-label">Top 1</div>
 										</li>
 										<li>
-											<div id="tournament-top-2" class="stat-value"><i class="fa-solid fa-circle-notch fa-spin"></i></div>
-											<div class="stat-label">Top 2</div>
-										</li>
-										<li>
 											<div id="tournament-winrate" class="stat-value"><i class="fa-solid fa-circle-notch fa-spin"></i></div>
 											<div class="stat-label">Winrate</div>
 										</li>
@@ -188,7 +184,6 @@ export default class ProfileView {
 				const rumbleRank = document.getElementById('rumble-rank');
 				const tournamentTotalParticipated = document.getElementById('tournament-total-participated');
 				const tournamentTop1 = document.getElementById('tournament-top-1');
-				const tournamentTop2 = document.getElementById('tournament-top-2');
 				const tournamentWinrate = document.getElementById('tournament-winrate');
 				const tournamentMaxStreak = document.getElementById('tournament-max-streak');
 
@@ -211,7 +206,6 @@ export default class ProfileView {
 				rumbleRank.innerHTML = this.getRankField(data.rumble.rank);
 				tournamentTotalParticipated.innerHTML = data.tournament.total_participated;
 				tournamentTop1.innerHTML = data.tournament.top_1;
-				tournamentTop2.innerHTML = data.tournament.top_2;
 				tournamentWinrate.innerHTML = data.tournament.winrate;
 				tournamentMaxStreak.innerHTML = data.tournament.max_streak;
 			}

@@ -39,7 +39,6 @@ class ProfileConsumer(AsyncHttpConsumer):
 				'tournament': {
 					'total_participated': user_statistic.tournament_total_participated,
 					'top_1': user_statistic.tournament_top_1,
-					'top_2': user_statistic.tournament_top_2,
 					'winrate': get_winrate(user_statistic.rumble_wins, user_statistic.tournament_total_participated),
 					'max_streak': user_statistic.tournament_max_streak,
 				},
