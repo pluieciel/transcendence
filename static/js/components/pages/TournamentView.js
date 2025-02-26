@@ -622,7 +622,15 @@ export default class TournamentView {
 			newSpectateButton.addEventListener('click', (e) => {
 				e.preventDefault();
 				const gameId = e.currentTarget.dataset.gameId;
-				alert(gameId);
+				const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+				const host = window.location.host;
+				window.app.gamews = new WebSocket(`${protocol}${host}/ws/game/?watchId=${gameId}`);
+				window.app.gamews.onmessage = (event) => {
+					const events = JSON.parse(event.data);
+					if (events.message_type === "init") {
+						this.redirectToGame(events);
+					}
+				};
 			});
 		});
 	}
