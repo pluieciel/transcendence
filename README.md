@@ -49,7 +49,7 @@ ft_transcendance is a full-stack web application designed as a modern multiplaye
 - Start a game or chat with other users.
 
 ## Contributors:
-- @pluieciel: https://github.com/pluieciel
-- @jlefonde: https://github.com/jlefonde
-- @siul008: https://github.com/siul008
-- @neutrou: https://github.com/neutrou
+- [@pluieciel](https://github.com/pluieciel)
+- [@jlefonde](https://github.com/jlefonde)
+- [@siul008](https://github.com/siul008)
+- [@neutrou](https://github.com/neutrou)
