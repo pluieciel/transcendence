@@ -537,7 +537,7 @@ export default class TournamentView {
 		{
 			if (game.game_id != -1)
 			{
-				spectate = `<button id="game-spectate-button?${game.game_id}"><i class="fa-solid fa-eye fa-lg"></i></button>`
+				spectate = `<button class="game-spectate-button" data-game-id="${game.game_id}"><i class="fa-solid fa-eye fa-lg"></i></button>`
 			}
 			leftState = playingState;
 			rightState = playingState;
@@ -589,6 +589,18 @@ export default class TournamentView {
 				e.preventDefault();
 				const redirectTo = e.currentTarget.dataset.redirectTo;
 				window.app.router.navigateTo(redirectTo);
+			});
+		});
+
+		const spectateButtons = gameSelector.querySelectorAll('[data-game-id]');
+		spectateButtons.forEach(spectateButton => {
+			const newSpectateButton = spectateButton.cloneNode(true);
+			spectateButton.parentNode.replaceChild(newSpectateButton, spectateButton);
+
+			newSpectateButton.addEventListener('click', (e) => {
+				e.preventDefault();
+				const gameId = e.currentTarget.dataset.gameId;
+				alert(gameId);
 			});
 		});
 	}

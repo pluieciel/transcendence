@@ -1800,7 +1800,7 @@ form button:hover:not(:disabled) {
 	opacity: 0.5;
 }
 
-#game-spectate-button {
+.game-spectate-button {
 	margin-top: 0.5rem;
 	background-color: transparent;
 	color: var(--secondary-color);
