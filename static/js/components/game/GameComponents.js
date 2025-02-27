@@ -39,7 +39,6 @@ export default class GameComponent {
 	addPlayButtonEventListeners() {		
 		const playButton = document.getElementById("start-button");
 		const gameModeCheckbox = document.getElementById("game-mode-checkbox");
-		const gameTypeCheckbox = document.getElementById("game-type-checkbox");
 		
 		playButton.addEventListener("click", () => {
 			const searchGameModal = document.getElementById('search-game-modal');
@@ -48,16 +47,29 @@ export default class GameComponent {
 			searchGameModal.parentElement.style.display = 'flex';
 
 			window.app.settings["game-mode"] = gameModeCheckbox.checked ? "rumble" : "classic";
-			window.app.settings["game-type"] = gameTypeCheckbox.checked ? "ranked" : "ai";
 
 			gameSearchMode.innerHTML = window.app.settings["game-mode"] === "classic" ? `<i class="fa-solid fa-star"></i>&nbsp; Classic` : `<i class="fa-solid fa-bolt"></i>&nbsp; Rumble`;
-			gameSearchType.innerHTML = window.app.settings["game-type"] === "ai" ? `<i class="fa-solid fa-robot"></i>&nbsp; AI` : `<i class="fa-solid fa-ranking-star"></i>&nbsp; Ranked`;
-
-			if (window.app.settings["game-type"] === "ai") {
-				this.playBot(parseInt(window.app.settings["bot-difficulty"]));
+			
+			switch (window.app.settings["game-type"]) {
+				case "Ranked":
+					gameSearchType.innerHTML = `<i class="fa-solid fa-ranking-star"></i>&nbsp; `;
+					break;
+				case "AI":
+					gameSearchType.innerHTML = `<i class="fa-solid fa-robot"></i>&nbsp; `;
+					break;
+				case "Local":
+					gameSearchType.innerHTML = `<i class="fa-solid fa-house-user"></i>&nbsp; `;
+					break;
 			}
-			else if (window.app.settings["game-type"] === "ranked")
+			
+			gameSearchType.innerHTML += window.app.settings["game-type"];
+			
+			if (window.app.settings["game-type"].toLowerCase() === "ranked")
 				this.searchGame();
+			else if (window.app.settings["game-type"].toLowerCase() === "local")
+				;
+			else if (window.app.settings["game-type"].toLowerCase() === "ai")
+				this.playBot(parseInt(window.app.settings["bot-difficulty"]));
 		});
 	}
 
