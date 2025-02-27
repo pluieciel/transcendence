@@ -113,9 +113,9 @@ class Player:
 
 	def update(self, delta_time):
 		movement = 0
-		if self.keys["ArrowUp"]:
+		if self.keys["ArrowUp"] or self.keys["W"]:
 			movement = 1
-		if self.keys["ArrowDown"]:
+		if self.keys["ArrowDown"] or self.keys["S"]:
 			movement = -1
 
 		movement_amount = movement * self.paddle_speed * delta_time
@@ -132,11 +132,12 @@ class GameBounds:
 		self.right = Vector2D(20.42, -3.70+10.5, -15)
 
 class ClassicGameInstance:
-	def __init__(self, broadcast_fun, game_end_fun, achievement_checker_fun, tournament):
+	def __init__(self, broadcast_fun, game_end_fun, achievement_checker_fun, tournament, local):
 		self.bounds = GameBounds()
-		self.player_left = Player(Vector2D(self.bounds.left.x + 2, -3+10.5, -15), 0,{"ArrowUp": False, "ArrowDown": False}, self.bounds)
-		self.player_right = Player(Vector2D(self.bounds.right.x - 2, -3+10.5, -15), 0,{"ArrowUp": False, "ArrowDown": False}, self.bounds)
+		self.player_left = Player(Vector2D(self.bounds.left.x + 2, -3+10.5, -15), 0,{"ArrowUp": False, "ArrowDown": False, "W" : False, "S" : False}, self.bounds)
+		self.player_right = Player(Vector2D(self.bounds.right.x - 2, -3+10.5, -15), 0,{"ArrowUp": False, "ArrowDown": False, "W" : False, "S" : False}, self.bounds)
 		self.ball = Ball()
+		self.local = local
 		self.tournament = tournament
 		self.paused = False
 		self.ended = False

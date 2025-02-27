@@ -37,14 +37,14 @@ class GameManager:
 			game = self.games[game_id]
 			del self.games[game_id]
 
-	async def get_game(self, user, bot, mode, ranked=True):
+	async def get_game(self, user, bot, mode, ranked=True, local=False):
 		self._get_game_history_model()
 		self.logger.info(f"Getting game for user {user.username}")
 		game = None
-		if (bot == 0):
+		if (bot == 0 and not local):
 			game = await self.check_available_game(mode)
 		if (game is None):
-			game = await self.create_game(user, bot, mode, ranked)
+			game = await self.create_game(user, bot, mode, ranked, local)
 		return (game)
 
 	def get_player_current_game(self, user):
@@ -65,13 +65,17 @@ class GameManager:
 			return self.games[game.id]
 		return None
 
-	async def create_game(self, user, bot, mode, ranked):
+	async def create_game(self, user, bot, mode, ranked, local):
 		self._get_game_history_model()
-		if (bot == 0):
+		if (bot == 0 and not local):
 			game_id = (await self.create_game_history(user, game_mode=mode)).id
 		else:
 			game_id = (await self.create_game_history(user, game_type='AI', game_mode=mode)).id
-		self.games[game_id] = GameBackend(game_id, bot, self, ranked and bot == 0, mode, False)
+		if (local):
+			local = True
+		else:
+			local = False
+		self.games[game_id] = GameBackend(game_id, bot, self, ranked and bot == 0 and local, mode, False, local)
 		return self.games[game_id]
 
 	async def create_tournament_empty_games(self, tournament_info):
@@ -84,9 +88,6 @@ class GameManager:
 		game_id3 = (await self.create_game_history(None, None, game_type='Tournament2', tournament_count=self.tournament_count)).id
 		game_id1 = (await self.create_game_history(await self.get_user(p1), await self.get_user(p2), game_type='Tournament1', tournament_count=self.tournament_count, tournament_round2_game_id=game_id3, tournament_round2_place=1)).id
 		game_id2 = (await self.create_game_history(await self.get_user(p3), await self.get_user(p4), game_type='Tournament1', tournament_count=self.tournament_count, tournament_round2_game_id=game_id3, tournament_round2_place=2)).id
-		self.games[game_id1] = GameBackend(game_id1, 0, self, False, 'classic', False)
-		self.games[game_id2] = GameBackend(game_id2, 0, self, False, 'classic', False)
-		self.games[game_id3] = GameBackend(game_id3, 0, self, False, 'classic', False)
 		print(f"3games created {game_id1}, {game_id2}, {game_id3}, players: {p1}, {p2}, {p3}, {p4}", flush=True)
 
 	@database_sync_to_async

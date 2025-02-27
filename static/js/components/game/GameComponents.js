@@ -67,7 +67,13 @@ export default class GameComponent {
 			if (window.app.settings["game-type"].toLowerCase() === "ranked")
 				this.searchGame();
 			else if (window.app.settings["game-type"].toLowerCase() === "local")
-				;
+			{
+				const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+				const host = window.location.host;
+				const wsUrl = `${protocol}//${host}/ws/game/?local=true&mode=${window.app.settings["game-mode"]}`;
+		
+				this.initializeWebSocket(wsUrl);
+			}
 			else if (window.app.settings["game-type"].toLowerCase() === "ai")
 				this.playBot(parseInt(window.app.settings["bot-difficulty"]));
 		});
