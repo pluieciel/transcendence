@@ -32,6 +32,7 @@ export default class AdminView {
 		const cadvisorBtn = document.getElementById("cadvisor-button");
 		const prometheusBtn = document.getElementById("prometheus-button");
 		const grafanaBtn = document.getElementById("grafana-button");
+		const adminerBtn = document.getElementById("adminer-button");
 
 		elasticsearchBtn.addEventListener("click", () => {
 			window.location.href = "/admin/services/elasticsearch";
@@ -55,6 +56,10 @@ export default class AdminView {
 
 		grafanaBtn.addEventListener("click", () => {
 			window.location.href = "/admin/services/grafana";
+		});
+
+		adminerBtn.addEventListener("click", () => {
+			window.location.href = "/admin/services/adminer";
 		});
 	}
 }

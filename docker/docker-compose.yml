@@ -94,8 +94,10 @@ services:
             - jwt-secret-key
         expose:
             - 9000
+            - 443
         ports:
             - "9000:9000"
+            - "443:443"
         volumes:
             - nginx_data:/var/www/html
             - nginx_logs:/var/log/nginx
@@ -253,6 +255,16 @@ services:
             - grafana_data:/var/lib/grafana
         expose:
             - 3000
+        networks:
+            - transcendence
+        restart: unless-stopped
+
+    adminer:
+        build: ${PWD}/docker/adminer
+        image: adminer
+        container_name: adminer
+        expose:
+            - 8080
         networks:
             - transcendence
         restart: unless-stopped

@@ -1,0 +1,3 @@
+FROM adminer:4.17.1
+
+EXPOSE 8080

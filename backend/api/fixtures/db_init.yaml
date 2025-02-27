@@ -86,6 +86,13 @@
     username: user8
     password: pbkdf2_sha256$600000$qkwVgj84SOaRMxVFtMZXgH$Ajfm7Hj3X7DPgzSqEPpdsxDTwdBBW/OF2ItVrFuTu20=
     created_at: "2025-01-01T00:00:00Z"
+- model: api.user   
+  pk: 13
+  fields:
+    username: admin
+    password: pbkdf2_sha256$600000$dJL2vjbVzyIJ0437punL2X$ii7q3624ebSXw1PRd7HW3u2R2h0l4nP1+LcNAPB2Yv0=
+    is_admin: true
+    created_at: "2025-01-01T00:00:00Z"
 - model: api.userpreference
   pk: 1
   fields:
@@ -134,6 +141,10 @@
   pk: 12
   fields:
     user: 12
+- model: api.userpreference
+  pk: 13
+  fields:
+    user: 13
 - model: api.userstatistic
   pk: 1
   fields:
@@ -182,6 +193,10 @@
   pk: 12
   fields:
     user: 12
+- model: api.userstatistic
+  pk: 13
+  fields:
+    user: 13
 - model: api.achievement
   pk: 1
   fields:
@@ -1450,6 +1465,102 @@
   pk: 143
   fields:
     user: 12
+    achievement: 12
+    date_earned : "2025-01-01T00:00:00Z"
+    unlocked: false
+    progression: 0
+- model: api.userachievement
+  pk: 144
+  fields:
+    user: 13
+    achievement: 1
+    date_earned : "2025-01-01T00:00:00Z"
+    unlocked: false
+    progression: 0
+- model: api.userachievement
+  pk: 145
+  fields:
+    user: 13
+    achievement: 2
+    date_earned : "2025-01-01T00:00:00Z"
+    unlocked: false
+    progression: 0
+- model: api.userachievement
+  pk: 146
+  fields:
+    user: 13
+    achievement: 3
+    date_earned : "2025-01-01T00:00:00Z"
+    unlocked: false
+    progression: 0
+- model: api.userachievement
+  pk: 147
+  fields:
+    user: 13
+    achievement: 4
+    date_earned : "2025-01-01T00:00:00Z"
+    unlocked: false
+    progression: 0
+- model: api.userachievement
+  pk: 148
+  fields:
+    user: 13
+    achievement: 5
+    date_earned : "2025-01-01T00:00:00Z"
+    unlocked: false
+    progression: 0
+- model: api.userachievement
+  pk: 149
+  fields:
+    user: 13
+    achievement: 6
+    date_earned : "2025-01-01T00:00:00Z"
+    unlocked: false
+    progression: 0
+- model: api.userachievement
+  pk: 150
+  fields:
+    user: 13
+    achievement: 7
+    date_earned : "2025-01-01T00:00:00Z"
+    unlocked: false
+    progression: 0
+- model: api.userachievement
+  pk: 151
+  fields:
+    user: 13
+    achievement: 8
+    date_earned : "2025-01-01T00:00:00Z"
+    unlocked: false
+    progression: 0
+- model: api.userachievement
+  pk: 152
+  fields:
+    user: 13
+    achievement: 9
+    date_earned : "2025-01-01T00:00:00Z"
+    unlocked: false
+    progression: 0
+- model: api.userachievement
+  pk: 153
+  fields:
+    user: 13
+    achievement: 10
+    date_earned : "2025-01-01T00:00:00Z"
+    unlocked: false
+    progression: 0
+- model: api.userachievement
+  pk: 154
+  fields:
+    user: 13
+    achievement: 11
+    date_earned : "2025-01-01T00:00:00Z"
+    unlocked: false
+    progression: 0
+- model: api.userachievement
+  pk: 155
+  fields:
+    user: 13
     achievement: 12
     date_earned : "2025-01-01T00:00:00Z"
     unlocked: false
