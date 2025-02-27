@@ -304,7 +304,8 @@ class App {
 		});
 
 		logoutButton.addEventListener("click", () => {
-			window.app.chatBox.disconnect();
+			if (window.app.chatBox)
+				window.app.chatBox.disconnect();
 			window.app.logout();
 		});
 	}
