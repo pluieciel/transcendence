@@ -122,10 +122,10 @@ class RumbleGameInstance:
 		self.bounds = GameBounds()
 		self.event_weights = {
 			"InvertedControlsEvent": 800,
-			"RandomBouncesEvent": 15500,
+			"RandomBouncesEvent": 1500,
 			"MirrorBallEvent": 1000,
 			"LightsOutEvent": 300,
-			"InvisibilityFieldEvent": 15000,
+			"InvisibilityFieldEvent": 1500,
 			"InfiniteSpeedEvent": 1000,
 			"ReverseBallEvent": 1500,
 			"ShrinkingPaddleEvent": 1000,
