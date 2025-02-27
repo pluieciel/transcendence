@@ -417,10 +417,17 @@ export default class SettingsView {
 			if (data.success) {	
 				const displayNameInput = document.getElementById("display-name-input");
 				const toggle2FAButton = document.getElementById("toggle-2fa-button");
+				const passwordInput = document.getElementById("password-input");
+				const confirmPasswordInput = document.getElementById("confirm-password-input");
+				const uploadAvatar = document.getElementById("upload-avatar");
 
 				displayNameInput.value = data.display_name;
-				if (data.is_42_user)
+				if (data.is_42_user) {
 					toggle2FAButton.style.display = 'none';
+					passwordInput.parentElement.style.display = 'none';
+					confirmPasswordInput.parentElement.style.display = 'none';
+					uploadAvatar.style.display = 'none';
+				}
 				else {
 					toggle2FAButton.innerHTML = data.is_2fa_enabled ? `<i class="fa-solid fa-shield"></i> Disable 2FA` : `<i class="fa-solid fa-shield-halved"></i> Enable 2FA`;
 					toggle2FAButton.setAttribute("data-is-2fa-enabled", data.is_2fa_enabled);
