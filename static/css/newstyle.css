@@ -352,7 +352,7 @@ form button:hover:not(:disabled) {
 	justify-content: center;
 }
 
-#color, #quality, #bot-difficulty {
+#color, #quality, #bot-difficulty, #game-type {
 	width: 100%;
 	display: flex;
 	flex-direction: row;
@@ -362,6 +362,10 @@ form button:hover:not(:disabled) {
 	height: 3rem;
 	border-radius: 0.3rem;
 	background-color: var(--primary-color);
+}
+
+#bot-difficulty {
+	display: none;
 }
 
 #selector-middle {
@@ -550,7 +554,7 @@ form button:hover:not(:disabled) {
 /*                Play              */
 /* ******************************** */
 
-#game-mode, #game-type
+#game-mode
 {
 	margin-bottom: 1rem;
 	position: relative;
@@ -620,16 +624,16 @@ form button:hover:not(:disabled) {
 	background-color: var(--selector-color);
 }
 
-#game-mode-rumble, #game-type-ranked {
+#game-mode-rumble {
 	left: 50%;
 	color: var(--checkbox-unchecked-color);
 }
 
-.checkbox-button .checkbox:checked + .knobs #game-mode-rumble, .checkbox-button .checkbox:checked + .knobs #game-type-ranked {
+.checkbox-button .checkbox:checked + .knobs #game-mode-rumble {
 	color: var(--secondary-color);
 }
 
-.checkbox-button .checkbox:checked + .knobs #game-mode-classic, .checkbox-button .checkbox:checked + .knobs #game-type-ai {
+.checkbox-button .checkbox:checked + .knobs #game-mode-classic {
 	color: var(--checkbox-unchecked-color);
 }
 
