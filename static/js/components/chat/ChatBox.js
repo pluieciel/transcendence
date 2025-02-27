@@ -230,17 +230,9 @@ export default class ChatBox {
                             <button class="btn btn-primary square-btn me-1" data-action="watchgame" data-user="${user}">
                                 <i class="fa-solid fa-eye"></i>
                             </button>
-                            <div class="dropdown">
-                                <button class="btn btn-primary square-btn me-1" data-action="profile" data-user="${user}"
-                                    data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-user"></i>
-                                </button>
-                                <ul class="dropdown-menu">
-                                    <li class="dropdown-item" id='elo_${user}'>Loading...</li>
-                                    <li class="dropdown-item" id='wr_${user}'>Loading...</li>
-                                    <li class="dropdown-item" id='tn_${user}'>Loading...</li>
-                                </ul>
-                            </div>
+							<button class="btn btn-primary square-btn me-1" data-redirect-to="/profiles/${user}">
+								<i class="fas fa-user"></i>
+							</button>
                             <button class="btn btn-primary square-btn me-1" data-action="chat" data-user="${user}">
                                 <i class="fas fa-comments"></i>
                             </button>
@@ -266,6 +258,18 @@ export default class ChatBox {
 				})
 				.join("");
 			container.innerHTML = '<div class="text-white">Online Users</div>' + container.innerHTML;
+
+			const buttons = container.querySelectorAll('[data-redirect-to]');
+			buttons.forEach(button => {
+				const newButton = button.cloneNode(true);
+				button.parentNode.replaceChild(newButton, button);
+	
+				newButton.addEventListener('click', (e) => {
+					e.preventDefault();
+					const redirectTo = e.currentTarget.dataset.redirectTo;
+					window.app.router.navigateTo(redirectTo);
+				});
+			});
 
 			this.onlineusers.map(async (user) => {
 				const avatar_div = this.container.querySelector(`#avatar_${user}`);
@@ -344,17 +348,9 @@ export default class ChatBox {
                             `
 									: ""
 							}
-                            <div class="dropdown">
-                                <button class="btn btn-primary square-btn me-1" data-action="profile" data-user="${user}"
-                                    data-bs-toggle="dropdown" aria-expanded="false">
+                            <button class="btn btn-primary square-btn me-1" data-redirect-to="/profiles/${user}">
                                 <i class="fas fa-user"></i>
-                                </button>
-                                <ul class="dropdown-menu">
-                                    <li class="dropdown-item" id='elof_${user}'>Loading...</li>
-                                    <li class="dropdown-item" id='wrf_${user}'>Loading...</li>
-                                    <li class="dropdown-item" id='tnf_${user}'>Loading...</li>
-                                </ul>
-                            </div>
+                            </button>
                             ${
 								this.waiting_users.includes(user)
 									? `
@@ -374,6 +370,18 @@ export default class ChatBox {
 				})
 				.join("");
 			container.innerHTML = '<div class="text-white">Friends</div>' + container.innerHTML;
+
+			const buttons = container.querySelectorAll('[data-redirect-to]');
+			buttons.forEach(button => {
+				const newButton = button.cloneNode(true);
+				button.parentNode.replaceChild(newButton, button);
+	
+				newButton.addEventListener('click', (e) => {
+					e.preventDefault();
+					const redirectTo = e.currentTarget.dataset.redirectTo;
+					window.app.router.navigateTo(redirectTo);
+				});
+			});
 
 			this.friends.map(async (user) => {
 				const avatar_div = this.container.querySelector(`#avatar_${user}`);
