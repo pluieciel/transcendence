@@ -5,6 +5,7 @@ export default class TournamentView {
 		this.init();
 		this.intervalStarting = null;
 		this.intervalReady = null;
+
 	}
 
 	async init() {
@@ -34,7 +35,17 @@ export default class TournamentView {
 			
 			if (events.type === "tournament_update") {
 				this.clearTree();
-				this.updatePlayersList(events.players);				
+				this.updatePlayersList(events.players);
+				if (this.intervalStarting)
+				{
+					clearInterval(this.intervalStarting);
+					this.intervalStarting = null;
+				}
+				if (this.intervalReady)
+				{
+					clearInterval(this.intervalReady);
+					this.intervalReady = null;
+				}			
 		
 				const waitingRoomTotalPlayers = document.getElementById("waiting-room-total-players");
 				waitingRoomTotalPlayers.innerHTML = `<i class="fa-solid fa-user"></i>&nbsp; ${events.players.length}/${events.size}`
@@ -48,6 +59,11 @@ export default class TournamentView {
 				events.state !== 'finished'? roomCardTournament.style.display = 'flex' : roomCardTournament.style.display = 'none';
 				
 				
+				document.getElementById('forfeit-button').style.display = 'none';
+				document.getElementById('leave-button').style.display = 'none';
+				document.getElementById('ready-button').style.display = 'none';
+				document.getElementById('join-button').style.display = 'none';
+
 				let inTournament = false;
 				let isReady = false;
 				let isLost = false;
@@ -68,23 +84,8 @@ export default class TournamentView {
 						}
 					);
 				}
-				if (this.intervalStarting)
-				{
-					clearInterval(this.intervalStarting);
-					this.intervalStarting = null;
-				}
-				if (this.intervalReady)
-				{
-					clearInterval(this.intervalReady);
-					this.intervalReady = null;
-				}
 				if (events.state == 'waiting')
 				{
-					if (this.intervalStarting)
-					{
-						clearInterval(this.intervalStarting);
-						this.intervalStarting = null;
-					}
 					document.getElementById('tournament-state').innerHTML = `<i class="fa-solid fa-hourglass-half fa-spin"></i>&nbsp; Waiting for players...`
 					if (inTournament)
 					{
@@ -102,12 +103,8 @@ export default class TournamentView {
 				}
 				else if (events.state == 'starting')
 				{
-					if (this.intervalStarting)
-					{
-						clearInterval(this.intervalStarting);
-						this.intervalStarting = null;
-					}
-					this.intervalStarting = setInterval(this.startingTournamentTimer, 1, events.start_time);
+					this.startingTournamentTimer(events.start_time)
+					this.intervalStarting = setInterval(this.startingTournamentTimer, 1000, events.start_time);
 					if (inTournament)
 					{
 						document.getElementById('leave-button').style.display = 'block';
@@ -121,11 +118,6 @@ export default class TournamentView {
 				}
 				else if (events.state == 'playing')
 				{
-					if (this.intervalStarting)
-					{
-						clearInterval(this.intervalStarting);
-						this.intervalStarting = null;
-					}
 					
 					document.getElementById('tournament-state').innerHTML = `<i class="fa-solid fa-gamepad"></i> Tournament in progress`;
 					if (inTournament)
@@ -138,16 +130,11 @@ export default class TournamentView {
 							
 							document.getElementById('ready-button').style.display = 'block';
 							document.getElementById('ready-button').disabled = false;
-							this.intervalReady = setInterval(this.startingReadyTimer, 1, events.give_up_end_time);
+							this.startingReadyTimer(events.give_up_end_time);
+							this.intervalReady = setInterval(this.startingReadyTimer, 1000, events.give_up_end_time);
 						}
 						else if (isReady && !isWin)
 						{
-							
-							if (this.intervalReady)
-							{
-								clearInterval(this.intervalReady);
-    							this.intervalReady = null;
-							}
 							document.getElementById('ready-button').disabled = true;
 							document.getElementById('ready-button').innerHTML = `<i class="fa-regular fa-circle-check"></i> You are ready`;
 						}
@@ -158,14 +145,6 @@ export default class TournamentView {
 							document.getElementById('forfeit-button').style.display = 'none';
 						}
 
-					}
-					else
-					{
-						
-						document.getElementById('forfeit-button').style.display = 'none';
-						document.getElementById('leave-button').style.display = 'none';
-						document.getElementById('ready-button').style.display = 'none';
-						document.getElementById('join-button').style.display = 'none';
 					}
 				}
 				let gameSize = 0;
@@ -276,9 +255,12 @@ export default class TournamentView {
 		
 		if (remainingTime < 0)
 		{
-			clearInterval(this.intervalStarting);
-			this.intervalStarting = null;
-			return ;
+			if (this.intervalStarting)
+			{
+				clearInterval(this.intervalStarting);
+				this.intervalStarting = null;
+				return ;
+			}	
 		}
 		const minutes = Math.floor(remainingTime / 60);
 		const seconds = remainingTime % 60;
@@ -298,11 +280,15 @@ export default class TournamentView {
 		const minutes = Math.floor(remainingTime / 60);
 		const seconds = remainingTime % 60;
 		timerElement.innerHTML = `<i class="fa-regular fa-circle-xmark"></i> Click to get ready [${minutes}:${seconds < 10 ? '0' : ''}${seconds}]`;
-	
-		if (remainingTime < 0) {
-			clearInterval(this.intervalReady);
-			this.intervalReady = null;
-			return;
+		console.log("Updating ready timer with " + minutes + "minutes and " + seconds);
+		if (remainingTime < 0) 
+		{
+			if (this.intervalReady)
+			{
+				clearInterval(this.intervalReady);
+				this.intervalReady = null;
+				return;
+			}	
 		}
 	}
 
@@ -360,7 +346,16 @@ export default class TournamentView {
 	}
 
 	async redirectToGame(events) {
-		
+		if (this.intervalReady)
+		{
+			clearInterval(this.intervalReady);
+			this.intervalReady = null;
+		}
+		if (this.intervalStarting)
+		{
+			clearInterval(this.intervalStarting);
+			this.intervalStarting = null;
+		}
 		window.app.router.navigateTo("/game");
 		if (window.app.tournamentws)
 		{
@@ -463,10 +458,10 @@ export default class TournamentView {
 								<ul id="waiting-room-container"></ul>
 							</div>
 						</div>
-						<button type="submit" id="forfeit-button"><i class="fa-solid fa-flag"></i> Forfeit</button>
 						<button type="submit" id="ready-button"><i class="fa-regular fa-circle-check"></i> Ready</button>
 						<button type="submit" id="join-button"><i class="fa-solid fa-user-plus"></i> Join</button>
 						<button type="submit" id="leave-button"><i class="fa-solid fa-user-minus"></i> Leave</button>
+						<button type="submit" id="forfeit-button"><i class="fa-solid fa-flag"></i> Forfeit</button>
 					</div>
 				</div>
 				<div id="tournament-tree-card" class="card">
