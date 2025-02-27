@@ -196,11 +196,11 @@ export default class GameView {
 			const playerRightRedirect = document.getElementById('player-right-redirect');
 
 			playerRightNameRedirect.onclick = () => {
-				window.app.router.navigateTo(`/profiles/${event.playerLeftUsername}`);
+				window.app.router.navigateTo(`/profiles/${event.playerRightUsername}`);
 			};
 
 			playerRightRedirect.onclick = () => {
-				window.app.router.navigateTo(`/profiles/${event.playerLeftUsername}`);
+				window.app.router.navigateTo(`/profiles/${event.playerRightUsername}`);
 			};
 		}
 	}
