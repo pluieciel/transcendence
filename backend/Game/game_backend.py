@@ -26,12 +26,17 @@ class GameBackend:
 		self.game_id = room_id
 		self.game_mode = mode
 		self.tournament = tournament
+		self.local = True
 		self.game = self.get_game_instance(self.game_mode)
 		self.is_ranked = ranked
 		self.channel_layer = None
 		self.manager = manager
-		self.bot = bot
-		self.bot_game = bot > 0
+		#self.bot = bot
+		#self.bot_game = bot > 0
+		#self.local = False
+		self.bot = 1
+		self.bot_game = True
+
 		self.player_left = None
 		self.player_right = None
 		self.elo_change = 0
@@ -47,26 +52,34 @@ class GameBackend:
 
 			
 
-		if (bot > 0):
-			self.player_right = Bot(bot, self.game)
+		if (bot > 0 and not self.local):
+			self.player_right = Bot(bot, self.game, None)
 		self.logger.info(f"{self.is_ranked is False} and {bot}")
 		from Chat.consumer import ChatConsumer
 		self.chat_consumer = ChatConsumer
+
 	def handle_key_event(self, websocket, key, is_down):
 		if websocket == self.player_left.channel:
-			self.game.player_left.keys[key] = is_down
+			if (self.local):
+				self.logger.info(f"Received key input for player left : {key} is down {is_down}")
+				if key == "W" or key == "S":
+					self.game.player_left.keys[key] = is_down
+					self.logger.info(f"Key assigned to player left")
+				else:
+					self.game.player_right.keys[key] = is_down
+					self.logger.info(f"Key assigned to player right")
+			else:
+				self.game.player_left.keys[key] = is_down
 		elif websocket == self.player_right.channel:
 			self.game.player_right.keys[key] = is_down
 
 	def get_game_instance(self, mode):
 		if (mode == "classic"):
-			return ClassicGameInstance(self.broadcast_state, self.on_game_end, self.check_classic_achievement, self.tournament)
+			return ClassicGameInstance(self.broadcast_state, self.on_game_end, self.check_classic_achievement, self.tournament, self.local)
 		elif (mode == "rumble"):
-			return RumbleGameInstance(self.rumble_broadcast_state, self.rumble_revert_event_broadcast, self.on_game_end, self.check_rumble_achievement, self.tournament)
+			return RumbleGameInstance(self.rumble_broadcast_state, self.rumble_revert_event_broadcast, self.on_game_end, self.check_rumble_achievement, self.tournament, self.local)
 		else:
 			self.logger.error("Game mode not found")
-
-
 
 	def is_full(self):
 		return (self.player_left is not None and self.player_right is not None)
@@ -77,7 +90,8 @@ class GameBackend:
 			self.player_right.state = "Playing"
 			if (self.bot > 0):
 				self.logger.info("started game with a bot")
-				self.player_right.start_bot()
+				if not self.local:
+					self.player_right.start_bot()
 			else:
 				await update_game_history_player_right(self.game_id, self.player_right.user)
 				self.logger.info("started game with a player")
@@ -119,6 +133,9 @@ class GameBackend:
 		if not self.player_left or self.player_left.user.id == user.id:
 			self.player_left = User(user, channel, "Connected")
 			self.logger.info(f"Creating user for player left {self.player_left.user.username}")
+			if (self.local):
+				self.player_right = Bot(0, self.game, user)
+
 		elif not self.player_right or self.player_right.user.id == user.id:
 			self.player_right = User(user, channel, "Connected")
 			self.logger.info(f"Creating user for player right {self.player_right.user.username}")

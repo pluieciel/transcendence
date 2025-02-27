@@ -11,43 +11,50 @@ class BotAvatar:
 
 
 class BotUser:
-	def __init__(self, difficulty, elo, color, user_id):
+	def __init__(self, difficulty, elo, color, user_id, local = None):
 		# self.username = username
-		self.username = "AI (" + difficulty.capitalize() + ")"
+		if (local == None):
+			self.username = "AI (" + difficulty.capitalize() + ")"
+			self.avatar = BotAvatar("/imgs/bot-" + difficulty + ".jpg")
+		else:
+			self.username = local.username + " (2)"
+			self.avatar = BotAvatar('/imgs/default_avatar.png')
 		self.display_name = self.username
 		self.elo = elo
 		self.color = color
 		self.id = user_id
-		# self.avatar = BotAvatar(avatarUrl)
-		self.avatar = BotAvatar("/imgs/bot-" + difficulty + ".jpg")
 		self.avatar_42 = None
 
 class Bot:
-	def __init__(self, difficulty, game):
-		match difficulty:
-			case 1:
-				self.user = BotUser("easy", 800, 1, -1)
-			case 2:
-				self.user = BotUser("medium", 1200, 1, -1)
-			case 5:
-				self.user = BotUser("hard", 1800, 1, -1)
+	def __init__(self, difficulty, game, local):
+		if not local:
+			match difficulty:
+				case 1:
+					self.user = BotUser("easy", 800, 1, -1)
+				case 2:
+					self.user = BotUser("medium", 1200, 1, -1)
+				case 5:
+					self.user = BotUser("hard", 1800, 1, -1)
+		else:
+			self.user = BotUser(local.username, 1000, 1, -1, local)
 		self.channel = None
 		self.state = "Ready"
-		self.game = game
-		self.difficulty = difficulty
-		self.is_running = False
-		self.ready = False
-		self.loop_task = None
-		self.last_update_time = time.time()
-		self.last_vision_update = time.time()
-		self.vision_update_rate = 1.0 / self.difficulty  # Update vision once per second
-		self.ball_position = None
-		self.ball_velocity = None
-		self.ball_radius = None
-		self.paddle_position = None
-		self.paddle_height = None
-		self.target_y = None  # Store the target position
-		self.logger = logging.getLogger('game')
+		if not local:
+			self.game = game
+			self.difficulty = difficulty
+			self.is_running = False
+			self.ready = False
+			self.loop_task = None
+			self.last_update_time = time.time()
+			self.last_vision_update = time.time()
+			self.vision_update_rate = 1.0 / self.difficulty  # Update vision once per second
+			self.ball_position = None
+			self.ball_velocity = None
+			self.ball_radius = None
+			self.paddle_position = None
+			self.paddle_height = None
+			self.target_y = None  # Store the target position
+			self.logger = logging.getLogger('game')
 
 	def calculate_ball_landing_position(self):
 		if not self.ball_position or not self.ball_velocity:
