@@ -724,7 +724,7 @@ export default class TournamentView {
 			<li>
 				<button id="redirect-to-${player.username}" class="redirect-to-profile-button" data-redirect-to="/profiles/${player.username}">
 					<img src="${player.avatar}" class="avatar player-avatar">
-					<div class="tournament-waiting-player-name">${player.display_name ? player.display_name : player.username}</div>
+					<div class="tournament-waiting-player-name">${player.name}</div>
 					<div class="tournament-waiting-player-elo"><i class="fa-solid fa-chart-line"></i>${player.elo}</div>
 					<div class="tournament-waiting-player-top-1"><i class="fa-solid fa-crown"></i>${player.top_1}</div>
 				</button>

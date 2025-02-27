@@ -511,7 +511,7 @@ class Tournament:
 				"elo": elo,
 				"top_1": top_1,
 				"username": player.user.username,
-				"display": player.user.display_name,
+				"name": player.user.display_name if player.user.display_name is not None else player.user.username,
 				"avatar": self.getUserAvatar(player.user),
 				"ready": player.ready,
 				"lost": player.lost,
