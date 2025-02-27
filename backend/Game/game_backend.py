@@ -50,7 +50,7 @@ class GameBackend:
 		else:
 			self.logger.info("Creating a game without bot")
 
-			
+		self.logger.info(f"Game Ranked ? {self.is_ranked} Tournament ? {self.tournament} local ? {self.local} bot ? {bot > 0}")
 
 		if (bot > 0 and not self.local):
 			self.player_right = Bot(bot, self.game, None)

@@ -75,7 +75,7 @@ class GameManager:
 			local = True
 		else:
 			local = False
-		self.games[game_id] = GameBackend(game_id, bot, self, ranked and bot == 0 and local, mode, False, local)
+		self.games[game_id] = GameBackend(game_id, bot, self, ranked and bot == 0 and local == False, mode, False, local)
 		return self.games[game_id]
 
 	async def create_tournament_empty_games(self, tournament_info):
