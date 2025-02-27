@@ -16,7 +16,6 @@ export default class PlayView {
 		await window.app.getSettings();
 		await this.render();
 		window.app.initChat();
-		this.checkForBackdrop();
 		this.addEventListeners();
 		
 		new GameComponent(this.container.querySelector("#gameContainer"));
@@ -40,14 +39,11 @@ export default class PlayView {
 						</div>
 					</div>
 					<div id="game-type">
-						<div class="checkbox-button">
-							<input type="checkbox" id="game-type-checkbox" class="checkbox">
-							<div class="knobs">
-								<span id="game-type-ai"><i class="fa-solid fa-robot"></i> AI</span>
-								<span id="game-type-ranked"><i class="fa-solid fa-ranking-star"></i> Ranked</span>
-							</div>
-							<div class="layer"></div>
+						<button id="selector-left-arrow"><i class="fa-solid fa-arrow-left fa-lg"></i></button>
+						<div id="selector-middle">
+							<span id="game-type-span"></span>
 						</div>
+						<button id="selector-right-arrow"><i class="fa-solid fa-arrow-right fa-lg"></i></button>
 					</div>
 					<div id="bot-difficulty">
 						<button id="selector-left-arrow"><i class="fa-solid fa-arrow-left fa-lg"></i></button>
@@ -87,15 +83,10 @@ export default class PlayView {
 		`;
 	}
 
-	checkForBackdrop() {
-		const el = document.querySelector(".modal-backdrop");
-		if (el) el.remove();
-	}
-
 	addEventListeners() {
 		window.app.addNavEventListeners();
 		this.addGameModeCheckboxEventListeners();
-		this.addGameTypeCheckboxEventListeners();
+		this.addGameTypeSelectorEventListeners();
 		this.addBotDifficultySelectorEventListeners();
 	}
 
@@ -106,11 +97,41 @@ export default class PlayView {
 		});
 	}
 
-	addGameTypeCheckboxEventListeners() {
-		const gameTypeCheckbox = document.getElementById("game-type-checkbox");
-		gameTypeCheckbox.addEventListener("change", () => {
-			window.app.settings["game-type"] = gameTypeCheckbox.checked ? "ranked" : "ai";
-			document.getElementById("bot-difficulty").style.display = gameTypeCheckbox.checked ? "none" : "";
+	addGameTypeSelectorEventListeners() {
+		const leftGameType = document.querySelector("#game-type #selector-left-arrow");
+		const rightGameType = document.querySelector("#game-type #selector-right-arrow");
+		const gameTypeSpan = document.querySelector("#game-type-span");
+
+		const gameTypes = ["Ranked", "Local", "AI"];
+		const gameTypeIcons = ["fa-ranking-star", "fa-house-user", "fa-robot"];
+		let currentGameType = 0;
+
+		gameTypeSpan.innerHTML = `<i class="fa-solid ${gameTypeIcons[currentGameType]}"></i> ${gameTypes[currentGameType]}`;
+		window.app.settings["game-type"] = gameTypes[currentGameType];
+		leftGameType.disabled = true;
+
+		leftGameType.addEventListener("click", () => {
+			rightGameType.disabled = false;
+			if (currentGameType > 0) {
+				currentGameType--;
+				if (currentGameType == 0)
+					leftGameType.disabled = true;
+				gameTypeSpan.innerHTML = `<i class="fa-solid ${gameTypeIcons[currentGameType]}"></i> ${gameTypes[currentGameType]}`;
+				window.app.settings["game-type"] = gameTypes[currentGameType];
+				document.getElementById('bot-difficulty').style.display = currentGameType == 2 ? 'flex' : 'none';
+			}
+		});
+
+		rightGameType.addEventListener("click", () => {
+			leftGameType.disabled = false;
+			if (currentGameType < gameTypes.length - 1) {
+				currentGameType++;
+				if (currentGameType == gameTypes.length - 1)
+					rightGameType.disabled = true;
+				gameTypeSpan.innerHTML = `<i class="fa-solid ${gameTypeIcons[currentGameType]}"></i> ${gameTypes[currentGameType]}`;
+				window.app.settings["game-type"] = gameTypes[currentGameType];
+				document.getElementById('bot-difficulty').style.display = currentGameType == 1 ? 'none' : 'flex';
+			}
 		});
 	}
 
