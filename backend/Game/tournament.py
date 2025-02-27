@@ -9,6 +9,7 @@ import logging
 import time
 from functools import partial
 import asyncio
+import random
 
 game_manager = GameManager.get_instance()
 
@@ -225,6 +226,10 @@ class Tournament:
 		self.logger.info("Tournament delay is up, creating games and starting the tournament")
 		self.state = 'playing'
 		self.games.clear()
+		self.logger.info(f"First player is " + self.players[0].user.username)
+		random.shuffle(self.players)
+		self.logger.info(f"First player after shuffle is " + self.players[0].user.username)
+
 		self.winner = None
 		self.logger.info("Creating games")
 		await self.createGames()
