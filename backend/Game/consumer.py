@@ -98,7 +98,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 				self.logger.info(f"Invalid invitation from {sender} to {self.user.username}")
 				return # invalid invitation
 			game_db = await game_manager.create_game_history(user, player_right=await self.get_user(sender), game_type='Invite', game_mode=mode)
-			self.game = GameBackend(game_db.id, 0, game_manager, False, mode, False)
+			self.game = GameBackend(game_db.id, 0, game_manager, False, mode, False, False)
 			game_manager.games[game_db.id] = self.game
 			self.game.channel_layer = self.channel_layer
 			self.game.assign_player(user, self.channel_name)
@@ -178,6 +178,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 			return
 		else: # quick match or bot
 			bot = int(query_params.get("bot", [0])[0])
+			local = query_params.get("local", [None])[0]
 			if not mode:
 				mode = 'classic'
 			if mode != 'classic' and mode != 'rumble':
@@ -197,7 +198,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 				self.game = game_manager.games[tournament_game_id]
 			else:
 				self.game = game_manager.get_player_current_game(user)
-				self.game = await game_manager.get_game(user, bot, mode)
+				self.game = await game_manager.get_game(user, bot, mode, local=local)
 			self.game.channel_layer = self.channel_layer
 			self.game.assign_player(user, self.channel_name)
 			await user_update_game(self.user, True, self.game.game_id)

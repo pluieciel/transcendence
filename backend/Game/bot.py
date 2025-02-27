@@ -11,13 +11,13 @@ class BotAvatar:
 
 
 class BotUser:
-	def __init__(self, difficulty, elo, color, user_id, local = None):
+	def __init__(self, difficulty, elo, color, user_id, localUser = None):
 		# self.username = username
-		if (local == None):
+		if (localUser == None):
 			self.username = "AI (" + difficulty.capitalize() + ")"
 			self.avatar = BotAvatar("/imgs/bot-" + difficulty + ".jpg")
 		else:
-			self.username = local.username + " (2)"
+			self.username = localUser.username + " (2)"
 			self.avatar = BotAvatar('/imgs/default_avatar.png')
 		self.display_name = self.username
 		self.elo = elo
@@ -26,8 +26,8 @@ class BotUser:
 		self.avatar_42 = None
 
 class Bot:
-	def __init__(self, difficulty, game, local):
-		if not local:
+	def __init__(self, difficulty, game, localUser):
+		if not localUser:
 			match difficulty:
 				case 1:
 					self.user = BotUser("easy", 800, 1, -1)
@@ -36,10 +36,10 @@ class Bot:
 				case 5:
 					self.user = BotUser("hard", 1800, 1, -1)
 		else:
-			self.user = BotUser(local.username, 1000, 1, -1, local)
+			self.user = BotUser(localUser.username, 1000, 1, -1, localUser)
 		self.channel = None
 		self.state = "Ready"
-		if not local:
+		if not localUser:
 			self.game = game
 			self.difficulty = difficulty
 			self.is_running = False

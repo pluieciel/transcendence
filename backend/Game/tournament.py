@@ -276,7 +276,7 @@ class Tournament:
 			self.game_history = self.get_game_history_model()
 			self.logger.info("Creating game history")
 			game_id = (await self.create_game_history(player_left=player_left.user, player_right=player_right.user, game_mode=mode, game_type='tournament')).id
-			game = GameBackend(game_id, 0, game_manager, False, mode, True)
+			game = GameBackend(game_id, 0, game_manager, False, mode, True, False)
 			game_manager.games[game_id] = game
 			tournamentGame = self.TournamentGame(game_id, player_left, player_right, round)
 			self.logger.info(f"Game {game_id} created between {player_left.user.username} and {player_right.user.username}")

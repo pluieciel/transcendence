@@ -20,23 +20,23 @@ class User:
 		self.state = state
 
 class GameBackend:
-	def __init__(self, room_id, bot, manager, ranked, mode, tournament):
+	def __init__(self, room_id, bot, manager, ranked, mode, tournament, local):
 		self.logger = logging.getLogger('game')
 		self.logger.info(f"Creating game in GameBackend with id {room_id}")
 		self.game_id = room_id
 		self.game_mode = mode
 		self.tournament = tournament
-		self.local = True
+		self.local = True if local else False
 		self.game = self.get_game_instance(self.game_mode)
 		self.is_ranked = ranked
 		self.channel_layer = None
 		self.manager = manager
-		#self.bot = bot
-		#self.bot_game = bot > 0
-		#self.local = False
-		self.bot = 1
-		self.bot_game = True
-
+		if (self.local):
+			self.bot = 1
+			self.bot_game = True
+		else:
+			self.bot = bot
+			self.bot_game = bot > 0
 		self.player_left = None
 		self.player_right = None
 		self.elo_change = 0
