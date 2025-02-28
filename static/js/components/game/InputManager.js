@@ -11,11 +11,11 @@ export class InputManager {
 			if (!this.keys[event.key]) {
 
 				this.keys[event.key] = true;
-				if (event.key === "ArrowUp" || event.key === "ArrowDown" || event.key === "w" || event.key === "s" || event.key === "W" || event.key === "S") {
+				if (event.key === "ArrowUp" || event.key === "ArrowDown" || event.key === "w" || event.key === "s" || event.key === "W" || event.key === "S" || event.key === "Z" || event.key === "z") {
 					this.sendKeyEvent("keydown", event.key);
 					if (event.key === "ArrowUp" || event.key === "ArrowDown")
 					{
-						event.preventDefault(); // Prevent page scrolling
+						event.preventDefault();
 					}
 					
 				}
@@ -25,10 +25,10 @@ export class InputManager {
 		window.addEventListener("keyup", (event) => {
 			if (this.keys[event.key]) {
 				this.keys[event.key] = false;
-				if (event.key === "ArrowUp" || event.key === "ArrowDown" || event.key === "w" || event.key === "s" || event.key === "W" || event.key === "S") {
+				if (event.key === "ArrowUp" || event.key === "ArrowDown" || event.key === "w" || event.key === "s" || event.key === "W" || event.key === "S" || event.key === "Z" || event.key === "z") {
 					if (event.key === "ArrowUp" || event.key === "ArrowDown")
 					{
-						event.preventDefault(); // Prevent page scrolling
+						event.preventDefault();
 					}
 					this.sendKeyEvent("keyup", event.key);
 				}
@@ -38,11 +38,10 @@ export class InputManager {
 
 	sendKeyEvent(type, key) {
 		if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-			if (key === 'w')
+			if (key === 'w' || key === 'z' || key === 'Z') 
 			{
 				key = 'W'
 			}
-
 			if (key === 's')
 			{
 				key = 'S'
