@@ -71,4 +71,11 @@ class AdminConsumer(AsyncHttpConsumer):
 					<p class="service-description">Metrics visualization and monitoring dashboard platform.</p>
 					<button id="grafana-button" class="service-button">Go to Grafana</button>
 				</div>
+				<div class="card service-card">
+					<h2 id="card-title">
+						<i class="fa-solid fa-server fa-xs"></i> ADMINER
+					</h2>
+					<p class="service-description">Database management tool.</p>
+					<button id="adminer-button" class="service-button">Go to Adminer</button>
+				</div>
 			</main>"""

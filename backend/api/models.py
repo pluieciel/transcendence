@@ -67,8 +67,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     playing = models.BooleanField(default = False)
     tournament = models.BooleanField(default = False)
     current_game_id = models.IntegerField(default=-1)
-    tournament_win = models.IntegerField(default=0)
-    tournament_participated = models.IntegerField(default=0)
     friends = models.ManyToManyField('self', symmetrical=False, related_name='friend_set', blank=True)
     invites = models.ManyToManyField('self', symmetrical=False, related_name='invite_set', blank=True)
 
@@ -146,8 +144,8 @@ def is_valid_invite(sender, recipient):
 
 class GameHistory(models.Model):
     game_mode = models.CharField(max_length=32, default='classic')
-    game_type = models.CharField(max_length=32) # Quick Match, Invite, Tournament1/2?
-    game_state = models.CharField(max_length=32, default='waiting') # waiting, playing, finished
+    game_type = models.CharField(max_length=32)
+    game_state = models.CharField(max_length=32, default='waiting')
     elo_change = models.IntegerField(default=0)
     score_left = models.IntegerField(default=0)
     score_right = models.IntegerField(default=0)

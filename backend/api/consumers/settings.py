@@ -49,6 +49,8 @@ class SetSettingsConsumer(AsyncHttpConsumer):
 				settings_updated = True
 
 			if avatar:
+				if user.is_42_user:
+					return await sendResponse(self, False, "Avatar cannot be modified for oauth", 403)
 				image_bytes = avatar.file.read()
 				image = Image.open(io.BytesIO(image_bytes))
 				img_byte_arr = io.BytesIO()
@@ -57,6 +59,9 @@ class SetSettingsConsumer(AsyncHttpConsumer):
 				avatar.file = img_byte_arr
 				await self.update_avatar(user, avatar)
 				settings_updated = True
+
+			if (password or confirm_password) and user.is_42_user:
+				return await sendResponse(self, False, "Password cannot be modified for oauth", 403)
 
 			if not password and not confirm_password:
 				return await sendResponse(self, True, "Updated successfully" if settings_updated else "No changes made", 201)
@@ -98,7 +103,5 @@ class SetSettingsConsumer(AsyncHttpConsumer):
 	def update_avatar(self, user, avatar):
 		if user.avatar:
 			user.avatar.delete(save=False)
-		if user.is_42_user:
-			user.is_42_avatar_used = False
 		user.avatar = avatar
 		user.save()

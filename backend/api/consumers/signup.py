@@ -50,9 +50,6 @@ class SignupConsumer(AsyncHttpConsumer):
 
 			if password != confirm_password:
 				return await sendResponse(self, False, "Passwords do not match", 400)
-			
-			if not is_valid_password(password):
-				return await sendResponse(self, False, "Password invalid: must be 8-32 characters long, contain at least one lowercase letter, one uppercase letter,\n one digit, and one special character from @$!%*?&", 400)
 
 			if await get_user_exists(username):
 				return await sendResponse(self, False, "Username already exists", 400)
