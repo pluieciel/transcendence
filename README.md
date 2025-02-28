@@ -8,13 +8,13 @@ ft_transcendance is a full-stack web application designed as a modern multiplaye
 - **Multiplayer Pong**: Play against other users in real-time.
 - **Chat System**: Engage in private and public conversations.
 - **Matchmaking System**: Find and play with opponents online.
-- **Customization**: Change the color theme, with earned colors trough achievements
+- **Customization**: Change the color theme, with earned colors through achievements
 - **User Profiles**: Track player stats and history.
 - **2FA Security**: Two-factor authentication for enhanced account protection.
 - **Admin**: View all sort of information in real time
 
 ## Technologies Used
-- **Frontend**: Javascript (Bootstrap)
+- **Frontend**: Javascript (Bootstrap, THREE.Js)
 - **Backend**: Django (python framework)
 - **Database**: PostgreSQL
 - **Logging**: ElasticSearch (Kibana), CAdvisor, Grafana, Prometheus and Node Exported
