@@ -572,53 +572,53 @@ export class SceneManager {
 		this.colorTextureMap = {
 			//Red
 			"#E71200": {
-				leftTexture: "/js/components/game/Textures/TextureLeftRed.png",
-				rightTexture: "/js/components/game/Textures/TextureRightRed.png",
+				leftTexture: "/js/components/game/Textures/RedTextureLeft.png",
+				rightTexture: "/js/components/game/Textures/RedTextureRight.png",
 			},
 			//Green
 			"#00AD06": {
-				leftTexture: "/js/components/game/Textures/TextureLeftGreen.png",
-				rightTexture: "/js/components/game/Textures/TextureRightGreen.png",
+				leftTexture: "/js/components/game/Textures/GreenTextureLeft.png",
+				rightTexture: "/js/components/game/Textures/GreenTextureRight.png",
 			},
 			//Cyan
 			"#00BDD1": {
-				leftTexture: "/js/components/game/Textures/TextureLeftCyan.png",
-				rightTexture: "/js/components/game/Textures/TextureRightCyan.png",
+				leftTexture: "/js/components/game/Textures/CyanTextureLeft.png",
+				rightTexture: "/js/components/game/Textures/CyanTextureRight.png",
 			},
 			//Blue
 			"#447AFF": {
-				leftTexture: "/js/components/game/Textures/TextureLeftBlue.png",
-				rightTexture: "/js/components/game/Textures/TextureRightBlue.png",
+				leftTexture: "/js/components/game/Textures/BlueTextureLeft.png",
+				rightTexture: "/js/components/game/Textures/BlueTextureRight.png",
 			},
 			//Orange
 			"#E67E00": {
-				leftTexture: "/js/components/game/Textures/TextureLeftOrange.png",
-				rightTexture: "/js/components/game/Textures/TextureRightOrange.png",
+				leftTexture: "/js/components/game/Textures/OrangeTextureLeft.png",
+				rightTexture: "/js/components/game/Textures/OrangeTextureRight.png",
 			},
 			//SoftGreen
 			"#0EC384": {
-				leftTexture: "/js/components/game/Textures/TextureLeftSoftGreen.png",
-				rightTexture: "/js/components/game/Textures/TextureRightSoftGreen.png",
+				leftTexture: "/js/components/game/Textures/SoftGreenTextureLeft.png",
+				rightTexture: "/js/components/game/Textures/SoftGreenTextureRight.png",
 			},
 			//White
 			"#E6E3E1": {
-				leftTexture: "/js/components/game/Textures/TextureLeftWhite.png",
-				rightTexture: "/js/components/game/Textures/TextureRightWhite.png",
+				leftTexture: "/js/components/game/Textures/WhiteTextureLeft.png",
+				rightTexture: "/js/components/game/Textures/WhiteTextureRight.png",
 			},
 			//Pink
 			"#E6008F": {
-				leftTexture: "/js/components/game/Textures/TextureLeftPink.png",
-				rightTexture: "/js/components/game/Textures/TextureRightPink.png",
+				leftTexture: "/js/components/game/Textures/PinkTextureLeft.png",
+				rightTexture: "/js/components/game/Textures/PinkTextureRight.png",
 			},
 			//Purple
-			"#6400C4": {
-				leftTexture: "/js/components/game/Textures/TextureLeftPurple.png",
-				rightTexture: "/js/components/game/Textures/TextureRightPurple.png",
+			"#6900CC": {
+				leftTexture: "/js/components/game/Textures/PurpleTextureLeft.png",
+				rightTexture: "/js/components/game/Textures/PurpleTextureRight.png",
 			},
 			//Yellow
 			"#D5DA2B": {
-				leftTexture: "/js/components/game/Textures/TextureLeftYellow.png",
-				rightTexture: "/js/components/game/Textures/TextureRightYellow.png",
+				leftTexture: "/js/components/game/Textures/YellowTextureLeft.png",
+				rightTexture: "/js/components/game/Textures/YellowTextureRight.png",
 			},
 		};
 		return this.colorTextureMap;

@@ -257,7 +257,7 @@ class PreviewGame {
 			case 4:
 				return "#E6008F";
 			case 5:
-				return "#6400C4";
+				return "#6900CC";
 			case 6:
 				return "#E71200";
 			case 7:
