@@ -33,7 +33,7 @@ export class SceneManager {
 		this.colorTextureMap = this.getTextureMap();
 
 		this.invisibilityField = null;
-		
+
 		this.leftButtonDownMat = null;
 		this.leftButtonUpMat = null;
 		this.rightButtonDownMat = null;
@@ -416,17 +416,18 @@ export class SceneManager {
 	}
 
 	setButtonBrightness(side, up, on) {
+		brightness = on ? 6 : 0;
 		if (side === "left" && up) {
-			on ? this.leftButtonUpMat.emissiveIntensity = 6 : this.leftButtonUpMat.emissiveIntensity = 0;
+			this.leftButtonUpMat.emissiveIntensity = brightness;
 		}
 		else if (side === "left" && !up) {
-			on ? this.leftButtonDownMat.emissiveIntensity = 6 : this.leftButtonDownMat.emissiveIntensity = 0;
+			this.leftButtonDownMat.emissiveIntensity = brightness;
 		}
 		else if (side === "right" && up) {
-			on ? this.rightButtonUpMat.emissiveIntensity = 6 : this.rightButtonUpMat.emissiveIntensity = 0;
+			this.rightButtonUpMat.emissiveIntensity = brightness;
 		}
 		else if (side === "right" && !up) {
-			on ? this.rightButtonDownMat.emissiveIntensity = 6 : this.rightButtonDownMat.emissiveIntensity = 0;
+			this.rightButtonDownMat.emissiveIntensity = brightness;
 		}
 	}
 
