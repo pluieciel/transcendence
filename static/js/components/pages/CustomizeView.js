@@ -334,7 +334,8 @@ class PreviewGame {
 						);
 						break;
 					case "LeftColor":
-					case "ButtonLeftInner":
+					case "ButtonLeftInnerUp":
+					case "ButtonLeftInnerDown":
 					case "ButtonLeftOuter":
 						obj.material.color.set(color);
 						obj.material.emissive.set(color);

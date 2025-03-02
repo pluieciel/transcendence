@@ -374,6 +374,10 @@ class GameBackend:
 					"player_right": vars(self.game.player_right.position),
 					"ball": ball_pos,
 				},
+				"keys": {
+                "player_left": self.map_key_state(self.game.player_left.keys),
+                "player_right": self.map_key_state(self.game.player_right.keys)
+           		 },
 				"trajectory": trajectory_data,
 				"events": events
 			}
@@ -497,6 +501,10 @@ class GameBackend:
 					"player_right": vars(self.game.player_right.position),
 					"ball": ball_pos,
 				},
+				 "keys": {
+                "player_left": self.map_key_state(self.game.player_left.keys),
+                "player_right": self.map_key_state(self.game.player_right.keys)
+            		},
 				"trajectory": trajectory_data,
 				"events": events
 			}
@@ -529,6 +537,14 @@ class GameBackend:
 			await self.channel_layer.group_send(str(self.game_id), state)
 		except Exception as e:
 			self.logger.info(f"Error {e}")
+
+	def map_key_state(self, keys):
+		key_states = []
+		if keys.get("ArrowUp", False) or keys.get("W", False):
+			key_states.append("UP")
+		if keys.get("ArrowDown", False) or keys.get("S", False):
+			key_states.append("DOWN")
+		return key_states
 
 	async def check_classic_achievement(self):
 		if (self.is_ranked or self.tournament):

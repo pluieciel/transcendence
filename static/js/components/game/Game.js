@@ -120,6 +120,16 @@ export class Game {
 		} else {
 			this.sceneManager.showTrajectory(false);
 		}
+		if (data.keys)
+		{
+			const playerLeftKeys = data.keys.player_left;
+			const playerRightKeys = data.keys.player_right;
+
+			this.sceneManager.setButtonBrightness("left", true, playerLeftKeys.includes("UP"))
+			this.sceneManager.setButtonBrightness("left", false, playerLeftKeys.includes("DOWN"))
+			this.sceneManager.setButtonBrightness("right", true, playerRightKeys.includes("UP"))
+			this.sceneManager.setButtonBrightness("right", false, playerRightKeys.includes("DOWN"))
+		}
 		if (data.events && data.events.length > 0) {
 			data.events.forEach((event) => {
 				if (event.type === "score" && event.position) {

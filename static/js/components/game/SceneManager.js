@@ -33,6 +33,16 @@ export class SceneManager {
 		this.colorTextureMap = this.getTextureMap();
 
 		this.invisibilityField = null;
+
+		this.buttonLeftUpOnColor = null;
+		this.buttonLeftDownOffColor = null;
+		this.buttonRightUpOnColor = null;
+		this.buttonRightDownOffColor = null;
+
+		this.leftButtonDownMat = null;
+		this.leftButtonUpMat = null;
+		this.rightButtonDownMat = null;
+		this.rightButtonUpMat = null;
 	}
 
 	dispose() {
@@ -271,11 +281,21 @@ export class SceneManager {
 		const ballPos = new THREE.Vector3(0, 6, -15);
 		const leftColor = data.player.left.color;
 		const rightColor = data.player.right.color;
+		this.buttonLeftOnColor = leftColor;
+		this.buttonRightOnColor = rightColor;
+		this.buttonLeftUpOffColor = this.getDisabledButtonColor(leftColor,0.2);
+		this.buttonRightUpOffColor = this.getDisabledButtonColor(rightColor, 0.05);
+		this.buttonLeftDownOffColor = this.getDisabledButtonColor(leftColor,0.2);
+		this.buttonRightDownOffColor = this.getDisabledButtonColor(rightColor,0.05);
 
 		this.table = await this.loadModelTable("/js/components/game/Table.glb", loader, leftColor, rightColor, tableScale, tablePos, "Table");
 		this.leftPaddle = await this.loadModel("/js/components/game/Paddle.glb", loader, leftColor, leftPaddleScale, leftPaddlePos, "Left Paddle");
 		this.rightPaddle = await this.loadModel("/js/components/game/Paddle.glb", loader, rightColor, rightPaddleScale, rightPaddlePos, "Right Paddle");
 
+		this.setButtonBrightness("left", true, false);
+		this.setButtonBrightness("left", false, false);
+		this.setButtonBrightness("right", true, false);
+		this.setButtonBrightness("right", false, false);
 		//Ball defaulted to grey color
 		this.ball = await this.loadModel("/js/components/game/Ball.glb", loader, "#5c6169", ballScale, ballPos, "Ball");
 
@@ -297,8 +317,7 @@ export class SceneManager {
 		const ballPos = new THREE.Vector3(0, 6, -15);
 		const leftColor = base_color;
 		const rightColor = "#00BDD1";
-
-		
+	
 		this.table = await this.loadModelTable("/js/components/game/Table.glb", loader, leftColor, rightColor, tableScale, tablePos, "Table");
 		this.leftPaddle = await this.loadModel("/js/components/game/Paddle.glb", loader, leftColor, leftPaddleScale, leftPaddlePos, "Left Paddle");
 		this.rightPaddle = await this.loadModel("/js/components/game/Paddle.glb", loader, rightColor, rightPaddleScale, rightPaddlePos, "Right Paddle");
@@ -326,7 +345,6 @@ export class SceneManager {
 					model.position.set(position.x, position.y, position.z);
 					model.visible = true;
 					model.name = name;
-
 					model.traverse((obj) => {
 						if (obj.isMesh) {
 							switch (obj.material.name) {
@@ -360,16 +378,39 @@ export class SceneManager {
 										},
 									);
 									break;
-								case "LeftColor":
-								case "ButtonLeftInner":
-								case "ButtonLeftOuter":
+
+								case "ButtonLeftInnerUp":
+									this.leftButtonUpMat = obj.material;
 									obj.material.color.set(colorLeft);
 									obj.material.emissive.set(colorLeft);
 									obj.material.emissiveIntensity = 4;
 									break;
+								case "ButtonLeftInnerDown":
+									this.leftButtonDownMat = obj.material;
+									obj.material.color.set(colorLeft);
+									obj.material.emissive.set(colorLeft);
+									obj.material.emissiveIntensity = 4;
+									break;					
+								case "ButtonLeftOuter":
+								case "LeftColor":
+									obj.material.color.set(colorLeft);
+									obj.material.emissive.set(colorLeft);
+									obj.material.emissiveIntensity = 4;
+									break;
+								case "ButtonRightInnerUp":
+									this.rightButtonUpMat = obj.material;
+									obj.material.color.set(colorRight);
+									obj.material.emissive.set(colorRight);
+									obj.material.emissiveIntensity = 4;
+									break;
+								case "ButtonRightInnerDown":
+									this.rightButtonDownMat = obj.material;
+									obj.material.color.set(colorRight);
+									obj.material.emissive.set(colorRight);
+									obj.material.emissiveIntensity = 4;
+									break;
 								case "RightColor":
 								case "ButtonRightOuter":
-								case "ButtonRightInner":
 									obj.material.color.set(colorRight);
 									obj.material.emissive.set(colorRight);
 									obj.material.emissiveIntensity = 4;
@@ -383,6 +424,42 @@ export class SceneManager {
 				reject,
 			);
 		});
+	}
+
+	setButtonBrightness(side, up, on) {
+		if (side === "left" && up) {
+			on ? this.leftButtonUpMat.color.set(this.buttonLeftOnColor) : this.leftButtonUpMat.color.set(this.buttonLeftUpOffColor);
+			on ? this.leftButtonUpMat.emissive.set(this.buttonLeftOnColor) : this.leftButtonUpMat.emissive.set(this.buttonLeftUpOffColor);
+			on ? this.leftButtonUpMat.emissiveIntensity = 4 : this.leftButtonUpMat.emissiveIntensity = 0;
+		}
+		else if (side === "left" && !up) {
+			on ? this.leftButtonDownMat.color.set(this.buttonLeftOnColor) : this.leftButtonDownMat.color.set(this.buttonLeftDownOffColor);
+			on ? this.leftButtonDownMat.emissive.set(this.buttonLeftOnColor) : this.leftButtonDownMat.emissive.set(this.buttonLeftDownOffColor);
+			on ? this.leftButtonDownMat.emissiveIntensity = 4 : this.leftButtonDownMat.emissiveIntensity = 0;
+		}
+		else if (side === "right" && up) {
+			on ? this.rightButtonUpMat.color.set(this.buttonRightOnColor) : this.rightButtonUpMat.color.set(this.buttonRightUpOffColor);
+			on ? this.rightButtonUpMat.emissive.set(this.buttonRightOnColor) : this.rightButtonUpMat.emissive.set(this.buttonRightUpOffColor);
+			on ? this.rightButtonUpMat.emissiveIntensity = 4 : this.rightButtonUpMat.emissiveIntensity = 0;
+		}
+		else if (side === "right" && !up) {
+			on ? this.rightButtonDownMat.color.set(this.buttonRightOnColor) : this.rightButtonDownMat.color.set(this.buttonRightDownOffColor);
+			on ? this.rightButtonDownMat.emissive.set(this.buttonRightOnColor) : this.rightButtonDownMat.emissive.set(this.buttonRightDownOffColor);
+			on ? this.rightButtonDownMat.emissiveIntensity = 4 : this.rightButtonDownMat.emissiveIntensity = 0;
+		}
+	}
+
+
+	getDisabledButtonColor(baseColor, factor)
+	{
+		const color = new THREE.Color(baseColor);
+		const hsl = { h: 0, s: 0, l: 0 };
+
+		color.getHSL(hsl);
+		hsl.l = Math.min(1, hsl.l * 0.2);
+
+		color.setHSL(hsl.h, hsl.s, hsl.l);
+		return color;
 	}
 
 	createPlayerAvatar(imageUrl, position, color) {
