@@ -33,12 +33,7 @@ export class SceneManager {
 		this.colorTextureMap = this.getTextureMap();
 
 		this.invisibilityField = null;
-
-		this.buttonLeftUpOnColor = null;
-		this.buttonLeftDownOffColor = null;
-		this.buttonRightUpOnColor = null;
-		this.buttonRightDownOffColor = null;
-
+		
 		this.leftButtonDownMat = null;
 		this.leftButtonUpMat = null;
 		this.rightButtonDownMat = null;
@@ -281,12 +276,6 @@ export class SceneManager {
 		const ballPos = new THREE.Vector3(0, 6, -15);
 		const leftColor = data.player.left.color;
 		const rightColor = data.player.right.color;
-		this.buttonLeftOnColor = leftColor;
-		this.buttonRightOnColor = rightColor;
-		this.buttonLeftUpOffColor = this.getDisabledButtonColor(leftColor,0.2);
-		this.buttonRightUpOffColor = this.getDisabledButtonColor(rightColor, 0.05);
-		this.buttonLeftDownOffColor = this.getDisabledButtonColor(leftColor,0.2);
-		this.buttonRightDownOffColor = this.getDisabledButtonColor(rightColor,0.05);
 
 		this.table = await this.loadModelTable("/js/components/game/Table.glb", loader, leftColor, rightColor, tableScale, tablePos, "Table");
 		this.leftPaddle = await this.loadModel("/js/components/game/Paddle.glb", loader, leftColor, leftPaddleScale, leftPaddlePos, "Left Paddle");
@@ -428,24 +417,16 @@ export class SceneManager {
 
 	setButtonBrightness(side, up, on) {
 		if (side === "left" && up) {
-			on ? this.leftButtonUpMat.color.set(this.buttonLeftOnColor) : this.leftButtonUpMat.color.set(this.buttonLeftUpOffColor);
-			on ? this.leftButtonUpMat.emissive.set(this.buttonLeftOnColor) : this.leftButtonUpMat.emissive.set(this.buttonLeftUpOffColor);
-			on ? this.leftButtonUpMat.emissiveIntensity = 4 : this.leftButtonUpMat.emissiveIntensity = 0;
+			on ? this.leftButtonUpMat.emissiveIntensity = 6 : this.leftButtonUpMat.emissiveIntensity = 0;
 		}
 		else if (side === "left" && !up) {
-			on ? this.leftButtonDownMat.color.set(this.buttonLeftOnColor) : this.leftButtonDownMat.color.set(this.buttonLeftDownOffColor);
-			on ? this.leftButtonDownMat.emissive.set(this.buttonLeftOnColor) : this.leftButtonDownMat.emissive.set(this.buttonLeftDownOffColor);
-			on ? this.leftButtonDownMat.emissiveIntensity = 4 : this.leftButtonDownMat.emissiveIntensity = 0;
+			on ? this.leftButtonDownMat.emissiveIntensity = 6 : this.leftButtonDownMat.emissiveIntensity = 0;
 		}
 		else if (side === "right" && up) {
-			on ? this.rightButtonUpMat.color.set(this.buttonRightOnColor) : this.rightButtonUpMat.color.set(this.buttonRightUpOffColor);
-			on ? this.rightButtonUpMat.emissive.set(this.buttonRightOnColor) : this.rightButtonUpMat.emissive.set(this.buttonRightUpOffColor);
-			on ? this.rightButtonUpMat.emissiveIntensity = 4 : this.rightButtonUpMat.emissiveIntensity = 0;
+			on ? this.rightButtonUpMat.emissiveIntensity = 6 : this.rightButtonUpMat.emissiveIntensity = 0;
 		}
 		else if (side === "right" && !up) {
-			on ? this.rightButtonDownMat.color.set(this.buttonRightOnColor) : this.rightButtonDownMat.color.set(this.buttonRightDownOffColor);
-			on ? this.rightButtonDownMat.emissive.set(this.buttonRightOnColor) : this.rightButtonDownMat.emissive.set(this.buttonRightDownOffColor);
-			on ? this.rightButtonDownMat.emissiveIntensity = 4 : this.rightButtonDownMat.emissiveIntensity = 0;
+			on ? this.rightButtonDownMat.emissiveIntensity = 6 : this.rightButtonDownMat.emissiveIntensity = 0;
 		}
 	}
 
