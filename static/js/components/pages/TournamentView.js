@@ -421,29 +421,55 @@ export default class TournamentView {
 		await window.app.renderHeader(this.container, "tournament");
 		this.container.innerHTML += `
 			<main>
-				<div id="tournament-create-card" class="card">
-					<h2 id="card-title"><i class="fa-solid fa-crown"></i> TOURNAMENT</h2>
-						<div id="game-size">
-							<div class="checkbox-button">
-								<input type="checkbox" id="game-size-checkbox" class="checkbox">
-								<div class="knobs">
-									<span id="game-size-4"><i class="fa-solid fa-user"></i> 4</span>
-									<span id="game-size-8"><i class="fa-solid fa-user"></i> 8</span>
+				<div id="tournament-container-left">
+					<div id="tournament-create-card" class="card">
+						<h2 id="card-title"><i class="fa-solid fa-crown"></i> TOURNAMENT</h2>
+							<div id="game-size">
+								<div class="checkbox-button">
+									<input type="checkbox" id="game-size-checkbox" class="checkbox">
+									<div class="knobs">
+										<span id="game-size-4"><i class="fa-solid fa-user"></i> 4</span>
+										<span id="game-size-8"><i class="fa-solid fa-user"></i> 8</span>
+									</div>
+									<div class="layer"></div>
 								</div>
-								<div class="layer"></div>
 							</div>
-						</div>
-						<div id="game-mode">
-							<div class="checkbox-button">
-								<input type="checkbox" id="game-mode-checkbox" class="checkbox">
-								<div class="knobs">
-									<span id="game-mode-classic"><i class="fa-solid fa-star"></i> Classic</span>
-									<span id="game-mode-rumble"><i class="fa-solid fa-bolt"></i> Rumble</span>
+							<div id="game-mode">
+								<div class="checkbox-button">
+									<input type="checkbox" id="game-mode-checkbox" class="checkbox">
+									<div class="knobs">
+										<span id="game-mode-classic"><i class="fa-solid fa-star"></i> Classic</span>
+										<span id="game-mode-rumble"><i class="fa-solid fa-bolt"></i> Rumble</span>
+									</div>
+									<div class="layer"></div>
 								</div>
-								<div class="layer"></div>
 							</div>
-						</div>
-					<button type="submit" id="create-button"><i class="fa-solid fa-sitemap"></i> Create</button>
+						<button type="submit" id="create-button"><i class="fa-solid fa-sitemap"></i> Create</button>
+					</div>
+										<div id="tournament-create-card" class="card">
+						<h2 id="card-title"><i class="fa-solid fa-crown"></i> TOURNAMENT</h2>
+							<div id="game-size">
+								<div class="checkbox-button">
+									<input type="checkbox" id="game-size-checkbox" class="checkbox">
+									<div class="knobs">
+										<span id="game-size-4"><i class="fa-solid fa-user"></i> 4</span>
+										<span id="game-size-8"><i class="fa-solid fa-user"></i> 8</span>
+									</div>
+									<div class="layer"></div>
+								</div>
+							</div>
+							<div id="game-mode">
+								<div class="checkbox-button">
+									<input type="checkbox" id="game-mode-checkbox" class="checkbox">
+									<div class="knobs">
+										<span id="game-mode-classic"><i class="fa-solid fa-star"></i> Classic</span>
+										<span id="game-mode-rumble"><i class="fa-solid fa-bolt"></i> Rumble</span>
+									</div>
+									<div class="layer"></div>
+								</div>
+							</div>
+						<button type="submit" id="create-button"><i class="fa-solid fa-sitemap"></i> Create</button>
+					</div>
 				</div>
 				<div id="tournament-room-card" class="card">
 					<h2 id="card-title"><i class="fa-solid fa-crown"></i> TOURNAMENT</h2>

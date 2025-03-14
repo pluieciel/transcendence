@@ -1859,6 +1859,13 @@ form button:hover:not(:disabled) {
 	opacity: 0.5;
 }
 
+#tournament-container-left {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	height: 100%;
+}
+
 /* ******************************** */
 /*                Admin             */
 /* ******************************** */
