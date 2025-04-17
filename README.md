@@ -1,7 +1,7 @@
 # ft_transcendance
 
 ## Online Version
-https://pong42.jorislefondeur.com/
+https://42pong.com
 
 ## Overview
 ft_transcendance is a full-stack web application designed as a modern multiplayer Pong game with authentication, chat, and matchmaking features. This project follows the 42 School guidelines and aims to provide a seamless gaming experience with real-time interactions.
